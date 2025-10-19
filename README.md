@@ -2,7 +2,6 @@
 
 > 基于 Turborepo 的企业级 SAAS 平台 - 采用 Clean Architecture + DDD + CQRS + 事件溯源 + 事件驱动架构
 
-
 ### III. 架构原则
 
 **项目采用混合架构模式：Clean Architecture + DDD + CQRS + 事件溯源 (ES) + 事件驱动架构 (EDA)**
@@ -704,7 +703,7 @@ function process(data: any): any {
 - **构建工具**：Turborepo 2.5.8
 - **代码格式化**：Prettier 3.6.2
 - **后端框架**：NestJS（推荐）
-- **架构模式**：Clean  + DDD + CQRS + ES + EDA
+- **架构模式**：Clean + DDD + CQRS + ES + EDA
 
 ### TypeScript 配置要求（服务端项目）
 

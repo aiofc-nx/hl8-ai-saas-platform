@@ -15,6 +15,9 @@ import type { ConnectionConfig, PoolConfig } from "./connection.types.js";
  * @description Database 模块的完整配置接口
  */
 export interface DatabaseModuleOptions {
+  /** 数据库类型 */
+  type: "postgresql" | "mongodb";
+
   /** 数据库连接配置 */
   connection: ConnectionConfig;
 
@@ -22,7 +25,7 @@ export interface DatabaseModuleOptions {
   pool?: Partial<PoolConfig>;
 
   /** 实体类数组 */
-  entities: Function[];
+  entities: (new (...args: any[]) => any)[];
 
   /** MikroORM 额外配置（可选） */
   mikroORM?: Partial<MikroORMOptions>;

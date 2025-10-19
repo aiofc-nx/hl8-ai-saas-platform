@@ -39,14 +39,6 @@ export const DATABASE_ERROR_CODES = {
    * @httpStatus 500
    */
   TRANSACTION_ERROR: "DATABASE_TRANSACTION_ERROR",
-
-  /**
-   * 隔离上下文缺失
-   *
-   * @description 需要隔离上下文但未提供
-   * @httpStatus 400
-   */
-  ISOLATION_CONTEXT_MISSING: "ISOLATION_CONTEXT_MISSING",
 } as const;
 
 /**

@@ -147,7 +147,6 @@ export function wait(ms: number): Promise<void> {
  * @since 1.0.0
  */
 export function createTempDir(prefix: string = "test"): string {
-
   const tempDir = path.join(
     os.tmpdir(),
     `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -167,7 +166,6 @@ export function createTempDir(prefix: string = "test"): string {
  * @since 1.0.0
  */
 export async function cleanupTempFiles(paths: string[]): Promise<void> {
-
   for (const filePath of paths) {
     try {
       const stat = await fs.promises.stat(filePath);

@@ -19,7 +19,7 @@ describe("缓存基础集成测试", () => {
 
       // 设置缓存
       cache.set(key, value);
-      
+
       // 获取缓存
       const cached = cache.get(key);
       expect(cached).toEqual(value);
@@ -32,14 +32,14 @@ describe("缓存基础集成测试", () => {
 
       // 设置缓存
       cache.set(key, value);
-      
+
       // 验证缓存存在
       let cached = cache.get(key);
       expect(cached).toEqual(value);
 
       // 删除缓存
       cache.delete(key);
-      
+
       // 验证缓存已删除
       cached = cache.get(key);
       expect(cached).toBeUndefined();
@@ -118,7 +118,8 @@ describe("缓存基础集成测试", () => {
 
     it("应该能够计算平均延迟", () => {
       const latencies = [10, 15, 20, 25, 30];
-      const averageLatency = latencies.reduce((sum, latency) => sum + latency, 0) / latencies.length;
+      const averageLatency =
+        latencies.reduce((sum, latency) => sum + latency, 0) / latencies.length;
 
       expect(averageLatency).toBe(20);
     });
@@ -130,7 +131,7 @@ describe("缓存基础集成测试", () => {
       const promises = Array.from({ length: 10 }, async (_, i) => {
         const key = `concurrent-test-${i}`;
         const value = { id: `concurrent-${i}`, index: i };
-        
+
         cache.set(key, value);
         return cache.get(key);
       });
@@ -148,10 +149,10 @@ describe("缓存基础集成测试", () => {
   describe("错误处理概念测试", () => {
     it("应该处理无效的缓存键", () => {
       const cache = new Map<string, any>();
-      
+
       // 空键应该被处理
       expect(() => cache.set("", { id: "empty-key" })).not.toThrow();
-      
+
       // 空键的获取应该返回设置的值（Map 允许空键）
       const result = cache.get("");
       expect(result).toEqual({ id: "empty-key" });
@@ -159,7 +160,7 @@ describe("缓存基础集成测试", () => {
 
     it("应该处理不存在的缓存键", () => {
       const cache = new Map<string, any>();
-      
+
       // 获取不存在的键应该返回 undefined
       const result = cache.get("non-existent-key");
       expect(result).toBeUndefined();

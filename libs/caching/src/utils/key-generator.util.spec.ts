@@ -36,14 +36,18 @@ describe("Key Generator Utils", () => {
     });
 
     it("should throw error for invalid namespace", () => {
-      expect(() => generateCacheKey("", "123")).toThrow(CacheKeyValidationError);
+      expect(() => generateCacheKey("", "123")).toThrow(
+        CacheKeyValidationError,
+      );
       expect(() => generateCacheKey("a".repeat(65), "123")).toThrow(
         CacheKeyValidationError,
       );
     });
 
     it("should throw error for invalid key", () => {
-      expect(() => generateCacheKey("user", "")).toThrow(CacheKeyValidationError);
+      expect(() => generateCacheKey("user", "")).toThrow(
+        CacheKeyValidationError,
+      );
       expect(() => generateCacheKey("user", "a".repeat(129))).toThrow(
         CacheKeyValidationError,
       );
@@ -66,7 +70,12 @@ describe("Key Generator Utils", () => {
     });
 
     it("should generate platform-level pattern with prefix", () => {
-      const pattern = generateCachePattern("user", "all", undefined, "hl8:cache:");
+      const pattern = generateCachePattern(
+        "user",
+        "all",
+        undefined,
+        "hl8:cache:",
+      );
       expect(pattern).toBe("hl8:cache:platform:user:all");
     });
 

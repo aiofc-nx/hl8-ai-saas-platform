@@ -8,6 +8,7 @@ import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { EntityManager, MikroORM } from "@mikro-orm/core";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ClsService } from "nestjs-cls";
+import { ConnectionManager } from "../connection/connection.manager.js";
 import { DatabaseTransactionException } from "../exceptions/database-transaction.exception.js";
 import { TransactionService } from "./transaction.service.js";
 
@@ -54,6 +55,41 @@ describe("TransactionService", () => {
           useValue: mockCls,
         },
         {
+          provide: ConnectionManager,
+          useValue: {
+            getDriver: jest.fn().mockReturnValue({
+              connect: jest.fn().mockResolvedValue(undefined),
+              disconnect: jest.fn().mockResolvedValue(undefined),
+              isConnected: jest.fn().mockResolvedValue(true),
+              getConnectionInfo: jest.fn().mockReturnValue({
+                host: "localhost",
+                port: 5432,
+                database: "test_db",
+                type: "postgresql" as const,
+                status: "connected" as const,
+                connectedAt: new Date(),
+                uptime: 1000,
+              }),
+              getPoolStats: jest.fn().mockReturnValue({
+                total: 10,
+                active: 3,
+                idle: 7,
+                waiting: 0,
+                max: 20,
+                min: 5,
+              }),
+              healthCheck: jest.fn().mockResolvedValue({
+                healthy: true,
+                status: "healthy" as const,
+                responseTime: 100,
+                timestamp: new Date(),
+              }),
+              getDriverType: jest.fn().mockReturnValue("postgresql" as const),
+              getConfigSummary: jest.fn().mockReturnValue("PostgreSQL Driver"),
+            }),
+          },
+        },
+        {
           provide: FastifyLoggerService,
           useValue: mockLogger,
         },
@@ -67,7 +103,7 @@ describe("TransactionService", () => {
     it("应该成功执行事务并返回结果", async () => {
       mockCls.get.mockReturnValue(undefined);
 
-      const result = await service.runInTransaction(async (em) => {
+      const result = await service.runInTransaction(async (_em) => {
         return "success";
       });
 

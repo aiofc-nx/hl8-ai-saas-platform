@@ -1,7 +1,7 @@
 /**
  * 数据库连接管理器
  *
- * @description 管理数据库连接的生命周期
+ * @description 管理数据库连接的生命周期，支持多数据库类型
  *
  * ## 业务规则
  *
@@ -42,6 +42,12 @@
 import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { MikroORM } from "@mikro-orm/core";
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { DatabaseDriver } from "../drivers/database-driver.interface.js";
+import { DatabaseDriverFactory } from "../drivers/database-driver.factory.js";
+import {
+  DriverSelector,
+  // DriverSelectionStrategy,
+} from "../drivers/driver-selector.js";
 import { CONNECTION_DEFAULTS } from "../constants/defaults.js";
 import { DatabaseConnectionException } from "../exceptions/database-connection.exception.js";
 import {
@@ -56,10 +62,13 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
   private connectedAt?: Date;
   private lastActivityAt?: Date;
   private reconnectAttempts = 0;
+  private driver: DatabaseDriver | null = null;
 
   constructor(
     private readonly orm: MikroORM,
     private readonly logger: FastifyLoggerService,
+    private readonly driverFactory: DatabaseDriverFactory,
+    private readonly driverSelector: DriverSelector,
   ) {
     this.logger.log("ConnectionManager 初始化");
   }
@@ -95,89 +104,60 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
     try {
       this.connectionStatus = ConnectionStatus.CONNECTING;
 
+      // 检查是否已有连接
       const connected = await this.orm.isConnected();
-
-      if (!connected) {
-        // MikroORM 在创建时会自动连接，这里只是确认状态
-        // 如果未连接，等待一段时间让连接建立
-        await this.waitForConnection();
+      if (connected) {
+        this.connectionStatus = ConnectionStatus.CONNECTED;
+        this.connectedAt = new Date();
+        this.lastActivityAt = new Date();
+        this.logger.log("数据库连接已存在");
+        return;
       }
+
+      // 创建数据库驱动
+      const config = this.getDriverConfig();
+      const strategy = this.driverSelector.getRecommendedStrategy(
+        (process.env.NODE_ENV as any) || "development",
+      );
+
+      this.driver = this.driverSelector.selectDriver(config, strategy);
+      await this.driver.connect();
 
       this.connectionStatus = ConnectionStatus.CONNECTED;
       this.connectedAt = new Date();
       this.lastActivityAt = new Date();
       this.reconnectAttempts = 0;
 
-      this.logger.log("数据库连接成功", {
-        host: this.getConnectionConfig().host,
-        database: this.getConnectionConfig().database,
-        connectedAt: this.connectedAt,
+      this.logger.log("数据库连接建立成功", {
+        type: config.type,
+        host: config.connection.host,
+        database: config.connection.database,
       });
     } catch (error) {
-      this.connectionStatus = ConnectionStatus.FAILED;
-      this.logger.error("数据库连接失败", (error as Error).stack);
+      this.connectionStatus = ConnectionStatus.DISCONNECTED;
+      this.logger.error(error as Error);
 
-      // 尝试重连
-      if (this.reconnectAttempts < CONNECTION_DEFAULTS.MAX_RECONNECT_ATTEMPTS) {
-        await this.reconnect();
-      } else {
-        throw new DatabaseConnectionException(
-          `无法连接到数据库服务器，已重试 ${this.reconnectAttempts} 次`,
-          {
-            host: this.getConnectionConfig().host,
-            port: this.getConnectionConfig().port,
-            attempts: this.reconnectAttempts,
-          },
+      // 自动重试逻辑
+      if (this.reconnectAttempts < CONNECTION_DEFAULTS.MAX_RETRY_ATTEMPTS) {
+        this.reconnectAttempts++;
+        const delay = Math.min(
+          CONNECTION_DEFAULTS.BASE_RETRY_DELAY *
+            Math.pow(2, this.reconnectAttempts - 1),
+          CONNECTION_DEFAULTS.MAX_RETRY_DELAY,
         );
+
+        this.logger.log(
+          `将在 ${delay}ms 后重试连接 (第 ${this.reconnectAttempts} 次)`,
+        );
+        await this.sleep(delay);
+        return this.connect();
       }
+
+      throw new DatabaseConnectionException(
+        `数据库连接失败，已重试 ${this.reconnectAttempts} 次`,
+        error instanceof Error ? error : new Error(String(error)),
+      );
     }
-  }
-
-  /**
-   * 等待连接建立
-   *
-   * @description 等待 MikroORM 建立连接
-   */
-  private async waitForConnection(): Promise<void> {
-    const maxWait = CONNECTION_DEFAULTS.CONNECT_TIMEOUT;
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < maxWait) {
-      if (await this.orm.isConnected()) {
-        return;
-      }
-      await this.sleep(100);
-    }
-
-    throw new Error("等待连接超时");
-  }
-
-  /**
-   * 重连数据库
-   *
-   * @description 使用指数退避算法重连
-   */
-  private async reconnect(): Promise<void> {
-    this.reconnectAttempts++;
-    this.connectionStatus = ConnectionStatus.RECONNECTING;
-
-    // 计算退避延迟（指数增长）
-    const delay = Math.min(
-      CONNECTION_DEFAULTS.RECONNECT_INITIAL_DELAY *
-        Math.pow(2, this.reconnectAttempts - 1),
-      CONNECTION_DEFAULTS.RECONNECT_MAX_DELAY,
-    );
-
-    this.logger.warn(
-      `重连数据库（第 ${this.reconnectAttempts} 次尝试），等待 ${delay}ms`,
-      {
-        attempt: this.reconnectAttempts,
-        delayMs: delay,
-      },
-    );
-
-    await this.sleep(delay);
-    await this.connect();
   }
 
   /**
@@ -187,14 +167,21 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
    */
   async disconnect(): Promise<void> {
     try {
-      if (await this.orm.isConnected()) {
-        await this.orm.close(true); // force close
-        this.connectionStatus = ConnectionStatus.DISCONNECTED;
-        this.logger.log("数据库连接已关闭");
+      this.connectionStatus = ConnectionStatus.DISCONNECTED;
+
+      if (this.driver) {
+        await this.driver.disconnect();
+        this.driver = null;
       }
+
+      this.connectionStatus = ConnectionStatus.DISCONNECTED;
+      this.connectedAt = undefined;
+      this.lastActivityAt = undefined;
+
+      this.logger.log("数据库连接已关闭");
     } catch (error) {
-      this.logger.error("关闭数据库连接时发生错误", (error as Error).stack);
-      throw new DatabaseConnectionException("关闭数据库连接失败");
+      this.logger.error(error as Error);
+      this.connectionStatus = ConnectionStatus.DISCONNECTED;
     }
   }
 
@@ -205,6 +192,9 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
    * @returns 是否已连接
    */
   async isConnected(): Promise<boolean> {
+    if (this.driver) {
+      return await this.driver.isConnected();
+    }
     return this.orm.isConnected();
   }
 
@@ -217,13 +207,30 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
   async getConnectionInfo(): Promise<ConnectionInfo> {
     const poolStats = await this.getPoolStats();
 
+    if (this.driver) {
+      const driverInfo = this.driver.getConnectionInfo();
+      return {
+        status: this.connectionStatus,
+        type: driverInfo.type,
+        host: driverInfo.host,
+        port: driverInfo.port,
+        database: driverInfo.database,
+        connectedAt: this.connectedAt,
+        uptime: this.connectedAt ? Date.now() - this.connectedAt.getTime() : 0,
+        lastActivityAt: this.lastActivityAt,
+        poolStats,
+      };
+    }
+
+    // 回退到原始实现
     return {
       status: this.connectionStatus,
-      type: this.getConnectionConfig().type,
-      host: this.getConnectionConfig().host,
-      port: this.getConnectionConfig().port,
-      database: this.getConnectionConfig().database,
+      type: this.getDriverConfig().type,
+      host: this.getDriverConfig().connection.host,
+      port: this.getDriverConfig().connection.port,
+      database: this.getDriverConfig().connection.database,
       connectedAt: this.connectedAt,
+      uptime: this.connectedAt ? Date.now() - this.connectedAt.getTime() : 0,
       lastActivityAt: this.lastActivityAt,
       poolStats,
     };
@@ -236,7 +243,11 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
    * @returns 连接池统计
    */
   async getPoolStats(): Promise<PoolStats> {
-    // 从 MikroORM 获取连接池信息
+    if (this.driver) {
+      return this.driver.getPoolStats();
+    }
+
+    // 回退到原始实现
     const driver = (this.orm as any).driver;
     const pool = driver?.connection?.getPool?.();
 
@@ -272,6 +283,82 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * 获取数据库驱动
+   *
+   * @description 获取当前使用的数据库驱动实例
+   * @returns 数据库驱动实例或 null
+   */
+  getDriver(): DatabaseDriver | null {
+    return this.driver;
+  }
+
+  /**
+   * 健康检查
+   *
+   * @description 执行数据库健康检查
+   * @returns 健康检查结果
+   */
+  async healthCheck(): Promise<{
+    healthy: boolean;
+    responseTime: number;
+    error?: string;
+    timestamp: Date;
+  }> {
+    if (this.driver) {
+      return await this.driver.healthCheck();
+    }
+
+    // 回退到原始实现
+    const startTime = Date.now();
+    try {
+      const isConnected = await this.isConnected();
+      const responseTime = Date.now() - startTime;
+
+      return {
+        healthy: isConnected,
+        responseTime,
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      return {
+        healthy: false,
+        responseTime: Date.now() - startTime,
+        error: error instanceof Error ? error.message : "未知错误",
+        timestamp: new Date(),
+      };
+    }
+  }
+
+  /**
+   * 获取驱动配置（内部方法）
+   *
+   * @private
+   */
+  private getDriverConfig() {
+    const config = this.orm.config as any;
+    return {
+      type: (config.get("driver")?.name?.toLowerCase()?.includes("mongo")
+        ? "mongodb"
+        : "postgresql") as "postgresql" | "mongodb",
+      connection: {
+        host: config.get("host"),
+        port: config.get("port"),
+        database: config.get("dbName"),
+        username: config.get("user"),
+        password: config.get("password"),
+      },
+      pool: {
+        min: config.get("pool")?.min,
+        max: config.get("pool")?.max,
+        idleTimeoutMillis: config.get("pool")?.idleTimeoutMillis,
+        acquireTimeoutMillis: config.get("pool")?.acquireTimeoutMillis,
+        createTimeoutMillis: config.get("pool")?.createTimeoutMillis,
+      },
+      debug: config.get("debug"),
+    };
+  }
+
+  /**
    * 获取连接配置（内部方法）
    *
    * @private
@@ -279,7 +366,9 @@ export class ConnectionManager implements OnModuleInit, OnModuleDestroy {
   private getConnectionConfig() {
     const config = this.orm.config as any;
     return {
-      type: config.get("type"),
+      type: config.get("driver")?.name?.toLowerCase()?.includes("mongo")
+        ? "mongodb"
+        : "postgresql",
       host: config.get("host"),
       port: config.get("port"),
       database: config.get("dbName"),

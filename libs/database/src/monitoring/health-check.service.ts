@@ -37,6 +37,9 @@
 import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { Injectable } from "@nestjs/common";
 import { ConnectionManager } from "../connection/connection.manager.js";
+import { ConnectionHealthService } from "../connection/connection-health.service.js";
+import { ConnectionPoolAdapter } from "../connection/connection-pool.adapter.js";
+// import { DatabaseDriver } from "../drivers/database-driver.interface.js";
 import { HealthCheckException } from "../exceptions/health-check.exception.js";
 import type { PoolStats } from "../types/connection.types.js";
 import type { HealthCheckResult } from "../types/monitoring.types.js";
@@ -45,6 +48,8 @@ import type { HealthCheckResult } from "../types/monitoring.types.js";
 export class HealthCheckService {
   constructor(
     private readonly connectionManager: ConnectionManager,
+    private readonly connectionHealthService: ConnectionHealthService,
+    private readonly poolAdapter: ConnectionPoolAdapter,
     private readonly logger: FastifyLoggerService,
   ) {
     this.logger.log("HealthCheckService 初始化");
@@ -61,70 +66,113 @@ export class HealthCheckService {
     const startTime = Date.now();
 
     try {
-      // 检查连接状态
-      const isConnected = await this.connectionManager.isConnected();
-      const poolStats = await this.connectionManager.getPoolStats();
+      // 获取数据库驱动
+      const driver = this.connectionManager.getDriver();
 
-      const responseTime = Date.now() - startTime;
+      if (driver) {
+        // 使用新的健康检查服务
+        const healthResult =
+          await this.connectionHealthService.performHealthCheck(driver);
 
-      // 判断健康状态
-      let status: "healthy" | "unhealthy" | "degraded" = "healthy";
+        const result: HealthCheckResult = {
+          healthy: healthResult.healthy,
+          status:
+            healthResult.status ||
+            (healthResult.healthy ? "healthy" : "unhealthy"),
+          responseTime: healthResult.responseTime,
+          error: healthResult.error,
+          timestamp: healthResult.timestamp,
+          details: {
+            connection: healthResult.healthy,
+            pool: true,
+            performance: true,
+          },
+        };
 
-      if (!isConnected) {
-        status = "unhealthy";
-      } else if (poolStats.idle < 2 && poolStats.total >= poolStats.max * 0.9) {
-        // 连接池接近上限
-        status = "degraded";
-      }
+        if (result.status === "unhealthy") {
+          this.logger.warn("数据库健康检查异常", result as any);
+          throw new HealthCheckException(
+            `数据库健康检查失败: ${result.status}`,
+            result.status,
+            result,
+          );
+        } else {
+          this.logger.debug("数据库健康检查通过", result as any);
+        }
 
-      const result: HealthCheckResult = {
-        status,
-        checkedAt: new Date(),
-        responseTime,
-        connection: {
-          isConnected,
-        },
-        pool: poolStats,
-      };
-
-      if (status !== "healthy") {
-        // 记录监控日志
-        this.logger.warn("数据库健康检查异常", result as any);
-        // 抛出业务异常
-        throw new HealthCheckException(
-          `数据库健康检查失败: ${status}`,
-          status,
-          result,
-        );
+        return result;
       } else {
-        // 记录成功日志用于监控
-        this.logger.debug("数据库健康检查通过", result as any);
+        // 回退到原始实现
+        return await this.legacyHealthCheck();
       }
-
-      return result;
     } catch (error) {
       const responseTime = Date.now() - startTime;
 
       this.logger.error("健康检查失败", (error as Error).stack);
 
       return {
+        healthy: false,
         status: "unhealthy",
-        checkedAt: new Date(),
         responseTime,
-        connection: {
-          isConnected: false,
-          error: (error as Error).message,
-        },
-        pool: {
-          total: 0,
-          active: 0,
-          idle: 0,
-          waiting: 0,
-          max: 0,
-          min: 0,
+        error: (error as Error).message,
+        timestamp: new Date(),
+        details: {
+          connection: false,
+          pool: false,
+          performance: false,
         },
       };
     }
+  }
+
+  /**
+   * 传统健康检查实现
+   *
+   * @private
+   */
+  private async legacyHealthCheck(): Promise<HealthCheckResult> {
+    const startTime = Date.now();
+
+    // 检查连接状态
+    const isConnected = await this.connectionManager.isConnected();
+    const poolStats = await this.connectionManager.getPoolStats();
+
+    const responseTime = Date.now() - startTime;
+
+    // 判断健康状态
+    let status: "healthy" | "unhealthy" | "degraded" = "healthy";
+
+    if (!isConnected) {
+      status = "unhealthy";
+    } else if (poolStats.idle < 2 && poolStats.total >= poolStats.max * 0.9) {
+      // 连接池接近上限
+      status = "degraded";
+    }
+
+    const result: HealthCheckResult = {
+      healthy: isConnected,
+      status,
+      responseTime,
+      timestamp: new Date(),
+      details: {
+        connection: isConnected,
+        pool: true,
+        performance: true,
+      },
+    };
+
+    if (status !== "healthy") {
+      this.logger.warn("数据库健康检查异常", result as any);
+      throw new HealthCheckException(
+        `数据库健康检查失败: ${status}`,
+        status,
+        result,
+      );
+    } else {
+      this.logger.debug("数据库健康检查通过", result as any);
+    }
+
+    return result;
   }
 
   /**
@@ -136,5 +184,83 @@ export class HealthCheckService {
    */
   async getPoolStats(): Promise<PoolStats> {
     return this.connectionManager.getPoolStats();
+  }
+
+  /**
+   * 获取详细健康检查结果
+   *
+   * @description 获取包含更多细节的健康检查结果
+   *
+   * @returns 详细健康检查结果
+   */
+  async getDetailedHealthCheck(): Promise<{
+    basic: HealthCheckResult;
+    driver?: any;
+    pool?: any;
+    health?: any;
+  }> {
+    const basic = await this.check();
+    const driver = this.connectionManager.getDriver();
+
+    let poolDetails: any;
+    let healthDetails: any;
+
+    if (driver) {
+      try {
+        poolDetails = await this.poolAdapter.getPoolStats(driver);
+        healthDetails =
+          await this.connectionHealthService.performHealthCheck(driver);
+      } catch (error) {
+        this.logger.error(error as Error);
+      }
+    }
+
+    return {
+      basic,
+      driver: driver
+        ? {
+            type: driver.getDriverType(),
+            config: driver.getConfigSummary(),
+          }
+        : undefined,
+      pool: poolDetails,
+      health: healthDetails,
+    };
+  }
+
+  /**
+   * 启动自动健康检查
+   *
+   * @description 启动定期健康检查
+   */
+  startAutoHealthCheck(): void {
+    const driver = this.connectionManager.getDriver();
+    if (driver) {
+      this.connectionHealthService.startAutoHealthCheck(driver);
+      this.logger.log("已启动自动健康检查");
+    } else {
+      this.logger.warn("无法启动自动健康检查：数据库驱动未设置");
+    }
+  }
+
+  /**
+   * 停止自动健康检查
+   *
+   * @description 停止定期健康检查
+   */
+  stopAutoHealthCheck(): void {
+    this.connectionHealthService.stopAutoHealthCheck();
+    this.logger.log("已停止自动健康检查");
+  }
+
+  /**
+   * 获取健康检查历史
+   *
+   * @description 获取健康检查的历史记录
+   *
+   * @returns 健康检查历史
+   */
+  getHealthCheckHistory(): any {
+    return this.connectionHealthService.getLastHealthCheck();
   }
 }

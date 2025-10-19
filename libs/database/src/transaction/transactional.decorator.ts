@@ -78,7 +78,7 @@ export function Transactional(options?: TransactionOptions): MethodDecorator {
       }
 
       // 在事务中执行原方法
-      return transactionService.runInTransaction(async (em: any) => {
+      return transactionService.runInTransaction(async (_em: any) => {
         return originalMethod.apply(this, args);
       }, options);
     };

@@ -1,18 +1,20 @@
 # Tasks: Caching Module Refactor
 
 **Input**: Design documents from `/specs/caching-refactor/`  
-**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/  
+**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
 **Tests**: Tests are included to ensure refactoring maintains functionality while simplifying implementation.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
+
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
 
 ## Path Conventions
+
 - **Project**: `libs/caching/` at repository root
 - **Source**: `libs/caching/src/`
 - **Tests**: Unit tests co-located with source files (`.spec.ts`)
@@ -57,8 +59,8 @@
 
 - [ ] T010 [P] [US1] Unit test for simplified CacheService in libs/caching/src/services/cache.service.spec.ts
 - [ ] T011 [P] [US1] Unit test for simplified RedisService in libs/caching/src/services/redis.service.spec.ts
-- [ ] T012 [P] [US1] Integration test for basic caching operations in libs/caching/src/__tests__/integration/cache-operations.spec.ts
-- [ ] T013 [P] [US1] Integration test for decorator functionality in libs/caching/src/__tests__/integration/decorator-operations.spec.ts
+- [ ] T012 [P] [US1] Integration test for basic caching operations in libs/caching/src/**tests**/integration/cache-operations.spec.ts
+- [ ] T013 [P] [US1] Integration test for decorator functionality in libs/caching/src/**tests**/integration/decorator-operations.spec.ts
 
 ### Implementation for User Story 1
 
@@ -84,11 +86,11 @@
 ### Tests for User Story 2
 
 - [ ] T022 [P] [US2] Unit test for isolation context handling in libs/caching/src/services/cache.service.spec.ts
-- [ ] T023 [P] [US2] Integration test for tenant-level isolation in libs/caching/src/__tests__/integration/tenant-isolation.spec.ts
-- [ ] T024 [P] [US2] Integration test for organization-level isolation in libs/caching/src/__tests__/integration/organization-isolation.spec.ts
-- [ ] T025 [P] [US2] Integration test for department-level isolation in libs/caching/src/__tests__/integration/department-isolation.spec.ts
-- [ ] T026 [P] [US2] Integration test for user-level isolation in libs/caching/src/__tests__/integration/user-isolation.spec.ts
-- [ ] T027 [P] [US2] Integration test for platform-level isolation in libs/caching/src/__tests__/integration/platform-isolation.spec.ts
+- [ ] T023 [P] [US2] Integration test for tenant-level isolation in libs/caching/src/**tests**/integration/tenant-isolation.spec.ts
+- [ ] T024 [P] [US2] Integration test for organization-level isolation in libs/caching/src/**tests**/integration/organization-isolation.spec.ts
+- [ ] T025 [P] [US2] Integration test for department-level isolation in libs/caching/src/**tests**/integration/department-isolation.spec.ts
+- [ ] T026 [P] [US2] Integration test for user-level isolation in libs/caching/src/**tests**/integration/user-isolation.spec.ts
+- [ ] T027 [P] [US2] Integration test for platform-level isolation in libs/caching/src/**tests**/integration/platform-isolation.spec.ts
 
 ### Implementation for User Story 2
 
@@ -113,8 +115,8 @@
 ### Tests for User Story 3
 
 - [ ] T035 [P] [US3] Unit test for simplified CacheMetricsService in libs/caching/src/monitoring/cache-metrics.service.spec.ts
-- [ ] T036 [P] [US3] Integration test for metrics collection in libs/caching/src/__tests__/integration/metrics-collection.spec.ts
-- [ ] T037 [P] [US3] Integration test for metrics reset functionality in libs/caching/src/__tests__/integration/metrics-reset.spec.ts
+- [ ] T036 [P] [US3] Integration test for metrics collection in libs/caching/src/**tests**/integration/metrics-collection.spec.ts
+- [ ] T037 [P] [US3] Integration test for metrics reset functionality in libs/caching/src/**tests**/integration/metrics-reset.spec.ts
 
 ### Implementation for User Story 3
 
@@ -139,7 +141,7 @@
 - [ ] T043 [P] [US4] Unit test for simplified decorator functionality in libs/caching/src/decorators/cacheable.decorator.spec.ts
 - [ ] T044 [P] [US4] Unit test for simplified decorator functionality in libs/caching/src/decorators/cache-evict.decorator.spec.ts
 - [ ] T045 [P] [US4] Unit test for simplified decorator functionality in libs/caching/src/decorators/cache-put.decorator.spec.ts
-- [ ] T046 [P] [US4] Integration test for decorator usage patterns in libs/caching/src/__tests__/integration/decorator-patterns.spec.ts
+- [ ] T046 [P] [US4] Integration test for decorator usage patterns in libs/caching/src/**tests**/integration/decorator-patterns.spec.ts
 
 ### Implementation for User Story 4
 
@@ -164,11 +166,11 @@
 - [ ] T056 [P] Remove unused value object files in libs/caching/src/domain/value-objects/
 - [ ] T057 [P] Update index.ts exports in libs/caching/src/index.ts
 - [ ] T058 [P] Run all existing tests to ensure backward compatibility in libs/caching/
-- [ ] T059 [P] Performance testing to validate improvements in libs/caching/src/__tests__/performance/
+- [ ] T059 [P] Performance testing to validate improvements in libs/caching/src/**tests**/performance/
 - [ ] T060 [P] Code complexity analysis to validate simplification in libs/caching/
 - [ ] T061 [P] Update CHANGELOG.md with refactoring details in libs/caching/CHANGELOG.md
 - [ ] T062 [P] Validate quickstart.md examples work with refactored implementation
-- [ ] T063 [P] Final integration testing across all user stories in libs/caching/src/__tests__/integration/
+- [ ] T063 [P] Final integration testing across all user stories in libs/caching/src/**tests**/integration/
 
 ---
 

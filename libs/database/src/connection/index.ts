@@ -7,3 +7,7 @@
  */
 
 export * from "./connection.manager.js";
+export * from "./connection-pool.adapter.js";
+export * from "./connection-health.service.js";
+export * from "./connection-stats.service.js";
+export * from "./connection-lifecycle.service.js";

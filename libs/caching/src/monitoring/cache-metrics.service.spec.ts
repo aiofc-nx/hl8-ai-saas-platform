@@ -17,7 +17,9 @@ describe("SimplifiedCacheMetricsService", () => {
       providers: [SimplifiedCacheMetricsService],
     }).compile();
 
-    service = module.get<SimplifiedCacheMetricsService>(SimplifiedCacheMetricsService);
+    service = module.get<SimplifiedCacheMetricsService>(
+      SimplifiedCacheMetricsService,
+    );
   });
 
   describe("recordHit", () => {

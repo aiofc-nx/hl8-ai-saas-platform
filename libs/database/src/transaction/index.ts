@@ -8,3 +8,8 @@
 
 export * from "./transaction.service.js";
 export * from "./transactional.decorator.js";
+export * from "./postgresql-transaction.adapter.js";
+export * from "./mongodb-transaction.adapter.js";
+export * from "./unified-transaction.manager.js";
+export * from "./transaction.factory.js";
+export * from "./transaction-monitor.js";

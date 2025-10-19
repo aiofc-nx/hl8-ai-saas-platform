@@ -14,23 +14,20 @@ import type { PoolStats } from "./connection.types.js";
  * @description 数据库健康检查的结果
  */
 export interface HealthCheckResult {
+  /** 是否健康 */
+  healthy: boolean;
+
   /** 健康状态 */
   status: "healthy" | "unhealthy" | "degraded";
-
-  /** 检查时间 */
-  checkedAt: Date;
 
   /** 响应时间（毫秒） */
   responseTime: number;
 
-  /** 连接状态 */
-  connection: {
-    isConnected: boolean;
-    error?: string;
-  };
+  /** 错误信息（如果有） */
+  error?: string;
 
-  /** 连接池状态 */
-  pool: PoolStats;
+  /** 时间戳 */
+  timestamp: Date;
 
   /** 详细信息 */
   details?: Record<string, unknown>;

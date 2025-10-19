@@ -20,16 +20,22 @@ export default {
     ],
   },
   transformIgnorePatterns: [
-    "node_modules/(?!(@hl8|ioredis|class-transformer|class-validator)/)"
+    "node_modules/(?!(@hl8|ioredis|class-transformer|class-validator)/)",
   ],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
     "^(\\.{1,2}/.*)\\.js$": "$1",
-    "^@hl8/caching$": "/home/arligle/hl8/hl8-ai-saas-platform/libs/caching/dist/index.js",
-    "^@hl8/config$": "/home/arligle/hl8/hl8-ai-saas-platform/libs/config/dist/index.js",
-    "^@hl8/database$": "/home/arligle/hl8/hl8-ai-saas-platform/libs/database/dist/index.js",
-    "^@hl8/nestjs-fastify$": "/home/arligle/hl8/hl8-ai-saas-platform/libs/nestjs-fastify/dist/index.js",
-    "^@hl8/nestjs-isolation$": "/home/arligle/hl8/hl8-ai-saas-platform/libs/nestjs-isolation/dist/index.js",
-    "^@hl8/isolation-model$": "/home/arligle/hl8/hl8-ai-saas-platform/libs/isolation-model/dist/index.js",
+    "^@hl8/caching$":
+      "/home/arligle/hl8/hl8-ai-saas-platform/libs/caching/dist/index.js",
+    "^@hl8/config$":
+      "/home/arligle/hl8/hl8-ai-saas-platform/libs/config/dist/index.js",
+    "^@hl8/database$":
+      "/home/arligle/hl8/hl8-ai-saas-platform/libs/database/dist/index.js",
+    "^@hl8/nestjs-fastify$":
+      "/home/arligle/hl8/hl8-ai-saas-platform/libs/nestjs-fastify/dist/index.js",
+    "^@hl8/nestjs-isolation$":
+      "/home/arligle/hl8/hl8-ai-saas-platform/libs/nestjs-isolation/dist/index.js",
+    "^@hl8/isolation-model$":
+      "/home/arligle/hl8/hl8-ai-saas-platform/libs/isolation-model/dist/index.js",
   },
 };

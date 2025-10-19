@@ -48,7 +48,12 @@ import { EntityManager, MikroORM } from "@mikro-orm/core";
 import { Injectable } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { v4 as uuidv4 } from "uuid";
-import { DatabaseTransactionException } from "../exceptions/database-transaction.exception.js";
+import { DatabaseDriver } from "../drivers/database-driver.interface.js";
+import { ConnectionManager } from "../connection/connection.manager.js";
+import {
+  DatabaseTransactionException,
+  TransactionExceptionType,
+} from "../exceptions/database-transaction.exception.js";
 import type { TransactionOptions } from "../types/transaction.types.js";
 
 @Injectable()
@@ -57,6 +62,7 @@ export class TransactionService {
     private readonly orm: MikroORM,
     private readonly cls: ClsService,
     private readonly logger: FastifyLoggerService,
+    private readonly connectionManager: ConnectionManager,
   ) {
     this.logger.log("TransactionService 初始化");
   }
@@ -136,10 +142,14 @@ export class TransactionService {
       });
 
       // 抛出业务异常
-      throw new DatabaseTransactionException("事务执行失败，所有操作已回滚", {
-        transactionId,
-        duration,
-      });
+      throw new DatabaseTransactionException(
+        "事务执行失败，所有操作已回滚",
+        TransactionExceptionType.EXECUTION_FAILED,
+        {
+          transactionId,
+          duration,
+        },
+      );
     }
   }
 
@@ -183,5 +193,197 @@ export class TransactionService {
    */
   getTransactionId(): string | undefined {
     return this.cls.get<string>("transactionId");
+  }
+
+  /**
+   * 获取数据库驱动类型
+   *
+   * @description 获取当前使用的数据库驱动类型
+   *
+   * @returns 数据库驱动类型
+   */
+  getDatabaseType(): string {
+    const driver = this.connectionManager.getDriver();
+    if (driver) {
+      return driver.getDriverType();
+    }
+
+    // 回退到从 ORM 配置获取
+    const config = this.orm.config as any;
+    const driverName = config.get("driver")?.name?.toLowerCase();
+    return driverName?.includes("mongo") ? "mongodb" : "postgresql";
+  }
+
+  /**
+   * 检查数据库是否支持事务
+   *
+   * @description 检查当前数据库是否支持事务
+   *
+   * @returns 是否支持事务
+   */
+  supportsTransactions(): boolean {
+    const dbType = this.getDatabaseType();
+
+    // PostgreSQL 完全支持 ACID 事务
+    if (dbType === "postgresql") {
+      return true;
+    }
+
+    // MongoDB 4.0+ 支持多文档事务
+    if (dbType === "mongodb") {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 获取事务隔离级别
+   *
+   * @description 获取当前数据库支持的事务隔离级别
+   *
+   * @returns 隔离级别数组
+   */
+  getSupportedIsolationLevels(): string[] {
+    const dbType = this.getDatabaseType();
+
+    if (dbType === "postgresql") {
+      return [
+        "READ_UNCOMMITTED",
+        "READ_COMMITTED",
+        "REPEATABLE_READ",
+        "SERIALIZABLE",
+      ];
+    }
+
+    if (dbType === "mongodb") {
+      return ["READ_COMMITTED", "SNAPSHOT"];
+    }
+
+    return ["READ_COMMITTED"];
+  }
+
+  /**
+   * 执行数据库特定的事务操作
+   *
+   * @description 根据数据库类型执行特定的事务操作
+   *
+   * @param callback 事务回调函数
+   * @param options 事务选项
+   * @returns 事务结果
+   */
+  async runDatabaseSpecificTransaction<T>(
+    callback: (em: EntityManager, driver: DatabaseDriver | null) => Promise<T>,
+    options?: TransactionOptions,
+  ): Promise<T> {
+    const dbType = this.getDatabaseType();
+    const driver = this.connectionManager.getDriver();
+
+    this.logger.log("执行数据库特定事务", {
+      databaseType: dbType,
+      supportsTransactions: this.supportsTransactions(),
+      driverType: driver?.getDriverType(),
+    });
+
+    if (dbType === "postgresql") {
+      return this.runPostgreSQLTransaction(callback, options);
+    } else if (dbType === "mongodb") {
+      return this.runMongoDBTransaction(callback, options);
+    } else {
+      // 回退到默认实现
+      return this.runInTransaction(async (em) => {
+        return callback(em, this.connectionManager.getDriver());
+      }, options);
+    }
+  }
+
+  /**
+   * 执行 PostgreSQL 事务
+   *
+   * @private
+   */
+  private async runPostgreSQLTransaction<T>(
+    callback: (em: EntityManager, driver: DatabaseDriver | null) => Promise<T>,
+    options?: TransactionOptions,
+  ): Promise<T> {
+    // PostgreSQL 使用标准的 ACID 事务
+    return this.runInTransaction(async (em) => {
+      return callback(em, this.connectionManager.getDriver());
+    }, options);
+  }
+
+  /**
+   * 执行 MongoDB 事务
+   *
+   * @private
+   */
+  private async runMongoDBTransaction<T>(
+    callback: (em: EntityManager, driver: DatabaseDriver | null) => Promise<T>,
+    options?: TransactionOptions,
+  ): Promise<T> {
+    // MongoDB 事务需要特殊处理
+    const driver = this.connectionManager.getDriver();
+
+    if (!driver) {
+      throw new DatabaseTransactionException("MongoDB 驱动未设置");
+    }
+
+    // 检查是否已在事务中
+    const existingEm = this.cls.get<EntityManager>("entityManager");
+    if (existingEm) {
+      this.logger.debug("检测到现有 MongoDB 事务，复用 EntityManager");
+      return callback(existingEm, driver);
+    }
+
+    const transactionId = uuidv4();
+    const startTime = Date.now();
+
+    this.logger.log("开始 MongoDB 事务", { transactionId, options });
+
+    try {
+      const em = this.orm.em.fork();
+
+      // MongoDB 事务需要显式开始
+      const result = await em.transactional(async (transactionEm) => {
+        this.cls.set("entityManager", transactionEm);
+        this.cls.set("transactionId", transactionId);
+
+        try {
+          return await callback(transactionEm, driver);
+        } finally {
+          this.cls.set("entityManager", undefined);
+          this.cls.set("transactionId", undefined);
+        }
+      });
+
+      const duration = Date.now() - startTime;
+      this.logger.log("MongoDB 事务提交成功", { transactionId, duration });
+
+      return result;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+
+      this.logger.error("MongoDB 事务执行失败，已回滚", undefined, {
+        transactionId,
+        duration,
+        err:
+          error instanceof Error
+            ? {
+                type: error.constructor.name,
+                message: error.message,
+                stack: error.stack,
+              }
+            : undefined,
+      });
+
+      throw new DatabaseTransactionException(
+        "MongoDB 事务执行失败，所有操作已回滚",
+        TransactionExceptionType.EXECUTION_FAILED,
+        {
+          transactionId,
+          duration,
+        },
+      );
+    }
   }
 }

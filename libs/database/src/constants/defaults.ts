@@ -97,6 +97,27 @@ export const CONNECTION_DEFAULTS = {
    * @default 30000 (30 秒)
    */
   RECONNECT_MAX_DELAY: 30_000,
+
+  /**
+   * 最大重试次数
+   *
+   * @default 3
+   */
+  MAX_RETRY_ATTEMPTS: 3,
+
+  /**
+   * 基础重试延迟（毫秒）
+   *
+   * @default 1000 (1 秒)
+   */
+  BASE_RETRY_DELAY: 1_000,
+
+  /**
+   * 最大重试延迟（毫秒）
+   *
+   * @default 5000 (5 秒)
+   */
+  MAX_RETRY_DELAY: 5_000,
 } as const;
 
 /**

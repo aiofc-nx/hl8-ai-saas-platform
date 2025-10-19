@@ -13,20 +13,22 @@
 同步配置缓存模块。
 
 **参数**:
+
 - `options`: 缓存模块配置选项
 
 **返回**: `DynamicModule`
 
 **示例**:
+
 ```typescript
 CachingModule.forRoot({
   redis: {
-    host: 'localhost',
+    host: "localhost",
     port: 6379,
   },
   defaultTtl: 300,
-  keyPrefix: 'app:',
-})
+  keyPrefix: "app:",
+});
 ```
 
 ##### `forRootAsync(options: CachingModuleAsyncOptions)`
@@ -34,21 +36,23 @@ CachingModule.forRoot({
 异步配置缓存模块。
 
 **参数**:
+
 - `options`: 异步配置选项
 
 **返回**: `DynamicModule`
 
 **示例**:
+
 ```typescript
 CachingModule.forRootAsync({
   inject: [ConfigService],
   useFactory: (config: ConfigService) => ({
     redis: {
-      host: config.get('REDIS_HOST'),
-      port: config.get('REDIS_PORT'),
+      host: config.get("REDIS_HOST"),
+      port: config.get("REDIS_PORT"),
     },
   }),
-})
+});
 ```
 
 ## 服务
@@ -64,14 +68,16 @@ CachingModule.forRootAsync({
 获取缓存数据。
 
 **参数**:
+
 - `namespace`: 命名空间
 - `key`: 缓存键
 
 **返回**: `Promise<any>` - 缓存的数据，如果不存在返回 `null`
 
 **示例**:
+
 ```typescript
-const data = await cacheService.get('users', 'user-123');
+const data = await cacheService.get("users", "user-123");
 ```
 
 ##### `set(namespace: string, key: string, value: any, ttl?: number): Promise<void>`
@@ -79,6 +85,7 @@ const data = await cacheService.get('users', 'user-123');
 设置缓存数据。
 
 **参数**:
+
 - `namespace`: 命名空间
 - `key`: 缓存键
 - `value`: 要缓存的数据
@@ -87,8 +94,9 @@ const data = await cacheService.get('users', 'user-123');
 **返回**: `Promise<void>`
 
 **示例**:
+
 ```typescript
-await cacheService.set('users', 'user-123', userData, 3600);
+await cacheService.set("users", "user-123", userData, 3600);
 ```
 
 ##### `del(namespace: string, key: string): Promise<void>`
@@ -96,14 +104,16 @@ await cacheService.set('users', 'user-123', userData, 3600);
 删除缓存数据。
 
 **参数**:
+
 - `namespace`: 命名空间
 - `key`: 缓存键
 
 **返回**: `Promise<void>`
 
 **示例**:
+
 ```typescript
-await cacheService.del('users', 'user-123');
+await cacheService.del("users", "user-123");
 ```
 
 ##### `clear(namespace: string): Promise<void>`
@@ -111,13 +121,15 @@ await cacheService.del('users', 'user-123');
 清除命名空间的所有缓存。
 
 **参数**:
+
 - `namespace`: 命名空间
 
 **返回**: `Promise<void>`
 
 **示例**:
+
 ```typescript
-await cacheService.clear('users');
+await cacheService.clear("users");
 ```
 
 ##### `exists(namespace: string, key: string): Promise<boolean>`
@@ -125,14 +137,16 @@ await cacheService.clear('users');
 检查缓存键是否存在。
 
 **参数**:
+
 - `namespace`: 命名空间
 - `key`: 缓存键
 
 **返回**: `Promise<boolean>`
 
 **示例**:
+
 ```typescript
-const exists = await cacheService.exists('users', 'user-123');
+const exists = await cacheService.exists("users", "user-123");
 ```
 
 ##### `keys(namespace: string, pattern?: string): Promise<string[]>`
@@ -140,14 +154,16 @@ const exists = await cacheService.exists('users', 'user-123');
 获取匹配模式的所有键。
 
 **参数**:
+
 - `namespace`: 命名空间
 - `pattern`: 匹配模式，可选
 
 **返回**: `Promise<string[]>`
 
 **示例**:
+
 ```typescript
-const keys = await cacheService.keys('users', 'user-*');
+const keys = await cacheService.keys("users", "user-*");
 ```
 
 ### CacheMetricsService
@@ -163,6 +179,7 @@ const keys = await cacheService.keys('users', 'user-*');
 **返回**: `Promise<CacheMetrics>`
 
 **示例**:
+
 ```typescript
 const metrics = await metricsService.getMetrics();
 ```
@@ -180,6 +197,7 @@ const metrics = await metricsService.getMetrics();
 记录操作延迟。
 
 **参数**:
+
 - `latency`: 延迟时间（毫秒）
 
 ## 装饰器
@@ -205,8 +223,18 @@ const metrics = await metricsService.getMetrics();
 ```typescript
 interface CacheableOptions {
   keyGenerator?: (target: any, methodName: string, args: any[]) => string;
-  condition?: (target: any, methodName: string, args: any[], result: any) => boolean;
-  unless?: (target: any, methodName: string, args: any[], result: any) => boolean;
+  condition?: (
+    target: any,
+    methodName: string,
+    args: any[],
+    result: any,
+  ) => boolean;
+  unless?: (
+    target: any,
+    methodName: string,
+    args: any[],
+    result: any,
+  ) => boolean;
 }
 ```
 
@@ -337,8 +365,18 @@ interface CacheMetrics {
 ```typescript
 interface CacheableOptions {
   keyGenerator?: (target: any, methodName: string, args: any[]) => string;
-  condition?: (target: any, methodName: string, args: any[], result: any) => boolean;
-  unless?: (target: any, methodName: string, args: any[], result: any) => boolean;
+  condition?: (
+    target: any,
+    methodName: string,
+    args: any[],
+    result: any,
+  ) => boolean;
+  unless?: (
+    target: any,
+    methodName: string,
+    args: any[],
+    result: any,
+  ) => boolean;
 }
 ```
 

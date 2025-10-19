@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import type { ConnectionInfo, PoolStats } from '../types/connection.types.js';
+import type { ConnectionInfo, PoolStats } from "../types/connection.types.js";
 
 /**
  * 数据库驱动接口
@@ -96,7 +96,7 @@ export interface DatabaseDriverFactory {
  */
 export interface DatabaseDriverConfig {
   /** 数据库类型 */
-  type: 'postgresql' | 'mongodb';
+  type: "postgresql" | "mongodb";
   /** 连接配置 */
   connection: ConnectionConfig;
   /** 连接池配置 */

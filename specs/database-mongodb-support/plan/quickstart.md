@@ -35,19 +35,19 @@ DB_DEBUG=false
 
 ```typescript
 // app.module.ts
-import { Module } from '@nestjs/common';
-import { DatabaseModule } from '@hl8/database';
+import { Module } from "@nestjs/common";
+import { DatabaseModule } from "@hl8/database";
 
 @Module({
   imports: [
     DatabaseModule.forRoot({
       connection: {
-        type: 'mongodb',
-        host: 'localhost',
+        type: "mongodb",
+        host: "localhost",
         port: 27017,
-        database: 'hl8_saas',
-        username: 'admin',
-        password: 'password',
+        database: "hl8_saas",
+        username: "admin",
+        password: "password",
       },
       pool: {
         min: 5,
@@ -66,8 +66,8 @@ export class AppModule {}
 
 ```typescript
 // user.service.ts
-import { Injectable } from '@nestjs/common';
-import { ConnectionManager, TransactionService } from '@hl8/database';
+import { Injectable } from "@nestjs/common";
+import { ConnectionManager, TransactionService } from "@hl8/database";
 
 @Injectable()
 export class UserService {
@@ -88,7 +88,7 @@ export class UserService {
   async checkConnection() {
     const isConnected = await this.connectionManager.isConnected();
     const stats = this.connectionManager.getPoolStats();
-    
+
     return {
       connected: isConnected,
       poolStats: stats,
@@ -107,28 +107,28 @@ export class UserService {
   imports: [
     // PostgreSQL 数据库
     DatabaseModule.forRoot({
-      name: 'postgres',
+      name: "postgres",
       connection: {
-        type: 'postgresql',
-        host: 'localhost',
+        type: "postgresql",
+        host: "localhost",
         port: 5432,
-        database: 'hl8_saas',
-        username: 'postgres',
-        password: 'password',
+        database: "hl8_saas",
+        username: "postgres",
+        password: "password",
       },
       entities: [User, Tenant, Organization],
     }),
-    
+
     // MongoDB 数据库
     DatabaseModule.forRoot({
-      name: 'mongodb',
+      name: "mongodb",
       connection: {
-        type: 'mongodb',
-        host: 'localhost',
+        type: "mongodb",
+        host: "localhost",
         port: 27017,
-        database: 'hl8_saas',
-        username: 'admin',
-        password: 'password',
+        database: "hl8_saas",
+        username: "admin",
+        password: "password",
       },
       entities: [Product, Order, Analytics],
     }),
@@ -143,7 +143,7 @@ export class AppModule {}
 // 通过配置切换数据库类型
 const config = {
   connection: {
-    type: process.env.DB_TYPE || 'postgresql', // 支持动态切换
+    type: process.env.DB_TYPE || "postgresql", // 支持动态切换
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT),
     database: process.env.DB_DATABASE,
@@ -158,8 +158,8 @@ const config = {
 
 ```typescript
 // monitoring.service.ts
-import { Injectable } from '@nestjs/common';
-import { ConnectionManager, MetricsService } from '@hl8/database';
+import { Injectable } from "@nestjs/common";
+import { ConnectionManager, MetricsService } from "@hl8/database";
 
 @Injectable()
 export class MonitoringService {
@@ -171,7 +171,7 @@ export class MonitoringService {
   async getDatabaseHealth() {
     const health = await this.connectionManager.healthCheck();
     const stats = this.metricsService.getPerformanceStats();
-    
+
     return {
       healthy: health.healthy,
       responseTime: health.responseTime,
@@ -194,20 +194,20 @@ export class MonitoringService {
 DatabaseModule.forRootAsync({
   useFactory: (configService: ConfigService) => ({
     connection: {
-      type: configService.get('DB_TYPE'),
-      host: configService.get('DB_HOST'),
-      port: configService.get('DB_PORT'),
-      database: configService.get('DB_DATABASE'),
-      username: configService.get('DB_USERNAME'),
-      password: configService.get('DB_PASSWORD'),
+      type: configService.get("DB_TYPE"),
+      host: configService.get("DB_HOST"),
+      port: configService.get("DB_PORT"),
+      database: configService.get("DB_DATABASE"),
+      username: configService.get("DB_USERNAME"),
+      password: configService.get("DB_PASSWORD"),
     },
     pool: {
-      min: configService.get('DB_POOL_MIN', 5),
-      max: configService.get('DB_POOL_MAX', 20),
+      min: configService.get("DB_POOL_MIN", 5),
+      max: configService.get("DB_POOL_MAX", 20),
     },
   }),
   inject: [ConfigService],
-})
+});
 ```
 
 ### 多数据库配置
@@ -217,12 +217,16 @@ DatabaseModule.forRootAsync({
 @Module({
   imports: [
     DatabaseModule.forRoot({
-      name: 'primary',
-      connection: { /* PostgreSQL 配置 */ },
+      name: "primary",
+      connection: {
+        /* PostgreSQL 配置 */
+      },
     }),
     DatabaseModule.forRoot({
-      name: 'analytics',
-      connection: { /* MongoDB 配置 */ },
+      name: "analytics",
+      connection: {
+        /* MongoDB 配置 */
+      },
     }),
   ],
 })
@@ -234,10 +238,10 @@ export class AppModule {}
 ### 单元测试
 
 ```typescript
-import { Test, TestingModule } from '@nestjs/testing';
-import { DatabaseModule, ConnectionManager } from '@hl8/database';
+import { Test, TestingModule } from "@nestjs/testing";
+import { DatabaseModule, ConnectionManager } from "@hl8/database";
 
-describe('DatabaseModule', () => {
+describe("DatabaseModule", () => {
   let connectionManager: ConnectionManager;
 
   beforeEach(async () => {
@@ -245,12 +249,12 @@ describe('DatabaseModule', () => {
       imports: [
         DatabaseModule.forRoot({
           connection: {
-            type: 'mongodb',
-            host: 'localhost',
+            type: "mongodb",
+            host: "localhost",
             port: 27017,
-            database: 'test_db',
-            username: 'test',
-            password: 'test',
+            database: "test_db",
+            username: "test",
+            password: "test",
           },
         }),
       ],
@@ -259,7 +263,7 @@ describe('DatabaseModule', () => {
     connectionManager = module.get<ConnectionManager>(ConnectionManager);
   });
 
-  it('should connect to database', async () => {
+  it("should connect to database", async () => {
     await connectionManager.connect();
     const isConnected = await connectionManager.isConnected();
     expect(isConnected).toBe(true);
@@ -270,7 +274,7 @@ describe('DatabaseModule', () => {
 ### 集成测试
 
 ```typescript
-describe('Database Integration', () => {
+describe("Database Integration", () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -278,12 +282,12 @@ describe('Database Integration', () => {
       imports: [
         DatabaseModule.forRoot({
           connection: {
-            type: 'mongodb',
-            host: 'localhost',
+            type: "mongodb",
+            host: "localhost",
             port: 27017,
-            database: 'test_db',
-            username: 'test',
-            password: 'test',
+            database: "test_db",
+            username: "test",
+            password: "test",
           },
         }),
       ],
@@ -297,7 +301,7 @@ describe('Database Integration', () => {
     await app.close();
   });
 
-  it('should perform database operations', async () => {
+  it("should perform database operations", async () => {
     // 测试数据库操作
   });
 });
@@ -309,7 +313,7 @@ describe('Database Integration', () => {
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: postgres:15-alpine
