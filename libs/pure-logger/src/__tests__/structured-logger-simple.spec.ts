@@ -2,7 +2,8 @@
  * 结构化日志器简化测试
  */
 
-import { StructuredLogger, LogLevel } from "../index";
+import { jest } from "@jest/globals";
+import { StructuredLogger, LogLevel } from "../index.js";
 
 describe("StructuredLogger 简化测试", () => {
   let logger: StructuredLogger;

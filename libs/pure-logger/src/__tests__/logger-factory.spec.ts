@@ -2,20 +2,11 @@
  * 日志工厂测试
  */
 
+
 // 设置测试环境
 beforeAll(() => {
   process.env.NODE_ENV = "test";
 });
-
-// 全局测试工具
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
 
 import {
   LoggerFactory,
@@ -25,7 +16,7 @@ import {
   NoOpLogger,
   StructuredLogger,
   type LoggerConfig,
-} from "../index";
+} from "../index.js";
 
 describe("LoggerFactory", () => {
   let originalEnv: string | undefined;

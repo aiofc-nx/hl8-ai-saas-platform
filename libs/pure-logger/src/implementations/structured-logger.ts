@@ -291,7 +291,10 @@ export class StructuredLogger implements IPureLogger {
         return JSON.stringify(value);
       } catch (error) {
         // 处理循环引用或其他序列化错误
-        if (error instanceof TypeError && error.message.includes("circular structure")) {
+        if (
+          error instanceof TypeError &&
+          error.message.includes("circular structure")
+        ) {
           return "[Circular Reference]";
         }
         return `[Serialization Error: ${error instanceof Error ? error.message : "Unknown error"}]`;

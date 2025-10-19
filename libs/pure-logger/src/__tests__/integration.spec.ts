@@ -2,20 +2,12 @@
  * 集成测试 - 验证各组件协作
  */
 
+import { jest } from '@jest/globals';
+
 // 设置测试环境
 beforeAll(() => {
   process.env.NODE_ENV = "test";
 });
-
-// 全局测试工具
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
 
 import {
   ConsoleLogger,
@@ -30,7 +22,8 @@ import {
   LoggerAdapterManager,
   BaseLoggerAdapter,
   loggerAdapterManager,
-} from "../index";
+  IPureLogger,
+} from "../index.js";
 
 // 测试适配器实现
 class TestLoggerAdapter extends BaseLoggerAdapter {
@@ -62,11 +55,11 @@ describe("集成测试", () => {
 
   beforeEach(() => {
     consoleSpy = {
-      log: jest.spyOn(console, "log").mockImplementation(),
-      debug: jest.spyOn(console, "debug").mockImplementation(),
-      info: jest.spyOn(console, "info").mockImplementation(),
-      warn: jest.spyOn(console, "warn").mockImplementation(),
-      error: jest.spyOn(console, "error").mockImplementation(),
+      log: jest.spyOn(console, "log").mockImplementation(() => {}),
+      debug: jest.spyOn(console, "debug").mockImplementation(() => {}),
+      info: jest.spyOn(console, "info").mockImplementation(() => {}),
+      warn: jest.spyOn(console, "warn").mockImplementation(() => {}),
+      error: jest.spyOn(console, "error").mockImplementation(() => {}),
     };
   });
 
@@ -287,7 +280,11 @@ describe("集成测试", () => {
     it("应该在所有实现中正确过滤日志级别", () => {
       const consoleLogger = new ConsoleLogger(LogLevel.WARN);
       const noopLogger = new NoOpLogger(LogLevel.WARN);
-      const structuredLogger = new StructuredLogger(LogLevel.WARN, {}, { json: true });
+      const structuredLogger = new StructuredLogger(
+        LogLevel.WARN,
+        {},
+        { json: true },
+      );
 
       [consoleLogger, noopLogger, structuredLogger].forEach((logger) => {
         logger.debug("debug message");
@@ -567,7 +564,7 @@ describe("集成测试", () => {
       const startTime = Date.now();
 
       // 创建大量子日志器
-      const childLoggers = [];
+      const childLoggers: IPureLogger[] = [];
       for (let i = 0; i < 1000; i++) {
         childLoggers.push(parentLogger.child({ child: i }));
       }

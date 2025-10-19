@@ -14,7 +14,6 @@ const config: Config = {
       },
     ],
   },
-  // setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup/jest-setup.ts"],
   transformIgnorePatterns: ["node_modules/(?!(.*\\.mjs$))"],
   moduleNameMapper: {
     "^@hl8/pure-logger$": "<rootDir>/src/index.ts",

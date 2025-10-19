@@ -2,6 +2,7 @@
  * 控制台日志器测试
  */
 
+import { jest } from '@jest/globals';
 import { ConsoleLogger, LogLevel } from "../index";
 
 // 设置测试环境

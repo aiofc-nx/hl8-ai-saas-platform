@@ -2,20 +2,12 @@
  * 空操作日志器测试
  */
 
+import { jest } from '@jest/globals';
+
 // 设置测试环境
 beforeAll(() => {
   process.env.NODE_ENV = "test";
 });
-
-// 全局测试工具
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
 
 import { NoOpLogger, LogLevel } from "../index";
 
