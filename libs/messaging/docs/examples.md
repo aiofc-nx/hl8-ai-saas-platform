@@ -5,16 +5,16 @@
 ### 1. 模块配置
 
 ```typescript
-import { Module } from '@nestjs/common';
-import { MessagingModule } from '@hl8/messaging';
+import { Module } from "@nestjs/common";
+import { MessagingModule } from "@hl8/messaging";
 
 @Module({
   imports: [
     MessagingModule.forRoot({
-      adapter: 'kafka',
-      brokers: ['localhost:9092'],
-      clientId: 'my-app',
-      groupId: 'my-group',
+      adapter: "kafka",
+      brokers: ["localhost:9092"],
+      clientId: "my-app",
+      groupId: "my-group",
     }),
   ],
 })
@@ -24,8 +24,8 @@ export class AppModule {}
 ### 2. 消息发布
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { MessagingService } from '@hl8/messaging';
+import { Injectable } from "@nestjs/common";
+import { MessagingService } from "@hl8/messaging";
 
 @Injectable()
 export class UserService {
@@ -33,8 +33,8 @@ export class UserService {
 
   async createUser(userData: CreateUserDto) {
     const user = await this.userRepository.save(userData);
-    
-    await this.messagingService.publish('user.created', {
+
+    await this.messagingService.publish("user.created", {
       userId: user.id,
       email: user.email,
       name: user.name,
@@ -49,15 +49,15 @@ export class UserService {
 ### 3. 消息订阅
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { MessagingService } from '@hl8/messaging';
+import { Injectable } from "@nestjs/common";
+import { MessagingService } from "@hl8/messaging";
 
 @Injectable()
 export class NotificationService {
   constructor(private messagingService: MessagingService) {}
 
   async onModuleInit() {
-    await this.messagingService.subscribe('user.created', async (message) => {
+    await this.messagingService.subscribe("user.created", async (message) => {
       await this.sendWelcomeEmail(message.email);
     });
   }
@@ -73,23 +73,23 @@ export class NotificationService {
 ### 消息处理器装饰器
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { MessageHandler } from '@hl8/messaging';
+import { Injectable } from "@nestjs/common";
+import { MessageHandler } from "@hl8/messaging";
 
 @Injectable()
 export class UserHandlersService {
-  @MessageHandler('user.created')
+  @MessageHandler("user.created")
   async handleUserCreated(message: any) {
-    console.log('处理用户创建消息:', message);
-    
+    console.log("处理用户创建消息:", message);
+
     await this.emailService.sendWelcome(message.email);
     await this.preferenceService.createDefaults(message.userId);
   }
 
-  @MessageHandler('user.updated')
+  @MessageHandler("user.updated")
   async handleUserUpdated(message: any) {
-    console.log('处理用户更新消息:', message);
-    
+    console.log("处理用户更新消息:", message);
+
     await this.cacheService.invalidate(`user:${message.userId}`);
     await this.searchService.updateUser(message.userId, message.changes);
   }
@@ -99,23 +99,23 @@ export class UserHandlersService {
 ### 事件处理器装饰器
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { EventHandler } from '@hl8/messaging';
+import { Injectable } from "@nestjs/common";
+import { EventHandler } from "@hl8/messaging";
 
 @Injectable()
 export class OrderHandlersService {
-  @EventHandler('OrderCreated')
+  @EventHandler("OrderCreated")
   async handleOrderCreated(event: any) {
-    console.log('处理订单创建事件:', event);
-    
+    console.log("处理订单创建事件:", event);
+
     await this.inventoryService.reserveItems(event.data.orderItems);
     await this.emailService.sendOrderConfirmation(event.data.customerEmail);
   }
 
-  @EventHandler('OrderPaid')
+  @EventHandler("OrderPaid")
   async handleOrderPaid(event: any) {
-    console.log('处理订单支付事件:', event);
-    
+    console.log("处理订单支付事件:", event);
+
     await this.inventoryService.confirmReservation(event.data.orderId);
     await this.shippingService.createShipment(event.data.orderId);
   }
@@ -125,17 +125,17 @@ export class OrderHandlersService {
 ### 任务处理器装饰器
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { TaskHandler } from '@hl8/messaging';
+import { Injectable } from "@nestjs/common";
+import { TaskHandler } from "@hl8/messaging";
 
 @Injectable()
 export class TaskHandlersService {
-  @TaskHandler('SendEmail')
+  @TaskHandler("SendEmail")
   async handleSendEmail(task: any) {
-    console.log('处理发送邮件任务:', task);
-    
+    console.log("处理发送邮件任务:", task);
+
     const { to, subject, template, data } = task.payload;
-    
+
     await this.emailService.send({
       to,
       subject,
@@ -144,18 +144,18 @@ export class TaskHandlersService {
     });
   }
 
-  @TaskHandler('GenerateReport')
+  @TaskHandler("GenerateReport")
   async handleGenerateReport(task: any) {
-    console.log('处理生成报告任务:', task);
-    
+    console.log("处理生成报告任务:", task);
+
     const { reportType, dateRange, userId } = task.payload;
-    
+
     const report = await this.reportService.generate({
       type: reportType,
       dateRange,
       userId,
     });
-    
+
     await this.reportService.save(report);
     await this.notificationService.notifyReportReady(userId, report.id);
   }
@@ -167,8 +167,8 @@ export class TaskHandlersService {
 ### 重试机制
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { MessagingService } from '@hl8/messaging';
+import { Injectable } from "@nestjs/common";
+import { MessagingService } from "@hl8/messaging";
 
 @Injectable()
 export class RetryHandlerService {
@@ -180,19 +180,19 @@ export class RetryHandlerService {
   async handleWithRetry(topic: string, handler: Function) {
     await this.messagingService.subscribe(topic, async (message) => {
       let retryCount = 0;
-      
+
       while (retryCount < this.maxRetries) {
         try {
           await handler(message);
           break;
         } catch (error) {
           retryCount++;
-          
+
           if (retryCount >= this.maxRetries) {
             await this.sendToDeadLetterQueue(message, error);
             break;
           }
-          
+
           await this.delay(this.retryDelay * retryCount);
         }
       }
@@ -200,7 +200,7 @@ export class RetryHandlerService {
   }
 
   private async sendToDeadLetterQueue(message: any, error: Error) {
-    await this.messagingService.publish('dead.letter', {
+    await this.messagingService.publish("dead.letter", {
       originalMessage: message,
       error: error.message,
       timestamp: new Date(),
@@ -208,7 +208,7 @@ export class RetryHandlerService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 ```

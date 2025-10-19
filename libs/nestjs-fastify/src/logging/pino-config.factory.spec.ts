@@ -140,6 +140,10 @@ describe("Pino 配置工厂", () => {
     });
 
     it("应该支持自定义选项", () => {
+      // 设置开发环境以启用 transport 配置
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "development";
+      
       const config = createFastifyLoggerConfig({
         level: "debug",
         prettyPrint: true,
@@ -147,6 +151,9 @@ describe("Pino 配置工厂", () => {
 
       expect(config.level).toBe("debug");
       expect(config.transport?.options).toBeDefined();
+      
+      // 恢复原始环境变量
+      process.env.NODE_ENV = originalEnv;
     });
   });
 

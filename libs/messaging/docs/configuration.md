@@ -5,15 +5,15 @@
 ### MessagingModule 配置
 
 ```typescript
-import { MessagingModule } from '@hl8/messaging';
+import { MessagingModule } from "@hl8/messaging";
 
 @Module({
   imports: [
     MessagingModule.forRoot({
-      adapter: 'kafka',
-      brokers: ['localhost:9092'],
-      clientId: 'my-app',
-      groupId: 'my-group',
+      adapter: "kafka",
+      brokers: ["localhost:9092"],
+      clientId: "my-app",
+      groupId: "my-group",
     }),
   ],
 })
@@ -26,14 +26,14 @@ export class AppModule {}
 
 ```typescript
 const kafkaConfig = {
-  adapter: 'kafka',
-  brokers: ['localhost:9092', 'localhost:9093'],
-  clientId: 'messaging-client',
-  groupId: 'messaging-group',
+  adapter: "kafka",
+  brokers: ["localhost:9092", "localhost:9093"],
+  clientId: "messaging-client",
+  groupId: "messaging-group",
   kafka: {
     sessionTimeout: 30000,
     heartbeatInterval: 3000,
-    compression: 'gzip',
+    compression: "gzip",
   },
 };
 ```
@@ -42,16 +42,16 @@ const kafkaConfig = {
 
 ```typescript
 const rabbitmqConfig = {
-  adapter: 'rabbitmq',
-  connectionString: 'amqp://username:password@localhost:5672',
+  adapter: "rabbitmq",
+  connectionString: "amqp://username:password@localhost:5672",
   rabbitmq: {
     exchange: {
-      name: 'messaging.exchange',
-      type: 'topic',
+      name: "messaging.exchange",
+      type: "topic",
       durable: true,
     },
     queue: {
-      name: 'messaging.queue',
+      name: "messaging.queue",
       durable: true,
     },
   },
@@ -62,12 +62,12 @@ const rabbitmqConfig = {
 
 ```typescript
 const redisConfig = {
-  adapter: 'redis',
-  connectionString: 'redis://localhost:6379',
+  adapter: "redis",
+  connectionString: "redis://localhost:6379",
   redis: {
-    host: 'localhost',
+    host: "localhost",
     port: 6379,
-    keyPrefix: 'messaging:',
+    keyPrefix: "messaging:",
   },
 };
 ```
@@ -76,13 +76,13 @@ const redisConfig = {
 
 ```typescript
 const multiTenantConfig = {
-  adapter: 'kafka',
-  brokers: ['localhost:9092'],
+  adapter: "kafka",
+  brokers: ["localhost:9092"],
   multiTenant: {
     enabled: true,
-    tenantHeader: 'x-tenant-id',
-    namespaceStrategy: 'prefix',
-    defaultTenant: 'default',
+    tenantHeader: "x-tenant-id",
+    namespaceStrategy: "prefix",
+    defaultTenant: "default",
   },
 };
 ```
@@ -91,14 +91,14 @@ const multiTenantConfig = {
 
 ```typescript
 const monitoringConfig = {
-  adapter: 'kafka',
-  brokers: ['localhost:9092'],
+  adapter: "kafka",
+  brokers: ["localhost:9092"],
   monitoring: {
     enabled: true,
     metrics: {
       enabled: true,
       interval: 60000,
-      exporters: ['console', 'prometheus'],
+      exporters: ["console", "prometheus"],
     },
     healthCheck: {
       enabled: true,

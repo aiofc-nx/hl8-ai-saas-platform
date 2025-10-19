@@ -27,15 +27,19 @@
 ## 核心组件
 
 ### MessagingService
+
 提供消息发布、订阅、处理等核心功能
 
 ### EventService
+
 提供事件发布、订阅、处理等功能，支持事件溯源
 
 ### TaskService
+
 提供任务调度、执行、监控等功能
 
 ### 适配器架构
+
 - BaseAdapter: 抽象基类
 - KafkaAdapter: Kafka 适配器
 - RabbitMQAdapter: RabbitMQ 适配器
