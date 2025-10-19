@@ -7,23 +7,11 @@
  */
 
 import { ConfigRecord } from "../lib/types/config.types.js";
+import * as os from "os";
+import * as path from "path";
+import * as fs from "fs";
 
-/**
- * 测试配置类
- *
- * @description 用于测试的配置类
- * @class TestConfig
- * @since 1.0.0
- */
-export class TestConfig {
-  public readonly name!: string;
-  public readonly version!: string;
-  public readonly port!: number;
-  public readonly database!: TestDatabaseConfig;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试配置类允许动态属性（测试工具）
-  [key: string]: any;
-}
+import { IsString, IsNumber, ValidateNested } from "class-validator";
 
 /**
  * 测试数据库配置类
@@ -33,10 +21,41 @@ export class TestConfig {
  * @since 1.0.0
  */
 export class TestDatabaseConfig {
+  @IsString()
   public readonly host!: string;
+
+  @IsNumber()
   public readonly port!: number;
+
+  @IsString()
   public readonly username!: string;
+
+  @IsString()
   public readonly password!: string;
+}
+
+/**
+ * 测试配置类
+ *
+ * @description 用于测试的配置类
+ * @class TestConfig
+ * @since 1.0.0
+ */
+export class TestConfig {
+  @IsString()
+  public readonly name!: string;
+
+  @IsString()
+  public readonly version!: string;
+
+  @IsNumber()
+  public readonly port!: number;
+
+  @ValidateNested()
+  public readonly database!: TestDatabaseConfig;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试配置类允许动态属性（测试工具）
+  [key: string]: any;
 }
 
 /**
@@ -128,9 +147,6 @@ export function wait(ms: number): Promise<void> {
  * @since 1.0.0
  */
 export function createTempDir(prefix: string = "test"): string {
-  const os = require("os");
-  const path = require("path");
-  const fs = require("fs");
 
   const tempDir = path.join(
     os.tmpdir(),
@@ -151,16 +167,14 @@ export function createTempDir(prefix: string = "test"): string {
  * @since 1.0.0
  */
 export async function cleanupTempFiles(paths: string[]): Promise<void> {
-  const fs = require("fs").promises;
-  const path = require("path");
 
   for (const filePath of paths) {
     try {
-      const stat = await fs.stat(filePath);
+      const stat = await fs.promises.stat(filePath);
       if (stat.isDirectory()) {
-        await fs.rmdir(filePath, { recursive: true });
+        await fs.promises.rm(filePath, { recursive: true });
       } else {
-        await fs.unlink(filePath);
+        await fs.promises.unlink(filePath);
       }
     } catch (error) {
       // 忽略文件不存在错误
