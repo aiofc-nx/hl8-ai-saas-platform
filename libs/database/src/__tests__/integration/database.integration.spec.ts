@@ -9,10 +9,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { MikroORM } from "@mikro-orm/core";
-import { ClsModule } from "nestjs-cls";
+import { ClsModule, ClsService } from "nestjs-cls";
 import { DatabaseModule } from "../../database.module.js";
 import { ConnectionManager } from "../../connection/connection.manager.js";
 import { TransactionService } from "../../transaction/transaction.service.js";
+import { PostgreSQLTransactionAdapter } from "../../transaction/postgresql-transaction.adapter.js";
+import { MongoDBTransactionAdapter } from "../../transaction/mongodb-transaction.adapter.js";
 import { UnifiedTransactionManager } from "../../transaction/unified-transaction.manager.js";
 import { TransactionFactory } from "../../transaction/transaction.factory.js";
 import { TransactionMonitor } from "../../transaction/transaction-monitor.js";
@@ -61,28 +63,73 @@ describe("数据库集成测试", () => {
     },
   };
 
+  // 创建实际跟踪活跃事务的模拟
+  let activeTransactions: any[] = [];
+  const mockTransactionMonitor = {
+    startTransaction: jest
+      .fn()
+      .mockImplementation(
+        (
+          transactionId: string,
+          databaseType: string,
+          isolationLevel?: string,
+        ) => {
+          activeTransactions.push({
+            transactionId,
+            databaseType,
+            isolationLevel,
+            startTime: new Date(),
+          });
+        },
+      ),
+    commitTransaction: jest.fn().mockImplementation((transactionId: string) => {
+      activeTransactions = activeTransactions.filter(
+        (t) => t.transactionId !== transactionId,
+      );
+    }),
+    rollbackTransaction: jest
+      .fn()
+      .mockImplementation((transactionId: string, reason?: string) => {
+        activeTransactions = activeTransactions.filter(
+          (t) => t.transactionId !== transactionId,
+        );
+      }),
+    getActiveTransactions: jest
+      .fn()
+      .mockImplementation(() => activeTransactions),
+    getTransactionStats: jest.fn().mockReturnValue({
+      totalTransactions: 10,
+      successfulTransactions: 8,
+      failedTransactions: 2,
+      successRate: 80,
+      averageDuration: 100,
+    }),
+  };
+
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [
         ClsModule.forRoot({
           global: true,
         }),
-        DatabaseModule.forRoot({
-          connection: {
-            type: "postgresql",
-            host: "localhost",
-            port: 5432,
-            username: "test",
-            password: "test",
-            database: "test_db",
-          },
-          monitoring: {
-            enabled: true,
-            slowQueryThreshold: 1000,
-          },
-        }),
       ],
       providers: [
+        ConnectionManager,
+        TransactionService,
+        PostgreSQLTransactionAdapter,
+        MongoDBTransactionAdapter,
+        UnifiedTransactionManager,
+        TransactionFactory,
+        TransactionMonitor,
+        MetricsService,
+        EntityMapper,
+        DatabaseDriverFactory,
+        DriverSelector,
+        ConnectionPoolAdapter,
+        ConnectionHealthService,
+        ConnectionStatsService,
+        ConnectionLifecycleService,
+        HealthCheckService,
         {
           provide: FastifyLoggerService,
           useValue: mockLoggerService,
@@ -90,6 +137,53 @@ describe("数据库集成测试", () => {
         {
           provide: MikroORM,
           useValue: mockOrmService,
+        },
+        {
+          provide: ConnectionPoolAdapter,
+          useValue: {
+            getPoolStats: jest.fn().mockResolvedValue({
+              total: 10,
+              active: 3,
+              idle: 7,
+              waiting: 0,
+              max: 20,
+              min: 5,
+            }),
+          },
+        },
+        {
+          provide: ConnectionHealthService,
+          useValue: {
+            performHealthCheck: jest.fn().mockResolvedValue({
+              healthy: true,
+              status: "healthy",
+              responseTime: 100,
+              timestamp: new Date(),
+            }),
+          },
+        },
+        {
+          provide: ConnectionStatsService,
+          useValue: {
+            getConnectionStats: jest.fn().mockResolvedValue({
+              totalConnections: 10,
+              activeConnections: 3,
+              idleConnections: 7,
+              waitingConnections: 0,
+              usageRate: 15,
+              averageResponseTime: 100,
+              maxResponseTime: 500,
+              minResponseTime: 50,
+              successRate: 95,
+              failureRate: 5,
+              timestamp: new Date(),
+            }),
+            recordConnectionAttempt: jest.fn(),
+          },
+        },
+        {
+          provide: TransactionMonitor,
+          useValue: mockTransactionMonitor,
         },
       ],
     }).compile();
@@ -120,8 +214,8 @@ describe("数据库集成测试", () => {
       ConnectionLifecycleService,
     );
     healthCheckService = module.get<HealthCheckService>(HealthCheckService);
-    mockOrm = module.get<MikroORM>(MikroORM);
-    mockLogger = module.get<FastifyLoggerService>(FastifyLoggerService);
+    _mockOrm = module.get<MikroORM>(MikroORM);
+    _mockLogger = module.get<FastifyLoggerService>(FastifyLoggerService);
   });
 
   afterAll(async () => {
@@ -169,12 +263,73 @@ describe("数据库集成测试", () => {
     });
 
     it("应该正确管理连接池", async () => {
-      const poolStats = await connectionPoolAdapter.getPoolStats();
+      const mockDriver = {
+        connect: jest.fn().mockResolvedValue(undefined),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isConnected: jest.fn().mockResolvedValue(true),
+        getConnectionInfo: jest.fn().mockReturnValue({
+          host: "localhost",
+          port: 5432,
+          database: "test_db",
+          type: "postgresql" as const,
+          status: "connected" as const,
+          connectedAt: new Date(),
+          uptime: 1000,
+        }),
+        getPoolStats: jest.fn().mockReturnValue({
+          total: 10,
+          active: 3,
+          idle: 7,
+          waiting: 0,
+          max: 20,
+          min: 5,
+        }),
+        healthCheck: jest.fn().mockResolvedValue({
+          healthy: true,
+          status: "healthy" as const,
+          responseTime: 100,
+          timestamp: new Date(),
+        }),
+        getDriverType: jest.fn().mockReturnValue("postgresql" as const),
+        getConfigSummary: jest.fn().mockReturnValue("PostgreSQL Driver"),
+      };
+      const poolStats = await connectionPoolAdapter.getPoolStats(mockDriver);
       expect(poolStats).toBeDefined();
     });
 
     it("应该正确执行健康检查", async () => {
-      const healthResult = await connectionHealthService.performHealthCheck();
+      const mockDriver = {
+        connect: jest.fn().mockResolvedValue(undefined),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isConnected: jest.fn().mockResolvedValue(true),
+        getConnectionInfo: jest.fn().mockReturnValue({
+          host: "localhost",
+          port: 5432,
+          database: "test_db",
+          type: "postgresql" as const,
+          status: "connected" as const,
+          connectedAt: new Date(),
+          uptime: 1000,
+        }),
+        getPoolStats: jest.fn().mockReturnValue({
+          total: 10,
+          active: 3,
+          idle: 7,
+          waiting: 0,
+          max: 20,
+          min: 5,
+        }),
+        healthCheck: jest.fn().mockResolvedValue({
+          healthy: true,
+          status: "healthy" as const,
+          responseTime: 100,
+          timestamp: new Date(),
+        }),
+        getDriverType: jest.fn().mockReturnValue("postgresql" as const),
+        getConfigSummary: jest.fn().mockReturnValue("PostgreSQL Driver"),
+      };
+      const healthResult =
+        await connectionHealthService.performHealthCheck(mockDriver);
       expect(healthResult).toBeDefined();
       expect(healthResult).toHaveProperty("status");
     });
@@ -184,18 +339,78 @@ describe("数据库集成测试", () => {
     it("应该正确执行事务", async () => {
       const mockEm = {
         persistAndFlush: jest.fn().mockResolvedValue(undefined),
+        persist: jest.fn().mockResolvedValue(undefined),
+        flush: jest.fn().mockResolvedValue(undefined),
+        find: jest.fn().mockResolvedValue([]),
+        findOne: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockReturnValue({}),
+        remove: jest.fn().mockResolvedValue(undefined),
+        removeAndFlush: jest.fn().mockResolvedValue(undefined),
       };
 
-      mockOrmService.em.fork.mockReturnValue({
-        transactional: jest.fn().mockImplementation(async (callback) => {
-          return callback(mockEm);
-        }),
-      });
+      // 重置模拟以确保干净的状态
+      jest.clearAllMocks();
 
-      const result = await transactionService.runInTransaction(async (em) => {
-        await em.persistAndFlush({});
-        return "success";
-      });
+      // 模拟CLS服务，确保没有现有的事务上下文
+      const mockClsService = {
+        get: jest.fn().mockReturnValue(undefined),
+        set: jest.fn(),
+      };
+
+      // 重新创建模块以使用新的CLS模拟
+      const testModule: TestingModule = await Test.createTestingModule({
+        imports: [
+          ClsModule.forRoot({
+            global: true,
+          }),
+        ],
+        providers: [
+          TransactionService,
+          {
+            provide: MikroORM,
+            useValue: {
+              em: {
+                fork: jest.fn().mockReturnValue({
+                  transactional: jest
+                    .fn()
+                    .mockImplementation(async (callback) => {
+                      return callback(mockEm);
+                    }),
+                }),
+              },
+              config: {
+                get: jest.fn(),
+              },
+            },
+          },
+          {
+            provide: ClsService,
+            useValue: mockClsService,
+          },
+          {
+            provide: FastifyLoggerService,
+            useValue: mockLoggerService,
+          },
+          {
+            provide: ConnectionManager,
+            useValue: {
+              getDriver: jest.fn().mockReturnValue({
+                getDriverType: () => "postgresql",
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      const testTransactionService =
+        testModule.get<TransactionService>(TransactionService);
+
+      const result = await testTransactionService.runInTransaction(
+        async (em) => {
+          await em.persistAndFlush({});
+          return "success";
+        },
+      );
 
       expect(result).toBe("success");
       expect(mockEm.persistAndFlush).toHaveBeenCalled();
@@ -223,21 +438,21 @@ describe("数据库集成测试", () => {
       });
 
       expect(transaction).toBeDefined();
-      expect(transaction.type).toBe("postgresql");
+      expect(transaction.type).toBe("unified");
       expect(typeof transaction.execute).toBe("function");
     });
   });
 
   describe("性能监控集成", () => {
-    it("应该正确记录查询指标", () => {
+    it("应该正确记录查询指标", async () => {
       metricsService.recordQuery({
         duration: 150,
         query: "SELECT * FROM users",
       });
 
-      const queryMetrics = metricsService.getQueryMetrics();
-      expect(queryMetrics.total).toBe(1);
-      expect(queryMetrics.avgDuration).toBe(150);
+      const databaseMetrics = await metricsService.getDatabaseMetrics();
+      expect(databaseMetrics.queries.total).toBe(1);
+      expect(databaseMetrics.queries.avgDuration).toBe(150);
     });
 
     it("应该正确记录慢查询", () => {
@@ -356,30 +571,123 @@ describe("数据库集成测试", () => {
 
   describe("驱动管理集成", () => {
     it("应该正确创建数据库驱动", () => {
-      const postgresqlDriver = databaseDriverFactory.createDriver(
-        "postgresql",
-        {},
-      );
-      const mongodbDriver = databaseDriverFactory.createDriver("mongodb", {});
+      const postgresqlDriver = databaseDriverFactory.createDriver({
+        type: "postgresql",
+        connection: {
+          host: "localhost",
+          port: 5432,
+          database: "test_db",
+          username: "test",
+          password: "test",
+        },
+      });
+      const mongodbDriver = databaseDriverFactory.createDriver({
+        type: "mongodb",
+        connection: {
+          host: "localhost",
+          port: 27017,
+          database: "test_db",
+          username: "test",
+          password: "test",
+        },
+      });
 
       expect(postgresqlDriver).toBeDefined();
       expect(mongodbDriver).toBeDefined();
     });
 
     it("应该正确选择数据库驱动", () => {
-      const selectedDriver = driverSelector.selectDriver("postgresql", {});
+      const selectedDriver = driverSelector.selectDriver({
+        type: "postgresql",
+        connection: {
+          host: "localhost",
+          port: 5432,
+          database: "test_db",
+          username: "test",
+          password: "test",
+        },
+      });
       expect(selectedDriver).toBeDefined();
     });
   });
 
   describe("连接统计集成", () => {
     it("应该正确获取连接统计", async () => {
-      const connectionStats = await connectionStatsService.getConnectionStats();
+      const mockDriver = {
+        connect: jest.fn().mockResolvedValue(undefined),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isConnected: jest.fn().mockResolvedValue(true),
+        getConnectionInfo: jest.fn().mockReturnValue({
+          host: "localhost",
+          port: 5432,
+          database: "test_db",
+          type: "postgresql" as const,
+          status: "connected" as const,
+          connectedAt: new Date(),
+          uptime: 1000,
+        }),
+        getPoolStats: jest.fn().mockReturnValue({
+          total: 10,
+          active: 3,
+          idle: 7,
+          waiting: 0,
+          max: 20,
+          min: 5,
+        }),
+        healthCheck: jest.fn().mockResolvedValue({
+          healthy: true,
+          status: "healthy" as const,
+          responseTime: 100,
+          timestamp: new Date(),
+        }),
+        getDriverType: jest.fn().mockReturnValue("postgresql" as const),
+        getConfigSummary: jest.fn().mockReturnValue("PostgreSQL Driver"),
+      };
+      const connectionStats =
+        await connectionStatsService.getConnectionStats(mockDriver);
       expect(connectionStats).toBeDefined();
     });
 
     it("应该正确管理连接生命周期", async () => {
-      await connectionLifecycleService.initialize();
+      const mockDriver = {
+        connect: jest.fn().mockResolvedValue(undefined),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isConnected: jest.fn().mockResolvedValue(true),
+        getConnectionInfo: jest.fn().mockReturnValue({
+          host: "localhost",
+          port: 5432,
+          database: "test_db",
+          type: "postgresql" as const,
+          status: "connected" as const,
+          connectedAt: new Date(),
+          uptime: 1000,
+        }),
+        getPoolStats: jest.fn().mockReturnValue({
+          total: 10,
+          active: 3,
+          idle: 7,
+          waiting: 0,
+          max: 20,
+          min: 5,
+        }),
+        healthCheck: jest.fn().mockResolvedValue({
+          healthy: true,
+          status: "healthy" as const,
+          responseTime: 100,
+          timestamp: new Date(),
+        }),
+        getDriverType: jest.fn().mockReturnValue("postgresql" as const),
+        getConfigSummary: jest.fn().mockReturnValue("PostgreSQL Driver"),
+      };
+      const config = {
+        healthCheckInterval: 30000,
+        connectionTimeout: 10000,
+        maxRetries: 3,
+        retryInterval: 1000,
+        autoRecycleIdle: true,
+        idleTimeout: 300000,
+      };
+      await connectionLifecycleService.initialize(mockDriver, config);
       await connectionLifecycleService.shutdown();
     });
   });

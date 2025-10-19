@@ -85,6 +85,22 @@ export class EntityMapper {
   mapEntity(entity: any, config: EntityMappingConfig): EntityMappingResult {
     const startTime = Date.now();
 
+    // Handle null or undefined entities
+    if (!entity) {
+      return {
+        success: false,
+        mappedEntity: {},
+        statistics: {
+          totalFields: 0,
+          mappedFields: 0,
+          skippedFields: 0,
+          errorFields: 1,
+        },
+        errors: ["Entity is null or undefined"],
+        warnings: [],
+      };
+    }
+
     this.logger.log("开始实体映射", {
       sourceType: config.sourceType,
       targetType: config.targetType,

@@ -6,6 +6,10 @@
 
 import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { Test, TestingModule } from "@nestjs/testing";
+import { ConnectionPoolAdapter } from "../connection/connection-pool.adapter.js";
+import { ConnectionHealthService } from "../connection/connection-health.service.js";
+import { ConnectionStatsService } from "../connection/connection-stats.service.js";
+import { TransactionMonitor } from "../transaction/transaction-monitor.js";
 import { MetricsService } from "./metrics.service.js";
 
 describe("MetricsService", () => {
@@ -24,6 +28,56 @@ describe("MetricsService", () => {
         {
           provide: FastifyLoggerService,
           useValue: mockLogger,
+        },
+        {
+          provide: ConnectionPoolAdapter,
+          useValue: {
+            getPoolStats: jest.fn().mockResolvedValue({
+              total: 10,
+              active: 3,
+              idle: 7,
+              waiting: 0,
+              max: 20,
+              min: 5,
+            }),
+          },
+        },
+        {
+          provide: ConnectionHealthService,
+          useValue: {
+            performHealthCheck: jest.fn().mockResolvedValue({
+              healthy: true,
+              responseTime: 100,
+              timestamp: new Date(),
+            }),
+          },
+        },
+        {
+          provide: ConnectionStatsService,
+          useValue: {
+            getConnectionStats: jest.fn().mockResolvedValue({
+              totalConnections: 10,
+              activeConnections: 3,
+              idleConnections: 7,
+              waitingConnections: 0,
+              usageRate: 15,
+              averageResponseTime: 100,
+              maxResponseTime: 500,
+              minResponseTime: 50,
+              successRate: 95,
+              failureRate: 5,
+              timestamp: new Date(),
+            }),
+          },
+        },
+        {
+          provide: TransactionMonitor,
+          useValue: {
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn(),
+            rollbackTransaction: jest.fn(),
+            getActiveTransactions: jest.fn().mockReturnValue([]),
+          },
         },
       ],
     }).compile();
@@ -106,7 +160,7 @@ describe("MetricsService", () => {
   });
 
   describe("getDatabaseMetrics", () => {
-    it("应该返回数据库整体指标", () => {
+    it("应该返回数据库整体指标", async () => {
       service.recordQuery({
         duration: 100,
         executedAt: new Date(),
@@ -132,7 +186,7 @@ describe("MetricsService", () => {
         min: 5,
       };
 
-      const metrics = service.getDatabaseMetrics(mockPoolStats);
+      const metrics = await service.getDatabaseMetrics(mockPoolStats);
 
       expect(metrics.timestamp).toBeInstanceOf(Date);
       expect(metrics.pool).toEqual(mockPoolStats);
@@ -142,7 +196,7 @@ describe("MetricsService", () => {
   });
 
   describe("事务统计", () => {
-    it("应该正确记录事务提交", () => {
+    it("应该正确记录事务提交", async () => {
       service.recordTransactionCommit();
       service.recordTransactionCommit();
 
@@ -154,12 +208,12 @@ describe("MetricsService", () => {
         max: 20,
         min: 5,
       };
-      const metrics = service.getDatabaseMetrics(mockPoolStats);
+      const metrics = await service.getDatabaseMetrics(mockPoolStats);
 
       expect(metrics.transactions.committed).toBe(2);
     });
 
-    it("应该正确记录事务回滚", () => {
+    it("应该正确记录事务回滚", async () => {
       service.recordTransactionRollback();
 
       const mockPoolStats = {
@@ -170,7 +224,7 @@ describe("MetricsService", () => {
         max: 20,
         min: 5,
       };
-      const metrics = service.getDatabaseMetrics(mockPoolStats);
+      const metrics = await service.getDatabaseMetrics(mockPoolStats);
 
       expect(metrics.transactions.rolledBack).toBe(1);
     });

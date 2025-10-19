@@ -76,7 +76,9 @@ export class HealthCheckService {
 
         const result: HealthCheckResult = {
           healthy: healthResult.healthy,
-          status: healthResult.healthy ? "healthy" : "unhealthy",
+          status:
+            healthResult.status ||
+            (healthResult.healthy ? "healthy" : "unhealthy"),
           responseTime: healthResult.responseTime,
           error: healthResult.error,
           timestamp: healthResult.timestamp,
@@ -87,7 +89,7 @@ export class HealthCheckService {
           },
         };
 
-        if (result.status !== "healthy") {
+        if (result.status === "unhealthy") {
           this.logger.warn("数据库健康检查异常", result as any);
           throw new HealthCheckException(
             `数据库健康检查失败: ${result.status}`,
