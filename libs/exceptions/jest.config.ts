@@ -28,6 +28,13 @@ const config: Config = {
     ],
   },
 
+  // Jest 全局变量
+  globals: {
+    "ts-jest": {
+      useESM: true,
+    },
+  },
+
   // 测试匹配
   testMatch: ["<rootDir>/src/**/*.spec.ts"],
 

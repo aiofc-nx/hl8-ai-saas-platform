@@ -1,166 +1,149 @@
 # @hl8/exceptions
 
-统一的异常处理模块，遵循 RFC7807 标准
+[![npm version](https://badge.fury.io/js/%40hl8%2Fexceptions.svg)](https://badge.fury.io/js/%40hl8%2Fexceptions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
+> 统一的异常处理模块，遵循 RFC7807 标准，为 NestJS 应用提供完整的异常处理解决方案
 
-## ⚠️ 重要说明
+## 📋 目录
 
-### 配置方式说明
+- [特性](#特性)
+- [架构设计](#架构设计)
+- [安装](#安装)
+- [快速开始](#快速开始)
+- [核心概念](#核心概念)
+- [API 参考](#api-参考)
+- [配置选项](#配置选项)
+- [使用示例](#使用示例)
+- [最佳实践](#最佳实践)
+- [故障排除](#故障排除)
+- [更新日志](#更新日志)
+- [许可证](#许可证)
 
-本模块使用**模块选项**（Module Options）进行配置，这是 NestJS 动态模块的标准模式。
+## ✨ 特性
 
-**关键点**：
+- 🎯 **RFC7807 标准**：完全遵循 RFC7807 标准，提供统一的错误响应格式
+- 🏗️ **Clean Architecture**：采用清洁架构设计，支持领域驱动开发
+- 🔧 **高度可配置**：支持同步和异步配置，灵活的消息提供者
+- 📝 **完整日志记录**：自动记录异常详情和请求上下文
+- 🌐 **国际化支持**：通过消息提供者支持多语言错误消息
+- 🛡️ **类型安全**：完整的 TypeScript 支持，提供类型安全保障
+- ⚡ **性能优化**：轻量级设计，最小化性能开销
+- 🔄 **事件驱动**：支持异常事件发布，便于监控和追踪
 
-- ✅ 使用 `ExceptionModuleOptions` **interface** 定义配置
-- ✅ 在 `forRoot()` 或 `forRootAsync()` 中传入配置
-- ✅ **不需要**使用 `@hl8/config` 的 `TypedConfigModule`
-- ✅ 配置模块的**行为**，不是应用的运行时数据
+## 🏗️ 架构设计
 
-**与应用配置集成**：
+### 模块结构
 
-```typescript
-// 可以从 AppConfig 获取值来配置模块
-ExceptionModule.forRootAsync({
-  inject: [AppConfig],
-  useFactory: (config: AppConfig) => ({
-    enableLogging: config.logging.enabled,
-    isProduction: config.isProduction,
-  }),
-});
+```
+@hl8/exceptions/
+├── core/                    # 核心异常类
+│   ├── AbstractHttpException    # 抽象基类
+│   ├── GeneralBadRequestException    # 通用 400 错误
+│   ├── GeneralInternalServerException # 通用 500 错误
+│   ├── GeneralNotFoundException      # 通用 404 错误
+│   └── 业务异常类...           # 特定业务异常
+├── filters/                 # 异常过滤器
+│   ├── HttpExceptionFilter      # HTTP 异常过滤器
+│   └── AnyExceptionFilter       # 通用异常过滤器
+├── providers/              # 消息提供者
+│   ├── ExceptionMessageProvider # 消息提供者接口
+│   └── DefaultMessageProvider   # 默认消息提供者
+├── config/                 # 配置模块
+│   └── ExceptionConfig          # 配置选项
+└── ExceptionModule         # 主模块
 ```
 
-详见：[模块选项 vs 应用配置](../../docs/guides/config/MODULE_OPTIONS_VS_APP_CONFIG.md)
+### 设计原则
 
----
-
-## 🎓 快速开始
-
-**新手培训**：👉 **[异常处理培训文档](./docs/EXCEPTION_HANDLING_TRAINING.md)** ⭐
-
-这份培训文档涵盖：
-
-- 异常处理原则和机制
-- 异常与过滤器的关系
-- 如何定义新的异常
-- 如何根据环境输出异常信息
-
-**更多文档**：查看 [docs 目录](./docs/)
-
----
-
-## 📚 目录
-
-- [快速开始（培训）](#-快速开始)
-- [重要说明](#-重要说明)
-- [概述](#-概述)
-- [安装](#-安装)
-- [使用入门](#-使用入门)
-- [核心概念](#-核心概念)
-- [预定义异常类](#-预定义异常类)
-- [配置选项](#️-配置选项)
-- [高级功能](#-高级功能)
-- [异常过滤器](#-异常过滤器)
-- [API 文档](#-api-文档)
-- [与其他模块集成](#-与其他模块集成)
-- [常见问题](#-常见问题)
-- [最佳实践](#-最佳实践)
-- [模块架构](#️-模块架构)
-- [完整示例](#-完整示例)
-- [性能考虑](#-性能考虑)
-- [安全考虑](#-安全考虑)
-- [依赖关系](#-依赖关系)
-- [相关链接](#-相关链接)
-
----
-
-## 📋 概述
-
-`@hl8/exceptions` 是一个企业级的 NestJS 异常处理库，提供：
-
-- ✅ **RFC7807 标准**: 符合 [RFC7807 Problem Details](https://tools.ietf.org/html/rfc7807) 标准的错误响应
-- ✅ **丰富的异常类**: 预定义的标准异常类和业务异常类
-- ✅ **全局过滤器**: 自动捕获和转换所有异常
-- ✅ **消息定制**: 支持自定义错误消息提供器
-- ✅ **完整日志**: 集成日志服务，记录异常详情
-- ✅ **类型安全**: 完整的 TypeScript 类型定义
+1. **单一职责**：每个组件只负责一个特定功能
+2. **开闭原则**：对扩展开放，对修改封闭
+3. **依赖倒置**：依赖抽象而非具体实现
+4. **接口隔离**：提供细粒度的接口定义
+5. **RFC7807 兼容**：严格遵循国际标准
 
 ## 📦 安装
 
 ```bash
+# 使用 pnpm（推荐）
 pnpm add @hl8/exceptions
+
+# 使用 npm
+npm install @hl8/exceptions
+
+# 使用 yarn
+yarn add @hl8/exceptions
 ```
 
-## 🚀 使用入门
+### 依赖要求
 
-### 1. 导入模块
+- Node.js >= 18.0.0
+- NestJS >= 11.0.0
+- TypeScript >= 5.0.0
+
+## 🚀 快速开始
+
+### 1. 基本配置
 
 ```typescript
-import { Module } from "@nestjs/common";
-import { ExceptionModule } from "@hl8/exceptions";
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { ExceptionModule } from '@hl8/exceptions';
 
 @Module({
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === "production",
+      isProduction: process.env.NODE_ENV === 'production',
     }),
   ],
 })
 export class AppModule {}
 ```
 
-### 2. 使用异常类
+### 2. 创建自定义异常
 
 ```typescript
-import {
-  GeneralNotFoundException,
-  GeneralBadRequestException,
-} from "@hl8/exceptions";
+// user.exceptions.ts
+import { AbstractHttpException } from '@hl8/exceptions';
 
-@Injectable()
-export class UserService {
-  async findById(userId: string): Promise<User> {
-    const user = await this.userRepo.findById(userId);
-
-    if (!user) {
-      throw new GeneralNotFoundException(
-        "用户未找到",
-        `ID 为 "${userId}" 的用户不存在`,
-        { userId },
-      );
-    }
-
-    return user;
-  }
-}
-```
-
-## 📚 核心概念
-
-### 异常基类
-
-所有自定义异常都继承自 `AbstractHttpException`：
-
-```typescript
-import { AbstractHttpException } from "@hl8/exceptions";
-
-export class CustomException extends AbstractHttpException {
-  constructor(message: string) {
+export class UserNotFoundException extends AbstractHttpException {
+  constructor(userId: string) {
     super(
-      "CUSTOM_ERROR", // 错误代码
-      "自定义错误", // 简短标题
-      message, // 详细说明
-      400, // HTTP 状态码
-      { timestamp: Date.now() }, // 附加数据（可选）
+      'USER_NOT_FOUND',
+      '用户未找到',
+      `ID 为 "${userId}" 的用户不存在`,
+      404,
+      { userId }
     );
   }
 }
 ```
 
-### RFC7807 响应格式
+### 3. 在服务中使用
 
-所有异常自动转换为 RFC7807 格式：
+```typescript
+// user.service.ts
+import { Injectable } from '@nestjs/common';
+import { UserNotFoundException } from './user.exceptions';
+
+@Injectable()
+export class UserService {
+  async findById(id: string) {
+    const user = await this.userRepository.findById(id);
+    
+    if (!user) {
+      throw new UserNotFoundException(id);
+    }
+    
+    return user;
+  }
+}
+```
+
+### 4. 异常响应示例
+
+当抛出 `UserNotFoundException` 时，客户端将收到以下 RFC7807 格式的响应：
 
 ```json
 {
@@ -169,754 +152,643 @@ export class CustomException extends AbstractHttpException {
   "detail": "ID 为 \"user-123\" 的用户不存在",
   "status": 404,
   "errorCode": "USER_NOT_FOUND",
-  "instance": "req-abc-123",
+  "instance": "req-456789",
   "data": {
     "userId": "user-123"
   }
 }
 ```
 
-## 🎯 预定义异常类
+## 🧠 核心概念
 
-### 标准 HTTP 异常
+### RFC7807 标准
 
-#### GeneralBadRequestException (400)
+本模块严格遵循 [RFC7807](https://tools.ietf.org/html/rfc7807) 标准，提供统一的错误响应格式：
 
-```typescript
-throw new GeneralBadRequestException(
-  "邮箱格式错误",
-  `邮箱地址 "${email}" 格式不正确`,
-  { email, expectedFormat: "user@example.com" },
-);
+- **type**: 错误类型的 URI 引用
+- **title**: 错误的简短摘要
+- **detail**: 错误的详细说明
+- **status**: HTTP 状态码
+- **instance**: 请求实例的唯一标识符
+- **errorCode**: 应用自定义的错误代码
+- **data**: 附加数据（可选）
+
+### 异常层次结构
+
+```
+AbstractHttpException (抽象基类)
+├── GeneralBadRequestException (400)
+├── GeneralInternalServerException (500)
+├── GeneralNotFoundException (404)
+└── 业务异常类...
+    ├── UserNotFoundException
+    ├── TenantNotFoundException
+    └── UnauthorizedOrganizationException
 ```
 
-#### GeneralNotFoundException (404)
+### 过滤器处理流程
 
-```typescript
-throw new GeneralNotFoundException(
-  "用户未找到",
-  `ID 为 "${userId}" 的用户不存在`,
-  { userId },
-);
+```
+异常抛出 → HttpExceptionFilter → RFC7807 转换 → 日志记录 → 响应发送
+                ↓
+            消息提供者 (可选)
 ```
 
-#### GeneralInternalServerException (500)
+## 📚 API 参考
+
+### AbstractHttpException
+
+所有自定义异常的抽象基类。
 
 ```typescript
-try {
-  await this.externalService.call();
-} catch (error) {
-  throw new GeneralInternalServerException(
-    "外部服务调用失败",
-    "调用支付服务时发生错误",
-    { service: "payment" },
-    error, // rootCause
+abstract class AbstractHttpException extends HttpException {
+  constructor(
+    errorCode: string,
+    title: string,
+    detail: string,
+    status: number,
+    data?: any,
+    type?: string,
+    rootCause?: Error
+  );
+  
+  toRFC7807(): ProblemDetails;
+}
+```
+
+### 预定义异常类
+
+#### GeneralBadRequestException
+
+通用 400 错误请求异常。
+
+```typescript
+class GeneralBadRequestException extends AbstractHttpException {
+  constructor(title: string, detail: string, data?: any);
+}
+```
+
+#### GeneralNotFoundException
+
+通用 404 未找到异常。
+
+```typescript
+class GeneralNotFoundException extends AbstractHttpException {
+  constructor(title: string, detail: string, data?: any);
+}
+```
+
+#### GeneralInternalServerException
+
+通用 500 内部服务器错误异常。
+
+```typescript
+class GeneralInternalServerException extends AbstractHttpException {
+  constructor(title: string, detail: string, data?: any);
+}
+```
+
+### 异常过滤器
+
+#### HttpExceptionFilter
+
+处理 `AbstractHttpException` 及其子类的过滤器。
+
+```typescript
+@Injectable()
+@Catch(AbstractHttpException)
+class HttpExceptionFilter implements ExceptionFilter<AbstractHttpException> {
+  constructor(
+    @Optional() logger?: ILoggerService,
+    @Optional() messageProvider?: IExceptionMessageProvider
   );
 }
 ```
 
-### 业务异常
+#### AnyExceptionFilter
 
-#### InvalidIsolationContextException
+处理所有未捕获异常的过滤器。
 
 ```typescript
-throw new InvalidIsolationContextException("隔离上下文无效");
+@Injectable()
+@Catch()
+class AnyExceptionFilter implements ExceptionFilter {
+  constructor(@Optional() logger?: ILoggerService);
+}
 ```
 
-#### TenantNotFoundException
+### 消息提供者
+
+#### ExceptionMessageProvider
+
+异常消息提供者接口，支持国际化。
 
 ```typescript
-throw new TenantNotFoundException(tenantId);
-```
-
-#### UnauthorizedOrganizationException
-
-```typescript
-throw new UnauthorizedOrganizationException(orgId);
+interface ExceptionMessageProvider {
+  getMessage(
+    errorCode: string,
+    messageType: 'title' | 'detail',
+    params?: Record<string, any>
+  ): string | undefined;
+  
+  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean;
+}
 ```
 
 ## ⚙️ 配置选项
 
-### 配置选项说明
-
-本模块使用 `ExceptionModuleOptions` interface 进行配置。
-
-**可用选项**：
-
-| 选项                    | 类型                       | 默认值   | 说明                     |
-| ----------------------- | -------------------------- | -------- | ------------------------ |
-| `enableLogging`         | `boolean`                  | `true`   | 是否启用日志记录         |
-| `logger`                | `ILoggerService`           | -        | 自定义日志服务（可选）   |
-| `messageProvider`       | `ExceptionMessageProvider` | -        | 自定义消息提供器（可选） |
-| `isProduction`          | `boolean`                  | 自动检测 | 是否为生产环境           |
-| `registerGlobalFilters` | `boolean`                  | `true`   | 是否注册全局过滤器       |
-
-详见：`src/config/exception.config.ts`
-
----
-
-### 方式1：同步配置（简单场景）
+### ExceptionModuleOptions
 
 ```typescript
-import { ExceptionModule } from "@hl8/exceptions";
-
-@Module({
-  imports: [
-    ExceptionModule.forRoot({
-      // 是否启用日志记录
-      enableLogging: true,
-
-      // 自定义日志服务
-      logger: customLoggerService,
-
-      // 自定义消息提供器
-      messageProvider: customMessageProvider,
-
-      // 是否为生产环境
-      isProduction: process.env.NODE_ENV === "production",
-
-      // 是否注册全局过滤器
-      registerGlobalFilters: true,
-    }),
-  ],
-})
-export class AppModule {}
-```
-
----
-
-### 方式2：异步配置（使用 @nestjs/config）
-
-```typescript
-import { ExceptionModule } from "@hl8/exceptions";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-
-@Module({
-  imports: [
-    ConfigModule.forRoot(),
-
-    ExceptionModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        enableLogging: config.get("LOGGING_ENABLED", true),
-        isProduction: config.get("NODE_ENV") === "production",
-      }),
-      inject: [ConfigService],
-    }),
-  ],
-})
-export class AppModule {}
-```
-
----
-
-### 方式3：异步配置（使用 @hl8/config）推荐 ⭐
-
-```typescript
-import { TypedConfigModule, dotenvLoader } from "@hl8/config";
-import { ExceptionModule } from "@hl8/exceptions";
-import { AppConfig } from "./config/app.config.js";
-
-@Module({
-  imports: [
-    // 1. 加载应用配置
-    TypedConfigModule.forRoot({
-      schema: AppConfig,
-      isGlobal: true,
-      load: [dotenvLoader()],
-    }),
-
-    // 2. 从应用配置获取值配置异常模块
-    ExceptionModule.forRootAsync({
-      inject: [AppConfig],
-      useFactory: (config: AppConfig) => ({
-        enableLogging: config.logging.enabled,
-        isProduction: config.isProduction,
-        // 可以根据应用配置动态决定模块行为
-      }),
-    }),
-  ],
-})
-export class AppModule {}
-```
-
-**优势**：
-
-- ✅ 类型安全的配置
-- ✅ 从 .env 文件读取
-- ✅ 配置验证和转换
-- ✅ 统一的配置管理
-
-## 🔧 高级功能
-
-### 自定义消息提供器
-
-实现 `ExceptionMessageProvider` 接口：
-
-```typescript
-import { ExceptionMessageProvider } from "@hl8/exceptions";
-
-@Injectable()
-export class I18nMessageProvider implements ExceptionMessageProvider {
-  constructor(private i18n: I18nService) {}
-
-  getMessage(
-    errorCode: string,
-    field: "title" | "detail",
-    data?: any,
-  ): string | undefined {
-    return this.i18n.t(`errors.${errorCode}.${field}`, data);
-  }
-
-  hasMessage(errorCode: string): boolean {
-    return this.i18n.exists(`errors.${errorCode}`);
-  }
+interface ExceptionModuleOptions {
+  enableLogging?: boolean;           // 是否启用日志记录 (默认: true)
+  logger?: ILoggerService;           // 自定义日志服务
+  messageProvider?: ExceptionMessageProvider; // 自定义消息提供者
+  isProduction?: boolean;            // 是否为生产环境
+  registerGlobalFilters?: boolean;   // 是否全局注册过滤器 (默认: true)
 }
 ```
 
-### 自定义日志服务
-
-实现 `ILoggerService` 接口：
+### 同步配置
 
 ```typescript
-export interface ILoggerService {
-  log(message: string, context?: any): void;
-  error(message: string, trace?: string, context?: any): void;
-  warn(message: string, context?: any): void;
-}
-```
-
-## 📊 异常过滤器
-
-### HttpExceptionFilter
-
-自动捕获所有 `AbstractHttpException` 的异常：
-
-- ✅ 转换为 RFC7807 格式
-- ✅ 填充 `instance` 字段（请求 ID）
-- ✅ 记录日志（4xx 为 warn，5xx 为 error）
-- ✅ 支持自定义消息
-
-### AnyExceptionFilter
-
-捕获所有未处理的异常：
-
-- ✅ 将任何异常转换为 500 错误
-- ✅ 生产环境自动脱敏
-- ✅ 开发环境包含详细堆栈
-- ✅ 记录完整错误信息
-
-## 🧪 测试
-
-```bash
-# 运行测试
-pnpm test
-
-# 运行测试（监听模式）
-pnpm test:watch
-
-# 生成覆盖率报告
-pnpm test:cov
-```
-
-## 📖 API 文档
-
-### 核心类
-
-- **AbstractHttpException**: 抽象基类
-- **ProblemDetails**: RFC7807 响应接口
-
-### 标准异常类
-
-- **GeneralBadRequestException**: 400 错误
-- **GeneralNotFoundException**: 404 错误
-- **GeneralInternalServerException**: 500 错误
-
-### 业务异常类
-
-- **InvalidIsolationContextException**: 无效隔离上下文
-- **TenantNotFoundException**: 租户未找到
-- **UnauthorizedOrganizationException**: 未授权的组织
-
-### 过滤器
-
-- **HttpExceptionFilter**: HTTP 异常过滤器
-- **AnyExceptionFilter**: 通用异常过滤器
-
-### 消息提供器
-
-- **ExceptionMessageProvider**: 消息提供器接口
-- **DefaultMessageProvider**: 默认消息提供器
-
-### 配置
-
-- **ExceptionModuleOptions**: 模块配置选项
-- **ExceptionModuleAsyncOptions**: 异步配置选项
-
-## 🔗 与其他模块集成
-
-### 与 @hl8/nestjs-fastify 集成
-
-Fastify 应用应使用专门的 Fastify 异常处理模块：
-
-```typescript
-import { FastifyExceptionModule } from '@hl8/nestjs-fastify';
-
-@Module({
-  imports: [
-    // 使用 Fastify 专用的异常模块
-    FastifyExceptionModule.forRoot({
-      isProduction: process.env.NODE_ENV === 'production',
-    }),
-  ],
+ExceptionModule.forRoot({
+  enableLogging: true,
+  isProduction: process.env.NODE_ENV === 'production',
+  messageProvider: new CustomMessageProvider(),
 })
 ```
 
-详见：`libs/nestjs-fastify/src/exceptions/`
-
-### 与日志模块集成
-
-```typescript
-import { ExceptionModule } from '@hl8/exceptions';
-import { FastifyLoggerService } from '@hl8/nestjs-fastify';
-
-@Module({
-  imports: [
-    FastifyLoggingModule.forRoot({ ... }),
-
-    ExceptionModule.forRootAsync({
-      inject: [FastifyLoggerService],
-      useFactory: (logger: FastifyLoggerService) => ({
-        enableLogging: true,
-        logger: logger,  // 使用统一的日志服务
-      }),
-    }),
-  ],
-})
-```
-
----
-
-## ❓ 常见问题
-
-### Q1: 为什么不使用 @hl8/config 的 TypedConfigModule？
-
-**A**: 本模块使用**模块选项**（Module Options），不是应用配置。
-
-- 模块选项：配置模块如何工作（interface，forRoot）
-- 应用配置：应用运行时数据（class，TypedConfigModule）
-
-详见：[模块选项 vs 应用配置](../../docs/guides/config/MODULE_OPTIONS_VS_APP_CONFIG.md)
-
-### Q2: 如何与 AppConfig 集成？
-
-**A**: 使用 forRootAsync 从 AppConfig 获取值：
+### 异步配置
 
 ```typescript
 ExceptionModule.forRootAsync({
-  inject: [AppConfig],
-  useFactory: (config: AppConfig) => ({
-    enableLogging: config.logging.enabled,
-    isProduction: config.isProduction,
+  imports: [ConfigModule],
+  useFactory: (config: ConfigService) => ({
+    enableLogging: config.get('LOGGING_ENABLED'),
+    isProduction: config.get('NODE_ENV') === 'production',
   }),
-});
+  inject: [ConfigService],
+})
 ```
 
-### Q3: 生产环境和开发环境有什么区别？
+## 💡 使用示例
 
-**A**: 主要区别：
-
-| 特性     | 开发环境                     | 生产环境           |
-| -------- | ---------------------------- | ------------------ |
-| 错误详情 | ✅ 完整堆栈                  | ❌ 隐藏敏感信息    |
-| 日志级别 | `warn` (4xx) + `error` (5xx) | `error` (5xx only) |
-| 调试信息 | ✅ 包含                      | ❌ 不包含          |
-
-### Q4: 如何创建自定义异常？
-
-**A**: 继承 `AbstractHttpException`：
+### 业务异常示例
 
 ```typescript
-export class ProductOutOfStockException extends AbstractHttpException {
+// 用户相关异常
+export class UserNotFoundException extends AbstractHttpException {
+  constructor(userId: string) {
+    super(
+      'USER_NOT_FOUND',
+      '用户未找到',
+      `ID 为 "${userId}" 的用户不存在`,
+      404,
+      { userId }
+    );
+  }
+}
+
+export class UserAlreadyExistsException extends AbstractHttpException {
+  constructor(email: string) {
+    super(
+      'USER_ALREADY_EXISTS',
+      '用户已存在',
+      `邮箱 "${email}" 已被注册`,
+      409,
+      { email }
+    );
+  }
+}
+
+// 订单相关异常
+export class OrderNotFoundException extends AbstractHttpException {
+  constructor(orderId: string) {
+    super(
+      'ORDER_NOT_FOUND',
+      '订单未找到',
+      `ID 为 "${orderId}" 的订单不存在`,
+      404,
+      { orderId }
+    );
+  }
+}
+
+export class InsufficientStockException extends AbstractHttpException {
   constructor(productId: string, requested: number, available: number) {
     super(
-      "PRODUCT_OUT_OF_STOCK",
-      "商品库存不足",
-      `商品 ${productId} 库存不足，请求 ${requested}，可用 ${available}`,
+      'INSUFFICIENT_STOCK',
+      '库存不足',
+      `产品 "${productId}" 库存不足，请求 ${requested}，可用 ${available}`,
       400,
-      { productId, requested, available },
+      { productId, requested, available }
     );
   }
 }
 ```
 
-### Q5: 异常过滤器的执行顺序是什么？
-
-**A**:
-
-1. `HttpExceptionFilter` - 捕获 AbstractHttpException
-2. `AnyExceptionFilter` - 捕获所有其他异常
-
-两个过滤器都会自动注册（如果 `registerGlobalFilters: true`）。
-
-### Q6: 如何禁用某个异常的日志记录？
-
-**A**: 目前日志记录是全局控制的。如果需要细粒度控制，可以：
-
-1. 实现自定义 logger，在其中过滤
-2. 或设置 `enableLogging: false` 并手动记录重要异常
-
----
-
-## 🎨 最佳实践
-
-### 1. 使用明确的错误代码
+### 服务层使用示例
 
 ```typescript
-// 好
-export class OrderNotFoundException extends AbstractHttpException {
-  constructor(orderId: string) {
-    super("ORDER_NOT_FOUND", "订单未找到", `订单 ${orderId} 不存在`, 404, {
-      orderId,
-    });
+@Injectable()
+export class UserService {
+  constructor(private readonly userRepository: UserRepository) {}
+
+  async createUser(userData: CreateUserDto): Promise<User> {
+    // 检查用户是否已存在
+    const existingUser = await this.userRepository.findByEmail(userData.email);
+    if (existingUser) {
+      throw new UserAlreadyExistsException(userData.email);
+    }
+
+    try {
+      const user = await this.userRepository.create(userData);
+      return user;
+    } catch (error) {
+      // 包装数据库错误
+      throw new GeneralInternalServerException(
+        '用户创建失败',
+        '创建用户时发生内部错误',
+        { originalError: error.message }
+      );
+    }
+  }
+
+  async findById(id: string): Promise<User> {
+    const user = await this.userRepository.findById(id);
+    
+    if (!user) {
+      throw new UserNotFoundException(id);
+    }
+    
+    return user;
+  }
+}
+```
+
+### 控制器层使用示例
+
+```typescript
+@Controller('users')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Post()
+  async createUser(@Body() userData: CreateUserDto): Promise<User> {
+    return this.userService.createUser(userData);
+  }
+
+  @Get(':id')
+  async getUser(@Param('id') id: string): Promise<User> {
+    return this.userService.findById(id);
+  }
+
+  @Put(':id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateData: UpdateUserDto
+  ): Promise<User> {
+    // 先检查用户是否存在
+    await this.userService.findById(id);
+    
+    // 执行更新
+    return this.userService.update(id, updateData);
+  }
+}
+```
+
+### 自定义消息提供者
+
+```typescript
+@Injectable()
+export class I18nMessageProvider implements ExceptionMessageProvider {
+  constructor(private readonly i18nService: I18nService) {}
+
+  getMessage(
+    errorCode: string,
+    messageType: 'title' | 'detail',
+    params?: Record<string, any>
+  ): string | undefined {
+    const key = `errors.${errorCode}.${messageType}`;
+    return this.i18nService.translate(key, params);
+  }
+
+  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+    const key = `errors.${errorCode}.${messageType}`;
+    return this.i18nService.exists(key);
   }
 }
 
-// 不好
-throw new Error("Not found");
-```
-
-### 2. 提供有用的上下文数据
-
-```typescript
-// 好
-throw new GeneralBadRequestException(
-  "库存不足",
-  `请求数量 ${quantity} 超过可用库存 ${stock}`,
-  { requestedQuantity: quantity, availableStock: stock },
-);
-
-// 不好
-throw new GeneralBadRequestException("库存不足", "库存不足");
-```
-
-### 3. 链式追踪错误
-
-```typescript
-try {
-  await this.externalService.call();
-} catch (error) {
-  throw new GeneralInternalServerException(
-    "服务调用失败",
-    "调用外部服务时发生错误",
-    { service: "external" },
-    error, // 保留原始错误作为 rootCause
-  );
-}
-```
-
-### 4. 避免在响应中暴露敏感信息
-
-```typescript
-// 好
-throw new GeneralInternalServerException(
-  "数据库操作失败",
-  "保存用户数据时发生错误",
-  { operation: "saveUser" },
-);
-
-// 不好（暴露了数据库信息）
-throw new GeneralInternalServerException(
-  "数据库错误",
-  `Connection to postgres://admin:password@localhost:5432/db failed`,
-);
-```
-
----
-
-## 🏗️ 模块架构
-
-### 目录结构
-
-```
-libs/exceptions/
-├── src/
-│   ├── config/
-│   │   ├── exception.config.ts       # 模块选项定义
-│   │   └── index.ts
-│   ├── core/
-│   │   ├── abstract-http.exception.ts          # 异常基类
-│   │   ├── general-bad-request.exception.ts    # 400 异常
-│   │   ├── general-not-found.exception.ts      # 404 异常
-│   │   ├── general-internal-server.exception.ts # 500 异常
-│   │   ├── invalid-isolation-context.exception.ts
-│   │   ├── tenant-not-found.exception.ts
-│   │   ├── unauthorized-organization.exception.ts
-│   │   └── index.ts
-│   ├── filters/
-│   │   ├── http-exception.filter.ts   # HTTP 异常过滤器
-│   │   ├── any-exception.filter.ts    # 通用异常过滤器
-│   │   └── index.ts
-│   ├── providers/
-│   │   ├── exception-message.provider.ts     # 消息提供器接口
-│   │   ├── default-message.provider.ts       # 默认实现
-│   │   └── index.ts
-│   ├── exception.module.ts            # 模块定义
-│   └── index.ts                       # 导出
-├── README.md                          # 本文档
-└── package.json
-```
-
-### 设计原则
-
-1. **RFC7807 标准** - 统一的错误响应格式
-2. **全局异常捕获** - 不遗漏任何异常
-3. **可扩展性** - 支持自定义异常和消息
-4. **类型安全** - 完整的 TypeScript 支持
-5. **最小侵入** - 只需导入模块即可
-
----
-
-## 💻 完整示例
-
-### 在 Fastify 应用中使用
-
-```typescript
-// app.module.ts
-import { Module } from "@nestjs/common";
-import { TypedConfigModule, dotenvLoader } from "@hl8/config";
-import {
-  FastifyExceptionModule,
-  FastifyLoggingModule,
-} from "@hl8/nestjs-fastify/index.js";
-import { AppConfig } from "./config/app.config.js";
-
+// 注册自定义消息提供者
 @Module({
   imports: [
-    // 1. 配置模块
-    TypedConfigModule.forRoot({
-      schema: AppConfig,
-      isGlobal: true,
-      load: [dotenvLoader()],
-    }),
-
-    // 2. 日志模块
-    FastifyLoggingModule.forRoot({
-      config: {
-        level: process.env.LOG_LEVEL || "info",
-        prettyPrint: process.env.NODE_ENV === "development",
-      },
-    }),
-
-    // 3. 异常模块（Fastify 专用）
-    FastifyExceptionModule.forRoot({
-      isProduction: process.env.NODE_ENV === "production",
+    ExceptionModule.forRoot({
+      messageProvider: new I18nMessageProvider(i18nService),
     }),
   ],
 })
 export class AppModule {}
 ```
 
-### 在服务中使用异常
+### 自定义日志服务
 
 ```typescript
-// user.service.ts
-import { Injectable } from "@nestjs/common";
-import {
-  GeneralNotFoundException,
-  GeneralBadRequestException,
-  GeneralInternalServerException,
-} from "@hl8/exceptions";
-
 @Injectable()
-export class UserService {
-  // 示例1：资源未找到
-  async findById(id: string) {
-    const user = await this.userRepo.findById(id);
+export class CustomLoggerService implements ILoggerService {
+  constructor(private readonly logger: Logger) {}
 
-    if (!user) {
-      throw new GeneralNotFoundException(
-        "用户未找到",
-        `ID 为 "${id}" 的用户不存在`,
-        { userId: id },
-      );
-    }
-
-    return user;
+  log(message: string, context?: any): void {
+    this.logger.log(message, context);
   }
 
-  // 示例2：参数验证失败
-  async updateEmail(id: string, email: string) {
-    if (!this.isValidEmail(email)) {
-      throw new GeneralBadRequestException(
-        "邮箱格式错误",
-        `邮箱地址 "${email}" 格式不正确`,
-        { email, expectedFormat: "user@example.com" },
-      );
-    }
-
-    return this.userRepo.updateEmail(id, email);
+  error(message: string, stack?: string, context?: any): void {
+    this.logger.error(message, stack, context);
   }
 
-  // 示例3：外部服务调用失败
-  async sendWelcomeEmail(userId: string) {
-    try {
-      await this.emailService.send(userId);
-    } catch (error) {
-      throw new GeneralInternalServerException(
-        "发送邮件失败",
-        "调用邮件服务时发生错误",
-        { userId, service: "email" },
-        error, // rootCause
-      );
-    }
-  }
-}
-```
-
-### 在控制器中使用
-
-```typescript
-// user.controller.ts
-import { Controller, Get, Param } from "@nestjs/common";
-import { UserService } from "./user.service.js";
-
-@Controller("users")
-export class UserController {
-  constructor(private readonly userService: UserService) {}
-
-  @Get(":id")
-  async getUser(@Param("id") id: string) {
-    // 异常会被全局过滤器自动捕获和转换
-    return this.userService.findById(id);
+  warn(message: string, context?: any): void {
+    this.logger.warn(message, context);
   }
 }
 
-// 请求 GET /users/invalid-id
-// 自动返回 RFC7807 格式：
-// {
-//   "type": "https://docs.hl8.com/errors#USER_NOT_FOUND",
-//   "title": "用户未找到",
-//   "detail": "ID 为 \"invalid-id\" 的用户不存在",
-//   "status": 404,
-//   "errorCode": "USER_NOT_FOUND",
-//   "data": { "userId": "invalid-id" }
-// }
+// 注册自定义日志服务
+@Module({
+  imports: [
+    ExceptionModule.forRoot({
+      logger: new CustomLoggerService(logger),
+    }),
+  ],
+})
+export class AppModule {}
 ```
 
----
+## 🎯 最佳实践
 
-## 📈 性能考虑
-
-### 异常创建的开销
-
-- ✅ 异常对象创建很轻量
-- ✅ 堆栈跟踪仅在必要时生成
-- ✅ 消息提供器支持懒加载
-
-### 生产环境优化
+### 1. 异常命名规范
 
 ```typescript
-ExceptionModule.forRoot({
-  isProduction: true,
-  enableLogging: true, // 保留日志，但减少详情
+// ✅ 好的命名
+class UserNotFoundException extends AbstractHttpException {}
+class InvalidPasswordException extends AbstractHttpException {}
+class OrderPaymentFailedException extends AbstractHttpException {}
+
+// ❌ 避免的命名
+class UserError extends AbstractHttpException {}
+class Error1 extends AbstractHttpException {}
+class BadException extends AbstractHttpException {}
+```
+
+### 2. 错误代码规范
+
+```typescript
+// ✅ 使用大写蛇形命名法
+'USER_NOT_FOUND'
+'INVALID_PASSWORD'
+'ORDER_PAYMENT_FAILED'
+'INSUFFICIENT_STOCK'
+
+// ❌ 避免的格式
+'userNotFound'
+'user_not_found'
+'USERNOTFOUND'
+'UserNotFound'
+```
+
+### 3. 异常消息规范
+
+```typescript
+// ✅ 清晰的消息
+new UserNotFoundException(userId) // title: "用户未找到", detail: "ID 为 \"123\" 的用户不存在"
+
+// ✅ 包含上下文信息
+new InsufficientStockException(productId, requested, available)
+// title: "库存不足"
+// detail: "产品 \"ABC123\" 库存不足，请求 10，可用 5"
+
+// ❌ 模糊的消息
+new GeneralBadRequestException("错误", "出错了", {})
+```
+
+### 4. 数据字段规范
+
+```typescript
+// ✅ 包含有用的上下文数据
+throw new UserNotFoundException(userId, { 
+  userId, 
+  timestamp: new Date().toISOString(),
+  requestId: request.id 
+});
+
+// ❌ 包含敏感信息
+throw new UserNotFoundException(userId, { 
+  userId,
+  password: user.password, // 敏感信息
+  apiKey: user.apiKey      // 敏感信息
 });
 ```
 
-在生产环境：
-
-- 自动隐藏敏感堆栈信息
-- 简化错误响应
-- 优化日志输出
-
----
-
-## 🔐 安全考虑
-
-### 1. 不暴露敏感信息
+### 5. 异常链处理
 
 ```typescript
-// ✅ 好的做法
-throw new GeneralInternalServerException(
-  "数据库操作失败",
-  "保存数据时发生错误",
-  { operation: "save" },
-);
-
-// ❌ 避免暴露
-throw new GeneralInternalServerException(
-  "数据库错误",
-  `Error: Connection failed to postgres://user:pass@host:5432/db`,
-);
-```
-
-### 2. 生产环境自动脱敏
-
-```typescript
-// isProduction: true 时
-// 自动隐藏堆栈跟踪
-// 自动简化错误详情
-```
-
-### 3. 日志记录敏感数据
-
-```typescript
-// 实现自定义 logger，过滤敏感字段
-export class SafeLogger implements ILoggerService {
-  error(message: string, trace?: string, context?: any) {
-    // 过滤 context 中的敏感字段
-    const safeContext = this.removeSensitiveData(context);
-    this.logger.error(message, safeContext);
+@Injectable()
+export class UserService {
+  async createUser(userData: CreateUserDto): Promise<User> {
+    try {
+      // 数据库操作
+      return await this.userRepository.create(userData);
+    } catch (error) {
+      // 包装原始错误
+      throw new GeneralInternalServerException(
+        '用户创建失败',
+        '创建用户时发生内部错误',
+        { originalError: error.message },
+        undefined,
+        error // 保留原始错误链
+      );
+    }
   }
 }
 ```
 
----
+### 6. 模块配置最佳实践
 
-## 📦 依赖关系
+```typescript
+// 开发环境配置
+const developmentConfig = {
+  enableLogging: true,
+  isProduction: false,
+  registerGlobalFilters: true,
+};
 
-### 依赖的模块
+// 生产环境配置
+const productionConfig = {
+  enableLogging: true,
+  isProduction: true,
+  registerGlobalFilters: true,
+  logger: new StructuredLogger(), // 结构化日志
+  messageProvider: new I18nMessageProvider(), // 国际化支持
+};
 
-```json
-{
-  "peerDependencies": {
-    "@nestjs/common": "^11.0.0",
-    "@nestjs/core": "^11.0.0"
+// 测试环境配置
+const testConfig = {
+  enableLogging: false,
+  isProduction: false,
+  registerGlobalFilters: false, // 测试时不注册全局过滤器
+};
+```
+
+## 🔧 故障排除
+
+### 常见问题
+
+#### 1. 异常没有被捕获
+
+**问题**: 自定义异常没有被 `HttpExceptionFilter` 捕获
+
+**解决方案**: 确保异常继承自 `AbstractHttpException`
+
+```typescript
+// ✅ 正确
+class MyException extends AbstractHttpException {
+  constructor() {
+    super('MY_ERROR', '我的错误', '错误详情', 400);
+  }
+}
+
+// ❌ 错误
+class MyException extends Error {
+  constructor() {
+    super('我的错误');
   }
 }
 ```
 
-### 可选集成
+#### 2. 响应格式不正确
 
-- `@hl8/config` - 类型安全的配置管理
-- `@hl8/nestjs-fastify` - Fastify 专用增强
-- `@hl8/nestjs-isolation` - 多租户隔离
+**问题**: 响应不是 RFC7807 格式
 
-**无强制依赖**，可以独立使用！
+**解决方案**: 检查过滤器是否正确注册
+
+```typescript
+// 确保模块配置正确
+@Module({
+  imports: [
+    ExceptionModule.forRoot({
+      registerGlobalFilters: true, // 确保为 true
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+#### 3. 日志没有记录
+
+**问题**: 异常日志没有被记录
+
+**解决方案**: 检查日志服务配置
+
+```typescript
+@Module({
+  imports: [
+    ExceptionModule.forRoot({
+      enableLogging: true, // 确保启用日志
+      logger: new CustomLoggerService(), // 提供日志服务
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+#### 4. 消息提供者不生效
+
+**问题**: 自定义消息没有被使用
+
+**解决方案**: 检查消息提供者实现
+
+```typescript
+// 确保实现了正确的接口
+class MyMessageProvider implements ExceptionMessageProvider {
+  getMessage(errorCode: string, messageType: 'title' | 'detail', params?: any): string | undefined {
+    // 实现逻辑
+  }
+  
+  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+    // 实现逻辑
+  }
+}
+```
+
+### 调试技巧
+
+#### 1. 启用详细日志
+
+```typescript
+// 开发环境启用详细日志
+const config = {
+  enableLogging: true,
+  isProduction: false,
+  logger: new ConsoleLogger('ExceptionModule', {
+    logLevels: ['error', 'warn', 'log', 'debug', 'verbose'],
+  }),
+};
+```
+
+#### 2. 检查异常堆栈
+
+```typescript
+// 在异常中添加原始错误
+try {
+  // 业务逻辑
+} catch (error) {
+  throw new GeneralInternalServerException(
+    '操作失败',
+    '执行操作时发生错误',
+    { originalError: error.message },
+    undefined,
+    error // 保留原始错误链
+  );
+}
+```
+
+#### 3. 验证 RFC7807 格式
+
+```typescript
+// 手动验证异常格式
+const exception = new UserNotFoundException('user-123');
+const problemDetails = exception.toRFC7807();
+console.log(JSON.stringify(problemDetails, null, 2));
+```
+
+## 📝 更新日志
+
+### v0.1.0 (2024-01-01)
+
+- 🎉 初始版本发布
+- ✨ 实现 RFC7807 标准支持
+- ✨ 提供完整的异常处理解决方案
+- ✨ 支持自定义消息提供者
+- ✨ 支持自定义日志服务
+- ✨ 提供预定义异常类
+- ✨ 完整的 TypeScript 支持
+
+## 📄 许可证
+
+本项目采用 [MIT 许可证](LICENSE)。
 
 ---
 
 ## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request！
+欢迎提交 Issue 和 Pull Request 来改进这个项目。
 
-## 📄 许可证
+## 📞 支持
 
-MIT License
+如果您在使用过程中遇到问题，请：
 
-## 🔗 相关链接
+1. 查看 [故障排除](#故障排除) 部分
+2. 搜索已有的 [Issues](https://github.com/hl8/exceptions/issues)
+3. 创建新的 Issue 并提供详细信息
 
-### 文档
+---
 
-- [配置管理指南](../../docs/guides/config/CONFIGURATION_GUIDE.md)
-- [模块选项 vs 应用配置](../../docs/guides/config/MODULE_OPTIONS_VS_APP_CONFIG.md)
-
-### 标准和规范
-
-- [RFC7807 Problem Details](https://tools.ietf.org/html/rfc7807)
-- [NestJS 异常过滤器](https://docs.nestjs.com/exception-filters)
-
-### 项目
-
-- [HL8 SAAS 平台](https://github.com/aiofc-nx/hl8-saas-platform-turborepo)
-- [GitHub 仓库](https://github.com/aiofc-nx/hl8-saas-platform-turborepo/tree/main/libs/exceptions)
+**Made with ❤️ by HL8 Team**

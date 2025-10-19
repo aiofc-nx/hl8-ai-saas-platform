@@ -10,6 +10,9 @@ import {
 import { AnyExceptionFilter } from "./any-exception.filter.js";
 import type { ILoggerService } from "./http-exception.filter.js";
 
+// 导入 Jest 函数以支持 ES 模块
+import { jest } from "@jest/globals";
+
 describe("AnyExceptionFilter", () => {
   let filter: AnyExceptionFilter;
   let mockLogger: jest.Mocked<ILoggerService>;
@@ -19,23 +22,17 @@ describe("AnyExceptionFilter", () => {
   beforeEach(() => {
     // 创建 Mock 对象
     mockLogger = {
-      log: () => {},
-      error: () => {},
-      warn: () => {},
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
     };
 
     // 创建支持链式调用的 mock response（Fastify风格）
     mockResponse = {
-      status: function () {
-        return this;
-      },
-      code: function () {
-        return this;
-      }, // Fastify使用code而不是status
-      header: function () {
-        return this;
-      },
-      send: () => {},
+      status: jest.fn().mockReturnThis(),
+      code: jest.fn().mockReturnThis(), // Fastify使用code而不是status
+      header: jest.fn().mockReturnThis(),
+      send: jest.fn(),
     } as any;
 
     mockRequest = {
@@ -109,7 +106,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(error, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
       expect(mockResponse.header).toHaveBeenCalledWith(
         "Content-Type",
         "application/problem+json; charset=utf-8",
@@ -132,7 +129,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(error, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
 
     it("应该捕获 ReferenceError", () => {
@@ -143,7 +140,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(error, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
   });
 
@@ -160,7 +157,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(403);
+      expect(mockResponse.code).toHaveBeenCalledWith(403);
     });
 
     it("应该捕获 BadRequestException", () => {
@@ -171,7 +168,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.code).toHaveBeenCalledWith(400);
       expect(mockResponse.send).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 400,
@@ -231,7 +228,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
 
     it("应该捕获数字异常", () => {
@@ -242,7 +239,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
 
     it("应该捕获对象异常", () => {
@@ -253,7 +250,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
 
     it("应该捕获 null", () => {
@@ -264,7 +261,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
 
     it("应该捕获 undefined", () => {
@@ -275,7 +272,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
   });
 
@@ -382,7 +379,7 @@ describe("AnyExceptionFilter", () => {
       expect(() => filter.catch(error, mockArgumentsHost)).not.toThrow();
 
       // 验证响应正常发送
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
       expect(mockResponse.send).toHaveBeenCalled();
     });
   });
@@ -401,7 +398,7 @@ describe("AnyExceptionFilter", () => {
       filter.catch(obj, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
     });
 
     it("应该处理没有 request.id 的情况", () => {

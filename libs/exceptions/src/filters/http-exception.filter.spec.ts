@@ -12,6 +12,9 @@ import {
   ILoggerService,
 } from "./http-exception.filter.js";
 
+// 导入 Jest 函数以支持 ES 模块
+import { jest } from "@jest/globals";
+
 describe("HttpExceptionFilter", () => {
   let filter: HttpExceptionFilter;
   let mockLogger: jest.Mocked<ILoggerService>;
@@ -23,28 +26,22 @@ describe("HttpExceptionFilter", () => {
   beforeEach(() => {
     // 创建 Mock 对象
     mockLogger = {
-      log: () => {},
-      error: () => {},
-      warn: () => {},
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
     };
 
     mockMessageProvider = {
-      getMessage: () => {},
-      hasMessage: () => {},
+      getMessage: jest.fn(),
+      hasMessage: jest.fn(),
     };
 
     // 创建支持链式调用的 mock response（Fastify风格）
     mockResponse = {
-      status: function () {
-        return this;
-      },
-      code: function () {
-        return this;
-      }, // Fastify使用code而不是status
-      header: function () {
-        return this;
-      },
-      send: () => {},
+      status: jest.fn().mockReturnThis(),
+      code: jest.fn().mockReturnThis(), // Fastify使用code而不是status
+      header: jest.fn().mockReturnThis(),
+      send: jest.fn(),
     } as any;
 
     mockRequest = {
@@ -110,7 +107,7 @@ describe("HttpExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.code).toHaveBeenCalledWith(404);
       expect(mockResponse.header).toHaveBeenCalledWith(
         "Content-Type",
         "application/problem+json; charset=utf-8",
@@ -140,7 +137,7 @@ describe("HttpExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.code).toHaveBeenCalledWith(400);
       expect(mockResponse.send).toHaveBeenCalledWith(
         expect.objectContaining({
           errorCode: "BAD_REQUEST",
@@ -160,7 +157,7 @@ describe("HttpExceptionFilter", () => {
       filter.catch(exception, mockArgumentsHost);
 
       // Assert
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.code).toHaveBeenCalledWith(500);
       expect(mockResponse.send).toHaveBeenCalledWith(
         expect.objectContaining({
           errorCode: "INTERNAL_SERVER_ERROR",
@@ -297,7 +294,7 @@ describe("HttpExceptionFilter", () => {
       expect(() => filter.catch(exception, mockArgumentsHost)).not.toThrow();
 
       // 验证响应正常发送
-      expect(mockResponse.status).toHaveBeenCalled();
+      expect(mockResponse.code).toHaveBeenCalled();
       expect(mockResponse.send).toHaveBeenCalled();
     });
   });
