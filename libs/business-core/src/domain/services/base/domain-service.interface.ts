@@ -239,7 +239,7 @@ export abstract class BaseDomainService implements IDomainService {
     serviceVersion = "1.0.0",
     serviceDescription = "",
   ) {
-    this._exceptionFactory = ExceptionFactory.getInstance();
+    this._exceptionFactory = DomainExceptionFactory.getInstance();
     this.serviceName = serviceName;
     this.serviceVersion = serviceVersion;
     this.serviceDescription = serviceDescription;

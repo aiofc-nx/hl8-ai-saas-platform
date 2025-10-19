@@ -567,27 +567,24 @@ export class User extends BaseEntity {
    */
   private validateUsername(username: string): void {
     if (!username || !username.trim()) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "用户名不能为空",
-        "username",
-        username,
-        { entity: "User" },
+        "USERNAME_NOT_EMPTY",
+        { entity: "User", field: "username", value: username },
       );
     }
     if (username.trim().length > 50) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "用户名长度不能超过50字符",
-        "username",
-        username,
-        { entity: "User" },
+        "USERNAME_LENGTH_LIMIT",
+        { entity: "User", field: "username", value: username },
       );
     }
     if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "用户名只能包含字母、数字和下划线",
-        "username",
-        username,
-        { entity: "User" },
+        "USERNAME_FORMAT_RULE",
+        { entity: "User", field: "username", value: username },
       );
     }
   }
@@ -600,20 +597,18 @@ export class User extends BaseEntity {
    */
   private validateEmail(email: string): void {
     if (!email || !email.trim()) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "邮箱地址不能为空",
-        "email",
-        email,
-        { entity: "User" },
+        "EMAIL_NOT_EMPTY",
+        { entity: "User", field: "email", value: email },
       );
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "邮箱地址格式不正确",
-        "email",
-        email,
-        { entity: "User" },
+        "EMAIL_FORMAT_RULE",
+        { entity: "User", field: "email", value: email },
       );
     }
   }
@@ -628,11 +623,10 @@ export class User extends BaseEntity {
     if (phone && phone.trim()) {
       const phoneRegex = /^1[3-9]\d{9}$/;
       if (!phoneRegex.test(phone.trim())) {
-        throw this._exceptionFactory.createValidationError(
+        throw this._exceptionFactory.createBusinessRuleViolation(
           "手机号码格式不正确",
-          "phone",
-          phone,
-          { entity: "User" },
+          "PHONE_FORMAT_RULE",
+          { entity: "User", field: "phone", value: phone },
         );
       }
     }
@@ -646,19 +640,17 @@ export class User extends BaseEntity {
    */
   private validateDisplayName(displayName: string): void {
     if (!displayName || !displayName.trim()) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "用户姓名不能为空",
-        "displayName",
-        displayName,
-        { entity: "User" },
+        "DISPLAY_NAME_NOT_EMPTY",
+        { entity: "User", field: "displayName", value: displayName },
       );
     }
     if (displayName.trim().length > 100) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "用户姓名长度不能超过100字符",
-        "displayName",
-        displayName,
-        { entity: "User" },
+        "DISPLAY_NAME_LENGTH_LIMIT",
+        { entity: "User", field: "displayName", value: displayName },
       );
     }
   }
@@ -671,11 +663,10 @@ export class User extends BaseEntity {
    */
   private validateStatus(status: UserStatus): void {
     if (!status) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "用户状态不能为空",
-        "status",
-        status,
-        { entity: "User" },
+        "USER_STATUS_NOT_EMPTY",
+        { entity: "User", field: "status", value: status },
       );
     }
   }
@@ -688,11 +679,10 @@ export class User extends BaseEntity {
    */
   private validateRole(role: UserRole): void {
     if (!role) {
-      throw this._exceptionFactory.createValidationError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "用户角色不能为空",
-        "role",
-        role,
-        { entity: "User" },
+        "USER_ROLE_NOT_EMPTY",
+        { entity: "User", field: "role", value: role },
       );
     }
   }

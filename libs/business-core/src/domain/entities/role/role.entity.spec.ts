@@ -14,7 +14,7 @@ import { PermissionAction } from "../../value-objects/types/permission-action.vo
 import {
   BusinessRuleException,
   StateException,
-  DomainValidationException,
+  ValidationException,
 } from "../../exceptions/domain-exceptions.js";
 
 describe("Role Entity", () => {

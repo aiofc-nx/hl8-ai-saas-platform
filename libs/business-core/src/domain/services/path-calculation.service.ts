@@ -52,7 +52,7 @@ export class PathCalculationService {
    */
   constructor(logger: IPureLogger) {
     this.logger = logger;
-    this._exceptionFactory = ExceptionFactory.getInstance();
+    this._exceptionFactory = DomainExceptionFactory.getInstance();
   }
 
   /**

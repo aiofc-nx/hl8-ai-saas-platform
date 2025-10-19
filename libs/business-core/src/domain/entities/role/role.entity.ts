@@ -12,6 +12,7 @@ import { RoleType } from "../../value-objects/types/role-type.vo.js";
 import { PermissionType } from "../../value-objects/types/permission-type.vo.js";
 import { PermissionAction } from "../../value-objects/types/permission-action.vo.js";
 import { DomainExceptionFactory } from "../../exceptions/domain-exception-factory.js";
+import { StateException } from "../../exceptions/domain-exceptions.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../base/audit-info.js";
 

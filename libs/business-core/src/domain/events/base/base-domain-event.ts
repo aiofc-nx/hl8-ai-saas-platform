@@ -91,7 +91,7 @@ export abstract class BaseDomainEvent {
     tenantId: EntityId,
     eventVersion = 1,
   ) {
-    this._exceptionFactory = ExceptionFactory.getInstance();
+    this._exceptionFactory = DomainExceptionFactory.getInstance();
     this._eventId = TenantId.generate();
     this._aggregateId = aggregateId;
     this._aggregateVersion = aggregateVersion;

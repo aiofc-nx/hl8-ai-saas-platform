@@ -13,7 +13,7 @@ import { PermissionAction } from "../../value-objects/types/permission-action.vo
 import {
   BusinessRuleException,
   StateException,
-  DomainValidationException,
+  ValidationException,
 } from "../../exceptions/domain-exceptions.js";
 
 describe("Permission Entity", () => {
@@ -76,7 +76,7 @@ describe("Permission Entity", () => {
 
       expect(() => {
         new Permission(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
 
     it("应该验证权限名称长度不能超过100字符", () => {
@@ -84,7 +84,7 @@ describe("Permission Entity", () => {
 
       expect(() => {
         new Permission(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
 
     // 注意：Permission实体的构造函数不验证type和action，这些验证在updateType和updateAction方法中进行
@@ -124,7 +124,7 @@ describe("Permission Entity", () => {
 
       expect(() => {
         permission.updateName("");
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
 
     it("应该验证新名称长度不能超过100字符", () => {
@@ -136,7 +136,7 @@ describe("Permission Entity", () => {
 
       expect(() => {
         permission.updateName("a".repeat(101));
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
   });
 
@@ -240,7 +240,7 @@ describe("Permission Entity", () => {
 
       expect(() => {
         permission.updateResource("");
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
   });
 
@@ -269,7 +269,7 @@ describe("Permission Entity", () => {
 
       expect(() => {
         permission.addCondition("", "value");
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
 
     it("应该验证条件键格式", () => {

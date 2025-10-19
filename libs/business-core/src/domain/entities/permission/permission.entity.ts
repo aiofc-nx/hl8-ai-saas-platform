@@ -379,7 +379,7 @@ export class Permission extends BaseEntity {
    */
   activate(): void {
     if (this._isActive) {
-      throw this._exceptionFactory.createBusinessRuleError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "权限已激活",
         "PERMISSION_ALREADY_ACTIVE",
         { permissionId: this.id.toString() },
@@ -395,7 +395,7 @@ export class Permission extends BaseEntity {
    */
   deactivate(): void {
     if (!this._isActive) {
-      throw this._exceptionFactory.createBusinessRuleError(
+      throw this._exceptionFactory.createBusinessRuleViolation(
         "权限未激活",
         "PERMISSION_NOT_ACTIVE",
         { permissionId: this.id.toString() },

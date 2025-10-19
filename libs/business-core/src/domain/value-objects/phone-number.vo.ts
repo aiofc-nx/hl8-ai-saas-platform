@@ -24,7 +24,7 @@ export class PhoneNumber extends BaseValueObject<string> {
    */
   constructor(value: string) {
     super(value);
-    this._exceptionFactory = ExceptionFactory.getInstance();
+    this._exceptionFactory = DomainExceptionFactory.getInstance();
     this.validate();
   }
 

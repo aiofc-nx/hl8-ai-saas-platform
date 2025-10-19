@@ -1,7 +1,7 @@
 import { EntityId } from "@hl8/isolation-model";
 import { PathCalculationService } from "./path-calculation.service.js";
 import { IPureLogger } from "@hl8/pure-logger";
-import { DomainValidationException } from "../exceptions/validation-exceptions.js";
+import { ValidationException } from "../exceptions/domain-exceptions.js";
 
 describe("PathCalculationService", () => {
   let pathService: PathCalculationService;
@@ -111,19 +111,19 @@ describe("PathCalculationService", () => {
 
     it("应该在路径为空时抛出异常", () => {
       expect(() => pathService.validatePath("")).toThrow(
-        DomainValidationException,
+        ValidationException,
       );
       expect(() => pathService.validatePath("   ")).toThrow(
-        DomainValidationException,
+        ValidationException,
       );
     });
 
     it("应该在路径格式无效时抛出异常", () => {
       expect(() => pathService.validatePath("invalid-path")).toThrow(
-        DomainValidationException,
+        ValidationException,
       );
       expect(() => pathService.validatePath("123/456")).toThrow(
-        DomainValidationException,
+        ValidationException,
       );
     });
 

@@ -12,7 +12,7 @@ import { DepartmentLevel } from "../../value-objects/types/department-level.vo.j
 import {
   BusinessRuleException,
   StateException,
-  DomainValidationException,
+  ValidationException,
 } from "../../exceptions/domain-exceptions.js";
 
 describe("Department Entity", () => {
@@ -96,7 +96,7 @@ describe("Department Entity", () => {
     it("应该验证部门层级必须在1-8之间", () => {
       expect(() => {
         DepartmentLevel.create(9);
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
   });
 
@@ -210,7 +210,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         department.updateLevel(DepartmentLevel.create(9));
-      }).toThrow(DomainValidationException);
+      }).toThrow(ValidationException);
     });
   });
 

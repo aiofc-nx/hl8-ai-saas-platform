@@ -127,7 +127,7 @@ export class TenantAggregate extends IsolationAwareAggregateRoot {
   private _tenant: Tenant;
   private _platformId: EntityId;
   private _ruleManager: BusinessRuleManager;
-  private _exceptionFactory: SimplifiedExceptionFactory;
+  private _exceptionFactory: DomainExceptionFactory;
 
   /**
    * 构造函数
@@ -153,7 +153,7 @@ export class TenantAggregate extends IsolationAwareAggregateRoot {
     this.setIsolationContext(IsolationContext.tenant(props.platformId));
 
     this._ruleManager = BusinessRuleFactory.createTenantManager();
-    this._exceptionFactory = SimplifiedExceptionFactory.getInstance();
+    this._exceptionFactory = DomainExceptionFactory.getInstance();
     this._platformId = props.platformId;
     this._tenant = new Tenant(
       id,

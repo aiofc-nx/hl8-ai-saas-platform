@@ -46,7 +46,7 @@ export class SpecificationFactory {
   private _exceptionFactory: ExceptionFactory;
 
   private constructor() {
-    this._exceptionFactory = ExceptionFactory.getInstance();
+    this._exceptionFactory = DomainExceptionFactory.getInstance();
     this.initializeDefaultSpecifications();
   }
 

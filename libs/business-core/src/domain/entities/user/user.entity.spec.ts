@@ -53,7 +53,7 @@ describe("User Entity", () => {
       expect(user.displayName).toBe("Test User");
       expect(user.avatarUrl).toBe("https://example.com/avatar.jpg");
       expect(user.description).toBe("Test user description");
-      expect(user.isActive).toBe(true);
+      expect(user.isActive()).toBe(true);
       expect(user.lastLoginAt).toBeDefined();
       expect(user.lastLoginIp).toBe("192.168.1.1");
       expect(user.failedLoginAttempts).toBe(0);
@@ -303,7 +303,7 @@ describe("User Entity", () => {
 
       user.activate("admin");
 
-      expect(user.isActive).toBe(true);
+      expect(user.isActive()).toBe(true);
       expect(user.status.value).toBe(UserStatus.ACTIVE.value);
     });
   });
@@ -314,7 +314,7 @@ describe("User Entity", () => {
 
       user.deactivate("admin", "Test reason");
 
-      expect(user.isActive).toBe(false);
+      expect(user.isActive()).toBe(false);
       expect(user.status.value).toBe(UserStatus.INACTIVE.value);
     });
   });

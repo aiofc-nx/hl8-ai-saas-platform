@@ -511,10 +511,7 @@ export class Department extends BaseEntity {
    */
   private validateName(name: string): void {
     if (!name || !name.trim()) {
-      throw new BusinessRuleException(
-        "部门名称不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("部门名称不能为空", "VALIDATION_FAILED");
     }
     if (name.trim().length > 100) {
       throw new BusinessRuleException(
@@ -531,16 +528,10 @@ export class Department extends BaseEntity {
    */
   private validateLevel(level: DepartmentLevel): void {
     if (!level) {
-      throw new BusinessRuleException(
-        "部门层级不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("部门层级不能为空", "VALIDATION_FAILED");
     }
     if (!DepartmentLevel.isValid(level.value)) {
-      throw new BusinessRuleException(
-        "无效的部门层级",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("无效的部门层级", "VALIDATION_FAILED");
     }
   }
 
@@ -551,18 +542,13 @@ export class Department extends BaseEntity {
    */
   private validateParent(parentId: EntityId): void {
     if (!parentId) {
-      throw new BusinessRuleException(
-        "父部门ID不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("父部门ID不能为空", "VALIDATION_FAILED");
     }
     if (parentId.equals(this.id)) {
-      throw new StateException(
-        "不能设置自己为父部门",
-        "active",
-        "setParent",
-        { departmentId: this.id.toString(), parentId: parentId.toString() },
-      );
+      throw new StateException("不能设置自己为父部门", "active", "setParent", {
+        departmentId: this.id.toString(),
+        parentId: parentId.toString(),
+      });
     }
   }
 
@@ -587,10 +573,7 @@ export class Department extends BaseEntity {
    */
   private validateManager(managerId: EntityId): void {
     if (!managerId) {
-      throw new BusinessRuleException(
-        "负责人ID不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("负责人ID不能为空", "VALIDATION_FAILED");
     }
   }
 
@@ -601,10 +584,7 @@ export class Department extends BaseEntity {
    */
   private validateCode(code: string): void {
     if (!code || !code.trim()) {
-      throw new BusinessRuleException(
-        "部门编码不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("部门编码不能为空", "VALIDATION_FAILED");
     }
     if (code.trim().length > 20) {
       throw new BusinessRuleException(

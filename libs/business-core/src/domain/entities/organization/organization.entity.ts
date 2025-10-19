@@ -420,10 +420,7 @@ export class Organization extends BaseEntity {
    */
   private validateName(name: string): void {
     if (!name || !name.trim()) {
-      throw new BusinessRuleException(
-        "组织名称不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("组织名称不能为空", "VALIDATION_FAILED");
     }
     if (name.trim().length > 100) {
       throw new BusinessRuleException(
@@ -440,16 +437,10 @@ export class Organization extends BaseEntity {
    */
   private validateType(type: OrganizationType): void {
     if (!type) {
-      throw new BusinessRuleException(
-        "组织类型不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("组织类型不能为空", "VALIDATION_FAILED");
     }
     if (!Object.values(OrganizationType).includes(type)) {
-      throw new BusinessRuleException(
-        "无效的组织类型",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("无效的组织类型", "VALIDATION_FAILED");
     }
   }
 
@@ -460,18 +451,13 @@ export class Organization extends BaseEntity {
    */
   private validateParent(parentId: EntityId): void {
     if (!parentId) {
-      throw new BusinessRuleException(
-        "父组织ID不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("父组织ID不能为空", "VALIDATION_FAILED");
     }
     if (parentId.equals(this.id)) {
-      throw new StateException(
-        "不能设置自己为父组织",
-        "active",
-        "setParent",
-        { organizationId: this.id.toString(), parentId: parentId.toString() },
-      );
+      throw new StateException("不能设置自己为父组织", "active", "setParent", {
+        organizationId: this.id.toString(),
+        parentId: parentId.toString(),
+      });
     }
   }
 

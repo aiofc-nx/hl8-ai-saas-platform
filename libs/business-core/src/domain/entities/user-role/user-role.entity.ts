@@ -201,15 +201,10 @@ export class UserRole extends BaseEntity {
    */
   activate(): void {
     if (this._isActive) {
-      throw new StateException(
-        "用户角色关联已激活",
-        "active",
-        "activate",
-        {
-          userRoleId: this.id.toString(),
-          isActive: this._isActive,
-        },
-      );
+      throw new StateException("用户角色关联已激活", "active", "activate", {
+        userRoleId: this.id.toString(),
+        isActive: this._isActive,
+      });
     }
     this._isActive = true;
     this.updateTimestamp();
@@ -221,15 +216,10 @@ export class UserRole extends BaseEntity {
    */
   deactivate(): void {
     if (!this._isActive) {
-      throw new StateException(
-        "用户角色关联已停用",
-        "inactive",
-        "deactivate",
-        {
-          userRoleId: this.id.toString(),
-          isActive: this._isActive,
-        },
-      );
+      throw new StateException("用户角色关联已停用", "inactive", "deactivate", {
+        userRoleId: this.id.toString(),
+        isActive: this._isActive,
+      });
     }
     this._isActive = false;
     this.updateTimestamp();
@@ -350,10 +340,7 @@ export class UserRole extends BaseEntity {
    */
   private validateUserId(userId: UserId): void {
     if (!userId) {
-      throw new BusinessRuleException(
-        "用户ID不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("用户ID不能为空", "VALIDATION_FAILED");
     }
   }
 
@@ -365,10 +352,7 @@ export class UserRole extends BaseEntity {
    */
   private validateRoleId(roleId: EntityId): void {
     if (!roleId) {
-      throw new BusinessRuleException(
-        "角色ID不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("角色ID不能为空", "VALIDATION_FAILED");
     }
   }
 

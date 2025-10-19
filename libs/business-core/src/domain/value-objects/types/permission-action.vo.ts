@@ -33,6 +33,10 @@ export enum PermissionActionValue {
   EXPORT = "EXPORT",
   /** 导入 */
   IMPORT = "IMPORT",
+  /** 写入 */
+  WRITE = "WRITE",
+  /** 管理员 */
+  ADMIN = "ADMIN",
 }
 
 /**
@@ -159,7 +163,7 @@ export class PermissionAction extends BaseValueObject<PermissionActionValue> {
     const validActions = Object.values(PermissionActionValue);
     if (!validActions.includes(value)) {
       if (!this._exceptionFactory) {
-        this._exceptionFactory = ExceptionFactory.getInstance();
+        this._exceptionFactory = DomainExceptionFactory.getInstance();
       }
       throw this._exceptionFactory.createInvalidPermissionAction(
         value.toString(),

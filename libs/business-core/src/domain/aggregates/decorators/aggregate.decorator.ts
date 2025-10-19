@@ -255,7 +255,7 @@ export function isAggregate(target: unknown): boolean {
  * @throws {Error} 当配置选项无效时抛出错误
  */
 function validateAggregateOptions(options: AggregateOptions): void {
-  const exceptionFactory = ExceptionFactory.getInstance();
+  const exceptionFactory = DomainExceptionFactory.getInstance();
   if (
     !options.name ||
     typeof options.name !== "string" ||
@@ -342,7 +342,7 @@ export class AggregateRegistry {
    */
   static register(aggregateClass: new (...args: unknown[]) => unknown): void {
     const metadata = getAggregateMetadata(aggregateClass);
-    const exceptionFactory = ExceptionFactory.getInstance();
+    const exceptionFactory = DomainExceptionFactory.getInstance();
     if (!metadata) {
       throw exceptionFactory.createDomainValidation(
         `类 ${aggregateClass.name} 没有@Aggregate装饰器`,

@@ -340,7 +340,7 @@ export function getEventHandlers(target: any): Array<{
  * @throws {Error} 当配置选项无效时抛出错误
  */
 function validateDomainEventOptions(options: DomainEventOptions): void {
-  const exceptionFactory = ExceptionFactory.getInstance();
+  const exceptionFactory = DomainExceptionFactory.getInstance();
   if (
     !options.name ||
     typeof options.name !== "string" ||

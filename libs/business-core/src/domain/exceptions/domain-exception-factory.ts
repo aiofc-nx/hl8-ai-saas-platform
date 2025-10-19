@@ -619,4 +619,19 @@ export class DomainExceptionFactory {
       { entity: "Permission" },
     );
   }
+
+  /**
+   * 创建无效权限动作异常
+   *
+   * @param action - 无效的权限动作
+   * @returns 验证异常
+   */
+  createInvalidPermissionAction(action: string): ValidationException {
+    return this.createValidationError(
+      `无效的权限动作: ${action}`,
+      "action",
+      action,
+      { entity: "Permission" },
+    );
+  }
 }

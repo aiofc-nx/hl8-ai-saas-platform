@@ -71,7 +71,7 @@ export abstract class BaseValueObject<T> {
    * @param value 值对象的值
    */
   constructor(value: T) {
-    this._exceptionFactory = ExceptionFactory.getInstance();
+    this._exceptionFactory = DomainExceptionFactory.getInstance();
     this.validate(value);
     this._value = this.transform(value);
   }
