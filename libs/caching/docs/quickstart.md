@@ -1,31 +1,6 @@
-# 简化的缓存模块快速开始指南
+# 快速开始指南
 
-**版本**: 1.0.0  
-**更新日期**: 2025-01-19  
-**目的**: 提供简化后的缓存模块快速开始指南
-
-## 概述
-
-简化后的缓存模块提供了简单直接的缓存功能，支持多层级隔离、性能监控和装饰器模式。相比之前的 DDD 实现，新版本更加简洁易用。
-
-## 主要改进
-
-### 🚀 性能提升
-- **30%+ 更快的操作速度**
-- **50%+ 更少的内存使用**
-- **简化的序列化逻辑**
-
-### 🛠️ 代码简化
-- **50%+ 更少的代码行数**
-- **简化的错误处理**
-- **直接的 API 设计**
-
-### 📊 更好的监控
-- **简化的性能指标**
-- **实时性能监控**
-- **健康检查功能**
-
-## 快速开始
+## 🚀 5分钟快速上手
 
 ### 1. 安装依赖
 
@@ -36,65 +11,39 @@ pnpm add @hl8/caching
 ### 2. 基本配置
 
 ```typescript
-import { SimplifiedCachingModule } from '@hl8/caching';
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { CachingModule } from '@hl8/caching';
 
 @Module({
   imports: [
-    SimplifiedCachingModule.forRoot({
+    CachingModule.forRoot({
       redis: {
         host: 'localhost',
         port: 6379,
-        password: 'your-password',
       },
-      ttl: 3600, // 默认 1 小时
-      keyPrefix: 'myapp:cache:',
+      defaultTtl: 300, // 5分钟
+      keyPrefix: 'myapp:',
     }),
   ],
 })
 export class AppModule {}
 ```
 
-### 3. 异步配置
+### 3. 使用缓存服务
 
 ```typescript
-import { SimplifiedCachingModule } from '@hl8/caching';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-
-@Module({
-  imports: [
-    SimplifiedCachingModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        redis: {
-          host: configService.get('REDIS_HOST'),
-          port: configService.get('REDIS_PORT'),
-          password: configService.get('REDIS_PASSWORD'),
-        },
-        ttl: configService.get('CACHE_TTL', 3600),
-        keyPrefix: configService.get('CACHE_PREFIX', 'myapp:cache:'),
-      }),
-    }),
-  ],
-})
-export class AppModule {}
-```
-
-## 基本使用
-
-### 1. 直接使用服务
-
-```typescript
+// user.service.ts
 import { Injectable } from '@nestjs/common';
-import { SimplifiedCacheService } from '@hl8/caching';
+import { CacheService } from '@hl8/caching';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly cacheService: SimplifiedCacheService) {}
+  constructor(private readonly cacheService: CacheService) {}
 
-  async getUser(id: string): Promise<User> {
+  async getUser(id: string) {
     // 尝试从缓存获取
-    const cached = await this.cacheService.get<User>('user', id);
+    const cached = await this.cacheService.get('users', id);
     if (cached) {
       return cached;
     }
@@ -102,437 +51,309 @@ export class UserService {
     // 从数据库获取
     const user = await this.userRepository.findById(id);
     
-    // 存储到缓存
-    await this.cacheService.set('user', id, user, 1800); // 30分钟
+    // 缓存结果
+    await this.cacheService.set('users', id, user, 3600); // 1小时
     
     return user;
   }
+}
+```
 
-  async updateUser(id: string, user: User): Promise<User> {
+### 4. 使用装饰器
+
+```typescript
+// product.service.ts
+import { Injectable } from '@nestjs/common';
+import { Cacheable, CacheEvict } from '@hl8/caching';
+
+@Injectable()
+export class ProductService {
+  @Cacheable('products', 300) // 缓存5分钟
+  async getProduct(id: string) {
+    return await this.productRepository.findById(id);
+  }
+
+  @CacheEvict('products')
+  async updateProduct(id: string, data: any) {
+    return await this.productRepository.update(id, data);
+  }
+}
+```
+
+## 🎯 常用场景
+
+### 场景1：用户数据缓存
+
+```typescript
+@Injectable()
+export class UserService {
+  constructor(private readonly cacheService: CacheService) {}
+
+  async getUserProfile(userId: string) {
+    const cacheKey = `profile:${userId}`;
+    
+    // 尝试从缓存获取
+    let profile = await this.cacheService.get('users', cacheKey);
+    if (profile) {
+      return profile;
+    }
+
+    // 从数据库获取
+    profile = await this.userRepository.getProfile(userId);
+    
+    // 缓存用户资料（1小时）
+    await this.cacheService.set('users', cacheKey, profile, 3600);
+    
+    return profile;
+  }
+
+  async updateUserProfile(userId: string, data: any) {
     // 更新数据库
-    const updatedUser = await this.userRepository.update(id, user);
+    const profile = await this.userRepository.updateProfile(userId, data);
     
     // 更新缓存
-    await this.cacheService.set('user', id, updatedUser, 1800);
+    await this.cacheService.set('users', `profile:${userId}`, profile, 3600);
     
-    return updatedUser;
+    return profile;
   }
+}
+```
 
-  async deleteUser(id: string): Promise<void> {
-    // 删除数据库记录
-    await this.userRepository.delete(id);
+### 场景2：API响应缓存
+
+```typescript
+@Injectable()
+export class ApiService {
+  constructor(private readonly cacheService: CacheService) {}
+
+  async getApiData(endpoint: string, params: any) {
+    const cacheKey = `${endpoint}:${JSON.stringify(params)}`;
     
-    // 清除缓存
-    await this.cacheService.del('user', id);
-  }
-}
-```
-
-### 2. 使用装饰器
-
-```typescript
-import { Injectable } from '@nestjs/common';
-import { Cacheable, CacheEvict, CachePut } from '@hl8/caching';
-
-@Injectable()
-export class UserService {
-  @Cacheable('user', { ttl: 1800 })
-  async getUser(id: string): Promise<User> {
-    return this.userRepository.findById(id);
-  }
-
-  @CachePut('user', { ttl: 1800 })
-  async updateUser(id: string, user: User): Promise<User> {
-    return this.userRepository.update(id, user);
-  }
-
-  @CacheEvict('user')
-  async deleteUser(id: string): Promise<void> {
-    await this.userRepository.delete(id);
-  }
-}
-```
-
-### 3. 高级装饰器用法
-
-```typescript
-import { Injectable } from '@nestjs/common';
-import { Cacheable, CacheEvict, CachePut } from '@hl8/caching';
-
-@Injectable()
-export class UserService {
-  // 自定义键生成器
-  @Cacheable('user', {
-    keyGenerator: (id: string, type: string) => `${id}:${type}`,
-    ttl: 1800,
-  })
-  async getUserProfile(id: string, type: string): Promise<UserProfile> {
-    return this.userRepository.findProfile(id, type);
-  }
-
-  // 条件缓存
-  @Cacheable('user', {
-    condition: (id: string) => id !== 'skip',
-    ttl: 1800,
-  })
-  async getUser(id: string): Promise<User> {
-    return this.userRepository.findById(id);
-  }
-
-  // 清除所有用户缓存
-  @CacheEvict('user', { allEntries: true })
-  async clearAllUsers(): Promise<void> {
-    await this.userRepository.clearAll();
-  }
-
-  // 在方法执行前清除缓存
-  @CacheEvict('user', { beforeInvocation: true })
-  async updateUser(id: string, user: User): Promise<User> {
-    return this.userRepository.update(id, user);
-  }
-}
-```
-
-## 多层级隔离
-
-### 1. 平台级隔离（默认）
-
-```typescript
-// 所有用户共享缓存
-const user = await cacheService.get<User>('user', '123');
-// 键: platform:user:123
-```
-
-### 2. 租户级隔离
-
-```typescript
-import { IsolationContext, TenantId } from '@hl8/isolation-model';
-
-// 在租户上下文中
-const tenantId = TenantId.create('tenant-123');
-const context = IsolationContext.tenant(tenantId);
-
-// 使用 CLS 设置上下文
-await clsService.run(async () => {
-  clsService.set('isolationContext', context);
-  
-  const user = await cacheService.get<User>('user', '123');
-  // 键: tenant:tenant-123:user:123
-});
-```
-
-### 3. 组织级隔离
-
-```typescript
-import { IsolationContext, TenantId, OrganizationId } from '@hl8/isolation-model';
-
-const tenantId = TenantId.create('tenant-123');
-const orgId = OrganizationId.create('org-456');
-const context = IsolationContext.organization(tenantId, orgId);
-
-await clsService.run(async () => {
-  clsService.set('isolationContext', context);
-  
-  const user = await cacheService.get<User>('user', '123');
-  // 键: tenant:tenant-123:org:org-456:user:123
-});
-```
-
-### 4. 部门级隔离
-
-```typescript
-import { IsolationContext, TenantId, OrganizationId, DepartmentId } from '@hl8/isolation-model';
-
-const tenantId = TenantId.create('tenant-123');
-const orgId = OrganizationId.create('org-456');
-const deptId = DepartmentId.create('dept-789');
-const context = IsolationContext.department(tenantId, orgId, deptId);
-
-await clsService.run(async () => {
-  clsService.set('isolationContext', context);
-  
-  const user = await cacheService.get<User>('user', '123');
-  // 键: tenant:tenant-123:org:org-456:dept:dept-789:user:123
-});
-```
-
-### 5. 用户级隔离
-
-```typescript
-import { IsolationContext, TenantId, OrganizationId, DepartmentId, UserId } from '@hl8/isolation-model';
-
-const tenantId = TenantId.create('tenant-123');
-const orgId = OrganizationId.create('org-456');
-const deptId = DepartmentId.create('dept-789');
-const userId = UserId.create('user-123');
-const context = IsolationContext.user(tenantId, orgId, deptId, userId);
-
-await clsService.run(async () => {
-  clsService.set('isolationContext', context);
-  
-  const user = await cacheService.get<User>('user', '123');
-  // 键: tenant:tenant-123:org:org-456:dept:dept-789:user:user-123:user:123
-});
-```
-
-## 性能监控
-
-### 1. 基本监控
-
-```typescript
-import { SimplifiedCacheMetricsService } from '@hl8/caching';
-
-@Injectable()
-export class CacheMonitorService {
-  constructor(private readonly metricsService: SimplifiedCacheMetricsService) {}
-
-  getMetrics() {
-    const metrics = this.metricsService.getMetrics();
-    console.log(`命中率: ${metrics.hitRate.toFixed(2)}%`);
-    console.log(`平均延迟: ${metrics.averageLatency.toFixed(2)}ms`);
-    console.log(`总操作数: ${metrics.totalOperations}`);
-    return metrics;
-  }
-
-  checkHealth() {
-    const isHealthy = this.metricsService.isPerformanceHealthy(80, 100);
-    if (!isHealthy) {
-      console.warn('缓存性能异常');
+    // 尝试从缓存获取
+    const cached = await this.cacheService.get('api', cacheKey);
+    if (cached) {
+      return cached;
     }
-    return isHealthy;
+
+    // 调用外部API
+    const data = await this.externalApiService.getData(endpoint, params);
+    
+    // 缓存API响应（10分钟）
+    await this.cacheService.set('api', cacheKey, data, 600);
+    
+    return data;
   }
 }
 ```
 
-### 2. 高级监控
+### 场景3：会话数据缓存
 
 ```typescript
-import { PerformanceMonitor, PerformanceStats, PerformanceThresholdChecker } from '@hl8/caching';
-
 @Injectable()
-export class AdvancedCacheMonitorService {
-  private readonly stats = new PerformanceStats();
-  private readonly checker = new PerformanceThresholdChecker(85, 50);
+export class SessionService {
+  constructor(private readonly cacheService: CacheService) {}
 
-  async monitorOperation<T>(operation: () => Promise<T>): Promise<T> {
-    const monitor = new PerformanceMonitor();
-    monitor.start();
+  async getSession(sessionId: string) {
+    return await this.cacheService.get('sessions', sessionId);
+  }
 
+  async createSession(userId: string) {
+    const session = {
+      id: generateSessionId(),
+      userId,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24小时
+    };
+
+    // 缓存会话（24小时）
+    await this.cacheService.set('sessions', session.id, session, 86400);
+    
+    return session;
+  }
+
+  async destroySession(sessionId: string) {
+    await this.cacheService.del('sessions', sessionId);
+  }
+}
+```
+
+## 🔧 高级配置
+
+### 异步配置
+
+```typescript
+// app.module.ts
+import { ConfigService } from '@nestjs/config';
+import { CachingModule } from '@hl8/caching';
+
+@Module({
+  imports: [
+    CachingModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        redis: {
+          host: config.get('REDIS_HOST', 'localhost'),
+          port: config.get('REDIS_PORT', 6379),
+          password: config.get('REDIS_PASSWORD'),
+        },
+        defaultTtl: config.get('CACHE_TTL', 300),
+        keyPrefix: config.get('CACHE_PREFIX', 'app:'),
+      }),
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### 多级数据隔离
+
+```typescript
+@Injectable()
+export class DataService {
+  constructor(private readonly cacheService: CacheService) {}
+
+  // 平台级数据 - 所有用户共享
+  async getGlobalConfig() {
+    return await this.cacheService.get('platform', 'global-config');
+  }
+
+  // 租户级数据 - 需要 X-Tenant-Id 请求头
+  async getTenantSettings() {
+    return await this.cacheService.get('tenant', 'settings');
+  }
+
+  // 用户级数据 - 需要 X-User-Id 请求头
+  async getUserPreferences() {
+    return await this.cacheService.get('user', 'preferences');
+  }
+}
+```
+
+## 📊 性能监控
+
+### 获取缓存指标
+
+```typescript
+@Injectable()
+export class MetricsService {
+  constructor(private readonly metricsService: CacheMetricsService) {}
+
+  @Get('cache/metrics')
+  async getCacheMetrics() {
+    return await this.metricsService.getMetrics();
+  }
+}
+```
+
+### 自定义监控
+
+```typescript
+@Injectable()
+export class MonitoredCacheService {
+  constructor(private readonly cacheService: CacheService) {}
+
+  async getWithMonitoring(namespace: string, key: string) {
+    const start = Date.now();
+    
     try {
-      const result = await operation();
-      const latency = monitor.end();
-      this.stats.recordHit(latency);
+      const result = await this.cacheService.get(namespace, key);
+      const duration = Date.now() - start;
+      
+      // 记录性能指标
+      console.log(`Cache ${result ? 'HIT' : 'MISS'}: ${namespace}:${key} (${duration}ms)`);
+      
       return result;
     } catch (error) {
-      const latency = monitor.end();
-      this.stats.recordError(latency);
-      throw error;
-    }
-  }
-
-  getPerformanceReport() {
-    const stats = this.stats.getStats();
-    const isHealthy = this.checker.isHealthy(stats);
-    
-    return {
-      ...stats,
-      isHealthy,
-      recommendations: this.getRecommendations(stats),
-    };
-  }
-
-  private getRecommendations(stats: any): string[] {
-    const recommendations: string[] = [];
-    
-    if (stats.hitRate < 80) {
-      recommendations.push('考虑增加缓存 TTL 或优化缓存策略');
-    }
-    
-    if (stats.averageLatency > 100) {
-      recommendations.push('考虑优化 Redis 配置或网络连接');
-    }
-    
-    return recommendations;
-  }
-}
-```
-
-## 错误处理
-
-### 1. 基本错误处理
-
-```typescript
-import { 
-  CacheError, 
-  RedisConnectionError, 
-  CacheSerializationError 
-} from '@hl8/caching';
-
-@Injectable()
-export class CacheErrorHandlerService {
-  async handleCacheOperation<T>(operation: () => Promise<T>): Promise<T | null> {
-    try {
-      return await operation();
-    } catch (error) {
-      if (error instanceof RedisConnectionError) {
-        console.error('Redis 连接失败:', error.message);
-        // 实现重连逻辑
-        return null;
-      }
-      
-      if (error instanceof CacheSerializationError) {
-        console.error('缓存序列化失败:', error.message);
-        // 实现降级逻辑
-        return null;
-      }
-      
+      console.error(`Cache ERROR: ${namespace}:${key}`, error);
       throw error;
     }
   }
 }
 ```
 
-### 2. 高级错误处理
+## 🧪 测试
+
+### 单元测试
 
 ```typescript
-import { CacheError } from '@hl8/caching';
+import { Test, TestingModule } from '@nestjs/testing';
+import { CachingModule, CacheService } from '@hl8/caching';
 
-@Injectable()
-export class AdvancedCacheErrorHandlerService {
-  private readonly maxRetries = 3;
-  private readonly retryDelay = 1000;
+describe('UserService', () => {
+  let service: UserService;
+  let cacheService: CacheService;
 
-  async handleCacheOperationWithRetry<T>(
-    operation: () => Promise<T>,
-    retries: number = this.maxRetries
-  ): Promise<T | null> {
-    try {
-      return await operation();
-    } catch (error) {
-      if (error instanceof CacheError && retries > 0) {
-        console.warn(`缓存操作失败，${retries} 次重试剩余:`, error.message);
-        await this.delay(this.retryDelay);
-        return this.handleCacheOperationWithRetry(operation, retries - 1);
-      }
-      
-      console.error('缓存操作最终失败:', error.message);
-      return null;
-    }
-  }
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        CachingModule.forRoot({
+          redis: { host: 'localhost', port: 6379 },
+        }),
+      ],
+      providers: [UserService],
+    }).compile();
 
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-}
+    service = module.get<UserService>(UserService);
+    cacheService = module.get<CacheService>(CacheService);
+  });
+
+  it('should cache user data', async () => {
+    const userId = 'user-123';
+    const userData = { id: userId, name: 'John Doe' };
+
+    // 设置缓存
+    await cacheService.set('users', userId, userData, 60);
+
+    // 获取缓存
+    const cached = await cacheService.get('users', userId);
+    expect(cached).toEqual(userData);
+  });
+});
 ```
 
-## 最佳实践
+## 🚀 部署
 
-### 1. 缓存策略
+### Docker 配置
 
-```typescript
-// ✅ 好的做法
-@Cacheable('user', { ttl: 1800 }) // 30分钟
-async getUser(id: string): Promise<User> {
-  return this.userRepository.findById(id);
-}
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
 
-// ❌ 避免的做法
-@Cacheable('user', { ttl: 86400 }) // 24小时太长
-async getUser(id: string): Promise<User> {
-  return this.userRepository.findById(id);
-}
+  app:
+    build: .
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
 ```
 
-### 2. 键命名
+### 环境变量
 
-```typescript
-// ✅ 好的做法
-await cacheService.set('user', '123', user);
-await cacheService.set('user:profile', '123', profile);
-
-// ❌ 避免的做法
-await cacheService.set('user', 'user:123', user); // 重复前缀
-await cacheService.set('', 'user:123', user); // 空命名空间
+```bash
+# .env
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your-password
+CACHE_TTL=300
+CACHE_PREFIX=myapp:
 ```
 
-### 3. 错误处理
+## 📚 下一步
 
-```typescript
-// ✅ 好的做法
-async getUser(id: string): Promise<User | null> {
-  try {
-    const cached = await this.cacheService.get<User>('user', id);
-    if (cached) return cached;
-    
-    const user = await this.userRepository.findById(id);
-    await this.cacheService.set('user', id, user);
-    return user;
-  } catch (error) {
-    console.error('获取用户失败:', error);
-    return null;
-  }
-}
+- 查看 [API 文档](./api.md) 了解完整的 API 参考
+- 阅读 [最佳实践](./best-practices.md) 学习高级用法
+- 参考 [故障排除](./troubleshooting.md) 解决常见问题
 
-// ❌ 避免的做法
-async getUser(id: string): Promise<User> {
-  const cached = await this.cacheService.get<User>('user', id);
-  if (cached) return cached;
-  
-  const user = await this.userRepository.findById(id);
-  await this.cacheService.set('user', id, user);
-  return user; // 没有错误处理
-}
-```
-
-## 迁移指南
-
-### 从旧版本迁移
-
-1. **更新导入**:
-   ```typescript
-   // 旧版本
-   import { CachingModule, CacheService } from '@hl8/caching';
-   
-   // 新版本
-   import { SimplifiedCachingModule, SimplifiedCacheService } from '@hl8/caching';
-   ```
-
-2. **更新模块配置**:
-   ```typescript
-   // 旧版本
-   CachingModule.forRoot(options)
-   
-   // 新版本
-   SimplifiedCachingModule.forRoot(options)
-   ```
-
-3. **更新服务注入**:
-   ```typescript
-   // 旧版本
-   constructor(private readonly cacheService: CacheService) {}
-   
-   // 新版本
-   constructor(private readonly cacheService: SimplifiedCacheService) {}
-   ```
-
-### 性能对比
-
-| 指标 | 旧版本 | 新版本 | 改进 |
-|------|--------|--------|------|
-| 代码行数 | 3,501 | ~2,000 | 43% 减少 |
-| 操作延迟 | 100ms | 70ms | 30% 提升 |
-| 内存使用 | 100MB | 50MB | 50% 减少 |
-| 复杂度 | 高 | 低 | 显著降低 |
-
-## 总结
-
-简化后的缓存模块提供了：
-
-- ✅ **更简单的 API**
-- ✅ **更好的性能**
-- ✅ **更少的代码**
-- ✅ **更容易维护**
-- ✅ **100% 向后兼容**
-
-开始使用简化后的缓存模块，享受更好的开发体验！
+现在你已经掌握了缓存模块的基本用法，可以开始构建高性能的应用了！ 🎉
