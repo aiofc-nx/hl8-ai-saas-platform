@@ -2,20 +2,12 @@
  * 索引文件导出测试
  */
 
+import { jest } from "@jest/globals";
+
 // 设置测试环境
 beforeAll(() => {
   process.env.NODE_ENV = "test";
 });
-
-// 全局测试工具
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
 
 import {
   createLogger,
@@ -27,7 +19,7 @@ import {
   NoOpLogger,
   StructuredLogger,
   LoggerFactory,
-} from "../index";
+} from "../index.js";
 
 describe("Index 导出测试", () => {
   describe("createLogger 方法", () => {
@@ -175,7 +167,9 @@ describe("Index 导出测试", () => {
 
     it("应该是空操作日志器", () => {
       const logger = createProductionLogger();
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "log")
+        .mockImplementation(() => {});
 
       logger.debug("debug message");
       logger.info("info message");
@@ -220,7 +214,9 @@ describe("Index 导出测试", () => {
 
     it("应该支持所有日志方法", () => {
       const logger = createLogger();
-      const consoleSpy = jest.spyOn(console, "info").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "info")
+        .mockImplementation(() => {});
 
       logger.info("test message", { key: "value" });
 

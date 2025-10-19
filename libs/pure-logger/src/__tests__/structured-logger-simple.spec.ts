@@ -2,15 +2,16 @@
  * 结构化日志器简化测试
  */
 
-import { StructuredLogger, LogLevel } from "../index";
+import { jest } from "@jest/globals";
+import { StructuredLogger, LogLevel } from "../index.js";
 
 describe("StructuredLogger 简化测试", () => {
   let logger: StructuredLogger;
-  let consoleSpy: jest.SpyInstance;
+  let consoleSpy: jest.MockedFunction<any>;
 
   beforeEach(() => {
     logger = new StructuredLogger();
-    consoleSpy = jest.spyOn(console, "log").mockImplementation();
+    consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -45,13 +46,16 @@ describe("StructuredLogger 简化测试", () => {
 
   describe("错误处理", () => {
     it("应该正确处理错误对象", () => {
-      const errorSpy = jest.spyOn(console, "error").mockImplementation();
+      const errorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
       const error = new Error("test error");
 
       logger.error(error, { context: "test" });
 
       expect(errorSpy).toHaveBeenCalledTimes(1);
-      const logCall = errorSpy.mock.calls[0][0];
+      const logCall = errorSpy.mock.calls[0]?.[0];
+      expect(logCall).toBeDefined();
       const logData = JSON.parse(logCall);
 
       expect(logData.level).toBe("error");
@@ -71,12 +75,13 @@ describe("StructuredLogger 简化测试", () => {
         {},
         { json: false },
       );
-      const infoSpy = jest.spyOn(console, "info").mockImplementation();
+      const infoSpy = jest.spyOn(console, "info").mockImplementation(() => {});
 
       nonJsonLogger.info("test message");
 
       expect(infoSpy).toHaveBeenCalledTimes(1);
-      const logCall = infoSpy.mock.calls[0][0];
+      const logCall = infoSpy.mock.calls[0]?.[0];
+      expect(logCall).toBeDefined();
 
       expect(logCall).toMatch(/\[.*\] INFO: test message/);
 

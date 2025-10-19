@@ -131,6 +131,12 @@ export class LoggerAdapterManager {
       return adapter;
     }
 
+    // 如果指定的适配器不可用，尝试自动切换到可用的适配器
+    const availableAdapters = this.getAvailableAdapters();
+    if (availableAdapters.length > 0) {
+      return availableAdapters[0];
+    }
+
     return undefined;
   }
 

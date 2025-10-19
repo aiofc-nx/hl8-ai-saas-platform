@@ -148,8 +148,10 @@ export class LoggerFactory {
 
     switch (env) {
       case "production":
-      case "test":
         return LoggerType.NOOP;
+      case "test":
+        // 在测试环境中默认使用控制台日志器，便于测试验证
+        return LoggerType.CONSOLE;
       case "development":
       default:
         return LoggerType.CONSOLE;

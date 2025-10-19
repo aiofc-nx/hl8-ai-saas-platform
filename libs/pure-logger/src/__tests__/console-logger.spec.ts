@@ -2,7 +2,8 @@
  * 控制台日志器测试
  */
 
-import { ConsoleLogger, LogLevel } from "../index";
+import { jest } from "@jest/globals";
+import { ConsoleLogger, LogLevel } from "../index.js";
 
 // 设置测试环境
 beforeAll(() => {

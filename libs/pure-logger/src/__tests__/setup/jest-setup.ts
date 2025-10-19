@@ -11,14 +11,3 @@ beforeAll(() => {
 afterAll(() => {
   // 清理测试环境
 });
-
-// 全局测试工具
-global.console = {
-  ...console,
-  // 在测试中静默 console 输出
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};

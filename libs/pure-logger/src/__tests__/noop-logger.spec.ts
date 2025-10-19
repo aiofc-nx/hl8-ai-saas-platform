@@ -2,22 +2,14 @@
  * 空操作日志器测试
  */
 
+import { jest } from "@jest/globals";
+
 // 设置测试环境
 beforeAll(() => {
   process.env.NODE_ENV = "test";
 });
 
-// 全局测试工具
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
-
-import { NoOpLogger, LogLevel } from "../index";
+import { NoOpLogger, LogLevel } from "../index.js";
 
 describe("NoOpLogger", () => {
   let logger: NoOpLogger;
@@ -74,20 +66,20 @@ describe("NoOpLogger", () => {
 
   describe("日志方法 - 空操作验证", () => {
     let consoleSpy: {
-      log: jest.SpyInstance;
-      debug: jest.SpyInstance;
-      info: jest.SpyInstance;
-      warn: jest.SpyInstance;
-      error: jest.SpyInstance;
+      log: jest.MockedFunction<any>;
+      debug: jest.MockedFunction<any>;
+      info: jest.MockedFunction<any>;
+      warn: jest.MockedFunction<any>;
+      error: jest.MockedFunction<any>;
     };
 
     beforeEach(() => {
       consoleSpy = {
-        log: jest.spyOn(console, "log").mockImplementation(),
-        debug: jest.spyOn(console, "debug").mockImplementation(),
-        info: jest.spyOn(console, "info").mockImplementation(),
-        warn: jest.spyOn(console, "warn").mockImplementation(),
-        error: jest.spyOn(console, "error").mockImplementation(),
+        log: jest.spyOn(console, "log").mockImplementation(() => {}),
+        debug: jest.spyOn(console, "debug").mockImplementation(() => {}),
+        info: jest.spyOn(console, "info").mockImplementation(() => {}),
+        warn: jest.spyOn(console, "warn").mockImplementation(() => {}),
+        error: jest.spyOn(console, "error").mockImplementation(() => {}),
       };
     });
 
@@ -195,7 +187,9 @@ describe("NoOpLogger", () => {
 
     it("子日志器也应该是空操作", () => {
       const childLogger = logger.child({ test: "value" });
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "log")
+        .mockImplementation(() => {});
 
       childLogger.debug("child debug");
       childLogger.info("child info");

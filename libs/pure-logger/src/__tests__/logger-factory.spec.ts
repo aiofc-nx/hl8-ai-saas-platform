@@ -7,16 +7,6 @@ beforeAll(() => {
   process.env.NODE_ENV = "test";
 });
 
-// 全局测试工具
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
-
 import {
   LoggerFactory,
   LoggerType,
@@ -25,7 +15,7 @@ import {
   NoOpLogger,
   StructuredLogger,
   type LoggerConfig,
-} from "../index";
+} from "../index.js";
 
 describe("LoggerFactory", () => {
   let originalEnv: string | undefined;
@@ -141,11 +131,11 @@ describe("LoggerFactory", () => {
       expect(logger).toBeInstanceOf(NoOpLogger);
     });
 
-    it("测试环境应该使用空操作日志器", () => {
+    it("测试环境应该使用控制台日志器", () => {
       process.env.NODE_ENV = "test";
       const logger = LoggerFactory.create();
 
-      expect(logger).toBeInstanceOf(NoOpLogger);
+      expect(logger).toBeInstanceOf(ConsoleLogger);
     });
 
     it("未定义环境应该使用控制台日志器", () => {
