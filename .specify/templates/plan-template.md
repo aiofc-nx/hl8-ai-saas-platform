@@ -31,7 +31,48 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### Architecture Compliance
+- [ ] **Clean Architecture**: Feature design follows four-layer architecture (Domain, Application, Infrastructure, Interface)
+- [ ] **DDD Compliance**: Rich domain models with business logic, no anemic domain models
+- [ ] **CQRS Pattern**: Commands and queries are properly separated
+- [ ] **Event Sourcing**: State changes are recorded as events where applicable
+- [ ] **Event-Driven Architecture**: Components communicate through events for loose coupling
+
+### Monorepo Organization
+- [ ] **Project Structure**: Feature follows apps/libs/packages/examples structure
+- [ ] **Domain Module Independence**: Domain modules are developed as independent projects
+- [ ] **Service Naming**: Service modules in services directory drop "-service" suffix
+- [ ] **Package Management**: Uses pnpm as package manager
+
+### Quality Assurance
+- [ ] **ESLint Configuration**: Extends root eslint.config.mjs
+- [ ] **TypeScript Configuration**: Extends monorepo root tsconfig.json
+- [ ] **Documentation**: Detailed design files use "XS" prefix
+
+### Testing Architecture
+- [ ] **Unit Tests**: Located in same directory as source files with .spec.ts naming
+- [ ] **Integration Tests**: Located in __tests__/integration/ directory
+- [ ] **E2E Tests**: Located in __tests__/e2e/ directory
+- [ ] **Test Coverage**: Core business logic ≥ 80%, critical paths ≥ 90%
+
+### Data Isolation
+- [ ] **Multi-level Isolation**: Supports platform/tenant/organization/department/user level isolation
+- [ ] **Data Classification**: Distinguishes between shared and non-shared data
+- [ ] **Access Rules**: All data access includes complete isolation context
+
+### Unified Language
+- [ ] **Terminology**: Uses consistent domain terminology (Platform, Tenant, Organization, Department, User)
+- [ ] **Entity Mapping**: Technical implementation maps to business terminology
+
+### TypeScript Standards
+- [ ] **NodeNext Module System**: Uses NodeNext module system for all server-side projects
+- [ ] **any Type Usage**: any type usage is justified and follows safety rules
+- [ ] **ESM Migration**: Migrated from CommonJS to NodeNext where applicable
+
+### Error Handling
+- [ ] **Exception-First**: Uses exceptions for business logic, logs for monitoring
+- [ ] **Error Hierarchy**: Proper error handling at data/business/controller layers
+- [ ] **Anti-patterns Avoided**: No log-only error handling, no exception-only without logging
 
 ## Project Structure
 
