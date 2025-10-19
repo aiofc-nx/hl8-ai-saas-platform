@@ -7,7 +7,7 @@
  */
 
 import { BaseValueObject } from "../base-value-object.js";
-import { BusinessRuleViolationException } from "../../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../../common/constants/index.js";
 
 /**
@@ -127,7 +127,7 @@ export class UserRole extends BaseValueObject<UserRoleValue> {
     this.validateNotEmpty(value, "用户角色");
     const validRoles = Object.values(UserRoleValue);
     if (!validRoles.includes(value)) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         `无效的用户角色: ${value}`,
         ErrorCodes.VALIDATION_FAILED,
       );

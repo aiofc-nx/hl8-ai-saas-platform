@@ -205,7 +205,7 @@ export abstract class BaseDomainException extends Error {
 /**
  * 业务规则违反异常
  */
-export class BusinessRuleViolationException extends BaseDomainException {
+export class BusinessRuleException extends BaseDomainException {
   constructor(
     message: string,
     ruleName: string,
@@ -252,7 +252,7 @@ export class DomainValidationException extends BaseDomainException {
 /**
  * 领域状态异常
  */
-export class DomainStateException extends BaseDomainException {
+export class StateException extends BaseDomainException {
   constructor(
     message: string,
     currentState: string,

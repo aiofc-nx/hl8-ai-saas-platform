@@ -3,9 +3,8 @@
   "compilerOptions": {
     "module": "ES2022",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "emitDeclarationOnly": true
+    "noEmit": false,
+    "emitDeclarationOnly": false
   },
   "include": ["src"],
   "exclude": [
@@ -15,6 +14,7 @@
     "jest.config.ts",
     "**/*.spec.ts",
     "**/__tests__/**",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "src/domain/**"
   ]
 }

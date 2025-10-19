@@ -2,8 +2,8 @@ import { EntityId } from "@hl8/isolation-model";
 import { BaseEntity } from "../base/base-entity.js";
 import { OrganizationType } from "../../value-objects/types/organization-type.vo.js";
 import {
-  BusinessRuleViolationException,
-  DomainStateException,
+  BusinessRuleException,
+  StateException,
 } from "../../exceptions/domain-exceptions.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../base/audit-info.js";
@@ -344,7 +344,7 @@ export class Organization extends BaseEntity {
    */
   activate(): void {
     if (this._isActive) {
-      throw new DomainStateException("组织已激活", "active", "activate", {
+      throw new StateException("组织已激活", "active", "activate", {
         organizationId: this.id.toString(),
         isActive: this._isActive,
       });
@@ -367,7 +367,7 @@ export class Organization extends BaseEntity {
    */
   deactivate(): void {
     if (!this._isActive) {
-      throw new DomainStateException("组织已停用", "inactive", "deactivate", {
+      throw new StateException("组织已停用", "inactive", "deactivate", {
         organizationId: this.id.toString(),
         isActive: this._isActive,
       });
@@ -420,13 +420,13 @@ export class Organization extends BaseEntity {
    */
   private validateName(name: string): void {
     if (!name || !name.trim()) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "组织名称不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (name.trim().length > 100) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "组织名称长度不能超过100字符",
         "VALIDATION_FAILED",
       );
@@ -440,13 +440,13 @@ export class Organization extends BaseEntity {
    */
   private validateType(type: OrganizationType): void {
     if (!type) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "组织类型不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (!Object.values(OrganizationType).includes(type)) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "无效的组织类型",
         "VALIDATION_FAILED",
       );
@@ -460,13 +460,13 @@ export class Organization extends BaseEntity {
    */
   private validateParent(parentId: EntityId): void {
     if (!parentId) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "父组织ID不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (parentId.equals(this.id)) {
-      throw new DomainStateException(
+      throw new StateException(
         "不能设置自己为父组织",
         "active",
         "setParent",
@@ -482,7 +482,7 @@ export class Organization extends BaseEntity {
    */
   private validateSortOrder(sortOrder: number): void {
     if (sortOrder < 0) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "组织排序不能为负数",
         "VALIDATION_FAILED",
       );

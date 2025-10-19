@@ -9,8 +9,8 @@
 import { EntityId, UserId } from "@hl8/isolation-model";
 import { BaseEntity } from "../base/base-entity.js";
 import {
-  BusinessRuleViolationException,
-  DomainStateException,
+  BusinessRuleException,
+  StateException,
 } from "../../exceptions/domain-exceptions.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../base/audit-info.js";
@@ -201,7 +201,7 @@ export class UserRole extends BaseEntity {
    */
   activate(): void {
     if (this._isActive) {
-      throw new DomainStateException(
+      throw new StateException(
         "用户角色关联已激活",
         "active",
         "activate",
@@ -221,7 +221,7 @@ export class UserRole extends BaseEntity {
    */
   deactivate(): void {
     if (!this._isActive) {
-      throw new DomainStateException(
+      throw new StateException(
         "用户角色关联已停用",
         "inactive",
         "deactivate",
@@ -350,7 +350,7 @@ export class UserRole extends BaseEntity {
    */
   private validateUserId(userId: UserId): void {
     if (!userId) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "用户ID不能为空",
         "VALIDATION_FAILED",
       );
@@ -365,7 +365,7 @@ export class UserRole extends BaseEntity {
    */
   private validateRoleId(roleId: EntityId): void {
     if (!roleId) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色ID不能为空",
         "VALIDATION_FAILED",
       );
@@ -380,7 +380,7 @@ export class UserRole extends BaseEntity {
    */
   private validateReason(reason?: string): void {
     if (reason && reason.trim().length > 500) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "分配原因长度不能超过500字符",
         "VALIDATION_FAILED",
       );
@@ -395,7 +395,7 @@ export class UserRole extends BaseEntity {
    */
   private validateExpiration(expiresAt?: Date): void {
     if (expiresAt && expiresAt <= new Date()) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "过期时间必须是未来时间",
         "VALIDATION_FAILED",
       );

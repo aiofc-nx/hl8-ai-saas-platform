@@ -14,7 +14,7 @@ import { PermissionAction } from "../value-objects/types/permission-action.vo.js
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../entities/base/audit-info.js";
 import { DomainExceptionFactory } from "../exceptions/domain-exception-factory.js";
-import { BusinessRuleViolationException } from "../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../common/constants/index.js";
 
 /**
@@ -496,7 +496,7 @@ export class PermissionAggregate extends IsolationAwareAggregateRoot {
     newType: PermissionType,
   ): void {
     if (!newType) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "权限类型不能为空",
         ErrorCodes.VALIDATION_FAILED,
       );
@@ -531,7 +531,7 @@ export class PermissionAggregate extends IsolationAwareAggregateRoot {
     newAction: PermissionAction,
   ): void {
     if (!newAction) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "权限动作不能为空",
         ErrorCodes.VALIDATION_FAILED,
       );

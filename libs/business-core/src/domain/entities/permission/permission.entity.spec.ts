@@ -11,8 +11,8 @@ import { Permission } from "./permission.entity.js";
 import { PermissionType } from "../../value-objects/types/permission-type.vo.js";
 import { PermissionAction } from "../../value-objects/types/permission-action.vo.js";
 import {
-  BusinessRuleViolationException,
-  DomainStateException,
+  BusinessRuleException,
+  StateException,
   DomainValidationException,
 } from "../../exceptions/domain-exceptions.js";
 
@@ -358,7 +358,7 @@ describe("Permission Entity", () => {
 
       expect(() => {
         permission.setParentPermission(validEntityId);
-      }).toThrow(DomainStateException);
+      }).toThrow(StateException);
     });
 
     it("应该允许清除父权限", () => {
@@ -400,7 +400,7 @@ describe("Permission Entity", () => {
       expect(() => {
         permission.activate();
         permission.activate();
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -427,7 +427,7 @@ describe("Permission Entity", () => {
       expect(() => {
         permission.deactivate();
         permission.deactivate();
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 

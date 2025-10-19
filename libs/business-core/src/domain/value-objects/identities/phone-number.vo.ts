@@ -22,7 +22,7 @@
  */
 
 import { BaseValueObject } from "../base-value-object.js";
-import { BusinessRuleViolationException } from "../../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../../common/constants/index.js";
 
 export class PhoneNumber extends BaseValueObject<string> {
@@ -38,7 +38,7 @@ export class PhoneNumber extends BaseValueObject<string> {
     // 移除空格和连字符后的长度验证
     const cleanValue = value.replace(/[\s-]/g, "");
     if (cleanValue.length < 8 || cleanValue.length > 16) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "电话号码长度必须在8-16个字符之间",
         ErrorCodes.VALIDATION_FAILED,
       );
@@ -47,7 +47,7 @@ export class PhoneNumber extends BaseValueObject<string> {
     // 格式验证（支持国际格式）
     const phoneRegex = /^\+?[1-9]\d{1,14}$/;
     if (!phoneRegex.test(cleanValue)) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         `电话号码格式无效: ${value}`,
         ErrorCodes.VALIDATION_FAILED,
       );

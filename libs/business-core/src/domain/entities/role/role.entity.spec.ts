@@ -12,8 +12,8 @@ import { RoleType } from "../../value-objects/types/role-type.vo.js";
 import { PermissionType } from "../../value-objects/types/permission-type.vo.js";
 import { PermissionAction } from "../../value-objects/types/permission-action.vo.js";
 import {
-  BusinessRuleViolationException,
-  DomainStateException,
+  BusinessRuleException,
+  StateException,
   DomainValidationException,
 } from "../../exceptions/domain-exceptions.js";
 
@@ -77,7 +77,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         new Role(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证角色名称长度不能超过100字符", () => {
@@ -85,7 +85,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         new Role(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证角色描述长度不能超过500字符", () => {
@@ -93,7 +93,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         new Role(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     // 注意：Role实体的构造函数不验证type和permissionType，这些验证在updateType和updatePermissionType方法中进行
@@ -103,7 +103,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         new Role(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证权限动作不能重复", () => {
@@ -114,7 +114,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         new Role(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -140,7 +140,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         role.updateName("");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新名称长度不能超过100字符", () => {
@@ -148,7 +148,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         role.updateName("a".repeat(101));
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -174,7 +174,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         role.updateDescription("a".repeat(501));
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -192,7 +192,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         role.updateType(null as any);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -210,7 +210,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         role.updatePermissionType(null as any);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -231,7 +231,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         role.updatePriority(-1);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -250,7 +250,7 @@ describe("Role Entity", () => {
 
       expect(() => {
         role.setParentRole(validEntityId);
-      }).toThrow(DomainStateException);
+      }).toThrow(StateException);
     });
 
     it("应该允许清除父角色", () => {

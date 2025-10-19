@@ -7,7 +7,7 @@
  */
 
 import { BaseValueObject } from "../base-value-object.js";
-import { BusinessRuleViolationException } from "../../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../../common/constants/index.js";
 
 /**
@@ -98,7 +98,7 @@ export class UserStatus extends BaseValueObject<UserStatusValue> {
     this.validateNotEmpty(value, "用户状态");
     const validStatuses = Object.values(UserStatusValue);
     if (!validStatuses.includes(value)) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         `无效的用户状态: ${value}`,
         ErrorCodes.VALIDATION_FAILED,
       );

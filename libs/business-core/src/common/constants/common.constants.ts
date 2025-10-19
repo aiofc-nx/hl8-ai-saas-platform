@@ -91,3 +91,21 @@ export const FileSizeConstants = {
   /** 最大图片大小 */
   MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
 } as const;
+
+/**
+ * 实体操作常量
+ */
+export const ENTITY_OPERATIONS = {
+  /** 创建操作 */
+  CREATE: "CREATE",
+  /** 更新操作 */
+  UPDATE: "UPDATE",
+  /** 删除操作 */
+  DELETE: "DELETE",
+  /** 恢复操作 */
+  RESTORE: "RESTORE",
+  /** 激活操作 */
+  ACTIVATE: "ACTIVATE",
+  /** 停用操作 */
+  DEACTIVATE: "DEACTIVATE",
+} as const;

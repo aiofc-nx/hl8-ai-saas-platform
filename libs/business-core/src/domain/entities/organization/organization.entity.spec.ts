@@ -10,8 +10,8 @@ import { EntityId, TenantId } from "@hl8/isolation-model";
 import { Organization } from "./organization.entity.js";
 import { OrganizationType } from "../../value-objects/types/organization-type.vo.js";
 import {
-  BusinessRuleViolationException,
-  DomainStateException,
+  BusinessRuleException,
+  StateException,
 } from "../../exceptions/domain-exceptions.js";
 
 describe("Organization Entity", () => {
@@ -69,7 +69,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         new Organization(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证组织名称长度不能超过100字符", () => {
@@ -77,7 +77,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         new Organization(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证组织类型不能为空", () => {
@@ -85,7 +85,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         new Organization(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -123,7 +123,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         organization.updateName("");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新名称长度不能超过100字符", () => {
@@ -135,7 +135,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         organization.updateName("a".repeat(101));
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -187,7 +187,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         organization.updateType(null as any);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -214,7 +214,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         organization.setParent(validEntityId);
-      }).toThrow(DomainStateException);
+      }).toThrow(StateException);
     });
 
     it("应该允许清除父组织", () => {
@@ -279,7 +279,7 @@ describe("Organization Entity", () => {
 
       expect(() => {
         organization.updateSortOrder(-1);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 

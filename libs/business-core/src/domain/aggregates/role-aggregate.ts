@@ -16,7 +16,7 @@ import { PermissionAction } from "../value-objects/types/permission-action.vo.js
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../entities/base/audit-info.js";
 import { DomainExceptionFactory } from "../exceptions/domain-exception-factory.js";
-import { BusinessRuleViolationException } from "../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../common/constants/index.js";
 /**
  * 角色聚合根
@@ -426,7 +426,7 @@ export class RoleAggregate extends IsolationAwareAggregateRoot {
    */
   private validateRoleTypeChange(oldType: RoleType, newType: RoleType): void {
     if (!newType) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色类型不能为空",
         ErrorCodes.VALIDATION_FAILED,
       );

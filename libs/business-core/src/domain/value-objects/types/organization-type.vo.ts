@@ -1,5 +1,5 @@
 import { BaseValueObject } from "../base-value-object.js";
-import { BusinessRuleViolationException } from "../../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../../common/constants/index.js";
 import {
   OrganizationType as OrganizationTypeEnum,
@@ -72,7 +72,7 @@ export class OrganizationType extends BaseValueObject<string> {
     this.validateNotEmpty(value, "组织类型");
     const validTypes = OrganizationTypeUtils.getAllTypes();
     if (!validTypes.includes(value as OrganizationTypeEnum)) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         `无效的组织类型: ${value}`,
         ErrorCodes.VALIDATION_FAILED,
       );

@@ -7,7 +7,7 @@
  */
 
 import { BaseValueObject } from "../base-value-object.js";
-import { BusinessRuleViolationException } from "../../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../../common/constants/index.js";
 
 /**
@@ -109,7 +109,7 @@ export class RoleType extends BaseValueObject<RoleTypeValue> {
     this.validateNotEmpty(value, "角色类型");
     const validTypes = Object.values(RoleTypeValue);
     if (!validTypes.includes(value)) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         `无效的角色类型: ${value}`,
         ErrorCodes.VALIDATION_FAILED,
       );

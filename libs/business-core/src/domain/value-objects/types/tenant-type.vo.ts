@@ -41,7 +41,7 @@
  * @since 1.0.0
  */
 import { BaseValueObject } from "../base-value-object.js";
-import { BusinessRuleViolationException } from "../../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../../common/constants/index.js";
 import {
   TenantType as TenantTypeEnum,
@@ -102,7 +102,7 @@ export class TenantType extends BaseValueObject<string> {
       type.toString(),
     );
     if (!validTypes.includes(value.toUpperCase())) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         `无效的租户类型: ${value}。有效类型: ${validTypes.join(", ")}`,
         ErrorCodes.VALIDATION_FAILED,
       );
@@ -140,7 +140,7 @@ export class TenantType extends BaseValueObject<string> {
       case TenantTypeEnum.PERSONAL:
         return TenantType.PERSONAL;
       default:
-        throw new BusinessRuleViolationException(
+        throw new BusinessRuleException(
           `无效的租户类型: ${value}`,
           ErrorCodes.VALIDATION_FAILED,
         );

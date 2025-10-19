@@ -6,7 +6,7 @@
  */
 
 import { BaseValueObject } from "./base-value-object.js";
-import { BusinessRuleViolationException } from "../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../common/constants/index.js";
 
 /**
@@ -38,7 +38,7 @@ export class Email extends BaseValueObject<string> {
 
     const [localPart] = value.split("@");
     if (localPart.length > 64) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "邮箱本地部分长度不能超过64个字符",
         ErrorCodes.VALIDATION_FAILED,
       );

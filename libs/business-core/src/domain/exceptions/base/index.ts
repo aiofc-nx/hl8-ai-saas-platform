@@ -10,9 +10,9 @@ export {
   BaseDomainException,
   DomainExceptionType,
   DomainExceptionSeverity,
-  BusinessRuleViolationException,
+  BusinessRuleException,
   DomainValidationException,
-  DomainStateException,
+  StateException,
   DomainPermissionException,
 } from "./base-domain-exception.js";
 

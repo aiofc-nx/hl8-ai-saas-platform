@@ -10,8 +10,8 @@ import { EntityId, TenantId } from "@hl8/isolation-model";
 import { Department } from "./department.entity.js";
 import { DepartmentLevel } from "../../value-objects/types/department-level.vo.js";
 import {
-  BusinessRuleViolationException,
-  DomainStateException,
+  BusinessRuleException,
+  StateException,
   DomainValidationException,
 } from "../../exceptions/domain-exceptions.js";
 
@@ -74,7 +74,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         new Department(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证部门名称长度不能超过100字符", () => {
@@ -82,7 +82,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         new Department(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证部门层级不能为空", () => {
@@ -90,7 +90,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         new Department(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证部门层级必须在1-8之间", () => {
@@ -134,7 +134,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         department.updateName("");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新名称长度不能超过100字符", () => {
@@ -146,7 +146,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         department.updateName("a".repeat(101));
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -198,7 +198,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         department.updateLevel(null as any);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新层级必须在1-8之间", () => {
@@ -237,7 +237,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         department.setParent(validEntityId);
-      }).toThrow(DomainStateException);
+      }).toThrow(StateException);
     });
 
     it("应该允许清除父部门", () => {
@@ -302,7 +302,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         department.updateSortOrder(-1);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -357,7 +357,7 @@ describe("Department Entity", () => {
 
       expect(() => {
         department.updateCode("invalid code");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 

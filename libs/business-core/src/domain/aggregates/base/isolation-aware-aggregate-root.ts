@@ -124,7 +124,7 @@ import { EntityId } from "@hl8/isolation-model";
 import { IsolationContext, IsolationLevel } from "@hl8/isolation-model";
 import { BaseAggregateRoot } from "./base-aggregate-root.js";
 import { BaseDomainEvent } from "../../events/base/base-domain-event.js";
-import { BusinessRuleViolationException } from "../../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
 import { DomainPermissionException } from "../../exceptions/base/base-domain-exception.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../../entities/base/audit-info.js";
@@ -184,12 +184,12 @@ export abstract class IsolationAwareAggregateRoot extends BaseAggregateRoot {
    * - 可以在业务方法开始时调用以确保安全
    *
    * ### 异常处理
-   * - 抛出 BusinessRuleViolationException 异常
+   * - 抛出 BusinessRuleException 异常
    * - 异常消息清晰描述问题原因
    * - 异常详情包含聚合根类型和ID
    * - 便于调试和问题追踪
    *
-   * @throws {BusinessRuleViolationException} 当隔离上下文无效时
+   * @throws {BusinessRuleException} 当隔离上下文无效时
    *
    * @protected
    *
@@ -208,7 +208,7 @@ export abstract class IsolationAwareAggregateRoot extends BaseAggregateRoot {
    */
   protected ensureIsolationContext(): void {
     if (!this._isolationContext) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "隔离上下文缺失，所有操作必须在隔离上下文中执行",
         "MISSING_ISOLATION_CONTEXT",
       );

@@ -2,8 +2,8 @@ import { EntityId } from "@hl8/isolation-model";
 import { BaseEntity } from "../base/base-entity.js";
 import { DepartmentLevel } from "../../value-objects/types/department-level.vo.js";
 import {
-  BusinessRuleViolationException,
-  DomainStateException,
+  BusinessRuleException,
+  StateException,
 } from "../../exceptions/domain-exceptions.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../base/audit-info.js";
@@ -430,7 +430,7 @@ export class Department extends BaseEntity {
    */
   activate(): void {
     if (this._isActive) {
-      throw new DomainStateException("部门已激活", "active", "activate", {
+      throw new StateException("部门已激活", "active", "activate", {
         departmentId: this.id.toString(),
         isActive: this._isActive,
       });
@@ -453,7 +453,7 @@ export class Department extends BaseEntity {
    */
   deactivate(): void {
     if (!this._isActive) {
-      throw new DomainStateException("部门已停用", "inactive", "deactivate", {
+      throw new StateException("部门已停用", "inactive", "deactivate", {
         departmentId: this.id.toString(),
         isActive: this._isActive,
       });
@@ -511,13 +511,13 @@ export class Department extends BaseEntity {
    */
   private validateName(name: string): void {
     if (!name || !name.trim()) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "部门名称不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (name.trim().length > 100) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "部门名称长度不能超过100字符",
         "VALIDATION_FAILED",
       );
@@ -531,13 +531,13 @@ export class Department extends BaseEntity {
    */
   private validateLevel(level: DepartmentLevel): void {
     if (!level) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "部门层级不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (!DepartmentLevel.isValid(level.value)) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "无效的部门层级",
         "VALIDATION_FAILED",
       );
@@ -551,13 +551,13 @@ export class Department extends BaseEntity {
    */
   private validateParent(parentId: EntityId): void {
     if (!parentId) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "父部门ID不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (parentId.equals(this.id)) {
-      throw new DomainStateException(
+      throw new StateException(
         "不能设置自己为父部门",
         "active",
         "setParent",
@@ -573,7 +573,7 @@ export class Department extends BaseEntity {
    */
   private validateSortOrder(sortOrder: number): void {
     if (sortOrder < 0) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "部门排序不能为负数",
         "VALIDATION_FAILED",
       );
@@ -587,7 +587,7 @@ export class Department extends BaseEntity {
    */
   private validateManager(managerId: EntityId): void {
     if (!managerId) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "负责人ID不能为空",
         "VALIDATION_FAILED",
       );
@@ -601,19 +601,19 @@ export class Department extends BaseEntity {
    */
   private validateCode(code: string): void {
     if (!code || !code.trim()) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "部门编码不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (code.trim().length > 20) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "部门编码长度不能超过20字符",
         "VALIDATION_FAILED",
       );
     }
     if (!/^[A-Z0-9_]+$/.test(code.trim())) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "部门编码只能包含大写字母、数字和下划线",
         "VALIDATION_FAILED",
       );

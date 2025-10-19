@@ -41,7 +41,7 @@
  * @since 1.0.0
  */
 import { BaseValueObject } from "./base-value-object.js";
-import { BusinessRuleViolationException } from "../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../exceptions/base/base-domain-exception.js";
 
 export class TenantType extends BaseValueObject<string> {
   /**
@@ -95,7 +95,7 @@ export class TenantType extends BaseValueObject<string> {
 
     const validTypes = ["ENTERPRISE", "COMMUNITY", "TEAM", "PERSONAL"];
     if (!validTypes.includes(value.toUpperCase())) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         `无效的租户类型: ${value}。有效类型: ${validTypes.join(", ")}`,
         "VALIDATION_FAILED",
       );
@@ -133,7 +133,7 @@ export class TenantType extends BaseValueObject<string> {
       case "PERSONAL":
         return TenantType.PERSONAL;
       default:
-        throw new BusinessRuleViolationException(
+        throw new BusinessRuleException(
           `无效的租户类型: ${value}`,
           "VALIDATION_FAILED",
         );

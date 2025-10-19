@@ -14,7 +14,7 @@ import { Permission } from "../entities/permission/permission.entity.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import type { IPartialAuditInfo } from "../entities/base/audit-info.js";
 import { DomainExceptionFactory } from "../exceptions/domain-exception-factory.js";
-import { BusinessRuleViolationException } from "../exceptions/base/base-domain-exception.js";
+import { BusinessRuleException } from "../exceptions/base/base-domain-exception.js";
 
 /**
  * 用户角色关联聚合根

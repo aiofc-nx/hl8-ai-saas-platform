@@ -354,7 +354,7 @@ export class Role extends BaseEntity {
    */
   activate(): void {
     if (this._isActive) {
-      throw new DomainStateException("角色已激活", "active", "activate", {
+      throw new StateException("角色已激活", "active", "activate", {
         roleId: this.id.toString(),
         isActive: this._isActive,
       });
@@ -369,13 +369,13 @@ export class Role extends BaseEntity {
    */
   deactivate(): void {
     if (!this._isActive) {
-      throw new DomainStateException("角色已停用", "inactive", "deactivate", {
+      throw new StateException("角色已停用", "inactive", "deactivate", {
         roleId: this.id.toString(),
         isActive: this._isActive,
       });
     }
     if (this._isSystemRole) {
-      throw new DomainStateException(
+      throw new StateException(
         "系统角色不能停用",
         "system",
         "deactivate",
@@ -582,7 +582,7 @@ export class Role extends BaseEntity {
       );
     }
     if (name.trim().length > 100) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色名称长度不能超过100字符",
         "VALIDATION_FAILED",
       );
@@ -597,7 +597,7 @@ export class Role extends BaseEntity {
    */
   private validateDescription(description?: string): void {
     if (description && description.trim().length > 500) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色描述长度不能超过500字符",
         "VALIDATION_FAILED",
       );
@@ -612,7 +612,7 @@ export class Role extends BaseEntity {
    */
   private validateActions(actions: PermissionAction[]): void {
     if (!actions || actions.length === 0) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色必须至少有一个权限动作",
         "VALIDATION_FAILED",
       );
@@ -620,7 +620,7 @@ export class Role extends BaseEntity {
     const actionValues = actions.map((a) => a.value);
     const uniqueValues = [...new Set(actionValues)];
     if (actionValues.length !== uniqueValues.length) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "权限动作不能重复",
         "VALIDATION_FAILED",
       );
@@ -635,7 +635,7 @@ export class Role extends BaseEntity {
    */
   private validateActionAddition(action: PermissionAction): void {
     if (!action) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "权限动作不能为空",
         "VALIDATION_FAILED",
       );
@@ -650,13 +650,13 @@ export class Role extends BaseEntity {
    */
   private validateActionRemoval(action: PermissionAction): void {
     if (!action) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "权限动作不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (this._actions.length === 1) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色必须至少有一个权限动作",
         "VALIDATION_FAILED",
       );
@@ -672,7 +672,7 @@ export class Role extends BaseEntity {
    */
   private validateTypeChange(oldType: RoleType, newType: RoleType): void {
     if (!newType) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色类型不能为空",
         "VALIDATION_FAILED",
       );
@@ -682,7 +682,7 @@ export class Role extends BaseEntity {
       oldType.isSystemRole() &&
       !newType.isSystemRole()
     ) {
-      throw new DomainStateException(
+      throw new StateException(
         "系统角色不能变更为非系统角色",
         "system",
         "changeType",
@@ -703,7 +703,7 @@ export class Role extends BaseEntity {
     newType: PermissionType,
   ): void {
     if (!newType) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "权限类型不能为空",
         "VALIDATION_FAILED",
       );
@@ -718,7 +718,7 @@ export class Role extends BaseEntity {
    */
   private validatePriority(priority: number): void {
     if (typeof priority !== "number" || priority < 0) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "角色优先级必须是非负数",
         "VALIDATION_FAILED",
       );
@@ -733,13 +733,13 @@ export class Role extends BaseEntity {
    */
   private validateParentRole(parentRoleId: EntityId): void {
     if (!parentRoleId) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "父角色ID不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (parentRoleId.equals(this.id)) {
-      throw new DomainStateException(
+      throw new StateException(
         "角色不能设置自己为父角色",
         "active",
         "setParentRole",
@@ -756,13 +756,13 @@ export class Role extends BaseEntity {
    */
   private validateTag(tag: string): void {
     if (!tag || !tag.trim()) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "标签不能为空",
         "VALIDATION_FAILED",
       );
     }
     if (tag.trim().length > 50) {
-      throw new BusinessRuleViolationException(
+      throw new BusinessRuleException(
         "标签长度不能超过50字符",
         "VALIDATION_FAILED",
       );

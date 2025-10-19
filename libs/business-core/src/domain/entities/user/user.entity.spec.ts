@@ -10,7 +10,7 @@ import { EntityId, TenantId } from "@hl8/isolation-model";
 import { User } from "./user.entity.js";
 import { UserStatus } from "../../value-objects/types/user-status.vo.js";
 import { UserRole } from "../../value-objects/types/user-role.vo.js";
-import { BusinessRuleViolationException } from "../../exceptions/domain-exceptions.js";
+import { BusinessRuleException } from "../../exceptions/domain-exceptions.js";
 
 describe("User Entity", () => {
   let validEntityId: EntityId;
@@ -73,7 +73,7 @@ describe("User Entity", () => {
 
       expect(() => {
         new User(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证用户名长度不能超过50字符", () => {
@@ -81,7 +81,7 @@ describe("User Entity", () => {
 
       expect(() => {
         new User(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证用户名只能包含字母、数字和下划线", () => {
@@ -89,7 +89,7 @@ describe("User Entity", () => {
 
       expect(() => {
         new User(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证邮箱地址不能为空", () => {
@@ -97,7 +97,7 @@ describe("User Entity", () => {
 
       expect(() => {
         new User(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证邮箱地址格式", () => {
@@ -105,7 +105,7 @@ describe("User Entity", () => {
 
       expect(() => {
         new User(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证用户姓名不能为空", () => {
@@ -113,7 +113,7 @@ describe("User Entity", () => {
 
       expect(() => {
         new User(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证用户姓名长度不能超过100字符", () => {
@@ -121,7 +121,7 @@ describe("User Entity", () => {
 
       expect(() => {
         new User(validEntityId, invalidProps, validAuditInfo);
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -147,7 +147,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateUsername("", "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新用户名长度不能超过50字符", () => {
@@ -155,7 +155,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateUsername("a".repeat(51), "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新用户名只能包含字母、数字和下划线", () => {
@@ -163,7 +163,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateUsername("new-user", "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -189,7 +189,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateEmail("", "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新邮箱地址格式", () => {
@@ -197,7 +197,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateEmail("invalid-email", "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -215,7 +215,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updatePhone("invalid-phone", "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该允许空手机号码", () => {
@@ -249,7 +249,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateDisplayName("", "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该验证新姓名长度不能超过100字符", () => {
@@ -257,7 +257,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateDisplayName("a".repeat(101), "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -275,7 +275,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateRole(null as any, "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -293,7 +293,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateStatus(null as any, "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
   });
 
@@ -407,7 +407,7 @@ describe("User Entity", () => {
 
       expect(() => {
         user.updateUsername("user@name", "admin");
-      }).toThrow(BusinessRuleViolationException);
+      }).toThrow(BusinessRuleException);
     });
 
     it("应该处理Unicode字符的用户姓名", () => {
