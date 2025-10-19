@@ -1,152 +1,888 @@
 # HL8 SAAS 平台
 
-> 基于 Turborepo 的企业级 SAAS 平台 - 采用 Clean Architecture + CQRS + 事件溯源 + 事件驱动架构
+> 基于 Turborepo 的企业级 SAAS 平台 - 采用 Clean Architecture + DDD + CQRS + 事件溯源 + 事件驱动架构
 
-## Using this example
 
-Run the following command:
+### III. 架构原则
 
-```sh
-npx create-turbo@latest
+**项目采用混合架构模式：Clean Architecture + DDD + CQRS + 事件溯源 (ES) + 事件驱动架构 (EDA)**
+
+- **Clean Architecture**：
+  - 四层架构：领域层、应用层、基础设施层、接口层
+  - 依赖关系从外向内，内层不依赖外层
+  - 核心业务逻辑独立于框架和基础设施
+  - 用例（Use Cases）必须在文档和设计中明确提及
+
+- **领域驱动设计 (DDD)**：
+  - **充血模型（Rich Domain Model）**：
+    - 领域对象必须包含业务逻辑和数据，禁止使用贫血模型
+    - 实体和聚合根必须封装业务行为，而非仅作为数据容器
+    - 业务规则必须在领域对象内部实现，而非在服务层
+    - 领域对象通过方法暴露行为，而非直接暴露属性
+    - 对象状态变更必须通过业务方法，确保业务规则的执行
+    - 禁止贫血模型（Anemic Domain Model）：领域对象只有 getter/setter 没有业务逻辑
+  - **战术设计**：
+    - 领域实体和聚合根必须分离（entities/ 和 aggregates/）
+    - 聚合根管理聚合边界和一致性规则
+    - 值对象（Value Objects）表示无标识的不可变概念
+    - 领域服务（Domain Services）处理跨实体的领域逻辑
+    - 仓储（Repositories）负责聚合的持久化
+    - 规格模式（Specifications）封装复杂的业务规则
+    - 领域事件（Domain Events）记录领域内发生的重要事实
+  - **统一语言**：
+    - 技术实现必须使用业务术语
+    - 代码结构反映业务模型
+    - 开发者和业务专家使用相同的术语交流
+
+- **CQRS 模式**：
+  - 命令（Command）和查询（Query）必须分离
+  - 写操作使用命令模型，改变系统状态
+  - 读操作使用查询模型，不改变状态
+  - 支持读写模型的独立优化和扩展
+  - 命令和查询通过总线（Bus）分发
+  - 事件投影器（Projectors）构建读模型
+
+- **事件溯源 (ES)**：
+  - 所有状态变更通过事件记录，事件是事实来源
+  - 事件是不可变的事实记录，只能追加不能修改
+  - 支持通过重放事件重建聚合状态
+  - 支持完整的审计追踪和时间旅行
+  - 事件存储（Event Store）是核心基础设施
+  - 快照（Snapshots）优化事件重放性能
+
+- **事件驱动架构 (EDA)**：
+  - 系统组件通过事件通信，实现松耦合
+  - 领域事件在聚合内部传播
+  - 集成事件在服务间传播
+  - 支持异步处理和最终一致性
+  - 事件总线（Event Bus）负责事件的发布和订阅
+  - Saga 模式协调跨聚合的长事务
+
+**理由**：混合架构模式为企业级SAAS平台提供高可扩展性、高性能、高可靠性和高可维护性。DDD 确保技术实现与业务需求一致；Clean Architecture 确保核心逻辑独立于技术；CQRS 支持读写分离和独立优化；事件溯源提供完整的审计追踪；事件驱动实现系统解耦。这些模式的有机结合，适应复杂的业务场景和未来微服务部署需求。详细目录结构见 `docs/backend-project-template.md`。
+
+### IV. Monorepo 组织原则
+
+**使用 Turborepo 管理多个相关项目，实现代码共享和独立部署**
+
+- **项目结构**：
+  - `apps/`: 应用程序项目
+  - `libs/`: 服务端的业务库、领域模块、依赖库
+  - `packages/`: 前端的业务库、组件库以及前后端共享的依赖库和工具包
+  - `examples/`: 示例和演示项目
+- **领域模块独立性**：
+  - 领域模块作为独立项目开发
+  - 便于未来微服务部署
+  - 模块间通过明确的接口通信
+- **服务模块命名**：
+  - 服务模块放在 services 目录时，去掉 "-service" 后缀
+  - 例如：`auth-service` → `auth`
+- **包管理**：
+  - 必须使用 pnpm 作为包管理工具
+  - 通过 `pnpm-workspace.yaml` 管理项目依赖
+  - 使用 `turbo run` 执行项目任务
+
+**理由**：Monorepo 结构支持代码复用、统一配置管理和原子化提交，同时保持各模块的独立性，为微服务架构演进奠定基础。
+
+### V. 质量保证原则
+
+**确保代码质量、可维护性和可测试性**
+
+- **ESLint 规范**：
+  - 项目使用 `eslint.config.mjs` 作为配置文件
+  - 子项目必须扩展并集成根目录的 ESLint 配置
+  - 主动使用 MCP ESLint 工具进行代码检查和自动修复
+- **TypeScript 配置**：
+  - 每个 `libs/<package>/tsconfig.json` 必须扩展 monorepo 根 tsconfig.json
+  - 确保配置一致性
+- **文档规范**：
+  - 详细设计文件使用 "XS" 前缀而非 "详细设计"
+  - 保持文档与代码同步更新
+
+**理由**：统一的质量标准和工具链确保代码库的长期可维护性，减少技术债务，提高团队协作效率。
+
+### VI. 测试架构原则
+
+**本项目遵循分层测试架构，确保代码质量和快速反馈**
+
+- **就近原则**：单元测试文件与被测试文件在同一目录
+  - 文件命名：`{被测试文件名}.spec.ts`
+  - 便于维护和快速定位测试
+  - 确保测试与代码同步更新
+
+- **集中管理**：集成测试、端到端测试统一放置在 `__tests__` 目录
+  - 集成测试：`__tests__/integration/`
+  - 端到端测试：`__tests__/e2e/`
+  - 便于统一管理和执行
+
+- **类型分离**：不同类型的测试使用不同的目录结构
+  - 单元测试：与源代码同目录
+  - 集成测试：按模块组织在 `__tests__/integration/`
+  - 端到端测试：按功能组织在 `__tests__/e2e/`
+
+- **依赖隔离**：测试之间相互独立，不依赖执行顺序
+  - 每个测试用例独立运行
+  - 使用 beforeEach/afterEach 清理状态
+  - 避免共享可变状态
+
+- **快速反馈**：单元测试快速执行，集成测试覆盖关键路径
+  - 单元测试：毫秒级执行
+  - 集成测试：秒级执行
+  - 端到端测试：分钟级执行
+
+**测试金字塔**：
+
+```text
+           ┌─────────────────┐
+           │   E2E Tests     │  ← 少量，覆盖关键用户流程
+           │   (端到端测试)    │
+           └─────────────────┘
+        ┌─────────────────────┐
+        │  Integration Tests  │  ← 适量，测试模块间交互
+        │   (集成测试)         │
+        └─────────────────────┘
+     ┌─────────────────────────┐
+     │     Unit Tests          │  ← 大量，测试单个组件
+     │     (单元测试)           │
+     └─────────────────────────┘
 ```
 
-## What's inside?
+**测试覆盖率要求**：
 
-This Turborepo includes the following packages/apps:
+- 核心业务逻辑测试覆盖率 ≥ 80%
+- 关键路径测试覆盖率 ≥ 90%
+- 所有公共 API 必须有对应的测试用例
 
-### Apps and Packages
+**理由**：分层测试架构确保代码质量，减少缺陷，提供快速反馈，详细规范见 `docs/testing-standards.md`。
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### VII. 数据隔离与共享原则
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+**系统必须实现多层级数据隔离，支持共享数据和非共享数据的细粒度访问控制**
 
-### Utilities
+这是企业级SAAS平台的核心安全能力，确保数据在正确的范围内访问，防止数据泄露。
 
-This Turborepo has some additional tools already setup for you:
+#### 多层级数据隔离
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+基于宪章定义的统一语言体系，系统支持以下5个隔离层级：
 
-### Build
+- **平台级隔离（Platform Level）**：
+  - 平台数据与租户数据完全隔离
+  - 平台管理数据仅平台管理员可访问
+  - 例如：平台配置、全局统计、系统监控数据
 
-To build all apps and packages, run the following command:
+- **租户级隔离（Tenant Level）**：
+  - 不同租户的数据完全隔离，这是最基础的隔离要求
+  - 租户间数据不可跨访问，即使是相同类型的数据
+  - 支持企业租户、社群租户、团队租户、个人租户四种类型
+  - 例如：租户A的订单数据对租户B完全不可见
 
+- **组织级隔离（Organization Level）**：
+  - 同一租户内，不同组织的非共享数据相互隔离
+  - 组织是租户内的横向管理单位（专业委员会、项目团队、质量小组等）
+  - 组织间是平行关系，无从属关系
+  - 例如：技术委员会的评审数据对市场委员会不可见
+
+- **部门级隔离（Department Level）**：
+  - 同一组织内，不同部门的非共享数据相互隔离
+  - 部门是纵向管理单位，具有层级关系，支持8层嵌套
+  - 部门间遵循上下级关系，上级部门可访问下级部门的共享数据
+  - 例如：财务部门的预算数据对人力资源部门不可见
+
+- **用户级隔离（User Level）**：
+  - 用户私有数据仅该用户可访问
+  - 即使在同一部门，用户私有数据也相互隔离
+  - 例如：用户A的个人笔记对用户B不可见
+
+#### 数据分类
+
+系统将所有数据分为两类：
+
+- **共享数据（Shared Data）**：
+  - 可以在特定层级内被所有下级访问
+  - 必须明确定义共享级别（平台共享、租户共享、组织共享、部门共享）
+  - 共享数据对指定层级及其所有下级层级可见
+  - 例如：租户级共享的公告，对该租户内所有组织、部门、用户可见
+
+- **非共享数据（Non-Shared Data）**：
+  - 仅限特定层级访问，不可跨层级访问
+  - 数据所有者层级决定访问权限
+  - 非共享数据是默认状态，确保数据安全
+  - 例如：部门级非共享的财务数据，仅该部门成员可访问
+
+#### 数据访问规则
+
+- **隔离规则**：
+  - 所有数据访问必须携带完整的隔离上下文（租户ID、组织ID、部门ID、用户ID）
+  - 系统自动根据隔离上下文过滤数据，开发者无需手动处理
+  - 跨层级数据访问必须经过明确授权
+  - 所有数据访问都必须记录审计日志
+
+- **共享规则**：
+  - 上级层级的共享数据对下级可见（如租户共享数据对所有组织可见）
+  - 下级层级的数据对上级不可见（除非明确授权）
+  - 同级层级的非共享数据相互隔离
+  - 数据的共享级别在创建时确定，可通过权限管理修改
+
+- **兼职场景**：
+  - 用户可以同时属于多个组织或部门（兼职）
+  - 系统支持上下文切换，用户可选择当前工作的组织和部门
+  - 用户可访问所有归属层级的数据，但同一时刻只能在一个上下文中操作
+
+#### 技术实现要求
+
+- **数据模型**：
+  - 所有业务表必须包含隔离字段（tenantId、organizationId、departmentId、userId）
+  - 必须为隔离字段创建索引以优化查询性能
+  - 建议使用数据库行级安全策略（如 PostgreSQL RLS）
+
+- **API设计**：
+  - 所有API请求必须携带隔离标识（X-Tenant-Id、X-Organization-Id、X-Department-Id、X-User-Id）
+  - API响应只包含当前隔离上下文有权访问的数据
+  - 数据创建时必须指定共享级别和所有者层级
+
+- **缓存策略**：
+  - 缓存键必须包含完整的隔离层级信息
+  - 支持基于层级的批量缓存失效
+  - 例如：清除整个租户的缓存时，使用租户ID前缀匹配
+
+- **审计追踪**：
+  - 所有数据访问必须记录完整的隔离上下文
+  - 跨层级数据访问必须触发审计事件
+  - 数据访问拒绝必须记录原因和上下文
+
+**理由**：多层级数据隔离是企业级SAAS平台的核心安全能力，确保数据在正确的范围内访问。通过统一的数据分类和访问规则，既保证了数据安全，又支持了灵活的数据共享需求，是实现细粒度权限控制的基础。
+
+### VIII. 统一语言原则（Ubiquitous Language）
+
+**所有团队成员（开发者、AI助手、业务人员）必须使用统一的领域术语进行沟通和文档编写**
+
+这是领域驱动设计（DDD）的核心原则之一，确保技术实现与业务需求的一致性。
+
+#### 核心术语定义
+
+本项目使用的核心术语及其定义参见 `docs/definition-of-terms.mdc`，以下是关键术语摘要：
+
+##### 平台 (Platform)
+
+- **定义**：平台是SAAS服务的提供商，负责开发系统、提供技术支持和通用的商业服务
+- **主要职责**：
+  - 系统开发和维护
+  - 技术支持和问题解决
+  - 提供通用的商业服务和管理功能
+  - 平台运营和监控
+  - 租户管理和用户管理
+- **服务对象**：平台管理员、个人用户、租户、租户用户
+- **特点**：提供多租户SAAS服务，支持多种租户类型，提供完整的用户管理体系和权限控制
+
+##### 租户 (Tenant)
+
+- **定义**：租户是SAAS平台中的独立客户单位，拥有独立的数据空间和配置环境
+- **类型**：
+  - **企业租户**：公司、集团等商业组织
+  - **社群租户**：社区、协会、俱乐部等社会组织
+  - **团队租户**：项目团队、工作组等临时性组织
+  - **个人租户**：个人用户创建的独立空间
+- **特点**：数据完全隔离、独立的配置环境、独立的用户管理、独立的权限体系
+
+##### 组织 (Organization)
+
+- **定义**：组织是租户内设的横向部门管理单位，负责管理下属部门的特定职能及业务
+- **类型**：专业委员会、项目管理团队、质量控制小组、绩效管理小组、其他职能组织
+- **特点**：
+  - 横向设置，组织之间没有从属关系
+  - 专注于特定职能或业务领域
+  - 可以管理多个部门
+  - 具有相对独立的管理权限
+
+##### 部门 (Department)
+
+- **定义**：部门是组织内设的纵向管理机构，具有明确的上下级从属关系
+- **特点**：
+  - 纵向设置，具有明确的层级关系
+  - 上级部门管理下级部门
+  - 具有明确的汇报关系
+  - 负责具体的业务执行
+- **层级关系**：支持多级部门嵌套，可达8层以上（总部 → 事业部 → 区域 → 分公司 → 部门 → 组 → 小组 → 专项团队）
+
+##### 用户 (User)
+
+- **定义**：用户是SAAS平台的使用者，是系统中最基本的身份单位
+- **分类方法**：
+  - **按用户来源分类**：平台用户、租户用户、系统用户
+  - **按用户类型分类**：个人用户、企业用户、社群用户、团队用户
+  - **按用户角色分类**：管理员用户、普通用户、系统用户
+  - **按用户状态分类**：活跃用户、待激活用户、禁用用户、锁定用户、过期用户
+  - **按用户归属分类**：平台级用户、租户级用户、组织级用户、部门级用户
+- **特点**：
+  - 用户首先属于平台
+  - 用户可以被分配到租户
+  - 租户用户可以被分配到组织和部门
+  - 用户可以同时属于多个组织和部门（兼职）
+  - 用户离开租户后仍然是平台用户
+
+#### 术语关系图
+
+```text
+平台 (Platform) - SAAS服务提供商
+├── 平台管理员
+├── 个人用户 (Personal User)
+│
+└── 租户 (Tenant) - 平台客户
+    ├── 企业租户
+    ├── 社群租户
+    ├── 团队租户
+    └── 个人租户
+        │
+        ├── 组织 (Organization) - 横向设置
+        │   ├── 专业委员会
+        │   ├── 项目管理团队
+        │   ├── 质量控制小组
+        │   └── 绩效管理小组
+        │
+        └── 部门 (Department) - 纵向设置
+            ├── 一级部门
+            │   ├── 二级部门
+            │   │   └── 三级部门
+            │   └── 二级部门
+            └── 一级部门
 ```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+#### 术语使用规范
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+- **一致性**：在所有文档、代码注释、接口定义、数据模型中使用统一术语
+- **精确性**：使用术语时必须符合其定义，不得随意扩展或改变含义
+- **可追溯性**：技术实现必须能够追溯到业务术语，代码中的实体、服务、方法命名应反映业务术语
+- **演进性**：术语定义会随业务发展而演进，术语变更必须同步更新到所有相关文档和代码
+
+#### 核心业务实体映射
+
+基于统一语言，系统需要支持以下核心业务实体：
+
+**平台级实体**：
+
+- Platform（平台）
+- PlatformUser（平台用户）
+- PlatformAdmin（平台管理员）
+
+**租户级实体**：
+
+- Tenant（租户）
+  - EnterpriseTenant（企业租户）
+  - CommunityTenant（社群租户）
+  - TeamTenant（团队租户）
+  - PersonalTenant（个人租户）
+- TenantUser（租户用户）
+
+**组织级实体**：
+
+- Organization（组织）
+  - Committee（专业委员会）
+  - ProjectTeam（项目管理团队）
+  - QualityGroup（质量控制小组）
+  - PerformanceGroup（绩效管理小组）
+
+**部门级实体**：
+
+- Department（部门）
+  - Level1Department（一级部门）
+  - Level2Department（二级部门）
+  - Level3Department（三级部门）
+
+**用户实体**：
+
+- User（用户基础实体）
+- UserRole（用户角色）
+- UserStatus（用户状态）
+- UserPermission（用户权限）
+
+#### 业务关系映射
+
+**层级关系**：
+
+- Platform → Tenant → Organization → Department
+- User → TenantUser → OrganizationUser → DepartmentUser
+
+**多对多关系**：
+
+- User 可以属于多个 Tenant
+- User 可以属于多个 Organization
+- User 在同一个 Organization 中只能属于一个 Department
+- User 可以属于不同 Organization 的不同 Department
+- Organization 可以管理多个 Department
+
+#### 权限体系映射
+
+**权限层级**：
+
+- PlatformAdmin（平台管理员）
+- TenantAdmin（租户管理员）
+- OrganizationAdmin（组织管理员）
+- DepartmentAdmin（部门管理员）
+- RegularUser（普通用户）
+
+**权限继承**：
+
+- 上级权限包含下级权限
+- 跨层级权限需要特殊授权
+- 兼职用户权限需要合并处理
+
+**理由**：统一语言是领域驱动设计的基石，确保业务专家和技术团队使用相同的术语交流，避免翻译损失，提高沟通效率，确保技术实现准确反映业务需求。详细术语定义见 `docs/definition-of-terms.mdc`。
+
+### IX. TypeScript `any` 类型使用原则
+
+**`any` 类型应被视为"逃生舱口"而非常规工具，在"危险的潜在性"与"安全的宽泛性"之间保持严格的平衡**
+
+TypeScript 的 `any` 类型具有两面性：它禁用类型检查带来潜在危险，但在某些高级场景中又是实现预期行为的必要手段。
+
+#### 危险的潜在性
+
+- **失去类型安全**：`any` 禁用 TypeScript 的类型检查和自动完成特性
+- **运行时风险**：编译时不报错的代码可能在运行时崩溃
+- **维护困难**：失去类型推导使代码难以理解和重构
+- **技术债务**：过度使用 `any` 会降低整个代码库的质量
+
+#### 安全的宽泛性
+
+在以下特定场景中，`any` 的使用是必要且安全的：
+
+- **泛型约束中的函数类型**：
+  - 使用 `(...args: any[]) => any` 作为泛型约束
+  - 使类型工具能够适配任意函数签名
+  - 例如：`type ReturnType<T extends (...args: any[]) => any>`
+
+- **高阶函数和装饰器**：
+  - 声明对参数类型不关心的高阶函数
+  - 保持函数装饰器的通用性和灵活性
+  - 需要配合 `Parameters<T>` 和 `ReturnType<T>` 使用
+
+- **条件类型和类型推断**：
+  - 在复杂的条件类型中处理类型推断
+  - 使用 `infer` 关键字配合 `any` 实现高级类型转换
+  - 需要明确的类型断言保证正确性
+
+- **第三方库集成**：
+  - 与不使用 TypeScript 的第三方库集成
+  - 处理动态 JSON 数据（配合类型保护函数）
+  - 必须配合类型保护函数确保安全
+
+#### 安全使用规则
+
+- **明确声明**：
+  - 使用 `any` 时必须添加注释说明原因
+  - 注释格式：`// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 原因说明`
+  - 必须解释为什么其他类型（如 `unknown`）不适用
+
+- **局部限定**：
+  - 将 `any` 的使用限制在最小范围内
+  - 尽快将 `any` 转换为具体类型
+  - 避免 `any` 在函数签名中传播
+
+- **测试保障**：
+  - 使用 `any` 的代码必须有 ≥ 90% 的测试覆盖率
+  - 编写测试验证运行时行为的正确性
+  - 测试各种边界情况和异常输入
+
+- **优先替代方案**：
+  - 优先使用 `unknown` 并配合类型保护函数
+  - 优先使用泛型约束而非 `any`
+  - 优先使用联合类型或交叉类型
+  - 只有在上述方案都不适用时才使用 `any`
+
+- **持续改进**：
+  - 定期审查代码库中的 `any` 使用
+  - 使用类型保护函数逐步收窄类型
+  - 记录和监控 `any` 使用情况
+
+#### 工程化约束
+
+- **ESLint 配置**：
+  - 必须启用 `@typescript-eslint/no-explicit-any` 规则（error 级别）
+  - 必须启用 `@typescript-eslint/no-unsafe-*` 系列规则
+  - 测试文件中可以降低为 warning 级别
+  - 所有生产代码严格执行，不提供宽松配置
+
+- **代码审查要求**：
+  - 所有新增的 `any` 使用必须在代码审查中说明理由
+  - 审查者必须验证是否存在更安全的替代方案
+  - 必须确认相应的测试覆盖率
+
+- **度量和监控**：
+  - 定期统计代码库中 `any` 的使用数量
+  - 设置 `any` 使用比例的上限目标（< 1%）
+  - 所有代码（包括新代码和现有代码）禁止引入新的 `any`（除非充分说明理由）
+  - 项目处于重新开发初期，所有代码都是新代码，必须严格遵循
+
+#### 典型使用模式
+
+**✅ 推荐模式 - 泛型约束**：
+
+```typescript
+// 声明对函数参数类型不关心的泛型约束
+type ReturnType<T extends (...args: any[]) => any> = T extends (
+  ...args: any[]
+) => infer R
+  ? R
+  : never;
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+**✅ 推荐模式 - 配合测试**：
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```typescript
+function parseJSON<T = unknown>(json: string): T {
+  try {
+    return JSON.parse(json) as T;
+  } catch {
+    return null as any; // 配合单元测试验证行为
+  }
+}
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+**❌ 禁止模式 - 懒惰使用**：
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```typescript
+// 不可接受：仅为避免类型错误而使用 any
+function process(data: any): any {
+  return data.value; // 应该使用 unknown 或具体类型
+}
 ```
 
-### Remote Caching
+**理由**：TypeScript 的类型系统是代码质量的重要保障，`any` 的过度使用会破坏这一保障。通过明确的规则和约束，在保持类型安全的同时，为必要的灵活性提供"逃生舱口"，实现安全性与实用性的平衡。详细说明见 `docs/any-except.md`。
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### X. 错误处理与日志记录原则
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+**错误处理必须遵循"异常优先，日志辅助"的设计原则，确保业务逻辑清晰、错误传播正确、系统可观测性良好**
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+这是企业级应用的核心设计原则，确保错误处理的正确性、一致性和可维护性。
 
+#### 职责分离原则
+
+- **异常用于业务逻辑**：
+  - 表示业务规则违反和不可恢复的错误状态
+  - 让调用方决定如何处理错误
+  - 支持错误传播和统一处理
+  - 提供明确的错误类型和上下文信息
+
+- **日志用于监控和调试**：
+  - 记录系统状态变化和性能指标
+  - 记录技术错误用于问题排查
+  - 提供审计追踪和运维监控
+  - 支持系统可观测性
+
+#### 错误处理层次
+
+- **数据层**：
+  - 记录技术错误日志（数据库连接失败、查询超时等）
+  - 抛出业务异常（数据不存在、权限不足等）
+  - 异常必须包含足够的上下文信息
+
+- **业务层**：
+  - 捕获并转换技术异常为业务异常
+  - 记录业务操作日志
+  - 实现业务规则验证
+
+- **控制器层**：
+  - 捕获业务异常并转换为HTTP响应
+  - 记录请求处理日志
+  - 提供用户友好的错误消息
+
+#### 日志记录规范
+
+- **结构化日志**：
+  - 使用统一的日志格式和字段
+  - 包含必要的上下文信息（用户ID、请求ID、租户ID等）
+  - 支持日志聚合和分析
+
+- **日志级别使用**：
+  - `ERROR`：系统错误，需要立即处理
+  - `WARN`：警告信息，需要关注但不影响功能
+  - `LOG`：重要业务操作和状态变化
+  - `DEBUG`：详细的调试信息
+  - `TRACE`：最详细的执行跟踪
+
+- **敏感信息保护**：
+  - 不在日志中记录密码、令牌等敏感信息
+  - 对个人信息进行脱敏处理
+  - 遵循数据保护法规要求
+
+#### 异常设计规范
+
+- **业务异常类**：
+  - 继承自 `HttpException` 或自定义基础异常类
+  - 包含明确的错误代码和消息
+  - 提供详细的错误上下文信息
+  - 支持国际化错误消息
+
+- **异常层次结构**：
+  - 基础异常类：定义通用异常行为
+  - 业务异常类：表示特定业务错误
+  - 技术异常类：表示系统技术错误
+  - 权限异常类：表示访问控制错误
+
+#### 反模式禁止
+
+- **禁止用日志替代异常**：
+
+  ```typescript
+  // ❌ 错误做法
+  if (userNotFound) {
+    this.logger.error("用户不存在");
+    return null; // 调用方需要检查null
+  }
+
+  // ✅ 正确做法
+  if (userNotFound) {
+    this.logger.warn("用户查找失败", { userId });
+    throw new UserNotFoundException(userId);
+  }
+  ```
+
+- **禁止异常中不记录日志**：
+
+  ```typescript
+  // ❌ 错误做法
+  throw new DatabaseException("连接失败"); // 没有日志记录
+
+  // ✅ 正确做法
+  this.logger.error("数据库连接失败", undefined, { host, port });
+  throw new DatabaseException("连接失败");
+  ```
+
+- **禁止日志中不抛出异常**：
+
+  ```typescript
+  // ❌ 错误做法
+  try {
+    await riskyOperation();
+  } catch (error) {
+    this.logger.error("操作失败", undefined, { error: error.message });
+    // 没有重新抛出异常，调用方不知道操作失败
+  }
+
+  // ✅ 正确做法
+  try {
+    await riskyOperation();
+  } catch (error) {
+    this.logger.error("操作失败", undefined, { error: error.message });
+    throw new OperationFailedException("操作失败", error);
+  }
+  ```
+
+#### 测试要求
+
+- **异常测试**：
+  - 测试异常抛出的正确性
+  - 验证异常包含的上下文信息
+  - 测试异常处理的业务逻辑
+
+- **日志测试**：
+  - 验证日志记录的完整性
+  - 测试日志格式的正确性
+  - 确保敏感信息不被泄露
+
+#### 监控和告警
+
+- **错误监控**：
+  - 监控异常发生频率和类型
+  - 设置错误率阈值告警
+  - 跟踪错误恢复时间
+
+- **日志分析**：
+  - 分析日志模式识别问题
+  - 监控系统性能指标
+  - 支持故障排查和根因分析
+
+**理由**：正确的错误处理是企业级应用的基础，通过"异常优先，日志辅助"的原则，确保业务逻辑清晰、错误传播正确、系统可观测性良好。这种设计模式提高了代码的可维护性、可测试性和可观测性，是企业级软件开发的最佳实践。
+
+## 技术约束
+
+### 技术栈要求
+
+**运行环境和开发工具：**
+
+- **运行环境**：Node.js >= 20
+- **开发语言**：TypeScript 5.9.2
+- **包管理器**：pnpm 10.11.0
+- **构建工具**：Turborepo 2.5.8
+- **代码格式化**：Prettier 3.6.2
+- **后端框架**：NestJS（推荐）
+- **架构模式**：Clean  + DDD + CQRS + ES + EDA
+
+### TypeScript 配置要求（服务端项目）
+
+**所有服务端项目（apps/、libs/ 中的 NestJS 项目）必须使用 NodeNext 模块系统**
+
+#### 核心配置
+
+所有服务端项目的 `tsconfig.json` 必须包含以下关键配置：
+
+```json
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "moduleDetection": "force",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
 ```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+#### 必需配置项说明
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+- **module: "NodeNext"**：
+  - 使用现代 Node.js 模块系统
+  - 支持 ES 模块标准
+  - 更好的 Tree Shaking 和打包优化
+  - 与前端生态系统保持一致
+
+- **moduleResolution: "NodeNext"**：
+  - 使用 Node.js 的模块解析算法
+  - 正确处理 package.json 的 exports 字段
+  - 支持条件导出和子路径导出
+
+- **target: "ES2022"**：
+  - 目标运行环境为现代 Node.js（>= 20）
+  - 支持最新的 JavaScript 特性
+  - 无需额外的 polyfill
+
+- **moduleDetection: "force"**：
+  - 强制所有文件视为模块
+  - 避免全局作用域污染
+  - 确保模块隔离性
+
+- **esModuleInterop: true**：
+  - 允许使用 `import` 导入 CommonJS 模块
+  - 提升与第三方库的兼容性
+  - 简化导入语法
+
+- **strict: true**：
+  - 启用所有严格类型检查选项
+  - 确保最高级别的类型安全
+  - 包括 strictNullChecks、strictFunctionTypes 等
+
+- **skipLibCheck: true**：
+  - 跳过 .d.ts 文件的类型检查
+  - 提升编译性能
+  - 避免第三方库类型定义的问题
+
+#### package.json 对应配置
+
+所有服务端项目的 `package.json` 必须包含：
+
+```json
+{
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+- **type: "module"**：声明项目使用 ES 模块
+- **engines**：确保运行环境满足要求
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+#### 配置继承要求
 
+- 所有服务端项目的 `tsconfig.json` 必须继承共享配置（如 `@repo/typescript-config/nestjs.json`）
+- 仅在必要时添加项目特定配置（如 `paths`、`outDir`）
+- 禁止覆盖核心配置项（module、moduleResolution、strict）
+
+#### 禁止使用 CommonJS
+
+**不允许在新的服务端项目中使用以下配置**：
+
+```json
+{
+  "compilerOptions": {
+    "module": "CommonJS", // ❌ 禁止
+    "moduleResolution": "node" // ❌ 禁止
+  }
+}
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+**理由**：
 
-## 📚 文档
+- CommonJS 是过时的模块系统
+- 不支持现代 JavaScript 特性
+- 性能优化有限
+- 与前端生态系统不一致
+- 项目处于重新开发初期，无需向后兼容
 
-### 配置管理
+**例外情况**：
 
-**配置文档目录**：📁 [docs/guides/config/](./docs/guides/config/)
+- 仅在与特定第三方库集成时遇到兼容性问题，且无法解决时，可以在特定文件中使用 CommonJS
+- 必须在代码审查中说明理由
+- 必须制定迁移到 ES 模块的计划
 
-**必读文档**：
+#### 文件扩展名规范
 
-- 📖 [配置文档索引 (docs/guides/config/README.md)](./docs/guides/config/README.md) - 所有配置文档的导航
-- ⚡ [配置快速入门 (docs/guides/config/CONFIG_GETTING_STARTED.md)](./docs/guides/config/CONFIG_GETTING_STARTED.md) - 5分钟快速上手
-- 📘 [配置使用指南 (docs/guides/config/CONFIGURATION_GUIDE.md)](./docs/guides/config/CONFIGURATION_GUIDE.md) - 完整的使用手册
+- **TypeScript 源文件**：使用 `.ts` 扩展名
+- **ES 模块 JavaScript**：使用 `.mjs` 扩展名（配置文件）
+- **类型声明文件**：使用 `.d.ts` 扩展名
 
-**⚠️ 重要说明**：
+#### 导入导出规范
 
-- 🚨 [重要澄清：两种独立的缓存](./docs/guides/config/IMPORTANT_CACHE_CLARIFICATION.md) - **必读！**
-- 🔒 [配置安全性分析](./docs/guides/config/CONFIG_SECURITY_ANALYSIS.md) - 安全最佳实践
+- 必须使用 ES 模块语法：`import` / `export`
+- 禁止使用 `require()` / `module.exports`（除非在配合特定第三方库时）
+- 导入第三方模块必须包含文件扩展名（如需要）
 
-## Useful Links
+**理由**：NodeNext 模块系统代表了 Node.js 的未来方向，提供更好的现代化支持、性能优化和生态系统兼容性。统一使用 NodeNext 确保所有服务端项目的一致性，便于维护和升级。详细说明见 `docs/ts-config.md`。
 
-Learn more about the power of Turborepo:
+### CommonJS 到 NodeNext 迁移要求
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+**所有从旧项目迁移的代码必须从 CommonJS 模块系统迁移到 NodeNext 模块系统**
+
+#### 迁移范围
+
+- **代码语法迁移**：
+  - 将所有 `require()` 语句迁移为 `import` 语句
+  - 将所有 `module.exports` 迁移为 `export` 语句
+  - 更新动态导入语法：`import()` 替代 `require()`
+
+- **配置文件迁移**：
+  - 更新 `package.json`：添加 `"type": "module"`
+  - 更新 `tsconfig.json`：配置 NodeNext 模块系统
+  - 更新构建脚本：适配新的模块系统
+
+- **文件结构迁移**：
+  - 确保所有 TypeScript 文件使用 `.ts` 扩展名
+  - 配置文件使用 `.mjs` 扩展名（如需要）
+  - 类型声明文件使用 `.d.ts` 扩展名
+
+#### 迁移验证要求
+
+- **编译验证**：
+  - 所有模块必须能够成功编译
+  - 类型检查必须通过
+  - 构建脚本必须正常运行
+
+- **运行时验证**：
+  - 所有模块必须能够正常加载
+  - 导入导出功能正常
+  - 与第三方库兼容性良好
+
+- **测试验证**：
+  - 所有测试必须通过
+  - 测试覆盖率不得降低
+  - 集成测试必须正常
+
+#### 迁移约束
+
+- **向后兼容性**：
+  - 迁移过程中必须保持功能完整性
+  - 公共 API 接口不得改变
+  - 业务逻辑不得受到影响
+
+- **性能要求**：
+  - 迁移后性能不得下降
+  - 启动时间不得增加
+  - 内存使用不得增加
+
+- **依赖管理**：
+  - 所有依赖必须支持 ES 模块
+  - 不兼容的依赖必须寻找替代方案
+  - 自定义依赖必须同步迁移
+
+**理由**：CommonJS 是过时的模块系统，与现代 Node.js 生态系统不兼容。迁移到 NodeNext 模块系统是技术债务清理的重要部分，确保代码的现代化、可维护性和性能优化。所有重构项目都必须完成此迁移。
