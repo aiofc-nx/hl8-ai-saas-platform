@@ -17,7 +17,7 @@
  * @group integration
  */
 
-import { IsolationLevel } from "@hl8/isolation-model/index.js";
+import { IsolationLevel } from "@hl8/isolation-model";
 import { Controller, Get, INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import request from "supertest";
