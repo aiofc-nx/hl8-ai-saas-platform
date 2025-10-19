@@ -3,7 +3,7 @@ export default {
   preset: "../../jest.preset.js",
   testEnvironment: "node",
   transform: {
-    "^.+\\.[tj]s$": ["@swc/jest"],
+    "^.+\\.[tj]s$": ["ts-jest"],
   },
   moduleFileExtensions: ["ts", "js"],
   coverageDirectory: "../../coverage/libs/config",
