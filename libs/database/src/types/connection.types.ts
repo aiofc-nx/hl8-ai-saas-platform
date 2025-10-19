@@ -1,141 +1,109 @@
 /**
- * 连接相关类型定义
+ * 连接类型定义
  *
- * @description 数据库连接的类型定义
+ * @description 定义数据库连接相关的类型
  *
  * @since 1.0.0
  */
 
 /**
  * 连接状态枚举
- *
- * @description 表示数据库连接的当前状态
  */
 export enum ConnectionStatus {
-  /** 未连接 */
-  DISCONNECTED = "disconnected",
-
-  /** 连接中 */
-  CONNECTING = "connecting",
-
   /** 已连接 */
   CONNECTED = "connected",
-
-  /** 连接失败 */
-  FAILED = "failed",
-
-  /** 重连中 */
-  RECONNECTING = "reconnecting",
+  /** 已断开 */
+  DISCONNECTED = "disconnected",
+  /** 连接中 */
+  CONNECTING = "connecting",
+  /** 错误状态 */
+  ERROR = "error",
 }
 
 /**
- * 连接配置接口
- *
- * @description 数据库连接的配置参数
+ * 连接配置
  */
 export interface ConnectionConfig {
-  /** 数据库类型 */
-  type: "postgresql" | "mongodb";
-
   /** 主机地址 */
   host: string;
-
   /** 端口号 */
   port: number;
-
-  /** 数据库名称 */
+  /** 数据库名 */
   database: string;
-
   /** 用户名 */
   username: string;
-
   /** 密码 */
   password: string;
-
-  /** SSL 配置（可选） */
-  ssl?: {
-    enabled: boolean;
-    rejectUnauthorized?: boolean;
-    ca?: string;
-    key?: string;
-    cert?: string;
-  };
 }
 
 /**
- * 连接池配置接口
- *
- * @description 连接池的行为配置
+ * 连接池配置
  */
 export interface PoolConfig {
   /** 最小连接数 */
   min: number;
-
   /** 最大连接数 */
   max: number;
-
-  /** 空闲超时（毫秒） */
+  /** 空闲超时时间（毫秒） */
   idleTimeoutMillis: number;
-
-  /** 获取连接超时（毫秒） */
+  /** 获取连接超时时间（毫秒） */
   acquireTimeoutMillis: number;
-
-  /** 创建连接超时（毫秒） */
+  /** 创建连接超时时间（毫秒） */
   createTimeoutMillis: number;
 }
 
 /**
- * 连接信息接口
- *
- * @description 连接的详细信息，用于监控和诊断
+ * 连接信息
  */
 export interface ConnectionInfo {
-  /** 连接状态 */
-  status: ConnectionStatus;
-
-  /** 数据库类型 */
-  type: string;
-
   /** 主机地址 */
   host: string;
-
   /** 端口号 */
   port: number;
-
-  /** 数据库名称 */
+  /** 数据库名 */
   database: string;
-
-  /** 连接建立时间 */
-  connectedAt?: Date;
-
+  /** 数据库类型 */
+  type: "postgresql" | "mongodb";
+  /** 连接状态 */
+  status: "connected" | "disconnected" | "connecting" | "error";
+  /** 连接时间 */
+  connectedAt: Date;
+  /** 运行时间（毫秒） */
+  uptime: number;
   /** 最后活动时间 */
   lastActivityAt?: Date;
-
   /** 连接池统计 */
-  poolStats: PoolStats;
+  poolStats?: PoolStats;
 }
 
 /**
- * 连接池统计接口
- *
- * @description 连接池的实时统计信息
+ * 连接池统计
  */
 export interface PoolStats {
   /** 总连接数 */
   total: number;
-
-  /** 活动连接数 */
+  /** 活跃连接数 */
   active: number;
-
   /** 空闲连接数 */
   idle: number;
-
-  /** 等待中的请求数 */
+  /** 等待连接数 */
   waiting: number;
-
-  /** 最大连接数限制 */
+  /** 最大连接数 */
   max: number;
-
-  /** 最小连接数限制 */
+  /** 最小连接数 */
   min: number;
+}
+
+/**
+ * 数据库状态
+ */
+export interface DatabaseStatus {
+  /** 是否连接 */
+  connected: boolean;
+  /** 连接信息 */
+  connectionInfo: ConnectionInfo;
+  /** 连接池统计 */
+  poolStats: PoolStats;
+  /** 最后活动时间 */
+  lastActivityAt: Date | null;
 }

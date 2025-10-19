@@ -12,32 +12,34 @@ description: "Task list template for feature implementation"
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
+
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
 
 ## Path Conventions
+
 - **Single project**: `src/` at repository root, unit tests in same directory as source
 - **Web app**: `backend/src/`, `frontend/src/` with corresponding test structures
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/` with corresponding test structures
 - **Test Organization**: Unit tests co-located with source, integration tests in `__tests__/integration/`, E2E tests in `__tests__/e2e/`
 - Paths shown below assume single project - adjust based on plan.md structure
 
-<!-- 
+<!--
   ============================================================================
   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
-  
+
   The /speckit.tasks command MUST replace these with actual tasks based on:
   - User stories from spec.md (with their priorities P1, P2, P3...)
   - Feature requirements from plan.md
   - Entities from data-model.md
   - Endpoints from contracts/
-  
+
   Tasks MUST be organized by user story so each story can be:
   - Implemented independently
   - Tested independently
   - Delivered as an MVP increment
-  
+
   DO NOT keep these sample tasks in the generated tasks.md file.
   ============================================================================
 -->
@@ -82,8 +84,8 @@ Examples of foundational tasks (adjust based on your project):
 **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
 - [ ] T010 [P] [US1] Unit test for [component] in src/[module]/[component].spec.ts (same directory as source)
-- [ ] T011 [P] [US1] Integration test for [user journey] in src/__tests__/integration/test_[name].spec.ts
-- [ ] T012 [P] [US1] E2E test for [feature] in src/__tests__/e2e/test_[name].spec.ts (if applicable)
+- [ ] T011 [P] [US1] Integration test for [user journey] in src/**tests**/integration/test\_[name].spec.ts
+- [ ] T012 [P] [US1] E2E test for [feature] in src/**tests**/e2e/test\_[name].spec.ts (if applicable)
 
 ### Implementation for User Story 1
 
@@ -107,7 +109,7 @@ Examples of foundational tasks (adjust based on your project):
 ### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
 - [ ] T018 [P] [US2] Unit test for [component] in src/[module]/[component].spec.ts (same directory as source)
-- [ ] T019 [P] [US2] Integration test for [user journey] in src/__tests__/integration/test_[name].spec.ts
+- [ ] T019 [P] [US2] Integration test for [user journey] in src/**tests**/integration/test\_[name].spec.ts
 
 ### Implementation for User Story 2
 
@@ -129,7 +131,7 @@ Examples of foundational tasks (adjust based on your project):
 ### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
 - [ ] T024 [P] [US3] Unit test for [component] in src/[module]/[component].spec.ts (same directory as source)
-- [ ] T025 [P] [US3] Integration test for [user journey] in src/__tests__/integration/test_[name].spec.ts
+- [ ] T025 [P] [US3] Integration test for [user journey] in src/**tests**/integration/test\_[name].spec.ts
 
 ### Implementation for User Story 3
 
@@ -248,6 +250,3 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
-
-
-

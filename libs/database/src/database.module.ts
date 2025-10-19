@@ -60,15 +60,26 @@
 
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
+import { MongoDriver } from "@mikro-orm/mongodb";
 import { DynamicModule, Global, Module, Provider } from "@nestjs/common";
 import { ClsModule } from "nestjs-cls";
 import { ConnectionManager } from "./connection/connection.manager.js";
+import { ConnectionPoolAdapter } from "./connection/connection-pool.adapter.js";
+import { ConnectionHealthService } from "./connection/connection-health.service.js";
+import { ConnectionStatsService } from "./connection/connection-stats.service.js";
+import { ConnectionLifecycleService } from "./connection/connection-lifecycle.service.js";
 import { POOL_DEFAULTS } from "./constants/defaults.js";
 import { DI_TOKENS } from "./constants/tokens.js";
-import { DatabaseIsolationService } from "./isolation/isolation.service.js";
+import { DatabaseDriverFactory } from "./drivers/database-driver.factory.js";
+import { DriverSelector } from "./drivers/driver-selector.js";
 import { HealthCheckService } from "./monitoring/health-check.service.js";
 import { MetricsService } from "./monitoring/metrics.service.js";
 import { TransactionService } from "./transaction/transaction.service.js";
+import { PostgreSQLTransactionAdapter } from "./transaction/postgresql-transaction.adapter.js";
+import { MongoDBTransactionAdapter } from "./transaction/mongodb-transaction.adapter.js";
+import { UnifiedTransactionManager } from "./transaction/unified-transaction.manager.js";
+import { TransactionFactory } from "./transaction/transaction.factory.js";
+import { TransactionMonitor } from "./transaction/transaction-monitor.js";
 import type {
   DatabaseModuleAsyncOptions,
   DatabaseModuleOptions,
@@ -97,8 +108,18 @@ export class DatabaseModule {
         useValue: options,
       },
       ConnectionManager,
+      ConnectionPoolAdapter,
+      ConnectionHealthService,
+      ConnectionStatsService,
+      ConnectionLifecycleService,
       TransactionService,
-      DatabaseIsolationService,
+      PostgreSQLTransactionAdapter,
+      MongoDBTransactionAdapter,
+      UnifiedTransactionManager,
+      TransactionFactory,
+      TransactionMonitor,
+      DatabaseDriverFactory,
+      DriverSelector,
       HealthCheckService,
       MetricsService,
     ];
@@ -116,7 +137,7 @@ export class DatabaseModule {
         }),
         // 集成 MikroORM (v6 使用 driver 替代 type)
         MikroOrmModule.forRoot({
-          driver: PostgreSqlDriver,
+          driver: options.type === "mongodb" ? MongoDriver : PostgreSqlDriver,
           host: options.connection.host,
           port: options.connection.port,
           dbName: options.connection.database,
@@ -143,7 +164,8 @@ export class DatabaseModule {
         DI_TOKENS.MODULE_OPTIONS,
         ConnectionManager,
         TransactionService,
-        DatabaseIsolationService,
+        DatabaseDriverFactory,
+        DriverSelector,
         HealthCheckService,
         MetricsService,
       ],
@@ -166,8 +188,18 @@ export class DatabaseModule {
         inject: options.inject || [],
       },
       ConnectionManager,
+      ConnectionPoolAdapter,
+      ConnectionHealthService,
+      ConnectionStatsService,
+      ConnectionLifecycleService,
       TransactionService,
-      DatabaseIsolationService,
+      PostgreSQLTransactionAdapter,
+      MongoDBTransactionAdapter,
+      UnifiedTransactionManager,
+      TransactionFactory,
+      TransactionMonitor,
+      DatabaseDriverFactory,
+      DriverSelector,
       HealthCheckService,
       MetricsService,
     ];
@@ -189,7 +221,8 @@ export class DatabaseModule {
             const config = await options.useFactory(...args);
 
             return {
-              driver: PostgreSqlDriver,
+              driver:
+                config.type === "mongodb" ? MongoDriver : PostgreSqlDriver,
               host: config.connection.host,
               port: config.connection.port,
               dbName: config.connection.database,
@@ -220,7 +253,8 @@ export class DatabaseModule {
         DI_TOKENS.MODULE_OPTIONS,
         ConnectionManager,
         TransactionService,
-        DatabaseIsolationService,
+        DatabaseDriverFactory,
+        DriverSelector,
         HealthCheckService,
         MetricsService,
       ],

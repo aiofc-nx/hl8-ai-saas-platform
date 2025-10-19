@@ -1,6 +1,6 @@
 /**
  * Cache Service Interface
- * 
+ *
  * @description Simplified interface for caching operations without DDD complexity
  * @since 1.0.0
  */
@@ -13,7 +13,7 @@ import type { IsolationContext } from "@hl8/isolation-model";
 export interface ICacheService {
   /**
    * Get cached value
-   * 
+   *
    * @param namespace - Cache namespace
    * @param key - Cache key
    * @returns Cached value or undefined
@@ -22,7 +22,7 @@ export interface ICacheService {
 
   /**
    * Set cached value
-   * 
+   *
    * @param namespace - Cache namespace
    * @param key - Cache key
    * @param value - Value to cache
@@ -32,7 +32,7 @@ export interface ICacheService {
 
   /**
    * Delete cached value
-   * 
+   *
    * @param namespace - Cache namespace
    * @param key - Cache key
    * @returns true if deleted, false if not found
@@ -41,7 +41,7 @@ export interface ICacheService {
 
   /**
    * Check if cache key exists
-   * 
+   *
    * @param namespace - Cache namespace
    * @param key - Cache key
    * @returns true if exists, false otherwise
@@ -50,7 +50,7 @@ export interface ICacheService {
 
   /**
    * Clear cache by pattern
-   * 
+   *
    * @param pattern - Pattern to match (optional, clears all if not provided)
    * @returns Number of keys deleted
    */
@@ -63,7 +63,7 @@ export interface ICacheService {
 export interface IRedisService {
   /**
    * Get Redis client
-   * 
+   *
    * @returns Redis client instance
    * @throws RedisConnectionError if not connected
    */
@@ -71,14 +71,14 @@ export interface IRedisService {
 
   /**
    * Check Redis health
-   * 
+   *
    * @returns true if healthy, false otherwise
    */
   healthCheck(): Promise<boolean>;
 
   /**
    * Check if client is connected
-   * 
+   *
    * @returns true if connected, false otherwise
    */
   isClientConnected(): boolean;
@@ -90,28 +90,28 @@ export interface IRedisService {
 export interface ICacheMetricsService {
   /**
    * Record cache hit
-   * 
+   *
    * @param latency - Operation latency in milliseconds
    */
   recordHit(latency: number): void;
 
   /**
    * Record cache miss
-   * 
+   *
    * @param latency - Operation latency in milliseconds
    */
   recordMiss(latency: number): void;
 
   /**
    * Record cache error
-   * 
+   *
    * @param latency - Operation latency in milliseconds
    */
   recordError(latency: number): void;
 
   /**
    * Get cache metrics
-   * 
+   *
    * @returns Current cache metrics
    */
   getMetrics(): CacheMetrics;
@@ -206,22 +206,25 @@ export interface CachePutOptions {
  * Cache error classes
  */
 export class CacheError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error,
+  ) {
     super(message);
-    this.name = 'CacheError';
+    this.name = "CacheError";
   }
 }
 
 export class RedisConnectionError extends CacheError {
   constructor(message: string, cause?: Error) {
     super(`Redis connection failed: ${message}`, cause);
-    this.name = 'RedisConnectionError';
+    this.name = "RedisConnectionError";
   }
 }
 
 export class CacheSerializationError extends CacheError {
   constructor(message: string, cause?: Error) {
     super(`Cache serialization failed: ${message}`, cause);
-    this.name = 'CacheSerializationError';
+    this.name = "CacheSerializationError";
   }
 }

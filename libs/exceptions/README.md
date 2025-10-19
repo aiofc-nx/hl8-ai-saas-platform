@@ -87,14 +87,14 @@ yarn add @hl8/exceptions
 
 ```typescript
 // app.module.ts
-import { Module } from '@nestjs/common';
-import { ExceptionModule } from '@hl8/exceptions';
+import { Module } from "@nestjs/common";
+import { ExceptionModule } from "@hl8/exceptions";
 
 @Module({
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === 'production',
+      isProduction: process.env.NODE_ENV === "production",
     }),
   ],
 })
@@ -105,16 +105,16 @@ export class AppModule {}
 
 ```typescript
 // user.exceptions.ts
-import { AbstractHttpException } from '@hl8/exceptions';
+import { AbstractHttpException } from "@hl8/exceptions";
 
 export class UserNotFoundException extends AbstractHttpException {
   constructor(userId: string) {
     super(
-      'USER_NOT_FOUND',
-      '用户未找到',
+      "USER_NOT_FOUND",
+      "用户未找到",
       `ID 为 "${userId}" 的用户不存在`,
       404,
-      { userId }
+      { userId },
     );
   }
 }
@@ -124,18 +124,18 @@ export class UserNotFoundException extends AbstractHttpException {
 
 ```typescript
 // user.service.ts
-import { Injectable } from '@nestjs/common';
-import { UserNotFoundException } from './user.exceptions';
+import { Injectable } from "@nestjs/common";
+import { UserNotFoundException } from "./user.exceptions";
 
 @Injectable()
 export class UserService {
   async findById(id: string) {
     const user = await this.userRepository.findById(id);
-    
+
     if (!user) {
       throw new UserNotFoundException(id);
     }
-    
+
     return user;
   }
 }
@@ -209,9 +209,9 @@ abstract class AbstractHttpException extends HttpException {
     status: number,
     data?: any,
     type?: string,
-    rootCause?: Error
+    rootCause?: Error,
   );
-  
+
   toRFC7807(): ProblemDetails;
 }
 ```
@@ -287,11 +287,11 @@ class AnyExceptionFilter implements ExceptionFilter {
 interface ExceptionMessageProvider {
   getMessage(
     errorCode: string,
-    messageType: 'title' | 'detail',
-    params?: Record<string, any>
+    messageType: "title" | "detail",
+    params?: Record<string, any>,
   ): string | undefined;
-  
-  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean;
+
+  hasMessage(errorCode: string, messageType: "title" | "detail"): boolean;
 }
 ```
 
@@ -301,11 +301,11 @@ interface ExceptionMessageProvider {
 
 ```typescript
 interface ExceptionModuleOptions {
-  enableLogging?: boolean;           // 是否启用日志记录 (默认: true)
-  logger?: ILoggerService;           // 自定义日志服务
+  enableLogging?: boolean; // 是否启用日志记录 (默认: true)
+  logger?: ILoggerService; // 自定义日志服务
   messageProvider?: ExceptionMessageProvider; // 自定义消息提供者
-  isProduction?: boolean;            // 是否为生产环境
-  registerGlobalFilters?: boolean;   // 是否全局注册过滤器 (默认: true)
+  isProduction?: boolean; // 是否为生产环境
+  registerGlobalFilters?: boolean; // 是否全局注册过滤器 (默认: true)
 }
 ```
 
@@ -314,9 +314,9 @@ interface ExceptionModuleOptions {
 ```typescript
 ExceptionModule.forRoot({
   enableLogging: true,
-  isProduction: process.env.NODE_ENV === 'production',
+  isProduction: process.env.NODE_ENV === "production",
   messageProvider: new CustomMessageProvider(),
-})
+});
 ```
 
 ### 异步配置
@@ -325,11 +325,11 @@ ExceptionModule.forRoot({
 ExceptionModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (config: ConfigService) => ({
-    enableLogging: config.get('LOGGING_ENABLED'),
-    isProduction: config.get('NODE_ENV') === 'production',
+    enableLogging: config.get("LOGGING_ENABLED"),
+    isProduction: config.get("NODE_ENV") === "production",
   }),
   inject: [ConfigService],
-})
+});
 ```
 
 ## 💡 使用示例
@@ -341,11 +341,11 @@ ExceptionModule.forRootAsync({
 export class UserNotFoundException extends AbstractHttpException {
   constructor(userId: string) {
     super(
-      'USER_NOT_FOUND',
-      '用户未找到',
+      "USER_NOT_FOUND",
+      "用户未找到",
       `ID 为 "${userId}" 的用户不存在`,
       404,
-      { userId }
+      { userId },
     );
   }
 }
@@ -353,11 +353,11 @@ export class UserNotFoundException extends AbstractHttpException {
 export class UserAlreadyExistsException extends AbstractHttpException {
   constructor(email: string) {
     super(
-      'USER_ALREADY_EXISTS',
-      '用户已存在',
+      "USER_ALREADY_EXISTS",
+      "用户已存在",
       `邮箱 "${email}" 已被注册`,
       409,
-      { email }
+      { email },
     );
   }
 }
@@ -366,11 +366,11 @@ export class UserAlreadyExistsException extends AbstractHttpException {
 export class OrderNotFoundException extends AbstractHttpException {
   constructor(orderId: string) {
     super(
-      'ORDER_NOT_FOUND',
-      '订单未找到',
+      "ORDER_NOT_FOUND",
+      "订单未找到",
       `ID 为 "${orderId}" 的订单不存在`,
       404,
-      { orderId }
+      { orderId },
     );
   }
 }
@@ -378,11 +378,11 @@ export class OrderNotFoundException extends AbstractHttpException {
 export class InsufficientStockException extends AbstractHttpException {
   constructor(productId: string, requested: number, available: number) {
     super(
-      'INSUFFICIENT_STOCK',
-      '库存不足',
+      "INSUFFICIENT_STOCK",
+      "库存不足",
       `产品 "${productId}" 库存不足，请求 ${requested}，可用 ${available}`,
       400,
-      { productId, requested, available }
+      { productId, requested, available },
     );
   }
 }
@@ -408,20 +408,20 @@ export class UserService {
     } catch (error) {
       // 包装数据库错误
       throw new GeneralInternalServerException(
-        '用户创建失败',
-        '创建用户时发生内部错误',
-        { originalError: error.message }
+        "用户创建失败",
+        "创建用户时发生内部错误",
+        { originalError: error.message },
       );
     }
   }
 
   async findById(id: string): Promise<User> {
     const user = await this.userRepository.findById(id);
-    
+
     if (!user) {
       throw new UserNotFoundException(id);
     }
-    
+
     return user;
   }
 }
@@ -430,7 +430,7 @@ export class UserService {
 ### 控制器层使用示例
 
 ```typescript
-@Controller('users')
+@Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -439,19 +439,19 @@ export class UserController {
     return this.userService.createUser(userData);
   }
 
-  @Get(':id')
-  async getUser(@Param('id') id: string): Promise<User> {
+  @Get(":id")
+  async getUser(@Param("id") id: string): Promise<User> {
     return this.userService.findById(id);
   }
 
-  @Put(':id')
+  @Put(":id")
   async updateUser(
-    @Param('id') id: string,
-    @Body() updateData: UpdateUserDto
+    @Param("id") id: string,
+    @Body() updateData: UpdateUserDto,
   ): Promise<User> {
     // 先检查用户是否存在
     await this.userService.findById(id);
-    
+
     // 执行更新
     return this.userService.update(id, updateData);
   }
@@ -467,14 +467,14 @@ export class I18nMessageProvider implements ExceptionMessageProvider {
 
   getMessage(
     errorCode: string,
-    messageType: 'title' | 'detail',
-    params?: Record<string, any>
+    messageType: "title" | "detail",
+    params?: Record<string, any>,
   ): string | undefined {
     const key = `errors.${errorCode}.${messageType}`;
     return this.i18nService.translate(key, params);
   }
 
-  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+  hasMessage(errorCode: string, messageType: "title" | "detail"): boolean {
     const key = `errors.${errorCode}.${messageType}`;
     return this.i18nService.exists(key);
   }
@@ -542,48 +542,48 @@ class BadException extends AbstractHttpException {}
 
 ```typescript
 // ✅ 使用大写蛇形命名法
-'USER_NOT_FOUND'
-'INVALID_PASSWORD'
-'ORDER_PAYMENT_FAILED'
-'INSUFFICIENT_STOCK'
+"USER_NOT_FOUND";
+"INVALID_PASSWORD";
+"ORDER_PAYMENT_FAILED";
+"INSUFFICIENT_STOCK";
 
 // ❌ 避免的格式
-'userNotFound'
-'user_not_found'
-'USERNOTFOUND'
-'UserNotFound'
+"userNotFound";
+"user_not_found";
+"USERNOTFOUND";
+"UserNotFound";
 ```
 
 ### 3. 异常消息规范
 
 ```typescript
 // ✅ 清晰的消息
-new UserNotFoundException(userId) // title: "用户未找到", detail: "ID 为 \"123\" 的用户不存在"
+new UserNotFoundException(userId); // title: "用户未找到", detail: "ID 为 \"123\" 的用户不存在"
 
 // ✅ 包含上下文信息
-new InsufficientStockException(productId, requested, available)
+new InsufficientStockException(productId, requested, available);
 // title: "库存不足"
 // detail: "产品 \"ABC123\" 库存不足，请求 10，可用 5"
 
 // ❌ 模糊的消息
-new GeneralBadRequestException("错误", "出错了", {})
+new GeneralBadRequestException("错误", "出错了", {});
 ```
 
 ### 4. 数据字段规范
 
 ```typescript
 // ✅ 包含有用的上下文数据
-throw new UserNotFoundException(userId, { 
-  userId, 
+throw new UserNotFoundException(userId, {
+  userId,
   timestamp: new Date().toISOString(),
-  requestId: request.id 
+  requestId: request.id,
 });
 
 // ❌ 包含敏感信息
-throw new UserNotFoundException(userId, { 
+throw new UserNotFoundException(userId, {
   userId,
   password: user.password, // 敏感信息
-  apiKey: user.apiKey      // 敏感信息
+  apiKey: user.apiKey, // 敏感信息
 });
 ```
 
@@ -599,11 +599,11 @@ export class UserService {
     } catch (error) {
       // 包装原始错误
       throw new GeneralInternalServerException(
-        '用户创建失败',
-        '创建用户时发生内部错误',
+        "用户创建失败",
+        "创建用户时发生内部错误",
         { originalError: error.message },
         undefined,
-        error // 保留原始错误链
+        error, // 保留原始错误链
       );
     }
   }
@@ -651,14 +651,14 @@ const testConfig = {
 // ✅ 正确
 class MyException extends AbstractHttpException {
   constructor() {
-    super('MY_ERROR', '我的错误', '错误详情', 400);
+    super("MY_ERROR", "我的错误", "错误详情", 400);
   }
 }
 
 // ❌ 错误
 class MyException extends Error {
   constructor() {
-    super('我的错误');
+    super("我的错误");
   }
 }
 ```
@@ -708,11 +708,15 @@ export class AppModule {}
 ```typescript
 // 确保实现了正确的接口
 class MyMessageProvider implements ExceptionMessageProvider {
-  getMessage(errorCode: string, messageType: 'title' | 'detail', params?: any): string | undefined {
+  getMessage(
+    errorCode: string,
+    messageType: "title" | "detail",
+    params?: any,
+  ): string | undefined {
     // 实现逻辑
   }
-  
-  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+
+  hasMessage(errorCode: string, messageType: "title" | "detail"): boolean {
     // 实现逻辑
   }
 }
@@ -727,8 +731,8 @@ class MyMessageProvider implements ExceptionMessageProvider {
 const config = {
   enableLogging: true,
   isProduction: false,
-  logger: new ConsoleLogger('ExceptionModule', {
-    logLevels: ['error', 'warn', 'log', 'debug', 'verbose'],
+  logger: new ConsoleLogger("ExceptionModule", {
+    logLevels: ["error", "warn", "log", "debug", "verbose"],
   }),
 };
 ```
@@ -741,11 +745,11 @@ try {
   // 业务逻辑
 } catch (error) {
   throw new GeneralInternalServerException(
-    '操作失败',
-    '执行操作时发生错误',
+    "操作失败",
+    "执行操作时发生错误",
     { originalError: error.message },
     undefined,
-    error // 保留原始错误链
+    error, // 保留原始错误链
   );
 }
 ```
@@ -754,7 +758,7 @@ try {
 
 ```typescript
 // 手动验证异常格式
-const exception = new UserNotFoundException('user-123');
+const exception = new UserNotFoundException("user-123");
 const problemDetails = exception.toRFC7807();
 console.log(JSON.stringify(problemDetails, null, 2));
 ```

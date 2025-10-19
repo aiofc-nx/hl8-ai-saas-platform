@@ -40,7 +40,9 @@ describe("Serializer Utils", () => {
     it("should serialize Date objects", () => {
       const date = new Date("2023-01-01T00:00:00.000Z");
       const serialized = serialize(date);
-      expect(serialized).toBe('{"__type":"Date","value":"2023-01-01T00:00:00.000Z"}');
+      expect(serialized).toBe(
+        '{"__type":"Date","value":"2023-01-01T00:00:00.000Z"}',
+      );
     });
 
     it("should serialize RegExp objects", () => {
@@ -99,7 +101,9 @@ describe("Serializer Utils", () => {
     });
 
     it("should throw error for invalid JSON", () => {
-      expect(() => deserialize("invalid json")).toThrow(CacheSerializationError);
+      expect(() => deserialize("invalid json")).toThrow(
+        CacheSerializationError,
+      );
     });
   });
 

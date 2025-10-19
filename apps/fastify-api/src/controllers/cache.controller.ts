@@ -201,7 +201,9 @@ export class CacheController {
     status: 200,
     description: "成功返回缓存数据",
   })
-  async testOrganizationCache(@Param("key") key: string): Promise<CacheTestData> {
+  async testOrganizationCache(
+    @Param("key") key: string,
+  ): Promise<CacheTestData> {
     this.logger.debug(`Testing organization cache for key: ${key}`);
 
     // 尝试从缓存获取数据
@@ -273,7 +275,10 @@ export class CacheController {
    * @param input - 输入参数
    * @returns 计算结果
    */
-  private async computeWithCache(operation: string, input: string): Promise<any> {
+  private async computeWithCache(
+    operation: string,
+    input: string,
+  ): Promise<any> {
     // 模拟复杂计算
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -330,7 +335,8 @@ export class CacheController {
       hitRate: metrics.hitRate,
       averageLatency: metrics.averageLatency,
       totalOperations: metrics.hits + metrics.misses,
-      errorRate: metrics.errors / (metrics.hits + metrics.misses + metrics.errors) || 0,
+      errorRate:
+        metrics.errors / (metrics.hits + metrics.misses + metrics.errors) || 0,
     };
   }
 

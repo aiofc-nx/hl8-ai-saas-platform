@@ -12,7 +12,10 @@
 export * from "./constants/index.js";
 
 // 类型定义导出
-export * from "./types/index.js";
+export * from "./types/connection.types.js";
+export * from "./types/module.types.js";
+export * from "./types/transaction.types.js";
+// HealthCheckResult is exported from connection module to avoid conflicts
 
 // 配置类导出
 export * from "./config/index.js";
@@ -28,8 +31,8 @@ export { ConnectionManager as DatabaseService } from "./connection/index.js";
 // 事务管理导出
 export * from "./transaction/index.js";
 
-// 数据隔离导出
-export * from "./isolation/index.js";
+// 数据库驱动导出
+export * from "./drivers/index.js";
 
 // 监控服务导出
 export * from "./monitoring/index.js";

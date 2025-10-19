@@ -8,11 +8,13 @@
 
 `@hl8/database` 是 HL8 SAAS 平台的核心基础设施模块，提供：
 
+- ✅ **多数据库支持**: PostgreSQL 和 MongoDB 双数据库支持
 - ✅ **数据库连接管理**: 自动建立和维护数据库连接
 - ✅ **事务管理**: 声明式和编程式事务支持
 - ✅ **多租户数据隔离**: 集成 5 级数据隔离
 - ✅ **连接池优化**: 高效的连接复用和资源管理
 - ✅ **健康检查和监控**: 实时监控连接状态和性能指标
+- ✅ **实体映射**: 跨数据库类型的实体映射和转换
 - ✅ **类型安全**: 完整的 TypeScript 类型定义
 - ✅ **ES Module**: 现代化的模块系统
 
@@ -26,12 +28,29 @@ pnpm add @hl8/database
 
 ### 1. 配置环境变量
 
+#### PostgreSQL 配置
+
 ```env
 DB_TYPE=postgresql
 DB_HOST=localhost
 DB_PORT=5432
 DB_DATABASE=hl8_saas
 DB_USERNAME=postgres
+DB_PASSWORD=your_password
+DB_POOL_MIN=5
+DB_POOL_MAX=20
+DB_IDLE_TIMEOUT=600000
+DB_SLOW_QUERY_THRESHOLD=1000
+```
+
+#### MongoDB 配置
+
+```env
+DB_TYPE=mongodb
+DB_HOST=localhost
+DB_PORT=27017
+DB_DATABASE=hl8_saas
+DB_USERNAME=mongodb_user
 DB_PASSWORD=your_password
 DB_POOL_MIN=5
 DB_POOL_MAX=20
@@ -194,14 +213,107 @@ export class MonitoringController {
 - @hl8/nestjs-isolation - 数据隔离
 - @hl8/isolation-model - 隔离领域模型
 - @mikro-orm/core - ORM 核心
+- @mikro-orm/postgresql - PostgreSQL 驱动
+- @mikro-orm/mongodb - MongoDB 驱动
 - nestjs-cls - 上下文管理
+
+## 🌟 多数据库支持示例
+
+### PostgreSQL 使用示例
+
+```typescript
+import { Injectable } from "@nestjs/common";
+import { TransactionService } from "@hl8/database";
+
+@Injectable()
+export class UserService {
+  constructor(private readonly transactionService: TransactionService) {}
+
+  async createUser(userData: any) {
+    return this.transactionService.runInTransaction(async (em) => {
+      const user = new User(userData);
+      await em.persistAndFlush(user);
+      return user;
+    });
+  }
+}
+```
+
+### MongoDB 使用示例
+
+```typescript
+import { Injectable } from "@nestjs/common";
+import { UnifiedTransactionManager } from "@hl8/database";
+
+@Injectable()
+export class DocumentService {
+  constructor(private readonly unifiedManager: UnifiedTransactionManager) {}
+
+  async createDocument(documentData: any) {
+    return this.unifiedManager.executeTransaction(
+      async (em, driver) => {
+        const document = new Document(documentData);
+        await em.persistAndFlush(document);
+        return document;
+      },
+      {
+        databaseType: "mongodb",
+        isolationLevel: "READ_COMMITTED",
+      },
+    );
+  }
+}
+```
+
+### 实体映射示例
+
+```typescript
+import { EntityMapper } from "@hl8/database";
+
+const entityMapper = new EntityMapper();
+
+// PostgreSQL 到 MongoDB 映射
+const postgresqlEntity = {
+  id: 1,
+  name: "John Doe",
+  email: "john@example.com",
+  createdAt: new Date(),
+};
+
+const config = entityMapper.createPostgreSQLToMongoDBConfig(postgresqlEntity);
+const result = entityMapper.mapEntity(postgresqlEntity, config);
+
+console.log(result.mappedEntity);
+// 输出: { _id: "1", name: "John Doe", email: "john@example.com", createdAt: Date }
+```
+
+### 性能监控示例
+
+```typescript
+import { MetricsService } from "@hl8/database";
+
+const metricsService = new MetricsService();
+
+// 记录查询性能
+metricsService.recordQuery({
+  duration: 150,
+  query: "SELECT * FROM users",
+});
+
+// 获取多数据库性能指标
+const metrics = await metricsService.getMultiDatabaseMetrics();
+console.log("数据库类型:", metrics.databaseType);
+console.log("综合评分:", metrics.overallScore);
+```
 
 ## 📊 代码统计
 
-- 源代码：~2000 行
-- 核心服务：5 个
+- 源代码：~3000 行
+- 核心服务：8 个
 - 装饰器：2 个
 - 异常类：4 个
+- 驱动适配器：2 个
+- 事务适配器：2 个
 - 完整的中文 TSDoc 注释
 
 ## 📄 许可证

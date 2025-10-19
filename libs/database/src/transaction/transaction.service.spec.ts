@@ -67,7 +67,7 @@ describe("TransactionService", () => {
     it("应该成功执行事务并返回结果", async () => {
       mockCls.get.mockReturnValue(undefined);
 
-      const result = await service.runInTransaction(async (em) => {
+      const result = await service.runInTransaction(async (_em) => {
         return "success";
       });
 

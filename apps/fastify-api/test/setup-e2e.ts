@@ -27,7 +27,7 @@ beforeAll(async () => {
   }).compile();
 
   app = moduleFixture.createNestApplication();
-  
+
   // 配置应用
   await app.init();
 });

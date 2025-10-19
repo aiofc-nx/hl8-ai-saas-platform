@@ -44,13 +44,6 @@ export const DI_TOKENS = {
   TRANSACTION_SERVICE: "DATABASE_TRANSACTION_SERVICE",
 
   /**
-   * 隔离服务令牌
-   *
-   * @description 用于注入隔离服务实例
-   */
-  ISOLATION_SERVICE: "DATABASE_ISOLATION_SERVICE",
-
-  /**
    * 健康检查服务令牌
    *
    * @description 用于注入健康检查服务实例

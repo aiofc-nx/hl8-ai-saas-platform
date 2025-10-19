@@ -51,7 +51,7 @@ describe("缓存服务集成测试", () => {
 
       // 设置缓存
       await cacheService.set("platform", key, value, 300);
-      
+
       // 获取缓存
       const cached = await cacheService.get("platform", key);
       expect(cached).toEqual(value);
@@ -121,7 +121,7 @@ describe("缓存服务集成测试", () => {
 
       // 设置缓存
       await cacheService.set("platform", key, value, 300);
-      
+
       // 获取缓存
       const cached = await cacheService.get("platform", key);
       expect(cached).toEqual(value);
@@ -133,14 +133,14 @@ describe("缓存服务集成测试", () => {
 
       // 设置缓存
       await cacheService.set("platform", key, value, 300);
-      
+
       // 验证缓存存在
       let cached = await cacheService.get("platform", key);
       expect(cached).toEqual(value);
 
       // 删除缓存
       await cacheService.del("platform", key);
-      
+
       // 验证缓存已删除
       cached = await cacheService.get("platform", key);
       expect(cached).toBeNull();
@@ -182,13 +182,13 @@ describe("缓存服务集成测试", () => {
 
       // 设置短 TTL 缓存
       await cacheService.set("platform", key, value, 1); // 1秒TTL
-      
+
       // 立即获取应该存在
       let cached = await cacheService.get("platform", key);
       expect(cached).toEqual(value);
 
       // 等待过期
-      await new Promise(resolve => setTimeout(resolve, 1100));
+      await new Promise((resolve) => setTimeout(resolve, 1100));
 
       // 过期后应该不存在
       cached = await cacheService.get("platform", key);
@@ -199,7 +199,12 @@ describe("缓存服务集成测试", () => {
   describe("性能监控测试", () => {
     it("应该返回性能指标", async () => {
       // 执行一些缓存操作
-      await cacheService.set("platform", "metrics-test-1", { id: "test1" }, 300);
+      await cacheService.set(
+        "platform",
+        "metrics-test-1",
+        { id: "test1" },
+        300,
+      );
       await cacheService.get("platform", "metrics-test-1"); // 命中
       await cacheService.get("platform", "metrics-test-1"); // 命中
       await cacheService.get("platform", "metrics-test-2"); // 未命中
@@ -260,14 +265,16 @@ describe("缓存服务集成测试", () => {
   describe("错误处理测试", () => {
     it("应该处理无效的缓存键", async () => {
       // 空键应该被处理
-      await expect(cacheService.set("platform", "", { id: "empty-key" }, 300))
-        .rejects.toThrow();
+      await expect(
+        cacheService.set("platform", "", { id: "empty-key" }, 300),
+      ).rejects.toThrow();
     });
 
     it("应该处理无效的命名空间", async () => {
       // 无效命名空间应该被处理
-      await expect(cacheService.set("", "test-key", { id: "test" }, 300))
-        .rejects.toThrow();
+      await expect(
+        cacheService.set("", "test-key", { id: "test" }, 300),
+      ).rejects.toThrow();
     });
 
     it("应该处理序列化错误", async () => {
@@ -275,8 +282,9 @@ describe("缓存服务集成测试", () => {
       const circularObj: any = { id: "circular" };
       circularObj.self = circularObj;
 
-      await expect(cacheService.set("platform", "circular-key", circularObj, 300))
-        .rejects.toThrow();
+      await expect(
+        cacheService.set("platform", "circular-key", circularObj, 300),
+      ).rejects.toThrow();
     });
   });
 
@@ -285,7 +293,7 @@ describe("缓存服务集成测试", () => {
       const promises = Array.from({ length: 10 }, async (_, i) => {
         const key = `concurrent-test-${i}`;
         const value = { id: `concurrent-${i}`, index: i };
-        
+
         await cacheService.set("platform", key, value, 300);
         return cacheService.get("platform", key);
       });

@@ -35,20 +35,257 @@
 
 import { AbstractHttpException } from "@hl8/exceptions";
 
+/**
+ * 事务异常类型
+ */
+export enum TransactionExceptionType {
+  /** 事务执行失败 */
+  EXECUTION_FAILED = "EXECUTION_FAILED",
+  /** 事务提交失败 */
+  COMMIT_FAILED = "COMMIT_FAILED",
+  /** 事务回滚失败 */
+  ROLLBACK_FAILED = "ROLLBACK_FAILED",
+  /** 事务超时 */
+  TIMEOUT = "TIMEOUT",
+  /** 数据库死锁 */
+  DEADLOCK = "DEADLOCK",
+  /** 连接失败 */
+  CONNECTION_FAILED = "CONNECTION_FAILED",
+  /** 隔离级别冲突 */
+  ISOLATION_CONFLICT = "ISOLATION_CONFLICT",
+  /** 不支持的数据库类型 */
+  UNSUPPORTED_DATABASE = "UNSUPPORTED_DATABASE",
+  /** 事务配置错误 */
+  CONFIGURATION_ERROR = "CONFIGURATION_ERROR",
+}
+
+/**
+ * 事务异常数据
+ */
+export interface TransactionExceptionData {
+  /** 事务 ID */
+  transactionId?: string;
+  /** 数据库类型 */
+  databaseType?: string;
+  /** 隔离级别 */
+  isolationLevel?: string;
+  /** 执行时间（毫秒） */
+  duration?: number;
+  /** 重试次数 */
+  retryCount?: number;
+  /** 操作名称 */
+  operation?: string;
+  /** 错误代码 */
+  errorCode?: string;
+  /** 原始错误 */
+  originalError?: Error;
+  /** 附加数据 */
+  metadata?: Record<string, any>;
+}
+
 export class DatabaseTransactionException extends AbstractHttpException {
+  /** 异常类型 */
+  public readonly exceptionType: TransactionExceptionType;
+  /** 异常数据 */
+  public readonly exceptionData: TransactionExceptionData;
+
   /**
    * 创建数据库事务异常
    *
    * @param detail - 详细错误说明（中文）
-   * @param data - 诊断信息（可选），如 operation、step 等
+   * @param exceptionType - 异常类型
+   * @param exceptionData - 异常数据
    */
-  constructor(detail: string, data?: Record<string, any>) {
+  constructor(
+    detail: string,
+    exceptionType: TransactionExceptionType = TransactionExceptionType.EXECUTION_FAILED,
+    exceptionData?: TransactionExceptionData,
+  ) {
     super(
       "DATABASE_TRANSACTION_ERROR", // errorCode
       "数据库事务错误", // title
       detail, // detail
       500, // status
-      data, // data
+      {
+        exceptionType,
+        ...exceptionData,
+      }, // data
     );
+
+    this.exceptionType = exceptionType;
+    this.exceptionData = exceptionData || {};
+  }
+
+  /**
+   * 创建事务执行失败异常
+   */
+  static executionFailed(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.EXECUTION_FAILED,
+      data,
+    );
+  }
+
+  /**
+   * 创建事务提交失败异常
+   */
+  static commitFailed(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.COMMIT_FAILED,
+      data,
+    );
+  }
+
+  /**
+   * 创建事务回滚失败异常
+   */
+  static rollbackFailed(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.ROLLBACK_FAILED,
+      data,
+    );
+  }
+
+  /**
+   * 创建事务超时异常
+   */
+  static timeout(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.TIMEOUT,
+      data,
+    );
+  }
+
+  /**
+   * 创建数据库死锁异常
+   */
+  static deadlock(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.DEADLOCK,
+      data,
+    );
+  }
+
+  /**
+   * 创建连接失败异常
+   */
+  static connectionFailed(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.CONNECTION_FAILED,
+      data,
+    );
+  }
+
+  /**
+   * 创建隔离级别冲突异常
+   */
+  static isolationConflict(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.ISOLATION_CONFLICT,
+      data,
+    );
+  }
+
+  /**
+   * 创建不支持的数据库类型异常
+   */
+  static unsupportedDatabase(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.UNSUPPORTED_DATABASE,
+      data,
+    );
+  }
+
+  /**
+   * 创建事务配置错误异常
+   */
+  static configurationError(
+    detail: string,
+    data?: TransactionExceptionData,
+  ): DatabaseTransactionException {
+    return new DatabaseTransactionException(
+      detail,
+      TransactionExceptionType.CONFIGURATION_ERROR,
+      data,
+    );
+  }
+
+  /**
+   * 获取异常摘要
+   */
+  getExceptionSummary(): {
+    type: TransactionExceptionType;
+    message: string;
+    databaseType?: string;
+    transactionId?: string;
+    duration?: number;
+    retryCount?: number;
+  } {
+    return {
+      type: this.exceptionType,
+      message: this.detail,
+      databaseType: this.exceptionData.databaseType,
+      transactionId: this.exceptionData.transactionId,
+      duration: this.exceptionData.duration,
+      retryCount: this.exceptionData.retryCount,
+    };
+  }
+
+  /**
+   * 检查是否可重试
+   */
+  isRetryable(): boolean {
+    const retryableTypes = [
+      TransactionExceptionType.CONNECTION_FAILED,
+      TransactionExceptionType.TIMEOUT,
+    ];
+
+    return retryableTypes.includes(this.exceptionType);
+  }
+
+  /**
+   * 检查是否为死锁
+   */
+  isDeadlock(): boolean {
+    return this.exceptionType === TransactionExceptionType.DEADLOCK;
+  }
+
+  /**
+   * 检查是否为超时
+   */
+  isTimeout(): boolean {
+    return this.exceptionType === TransactionExceptionType.TIMEOUT;
   }
 }

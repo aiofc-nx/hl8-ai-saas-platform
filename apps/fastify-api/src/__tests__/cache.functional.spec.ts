@@ -10,7 +10,7 @@ describe("缓存功能测试", () => {
       const namespace = "test";
       const key = "sample-key";
       const expectedPattern = /^[a-zA-Z0-9:_-]+$/;
-      
+
       // 测试键格式验证
       expect(namespace).toMatch(expectedPattern);
       expect(key).toMatch(expectedPattern);
@@ -20,9 +20,9 @@ describe("缓存功能测试", () => {
       const platformKey = "platform:data";
       const tenantKey = "tenant:123:data";
       const orgKey = "org:456:data";
-      
+
       const keyPattern = /^[a-zA-Z0-9:_-]+$/;
-      
+
       expect(platformKey).toMatch(keyPattern);
       expect(tenantKey).toMatch(keyPattern);
       expect(orgKey).toMatch(keyPattern);
@@ -72,7 +72,7 @@ describe("缓存功能测试", () => {
 
       const serialized = JSON.stringify(complexData);
       expect(serialized).toBeDefined();
-      
+
       const deserialized = JSON.parse(serialized);
       expect(deserialized.user.id).toBe(complexData.user.id);
       expect(deserialized.settings.theme).toBe(complexData.settings.theme);
@@ -83,8 +83,11 @@ describe("缓存功能测试", () => {
   describe("缓存操作模拟", () => {
     it("应该能够模拟缓存设置和获取", () => {
       // 模拟缓存存储
-      const cache = new Map<string, { value: any; ttl: number; expires: number }>();
-      
+      const cache = new Map<
+        string,
+        { value: any; ttl: number; expires: number }
+      >();
+
       const setCache = (key: string, value: any, ttl: number) => {
         const expires = Date.now() + ttl * 1000;
         cache.set(key, { value, ttl, expires });
@@ -93,12 +96,12 @@ describe("缓存功能测试", () => {
       const getCache = (key: string) => {
         const item = cache.get(key);
         if (!item) return null;
-        
+
         if (Date.now() > item.expires) {
           cache.delete(key);
           return null;
         }
-        
+
         return item.value;
       };
 
@@ -117,8 +120,11 @@ describe("缓存功能测试", () => {
     });
 
     it("应该能够处理缓存过期", () => {
-      const cache = new Map<string, { value: any; ttl: number; expires: number }>();
-      
+      const cache = new Map<
+        string,
+        { value: any; ttl: number; expires: number }
+      >();
+
       const setCache = (key: string, value: any, ttl: number) => {
         const expires = Date.now() + ttl * 1000;
         cache.set(key, { value, ttl, expires });
@@ -127,12 +133,12 @@ describe("缓存功能测试", () => {
       const getCache = (key: string) => {
         const item = cache.get(key);
         if (!item) return null;
-        
+
         if (Date.now() > item.expires) {
           cache.delete(key);
           return null;
         }
-        
+
         return item.value;
       };
 
@@ -171,7 +177,7 @@ describe("缓存功能测试", () => {
         return /^[a-zA-Z0-9:_-]+$/.test(key);
       };
 
-      invalidKeys.forEach(key => {
+      invalidKeys.forEach((key) => {
         const result = isValidKey(key);
         expect(result).toBe(false);
       });
@@ -191,14 +197,16 @@ describe("缓存功能测试", () => {
       ];
 
       const isValidKey = (key: any): boolean => {
-        return key && 
-               typeof key === "string" && 
-               /^[a-zA-Z0-9:_-]+$/.test(key) &&
-               key.length > 0 &&
-               key.length <= 255;
+        return (
+          key &&
+          typeof key === "string" &&
+          /^[a-zA-Z0-9:_-]+$/.test(key) &&
+          key.length > 0 &&
+          key.length <= 255
+        );
       };
 
-      validKeys.forEach(key => {
+      validKeys.forEach((key) => {
         expect(isValidKey(key)).toBe(true);
       });
     });
@@ -226,14 +234,14 @@ describe("缓存功能测试", () => {
 
     it("应该能够快速查找缓存项", () => {
       const cache = new Map<string, any>();
-      
+
       // 填充缓存
       for (let i = 0; i < 100; i++) {
         cache.set(`key-${i}`, { value: i });
       }
 
       const startTime = Date.now();
-      
+
       // 执行查找操作
       for (let i = 0; i < 100; i++) {
         const found = cache.get(`key-${i}`);

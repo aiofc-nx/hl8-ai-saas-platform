@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Input**: User description: "根据上述讨论内容制定重构规范，保持现有功能不变"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Simplify Infrastructure Module Architecture (Priority: P1)
 
@@ -76,7 +76,7 @@ As a developer, I want to use caching decorators (@Cacheable, @CacheEvict, @Cach
 - What happens when cache keys exceed length limits with simplified validation?
 - How does the system handle serialization errors with simplified error handling?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -91,14 +91,14 @@ As a developer, I want to use caching decorators (@Cacheable, @CacheEvict, @Cach
 - **FR-009**: System MUST preserve all existing configuration options (sync/async configuration)
 - **FR-010**: System MUST maintain backward compatibility - no breaking changes to public API
 
-### Key Entities *(include if feature involves data)*
+### Key Entities _(include if feature involves data)_
 
 - **CacheService**: Simplified service providing core caching operations without DDD complexity
 - **RedisService**: Connection management service with simplified health checking
 - **CacheMetricsService**: Performance monitoring service with simplified metrics collection
 - **CacheConfig**: Configuration object for Redis and caching options
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

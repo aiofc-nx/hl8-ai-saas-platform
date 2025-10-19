@@ -6,8 +6,12 @@
  * @since 1.0.0
  */
 
-import type { DatabaseDriver } from './database-driver.interface.js';
-import type { ConnectionInfo, PoolStats, ConnectionStatus } from '../types/connection.types.js';
+import type { DatabaseDriver } from "./database-driver.interface.js";
+import type {
+  ConnectionInfo,
+  PoolStats,
+  ConnectionStatus,
+} from "../types/connection.types.js";
 
 /**
  * 连接管理器接口
