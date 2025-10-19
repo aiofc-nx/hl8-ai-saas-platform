@@ -1,0 +1,44 @@
+{
+  "name": "@hl8/pure-logger",
+  "version": "1.0.0",
+  "description": "纯净日志库 - 无框架依赖的领域层专用日志解决方案",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "keywords": [
+    "logger",
+    "pure",
+    "framework-free",
+    "domain",
+    "clean-architecture",
+    "typescript"
+  ],
+  "author": "HL8 Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.16.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist/**/*"
+  ]
+}

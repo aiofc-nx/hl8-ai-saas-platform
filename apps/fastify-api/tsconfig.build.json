@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/config/*": ["./src/config/*"],
+      "@/controllers/*": ["./src/controllers/*"],
+      "@/entities/*": ["./src/entities/*"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/services/*": ["./src/services/*"]
+    }
+  },
+  "exclude": ["node_modules", "__tests__", "dist", "**/*spec.ts"]
+}
