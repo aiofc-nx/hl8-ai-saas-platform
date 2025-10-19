@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BaseAdapter } from "./base.adapter";
+import { BaseAdapter } from "./base.adapter.js";
 
 /**
  * Kafka 适配器
