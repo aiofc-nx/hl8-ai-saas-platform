@@ -2,7 +2,7 @@
  * 日志适配器测试
  */
 
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
 // 设置测试环境
 beforeAll(() => {
@@ -14,7 +14,7 @@ import {
   BaseLoggerAdapter,
   loggerAdapterManager,
   LogLevel,
-} from "../index";
+} from "../index.js";
 import { ConsoleLogger } from "../implementations/console-logger.js";
 import { NoOpLogger } from "../implementations/noop-logger.js";
 
@@ -76,9 +76,9 @@ describe("LoggerAdapterManager", () => {
 
       const infos = manager.getAdapterInfos();
       expect(infos).toHaveLength(1);
-      expect(infos[0].name).toBe("test-adapter");
-      expect(infos[0].version).toBe("1.0.0");
-      expect(infos[0].available).toBe(true);
+      expect(infos[0]?.name).toBe("test-adapter");
+      expect(infos[0]?.version).toBe("1.0.0");
+      expect(infos[0]?.available).toBe(true);
     });
 
     it("应该切换默认适配器", () => {

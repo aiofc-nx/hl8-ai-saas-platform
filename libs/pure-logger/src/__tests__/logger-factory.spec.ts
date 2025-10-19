@@ -2,7 +2,6 @@
  * 日志工厂测试
  */
 
-
 // 设置测试环境
 beforeAll(() => {
   process.env.NODE_ENV = "test";

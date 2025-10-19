@@ -2,20 +2,12 @@
  * 边界情况和异常情况测试
  */
 
+import { jest } from "@jest/globals";
+
 // 设置测试环境
 beforeAll(() => {
   process.env.NODE_ENV = "test";
 });
-
-// 全局测试工具
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
 
 import {
   ConsoleLogger,
@@ -27,27 +19,27 @@ import {
   createLogger,
   createDomainLogger,
   createProductionLogger,
-} from "../index";
+} from "../index.js";
 
 describe("边界情况和异常情况测试", () => {
   describe("ConsoleLogger 边界情况", () => {
     let logger: ConsoleLogger;
     let consoleSpy: {
-      log: jest.SpyInstance;
-      debug: jest.SpyInstance;
-      info: jest.SpyInstance;
-      warn: jest.SpyInstance;
-      error: jest.SpyInstance;
+      log: jest.MockedFunction<any>;
+      debug: jest.MockedFunction<any>;
+      info: jest.MockedFunction<any>;
+      warn: jest.MockedFunction<any>;
+      error: jest.MockedFunction<any>;
     };
 
     beforeEach(() => {
       logger = new ConsoleLogger();
       consoleSpy = {
-        log: jest.spyOn(console, "log").mockImplementation(),
-        debug: jest.spyOn(console, "debug").mockImplementation(),
-        info: jest.spyOn(console, "info").mockImplementation(),
-        warn: jest.spyOn(console, "warn").mockImplementation(),
-        error: jest.spyOn(console, "error").mockImplementation(),
+        log: jest.spyOn(console, "log").mockImplementation(() => {}),
+        debug: jest.spyOn(console, "debug").mockImplementation(() => {}),
+        info: jest.spyOn(console, "info").mockImplementation(() => {}),
+        warn: jest.spyOn(console, "warn").mockImplementation(() => {}),
+        error: jest.spyOn(console, "error").mockImplementation(() => {}),
       };
     });
 
@@ -145,7 +137,7 @@ describe("边界情况和异常情况测试", () => {
     });
 
     it("应该处理嵌套很深的上下文对象", () => {
-      let deepContext: any = {};
+      const deepContext: any = {};
       let current = deepContext;
 
       for (let i = 0; i < 100; i++) {
@@ -186,7 +178,9 @@ describe("边界情况和异常情况测试", () => {
     it("应该处理字段截断边界值", () => {
       const config = { maxFieldLength: 10 };
       const structuredLogger = new StructuredLogger(LogLevel.DEBUG, {}, config);
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "log")
+        .mockImplementation(() => {});
 
       // 测试边界值
       structuredLogger.info("test", {
@@ -195,7 +189,8 @@ describe("边界情况和异常情况测试", () => {
         long: "123456789012345",
       });
 
-      const logCall = consoleSpy.mock.calls[0][0];
+      const logCall = consoleSpy.mock.calls[0]?.[0];
+      expect(logCall).toBeDefined();
       const logData = JSON.parse(logCall);
 
       expect(logData.short).toBe("123");
@@ -214,7 +209,9 @@ describe("边界情况和异常情况测试", () => {
 
       testCases.forEach(({ sampling, expected, minExpected, maxExpected }) => {
         const logger = new StructuredLogger(LogLevel.DEBUG, {}, { sampling });
-        const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+        const consoleSpy = jest
+          .spyOn(console, "log")
+          .mockImplementation(() => {});
 
         // 执行多次日志调用
         for (let i = 0; i < 10; i++) {
@@ -257,7 +254,9 @@ describe("边界情况和异常情况测试", () => {
         {},
         { json: false },
       );
-      const consoleSpy = jest.spyOn(console, "info").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "info")
+        .mockImplementation(() => {});
 
       nonJsonLogger.info("test message", { key: "value" });
 
@@ -401,7 +400,9 @@ describe("边界情况和异常情况测试", () => {
 
     it("应该处理并发日志调用", async () => {
       const logger = createLogger({ concurrent: "test" });
-      const consoleSpy = jest.spyOn(console, "info").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "info")
+        .mockImplementation(() => {});
 
       // 并发执行日志调用
       const promises = Array.from({ length: 100 }, (_, i) =>
@@ -418,7 +419,9 @@ describe("边界情况和异常情况测试", () => {
   describe("错误处理边界情况", () => {
     it("应该处理 Error 对象的边界情况", () => {
       const logger = new ConsoleLogger();
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const errorCases = [
         new Error("normal error"),
@@ -449,7 +452,9 @@ describe("边界情况和异常情况测试", () => {
       }
 
       const logger = new ConsoleLogger();
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const customError = new CustomError("custom error", "CUSTOM_001");
 

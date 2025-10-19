@@ -2,7 +2,7 @@
  * 集成测试 - 验证各组件协作
  */
 
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
 // 设置测试环境
 beforeAll(() => {
@@ -46,11 +46,11 @@ class TestLoggerAdapter extends BaseLoggerAdapter {
 
 describe("集成测试", () => {
   let consoleSpy: {
-    log: jest.SpyInstance;
-    debug: jest.SpyInstance;
-    info: jest.SpyInstance;
-    warn: jest.SpyInstance;
-    error: jest.SpyInstance;
+    log: jest.MockedFunction<any>;
+    debug: jest.MockedFunction<any>;
+    info: jest.MockedFunction<any>;
+    warn: jest.MockedFunction<any>;
+    error: jest.MockedFunction<any>;
   };
 
   beforeEach(() => {
