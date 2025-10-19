@@ -1,0 +1,27 @@
+{
+  "name": "database-demo",
+  "version": "1.0.0",
+  "description": "数据库连接测试演示项目",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "node src/test-database-connection.js",
+    "test:db": "node src/test-database-connection.js",
+    "test:advanced": "node src/advanced-database-test.js",
+    "test:hl8": "node src/test-hl8-database.js",
+    "test:hl8-simple": "node src/simple-hl8-test.js",
+    "test:mongodb": "node src/test-mongodb-connection.js",
+    "test:mongodb-fixed": "node src/test-mongodb-fixed.js",
+    "test:all": "npm run test && npm run test:advanced && npm run test:hl8-simple && npm run test:mongodb-fixed"
+  },
+  "keywords": ["database", "test", "postgresql", "mongodb", "redis"],
+  "author": "HL8 Team",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "dependencies": {
+    "mongodb": "^6.20.0",
+    "pg": "^8.16.3",
+    "redis": "^5.8.3",
+    "reflect-metadata": "^0.2.2"
+  }
+}
