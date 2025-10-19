@@ -6,14 +6,15 @@
  * @since 1.0.0
  */
 
-import { TypedConfigModule } from "../lib/typed-config.module";
+import { TypedConfigModule } from "../lib/typed-config.module.js";
+import { TestConfig, createTestConfig } from "./test-utils.js";
 
 describe("配置模块基础测试", () => {
   describe("基本功能", () => {
     it("应该创建配置模块", () => {
       const configModule = TypedConfigModule.forRoot({
-        schema: Object,
-        load: () => ({ name: "Test App", version: "1.0.0" }),
+        schema: TestConfig,
+        load: () => createTestConfig(),
       });
 
       expect(configModule).toBeDefined();
@@ -24,10 +25,10 @@ describe("配置模块基础测试", () => {
     });
 
     it("应该支持自定义配置加载器", () => {
-      const customLoader = jest.fn().mockReturnValue({ name: "Test App" });
+      const customLoader = jest.fn().mockReturnValue(createTestConfig());
 
       const configModule = TypedConfigModule.forRoot({
-        schema: Object,
+        schema: TestConfig,
         load: customLoader,
       });
 
@@ -42,8 +43,8 @@ describe("配置模块基础测试", () => {
       }));
 
       const configModule = TypedConfigModule.forRoot({
-        schema: Object,
-        load: () => ({ name: "Test App" }),
+        schema: TestConfig,
+        load: () => createTestConfig(),
         normalize,
       });
 
@@ -52,8 +53,8 @@ describe("配置模块基础测试", () => {
 
     it("应该支持缓存选项", () => {
       const configModule = TypedConfigModule.forRoot({
-        schema: Object,
-        load: () => ({ name: "Test App" }),
+        schema: TestConfig,
+        load: () => createTestConfig(),
         cacheOptions: {
           strategy: "memory" as any,
           ttl: 300000,
@@ -62,7 +63,7 @@ describe("配置模块基础测试", () => {
       });
 
       expect(configModule).toBeDefined();
-      expect(configModule.providers).toHaveLength(2); // Config + CacheManager
+      expect(configModule.providers).toHaveLength(3); // TestConfig + CacheManager + TestDatabaseConfig
     });
   });
 

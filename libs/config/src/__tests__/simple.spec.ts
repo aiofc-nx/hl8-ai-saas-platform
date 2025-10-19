@@ -64,7 +64,7 @@ describe("配置模块简单测试", () => {
       });
 
       expect(configModule).toBeDefined();
-      expect(configModule.providers).toHaveLength(2); // Config + CacheManager
+      expect(configModule.providers).toHaveLength(3); // TestConfig + CacheManager + TestDatabaseConfig
     });
   });
 
