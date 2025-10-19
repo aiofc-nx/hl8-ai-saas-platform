@@ -8,6 +8,7 @@ const config: Config = {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^@hl8/(.*)$": "<rootDir>/../../libs/$1/src",
   },
   transform: {
     "^.+\\.ts$": [
@@ -21,8 +22,8 @@ const config: Config = {
       },
     ],
   },
-  roots: ["<rootDir>/src", "<rootDir>/__tests__"],
-  testMatch: ["<rootDir>/src/**/*.spec.ts", "<rootDir>/__tests__/**/*.spec.ts"],
+  roots: ["<rootDir>/src"],
+  testMatch: ["<rootDir>/src/**/*.spec.ts"],
   collectCoverageFrom: [
     "src/**/*.ts",
     "!src/**/*.spec.ts",
