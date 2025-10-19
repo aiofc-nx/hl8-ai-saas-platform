@@ -6,5 +6,5 @@
  * @since 1.0.0
  */
 
-export { CacheSerializationException } from "./cache-serialization.exception.js";
-export { RedisConnectionException } from "./redis-connection.exception.js";
+export { CacheSerializationError } from "./cache.exceptions.js";
+export { RedisConnectionError } from "./cache.exceptions.js";

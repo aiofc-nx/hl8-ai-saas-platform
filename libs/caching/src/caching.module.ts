@@ -1,158 +1,153 @@
 /**
- * 缓存模块
+ * 简化的缓存模块
  *
- * @description 提供多层级数据隔离的缓存功能
- *
- * ## 功能特性
- *
- * - 自动多层级数据隔离
- * - Redis 作为缓存后端
- * - DDD 充血模型设计
- * - 完整的装饰器支持
- *
- * ## 使用方式
- *
- * ```typescript
- * @Module({
- *   imports: [
- *     CachingModule.forRoot({
- *       redis: {
- *         host: 'localhost',
- *         port: 6379,
- *       },
- *       ttl: 3600,
- *       keyPrefix: 'hl8:cache:',
- *     }),
- *   ],
- * })
- * export class AppModule {}
- * ```
+ * @description 提供简单直接的缓存模块配置，替代复杂的 DDD 实现
  *
  * @since 1.0.0
  */
 
-import { DynamicModule, Global, Module } from "@nestjs/common";
-import { CacheSerializationException } from "./exceptions/cache-serialization.exception.js";
-import { CacheInterceptor } from "./interceptors/cache.interceptor.js";
-import { CacheMetricsService } from "./monitoring/cache-metrics.service.js";
-import { CACHE_OPTIONS, CacheService } from "./services/cache.service.js";
-import { REDIS_OPTIONS, RedisService } from "./services/redis.service.js";
-import type {
-  CachingModuleAsyncOptions,
-  CachingModuleOptions,
-} from "./types/cache-options.interface.js";
+import { DynamicModule, Module, Provider } from "@nestjs/common";
+import { ClsModule } from "nestjs-cls";
+import { SimplifiedCacheService } from "./services/cache.service.js";
+import { SimplifiedRedisService } from "./services/redis.service.js";
+import { SimplifiedCacheMetricsService } from "./monitoring/cache-metrics.service.js";
+import { SimplifiedCacheInterceptor } from "./interceptors/cache.interceptor.js";
+import type { SimplifiedModuleOptions } from "./types/cache.types.js";
 
-@Global()
+/**
+ * 缓存选项令牌
+ *
+ * @description 用于注入缓存配置的令牌
+ */
+export const CACHE_OPTIONS = "CACHE_OPTIONS";
+
+/**
+ * 简化的缓存模块
+ *
+ * @description 提供简单直接的缓存模块配置
+ */
 @Module({})
-export class CachingModule {
+export class SimplifiedCachingModule {
   /**
    * 同步配置缓存模块
    *
-   * @param options - 缓存模块配置
+   * @description 使用同步配置创建缓存模块
+   *
+   * @param options - 缓存模块选项
    * @returns 动态模块
    *
    * @example
    * ```typescript
-   * CachingModule.forRoot({
-   *   redis: { host: 'localhost', port: 6379 },
-   *   ttl: 3600,
-   *   keyPrefix: 'hl8:cache:',
+   * @Module({
+   *   imports: [
+   *     SimplifiedCachingModule.forRoot({
+   *       redis: {
+   *         host: 'localhost',
+   *         port: 6379,
+   *       },
+   *       ttl: 3600,
+   *     }),
+   *   ],
    * })
+   * export class AppModule {}
    * ```
    */
-  static forRoot(options: CachingModuleOptions): DynamicModule {
+  static forRoot(options: SimplifiedModuleOptions): DynamicModule {
+    const providers: Provider[] = [
+      {
+        provide: CACHE_OPTIONS,
+        useValue: options,
+      },
+      {
+        provide: SimplifiedRedisService,
+        useFactory: (config: SimplifiedModuleOptions) => {
+          return new SimplifiedRedisService(config.redis);
+        },
+        inject: [CACHE_OPTIONS],
+      },
+      SimplifiedCacheService,
+      SimplifiedCacheMetricsService,
+      SimplifiedCacheInterceptor,
+    ];
+
     return {
-      module: CachingModule,
-      providers: [
-        {
-          provide: REDIS_OPTIONS,
-          useValue: options.redis,
-        },
-        {
-          provide: CACHE_OPTIONS,
-          useValue: {
-            ttl: options.ttl,
-            keyPrefix: options.keyPrefix,
-          },
-        },
-        RedisService,
-        CacheService,
-        CacheInterceptor,
-        CacheMetricsService,
-      ],
+      module: SimplifiedCachingModule,
+      imports: [ClsModule],
+      providers,
       exports: [
-        RedisService,
-        CacheService,
-        CacheInterceptor,
-        CacheMetricsService,
+        SimplifiedCacheService,
+        SimplifiedRedisService,
+        SimplifiedCacheMetricsService,
+        SimplifiedCacheInterceptor,
       ],
+      global: true,
     };
   }
 
   /**
    * 异步配置缓存模块
    *
-   * @param options - 异步配置选项
+   * @description 使用异步配置创建缓存模块
+   *
+   * @param options - 异步缓存模块选项
    * @returns 动态模块
    *
    * @example
    * ```typescript
-   * CachingModule.forRootAsync({
-   *   inject: [ConfigService],
-   *   useFactory: (config: ConfigService) => ({
-   *     redis: config.get('redis'),
-   *     ttl: config.get('cache.ttl'),
-   *   }),
+   * @Module({
+   *   imports: [
+   *     SimplifiedCachingModule.forRootAsync({
+   *       imports: [ConfigModule],
+   *       inject: [ConfigService],
+   *       useFactory: (configService: ConfigService) => ({
+   *         redis: {
+   *           host: configService.get('REDIS_HOST'),
+   *           port: configService.get('REDIS_PORT'),
+   *         },
+   *         ttl: configService.get('CACHE_TTL'),
+   *       }),
+   *     }),
+   *   ],
    * })
+   * export class AppModule {}
    * ```
    */
-  static forRootAsync(options: CachingModuleAsyncOptions): DynamicModule {
+  static forRootAsync(options: {
+    imports?: any[];
+    inject?: any[];
+    useFactory: (
+      ...args: any[]
+    ) => Promise<SimplifiedModuleOptions> | SimplifiedModuleOptions;
+  }): DynamicModule {
+    const providers: Provider[] = [
+      {
+        provide: CACHE_OPTIONS,
+        useFactory: options.useFactory,
+        inject: options.inject || [],
+      },
+      {
+        provide: SimplifiedRedisService,
+        useFactory: (config: SimplifiedModuleOptions) => {
+          return new SimplifiedRedisService(config.redis);
+        },
+        inject: [CACHE_OPTIONS],
+      },
+      SimplifiedCacheService,
+      SimplifiedCacheMetricsService,
+      SimplifiedCacheInterceptor,
+    ];
+
     return {
-      module: CachingModule,
-      imports: options.imports || [],
-      providers: [
-        {
-          provide: REDIS_OPTIONS,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- NestJS useFactory 模式必须支持任意依赖（宪章 IX 允许场景）
-          useFactory: async (...args: any[]) => {
-            if (options.useFactory) {
-              const config = await options.useFactory(...args);
-              return config.redis;
-            }
-            throw new CacheSerializationException(
-              "useFactory is required for async configuration",
-            );
-          },
-          inject: options.inject || [],
-        },
-        {
-          provide: CACHE_OPTIONS,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- NestJS useFactory 模式必须支持任意依赖（宪章 IX 允许场景）
-          useFactory: async (...args: any[]) => {
-            if (options.useFactory) {
-              const config = await options.useFactory(...args);
-              return {
-                ttl: config.ttl,
-                keyPrefix: config.keyPrefix,
-              };
-            }
-            throw new CacheSerializationException(
-              "useFactory is required for async configuration",
-            );
-          },
-          inject: options.inject || [],
-        },
-        RedisService,
-        CacheService,
-        CacheInterceptor,
-        CacheMetricsService,
-      ],
+      module: SimplifiedCachingModule,
+      imports: [ClsModule, ...(options.imports || [])],
+      providers,
       exports: [
-        RedisService,
-        CacheService,
-        CacheInterceptor,
-        CacheMetricsService,
+        SimplifiedCacheService,
+        SimplifiedRedisService,
+        SimplifiedCacheMetricsService,
+        SimplifiedCacheInterceptor,
       ],
+      global: true,
     };
   }
 }

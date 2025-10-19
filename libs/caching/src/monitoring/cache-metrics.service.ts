@@ -1,83 +1,63 @@
 /**
- * 缓存性能指标服务
+ * 简化的缓存指标服务
  *
- * @description 收集和计算缓存性能指标
- *
- * ## 业务规则
- *
- * ### 指标收集规则
- * - 每次缓存操作都应记录指标
- * - 指标数据存储在内存中
- * - 支持手动重置指标
- *
- * ### 计算规则
- * - 命中率 = hits / (hits + misses)
- * - 平均延迟 = totalLatency / totalOperations
- * - 总操作数 = hits + misses + errors
- *
- * ### 延迟测量
- * - 记录每次操作的开始和结束时间
- * - 计算时间差（毫秒）
- * - 累加到总延迟
- *
- * @example
- * ```typescript
- * @Injectable()
- * export class CacheService {
- *   constructor(
- *     private readonly metricsService: CacheMetricsService,
- *   ) {}
- *
- *   async get<T>(namespace: string, key: string): Promise<T | undefined> {
- *     const startTime = Date.now();
- *
- *     try {
- *       const value = await this.redis.get(key);
- *       const latency = Date.now() - startTime;
- *
- *       if (value) {
- *         this.metricsService.recordHit(latency);
- *         return JSON.parse(value);
- *       } else {
- *         this.metricsService.recordMiss(latency);
- *         return undefined;
- *       }
- *     } catch (error) {
- *       const latency = Date.now() - startTime;
- *       this.metricsService.recordError(latency);
- *       throw error;
- *     }
- *   }
- * }
- * ```
+ * @description 提供简单直接的性能监控，替代复杂的指标收集
  *
  * @since 1.0.0
  */
 
 import { Injectable, Logger } from "@nestjs/common";
-import type { CacheMetrics } from "../types/cache-metrics.interface.js";
 
+/**
+ * 简化的缓存指标接口
+ *
+ * @description 简化的缓存性能指标
+ */
+export interface SimplifiedCacheMetrics {
+  /** 命中次数 */
+  hits: number;
+  /** 未命中次数 */
+  misses: number;
+  /** 错误次数 */
+  errors: number;
+  /** 命中率 */
+  hitRate: number;
+  /** 平均延迟（毫秒） */
+  averageLatency: number;
+  /** 总操作次数 */
+  totalOperations: number;
+  /** 总延迟（毫秒） */
+  totalLatency: number;
+}
+
+/**
+ * 简化的缓存指标服务
+ *
+ * @description 提供简单直接的性能监控
+ */
 @Injectable()
-export class CacheMetricsService {
-  private readonly logger = new Logger(CacheMetricsService.name);
-
+export class SimplifiedCacheMetricsService {
+  private readonly logger = new Logger(SimplifiedCacheMetricsService.name);
   private hits = 0;
   private misses = 0;
   private errors = 0;
   private totalLatency = 0;
+  private operationCount = 0;
 
   /**
    * 记录缓存命中
+   *
+   * @description 记录缓存命中事件
    *
    * @param latency - 操作延迟（毫秒）
    *
    * @example
    * ```typescript
-   * const startTime = Date.now();
-   * const value = await redis.get(key);
-   * const latency = Date.now() - startTime;
+   * const start = Date.now();
+   * const value = await cacheService.get('user', '123');
+   * const latency = Date.now() - start;
    *
-   * if (value) {
+   * if (value !== undefined) {
    *   metricsService.recordHit(latency);
    * }
    * ```
@@ -85,21 +65,27 @@ export class CacheMetricsService {
   recordHit(latency: number): void {
     this.hits++;
     this.totalLatency += latency;
-    this.logger.debug(`缓存命中 | 延迟: ${latency.toFixed(2)}ms`);
+    this.operationCount++;
+
+    if (this.shouldLogMetrics()) {
+      this.logger.debug(`缓存命中: 延迟 ${latency}ms`);
+    }
   }
 
   /**
    * 记录缓存未命中
    *
+   * @description 记录缓存未命中事件
+   *
    * @param latency - 操作延迟（毫秒）
    *
    * @example
    * ```typescript
-   * const startTime = Date.now();
-   * const value = await redis.get(key);
-   * const latency = Date.now() - startTime;
+   * const start = Date.now();
+   * const value = await cacheService.get('user', '123');
+   * const latency = Date.now() - start;
    *
-   * if (!value) {
+   * if (value === undefined) {
    *   metricsService.recordMiss(latency);
    * }
    * ```
@@ -107,121 +93,188 @@ export class CacheMetricsService {
   recordMiss(latency: number): void {
     this.misses++;
     this.totalLatency += latency;
-    this.logger.debug(`缓存未命中 | 延迟: ${latency.toFixed(2)}ms`);
+    this.operationCount++;
+
+    if (this.shouldLogMetrics()) {
+      this.logger.debug(`缓存未命中: 延迟 ${latency}ms`);
+    }
   }
 
   /**
    * 记录缓存错误
+   *
+   * @description 记录缓存操作错误
    *
    * @param latency - 操作延迟（毫秒）
    *
    * @example
    * ```typescript
    * try {
-   *   await redis.get(key);
+   *   await cacheService.set('user', '123', user);
    * } catch (error) {
-   *   const latency = Date.now() - startTime;
-   *   metricsService.recordError(latency);
+   *   metricsService.recordError(Date.now() - start);
    * }
    * ```
    */
   recordError(latency: number): void {
     this.errors++;
     this.totalLatency += latency;
-    this.logger.warn(`缓存错误 | 延迟: ${latency.toFixed(2)}ms`);
+    this.operationCount++;
+
+    if (this.shouldLogMetrics()) {
+      this.logger.warn(`缓存错误: 延迟 ${latency}ms`);
+    }
   }
 
   /**
-   * 获取缓存命中率
+   * 获取缓存指标
    *
-   * @returns 命中率（0-1）
+   * @description 获取当前缓存性能指标
+   *
+   * @returns 缓存指标
+   *
+   * @example
+   * ```typescript
+   * const metrics = metricsService.getMetrics();
+   * console.log(`命中率: ${metrics.hitRate.toFixed(2)}%`);
+   * console.log(`平均延迟: ${metrics.averageLatency.toFixed(2)}ms`);
+   * ```
+   */
+  getMetrics(): SimplifiedCacheMetrics {
+    const totalOperations = this.hits + this.misses + this.errors;
+    const hitRate =
+      totalOperations > 0 ? (this.hits / totalOperations) * 100 : 0;
+    const averageLatency =
+      totalOperations > 0 ? this.totalLatency / totalOperations : 0;
+
+    return {
+      hits: this.hits,
+      misses: this.misses,
+      errors: this.errors,
+      hitRate,
+      averageLatency,
+      totalOperations,
+      totalLatency: this.totalLatency,
+    };
+  }
+
+  /**
+   * 重置指标
+   *
+   * @description 重置所有性能指标
+   *
+   * @example
+   * ```typescript
+   * metricsService.reset();
+   * console.log('指标已重置');
+   * ```
+   */
+  reset(): void {
+    this.hits = 0;
+    this.misses = 0;
+    this.errors = 0;
+    this.totalLatency = 0;
+    this.operationCount = 0;
+
+    this.logger.log("缓存指标已重置");
+  }
+
+  /**
+   * 记录指标摘要
+   *
+   * @description 记录当前指标摘要到日志
+   *
+   * @example
+   * ```typescript
+   * metricsService.logSummary();
+   * // 输出: 缓存指标摘要: 命中率 85.5%, 平均延迟 12.3ms, 总操作 1000
+   * ```
+   */
+  logSummary(): void {
+    const metrics = this.getMetrics();
+    this.logger.log(
+      `缓存指标摘要: 命中率 ${metrics.hitRate.toFixed(2)}%, 平均延迟 ${metrics.averageLatency.toFixed(2)}ms, 总操作 ${metrics.totalOperations}`,
+    );
+  }
+
+  /**
+   * 检查是否应该记录指标日志
+   *
+   * @description 根据操作频率决定是否记录详细日志
+   *
+   * @returns 如果应该记录日志返回 true，否则返回 false
+   * @private
+   */
+  private shouldLogMetrics(): boolean {
+    // 每 100 次操作记录一次日志
+    return this.operationCount % 100 === 0;
+  }
+
+  /**
+   * 获取命中率
+   *
+   * @description 获取当前命中率
+   *
+   * @returns 命中率（0-100）
    *
    * @example
    * ```typescript
    * const hitRate = metricsService.getHitRate();
-   * console.log(`命中率: ${(hitRate * 100).toFixed(2)}%`);
+   * if (hitRate < 80) {
+   *   console.warn('缓存命中率过低');
+   * }
    * ```
    */
   getHitRate(): number {
-    const totalQueries = this.hits + this.misses;
-    if (totalQueries === 0) {
-      return 0;
-    }
-    return this.hits / totalQueries;
+    const metrics = this.getMetrics();
+    return metrics.hitRate;
   }
 
   /**
    * 获取平均延迟
+   *
+   * @description 获取当前平均延迟
    *
    * @returns 平均延迟（毫秒）
    *
    * @example
    * ```typescript
    * const avgLatency = metricsService.getAverageLatency();
-   * console.log(`平均延迟: ${avgLatency.toFixed(2)}ms`);
-   * ```
-   */
-  getAverageLatency(): number {
-    const totalOperations = this.hits + this.misses + this.errors;
-    if (totalOperations === 0) {
-      return 0;
-    }
-    return this.totalLatency / totalOperations;
-  }
-
-  /**
-   * 获取完整的缓存指标
-   *
-   * @returns 缓存指标对象
-   *
-   * @example
-   * ```typescript
-   * const metrics = metricsService.getMetrics();
-   *
-   * console.log(`命中: ${metrics.hits}`);
-   * console.log(`未命中: ${metrics.misses}`);
-   * console.log(`错误: ${metrics.errors}`);
-   * console.log(`命中率: ${(metrics.hitRate * 100).toFixed(2)}%`);
-   * console.log(`平均延迟: ${metrics.averageLatency.toFixed(2)}ms`);
-   * console.log(`总操作: ${metrics.totalOperations}`);
-   * ```
-   */
-  getMetrics(): CacheMetrics {
-    return {
-      hits: this.hits,
-      misses: this.misses,
-      errors: this.errors,
-      hitRate: this.getHitRate(),
-      averageLatency: this.getAverageLatency(),
-      totalOperations: this.hits + this.misses + this.errors,
-    };
-  }
-
-  /**
-   * 重置所有指标
-   *
-   * @description 清空所有缓存指标数据，用于重新开始收集
-   *
-   * @example
-   * ```typescript
-   * // 定时重置指标（每天）
-   * @Cron('0 0 * * *')
-   * resetMetrics() {
-   *   const metrics = this.metricsService.getMetrics();
-   *   this.logger.log(`日报 | 命中率: ${(metrics.hitRate * 100).toFixed(2)}%`);
-   *   this.metricsService.reset();
+   * if (avgLatency > 100) {
+   *   console.warn('缓存延迟过高');
    * }
    * ```
    */
-  reset(): void {
+  getAverageLatency(): number {
     const metrics = this.getMetrics();
-    this.logger.log(
-      `重置指标 | 命中率: ${(metrics.hitRate * 100).toFixed(2)}%, 总操作: ${metrics.totalOperations}`,
-    );
+    return metrics.averageLatency;
+  }
 
-    this.hits = 0;
-    this.misses = 0;
-    this.errors = 0;
-    this.totalLatency = 0;
+  /**
+   * 检查性能是否正常
+   *
+   * @description 检查缓存性能是否在正常范围内
+   *
+   * @param hitRateThreshold - 命中率阈值（默认 80%）
+   * @param latencyThreshold - 延迟阈值（默认 100ms）
+   * @returns 如果性能正常返回 true，否则返回 false
+   *
+   * @example
+   * ```typescript
+   * const isHealthy = metricsService.isPerformanceHealthy();
+   * if (!isHealthy) {
+   *   console.warn('缓存性能异常');
+   * }
+   * ```
+   */
+  isPerformanceHealthy(
+    hitRateThreshold: number = 80,
+    latencyThreshold: number = 100,
+  ): boolean {
+    const metrics = this.getMetrics();
+    return (
+      metrics.hitRate >= hitRateThreshold &&
+      metrics.averageLatency <= latencyThreshold
+    );
   }
 }

@@ -1,79 +1,95 @@
 /**
- * @hl8/business-core
+ * 简化的缓存模块入口文件
  *
- * 企业级 NestJS Redis 缓存模块
- * 支持多层级数据隔离（平台、租户、组织、部门、用户）
+ * @description 导出简化后的缓存模块所有公共 API
  *
- * @module @hl8/business-core
  * @since 1.0.0
  */
 
 // 模块
-export { CachingModule } from "./caching.module.js";
+export { SimplifiedCachingModule as CachingModule } from "./caching.module.js";
 
 // 服务
-export { CacheService } from "./services/cache.service.js";
-export { RedisService } from "./services/redis.service.js";
+export { SimplifiedCacheService as CacheService } from "./services/cache.service.js";
+export { SimplifiedRedisService as RedisService } from "./services/redis.service.js";
+export { SimplifiedCacheMetricsService as CacheMetricsService } from "./monitoring/cache-metrics.service.js";
 
-// 值对象
-export { CacheEntry } from "./domain/value-objects/cache-entry.vo.js";
-export { CacheKey } from "./domain/value-objects/cache-key.vo.js";
-
-// 枚举
-export { CacheLevel } from "./types/cache-level.enum.js";
-
-// 类型
-export type {
-  CachingModuleAsyncOptions,
-  CachingModuleOptions,
-} from "./types/cache-options.interface.js";
-export type { RedisOptions } from "./types/redis-options.interface.js";
-
-// 配置
-export { CachingModuleConfig, RedisConfig } from "./config/caching.config.js";
-
-// 领域事件
-export { CacheInvalidatedEvent } from "./domain/events/cache-invalidated.event.js";
-export { CacheLevelInvalidatedEvent } from "./domain/events/cache-level-invalidated.event.js";
+// 拦截器
+export { SimplifiedCacheInterceptor as CacheInterceptor } from "./interceptors/cache.interceptor.js";
 
 // 装饰器
 export {
-  CacheEvict,
-  type CacheEvictOptions,
-} from "./decorators/cache-evict.decorator.js";
-export {
-  CachePut,
-  type CachePutOptions,
-} from "./decorators/cache-put.decorator.js";
-export {
   Cacheable,
-  type CacheableOptions,
+  CacheEvict,
+  CachePut,
+  defaultKeyGenerator,
+  generateCacheKey,
+  checkCacheCondition,
+  shouldCacheValue,
 } from "./decorators/cacheable.decorator.js";
-
-// 拦截器（通常不需要导出，装饰器内部使用）
-export { CacheInterceptor } from "./interceptors/cache.interceptor.js";
-
-// 监控服务
-export { CacheMetricsService } from "./monitoring/cache-metrics.service.js";
-
-// 监控类型
-export type { CacheMetrics } from "./types/cache-metrics.interface.js";
 
 // 工具函数
 export {
-  generateKey,
-  generatePattern,
+  generateCacheKey as generateCacheKeyUtil,
+  generateCachePattern,
   isValidKey,
   sanitizeKey,
 } from "./utils/key-generator.util.js";
+
 export {
+  serialize,
   deserialize,
   isSerializable,
-  serialize,
+  getSerializedSize,
+  isOversized,
 } from "./utils/serializer.util.js";
 
-// 异常类
 export {
-  CacheSerializationException,
-  RedisConnectionException,
-} from "./exceptions/index.js";
+  getIsolationLevel,
+  hasIsolationLevel,
+  getIsolationIdentifier,
+  validateIsolationContext,
+  createIsolationPrefix,
+  isIsolationContextMatch,
+  getIsolationContextSummary,
+} from "./utils/isolation.util.js";
+
+export {
+  PerformanceMonitor,
+  PerformanceStats,
+  PerformanceThresholdChecker,
+  PerformanceMonitor as PerformanceMonitorDecorator,
+} from "./utils/performance.util.js";
+
+// 错误类
+export {
+  CacheError,
+  RedisConnectionError,
+  CacheSerializationError,
+  CacheKeyValidationError,
+  CacheConfigurationError,
+  CacheTimeoutError,
+} from "./exceptions/cache.exceptions.js";
+
+// 类型定义
+export type {
+  SimplifiedCacheConfig,
+  SimplifiedRedisOptions,
+  SimplifiedCacheOptions,
+  SimplifiedDecoratorOptions,
+  SimplifiedErrorOptions,
+  SimplifiedPerformanceOptions,
+  SimplifiedIsolationOptions,
+  SimplifiedModuleOptions,
+} from "./types/cache.types.js";
+
+export type { SimplifiedCacheMetrics } from "./monitoring/cache-metrics.service.js";
+
+export type {
+  CacheKeyGenerator,
+  CacheCondition,
+  SimplifiedCacheableOptions,
+} from "./decorators/cacheable.decorator.js";
+
+// 常量
+export { CACHE_OPTIONS } from "./caching.module.js";

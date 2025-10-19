@@ -1,212 +1,278 @@
 /**
- * Redis 服务
+ * 简化的 Redis 服务
  *
- * @description 管理 Redis 连接和生命周期
- *
- * ## 业务规则
- *
- * ### 连接管理
- * - 模块初始化时自动连接
- * - 模块销毁时自动断开
- * - 连接失败时重试（exponential backoff）
- *
- * ### 健康检查
- * - PING 命令检测可用性
- * - 记录连接状态到日志
- *
- * ### 错误处理
- * - 连接错误记录到日志
- * - 重试策略：1秒、2秒、4秒...最多 10 次
+ * @description 提供简单直接的 Redis 连接管理，替代复杂的连接处理
  *
  * @since 1.0.0
  */
 
 import {
-  Inject,
   Injectable,
-  Logger,
-  OnModuleDestroy,
   OnModuleInit,
+  OnModuleDestroy,
+  Logger,
 } from "@nestjs/common";
-import { Redis } from "ioredis";
-import { RedisConnectionException } from "../exceptions/redis-connection.exception.js";
-import type { RedisOptions } from "../types/redis-options.interface.js";
+import Redis from "ioredis";
+import { RedisConnectionError } from "../exceptions/cache.exceptions.js";
+import type { SimplifiedRedisOptions } from "../types/cache.types.js";
 
-export const REDIS_OPTIONS = "REDIS_OPTIONS";
-
+/**
+ * 简化的 Redis 服务
+ *
+ * @description 提供简单直接的 Redis 连接管理
+ */
 @Injectable()
-export class RedisService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(RedisService.name);
-  private client: Redis | null = null;
+export class SimplifiedRedisService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(SimplifiedRedisService.name);
+  private client: any = null;
   private isConnected = false;
 
-  constructor(
-    @Inject(REDIS_OPTIONS)
-    private readonly options: RedisOptions,
-  ) {}
+  constructor(private readonly options: SimplifiedRedisOptions) {}
 
   /**
-   * 模块初始化钩子
+   * 模块初始化
    *
-   * @description 自动连接 Redis
+   * @description 创建 Redis 连接
    */
-  async onModuleInit() {
-    await this.connect();
-  }
-
-  /**
-   * 模块销毁钩子
-   *
-   * @description 自动断开 Redis 连接
-   */
-  async onModuleDestroy() {
-    await this.disconnect();
-  }
-
-  /**
-   * 连接 Redis
-   *
-   * @throws 如果连接失败
-   */
-  async connect(): Promise<void> {
-    if (this.client) {
-      this.logger.warn("Redis 已连接，跳过重复连接");
-      return;
-    }
-
+  async onModuleInit(): Promise<void> {
     try {
-      this.logger.log(
-        `正在连接 Redis: ${this.options.host}:${this.options.port}`,
-      );
-
-      this.client = new Redis({
-        ...this.options,
-        retryStrategy:
-          this.options.retryStrategy ?? this.defaultRetryStrategy.bind(this),
-      });
-
-      // 监听连接事件
-      this.client.on("connect", () => {
-        this.isConnected = true;
-        this.logger.log("Redis 连接成功");
-      });
-
-      this.client.on("error", (error: Error) => {
-        this.logger.error(`Redis 错误: ${error.message}`, error.stack);
-      });
-
-      this.client.on("close", () => {
-        this.isConnected = false;
-        this.logger.warn("Redis 连接已关闭");
-      });
-
-      // 等待连接就绪
-      await this.client.ping();
+      await this.createConnection();
+      this.logger.log("Redis 连接已建立");
     } catch (error) {
-      this.logger.error("Redis 连接失败", undefined, {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      throw error;
+      this.logger.error("Redis 连接失败", error);
+      throw new RedisConnectionError(
+        `无法连接到 Redis: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error : undefined,
+        { options: this.options },
+      );
     }
   }
 
   /**
-   * 断开 Redis 连接
+   * 模块销毁
+   *
+   * @description 关闭 Redis 连接
    */
-  async disconnect(): Promise<void> {
-    if (!this.client) {
-      return;
-    }
-
-    try {
+  async onModuleDestroy(): Promise<void> {
+    if (this.client) {
       await this.client.quit();
       this.client = null;
       this.isConnected = false;
-      this.logger.log("Redis 连接已断开");
-    } catch (error) {
-      this.logger.error("Redis 断开连接失败", undefined, {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      // 强制关闭
-      if (this.client) {
-        this.client.disconnect();
-      }
-      this.client = null;
-      this.isConnected = false;
+      this.logger.log("Redis 连接已关闭");
     }
   }
 
   /**
    * 获取 Redis 客户端
    *
-   * @returns Redis 客户端实例
-   * @throws RedisConnectionException 如果未连接
+   * @description 获取 Redis 客户端实例
+   *
+   * @returns Redis 客户端
+   *
+   * @throws {RedisConnectionError} 如果客户端未连接
+   *
+   * @example
+   * ```typescript
+   * const redis = redisService.getClient();
+   * await redis.set('key', 'value');
+   * ```
    */
-  getClient(): Redis {
-    if (!this.client) {
-      this.logger.error("Redis 未连接，尝试获取客户端", undefined, {
-        connectionState: this.isConnected,
-        clientExists: !!this.client,
-      });
-      throw new RedisConnectionException(
-        "Redis 未连接，请确保模块已正确初始化",
-      );
+  getClient(): any {
+    if (!this.client || !this.isConnected) {
+      throw new RedisConnectionError("Redis 客户端未连接");
     }
-
     return this.client;
   }
 
   /**
    * 健康检查
    *
-   * @returns true 如果 Redis 可用
+   * @description 检查 Redis 连接是否健康
+   *
+   * @returns 如果连接健康返回 true，否则返回 false
+   *
+   * @example
+   * ```typescript
+   * const isHealthy = await redisService.healthCheck();
+   * if (!isHealthy) {
+   *   console.log('Redis 连接不健康');
+   * }
+   * ```
    */
   async healthCheck(): Promise<boolean> {
-    if (!this.client || !this.isConnected) {
-      return false;
-    }
-
     try {
+      if (!this.client || !this.isConnected) {
+        return false;
+      }
+
       const result = await this.client.ping();
       return result === "PONG";
     } catch (error) {
-      this.logger.error("Redis 健康检查失败", undefined, {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      this.logger.warn("Redis 健康检查失败", error);
       return false;
     }
   }
 
   /**
-   * 获取连接状态
+   * 检查客户端是否已连接
    *
-   * @returns true 如果已连接
+   * @description 检查 Redis 客户端是否已连接
+   *
+   * @returns 如果已连接返回 true，否则返回 false
+   *
+   * @example
+   * ```typescript
+   * if (redisService.isClientConnected()) {
+   *   // 可以安全使用 Redis 客户端
+   * }
+   * ```
    */
   isClientConnected(): boolean {
-    return this.isConnected;
+    return this.isConnected && this.client !== null;
+  }
+
+  /**
+   * 创建 Redis 连接
+   *
+   * @description 创建新的 Redis 连接
+   *
+   * @private
+   */
+  private async createConnection(): Promise<void> {
+    const redisOptions: Redis.RedisOptions = {
+      host: this.options.host,
+      port: this.options.port,
+      password: this.options.password,
+      db: this.options.db ?? 0,
+      connectTimeout: this.options.connectTimeout ?? 10000,
+      commandTimeout: this.options.commandTimeout ?? 5000,
+      retryStrategy: this.options.retryStrategy ?? this.defaultRetryStrategy,
+      lazyConnect: true,
+    };
+
+    const Redis = await import("ioredis");
+    this.client = new (Redis as any).default(redisOptions);
+
+    // 设置事件监听器
+    this.setupEventListeners();
+
+    // 连接 Redis
+    await this.client.connect();
+    this.isConnected = true;
+  }
+
+  /**
+   * 设置事件监听器
+   *
+   * @description 设置 Redis 连接事件监听器
+   *
+   * @private
+   */
+  private setupEventListeners(): void {
+    if (!this.client) return;
+
+    this.client.on("connect", () => {
+      this.logger.log("Redis 连接已建立");
+      this.isConnected = true;
+    });
+
+    this.client.on("ready", () => {
+      this.logger.log("Redis 客户端已准备就绪");
+    });
+
+    this.client.on("error", (error) => {
+      this.logger.error("Redis 连接错误", error);
+      this.isConnected = false;
+    });
+
+    this.client.on("close", () => {
+      this.logger.warn("Redis 连接已关闭");
+      this.isConnected = false;
+    });
+
+    this.client.on("reconnecting", () => {
+      this.logger.log("Redis 正在重新连接");
+    });
+
+    this.client.on("end", () => {
+      this.logger.log("Redis 连接已结束");
+      this.isConnected = false;
+    });
   }
 
   /**
    * 默认重试策略
    *
-   * @description Exponential backoff：1s, 2s, 4s, 8s...最多 10 次
+   * @description 提供简单的重试策略
    *
-   * @param times - 当前重试次数
+   * @param times - 重试次数
    * @returns 重试延迟（毫秒）或 null（停止重试）
    * @private
    */
   private defaultRetryStrategy(times: number): number | null {
-    if (times > 10) {
-      this.logger.error("Redis 重试次数超过限制，停止重试");
+    // 最多重试 3 次，每次延迟递增
+    if (times > 3) {
       return null;
     }
 
-    const delay = Math.min(times * 1000, 10000); // 最多 10 秒
-    this.logger.warn(`Redis 重试第 ${times} 次，延迟 ${delay}ms`);
+    // 重试延迟：1秒、2秒、4秒
+    return Math.min(1000 * Math.pow(2, times - 1), 4000);
+  }
 
-    return delay;
+  /**
+   * 重新连接
+   *
+   * @description 重新建立 Redis 连接
+   *
+   * @returns 如果重连成功返回 true，否则返回 false
+   *
+   * @example
+   * ```typescript
+   * const reconnected = await redisService.reconnect();
+   * if (reconnected) {
+   *   console.log('Redis 重连成功');
+   * }
+   * ```
+   */
+  async reconnect(): Promise<boolean> {
+    try {
+      if (this.client) {
+        await this.client.quit();
+      }
+
+      await this.createConnection();
+      this.logger.log("Redis 重连成功");
+      return true;
+    } catch (error) {
+      this.logger.error("Redis 重连失败", error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取连接信息
+   *
+   * @description 获取当前连接信息
+   *
+   * @returns 连接信息
+   *
+   * @example
+   * ```typescript
+   * const info = redisService.getConnectionInfo();
+   * console.log(`连接到 ${info.host}:${info.port}`);
+   * ```
+   */
+  getConnectionInfo(): {
+    host: string;
+    port: number;
+    db: number;
+    connected: boolean;
+  } {
+    return {
+      host: this.options.host,
+      port: this.options.port,
+      db: this.options.db ?? 0,
+      connected: this.isConnected,
+    };
   }
 }

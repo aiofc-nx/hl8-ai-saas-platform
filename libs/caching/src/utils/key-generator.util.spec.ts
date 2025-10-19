@@ -1,174 +1,118 @@
 /**
  * 键生成工具单元测试
+ *
+ * @description 测试键生成工具的功能
+ *
+ * @group utils
  */
 
+import { TenantId } from "@hl8/isolation-model";
+import { IsolationContext } from "@hl8/isolation-model";
 import {
-  generateKey,
-  generatePattern,
+  generateCacheKey,
+  generateCachePattern,
   isValidKey,
   sanitizeKey,
 } from "./key-generator.util.js";
+import { CacheKeyValidationError } from "../exceptions/cache.exceptions.js";
 
-describe("key-generator.util", () => {
-  describe("generateKey()", () => {
-    it("应该生成简单键", () => {
-      const key = generateKey(["user", "profile", "123"]);
-      expect(key).toBe("user:profile:123");
+describe("Key Generator Utils", () => {
+  describe("generateCacheKey", () => {
+    it("should generate platform-level key when no context", () => {
+      const key = generateCacheKey("user", "123");
+      expect(key).toBe("platform:user:123");
     });
 
-    it("应该过滤空值", () => {
-      const key = generateKey(["user", "", null, undefined, "list"]);
-      expect(key).toBe("user:list");
+    it("should generate platform-level key with prefix", () => {
+      const key = generateCacheKey("user", "123", undefined, "hl8:cache:");
+      expect(key).toBe("hl8:cache:platform:user:123");
     });
 
-    it("应该处理数字", () => {
-      const key = generateKey(["user", 123, "profile"]);
-      expect(key).toBe("user:123:profile");
+    it("should generate tenant-level key when tenant context provided", () => {
+      const tenantId = TenantId.create("550e8400-e29b-41d4-a716-446655440000");
+      const context = IsolationContext.tenant(tenantId);
+      const key = generateCacheKey("user", "123", context);
+      expect(key).toBe(`tenant:${tenantId.toString()}:user:123`);
     });
 
-    it("应该清理非法字符", () => {
-      const key = generateKey(["user name", "profile @123"]);
-      expect(key).toBe("username:profile123");
+    it("should throw error for invalid namespace", () => {
+      expect(() => generateCacheKey("", "123")).toThrow(CacheKeyValidationError);
+      expect(() => generateCacheKey("a".repeat(65), "123")).toThrow(
+        CacheKeyValidationError,
+      );
     });
 
-    it("应该返回空字符串当所有部分都为空时", () => {
-      const key = generateKey(["", null, undefined]);
-      expect(key).toBe("");
-    });
-  });
-
-  describe("sanitizeKey()", () => {
-    it("应该移除空格", () => {
-      const clean = sanitizeKey("user name");
-      expect(clean).toBe("username");
+    it("should throw error for invalid key", () => {
+      expect(() => generateCacheKey("user", "")).toThrow(CacheKeyValidationError);
+      expect(() => generateCacheKey("user", "a".repeat(129))).toThrow(
+        CacheKeyValidationError,
+      );
     });
 
-    it("应该移除换行符", () => {
-      const clean = sanitizeKey("user\nname");
-      expect(clean).toBe("username");
-    });
-
-    it("应该移除制表符", () => {
-      const clean = sanitizeKey("user\tname");
-      expect(clean).toBe("username");
-    });
-
-    it("应该移除控制字符", () => {
-      const clean = sanitizeKey("user\x00name");
-      expect(clean).toBe("username");
-    });
-
-    it("应该保留字母数字", () => {
-      const clean = sanitizeKey("user123");
-      expect(clean).toBe("user123");
-    });
-
-    it("应该保留下划线", () => {
-      const clean = sanitizeKey("user_name");
-      expect(clean).toBe("user_name");
-    });
-
-    it("应该保留横线", () => {
-      const clean = sanitizeKey("user-name");
-      expect(clean).toBe("user-name");
-    });
-
-    it("应该保留冒号", () => {
-      const clean = sanitizeKey("user:name");
-      expect(clean).toBe("user:name");
-    });
-
-    it("应该移除特殊字符", () => {
-      const clean = sanitizeKey("user@#$%name");
-      expect(clean).toBe("username");
-    });
-
-    it("应该移除连续冒号", () => {
-      const clean = sanitizeKey("user:::name");
-      expect(clean).toBe("user:name");
-    });
-
-    it("应该移除开头冒号", () => {
-      const clean = sanitizeKey(":user");
-      expect(clean).toBe("user");
-    });
-
-    it("应该移除结尾冒号", () => {
-      const clean = sanitizeKey("user:");
-      expect(clean).toBe("user");
-    });
-
-    it("应该处理复杂情况", () => {
-      const clean = sanitizeKey(":::user  @name\n123:::");
-      expect(clean).toBe("username123");
+    it("should throw error for invalid characters", () => {
+      expect(() => generateCacheKey("user@", "123")).toThrow(
+        CacheKeyValidationError,
+      );
+      expect(() => generateCacheKey("user", "123#")).toThrow(
+        CacheKeyValidationError,
+      );
     });
   });
 
-  describe("isValidKey()", () => {
-    it("应该接受简单键", () => {
-      expect(isValidKey("user")).toBe(true);
+  describe("generateCachePattern", () => {
+    it("should generate platform-level pattern when no context", () => {
+      const pattern = generateCachePattern("user", "all");
+      expect(pattern).toBe("platform:user:all");
     });
 
-    it("应该接受带冒号的键", () => {
-      expect(isValidKey("user:profile:123")).toBe(true);
+    it("should generate platform-level pattern with prefix", () => {
+      const pattern = generateCachePattern("user", "all", undefined, "hl8:cache:");
+      expect(pattern).toBe("hl8:cache:platform:user:all");
     });
 
-    it("应该接受带下划线的键", () => {
+    it("should generate tenant-level pattern when tenant context provided", () => {
+      const tenantId = TenantId.create("550e8400-e29b-41d4-a716-446655440000");
+      const context = IsolationContext.tenant(tenantId);
+      const pattern = generateCachePattern("user", "all", context);
+      expect(pattern).toBe(`tenant:${tenantId.toString()}:user:all`);
+    });
+  });
+
+  describe("isValidKey", () => {
+    it("should return true for valid keys", () => {
+      expect(isValidKey("user:123")).toBe(true);
       expect(isValidKey("user_profile")).toBe(true);
-    });
-
-    it("应该接受带横线的键", () => {
       expect(isValidKey("user-profile")).toBe(true);
+      expect(isValidKey("user_123:profile")).toBe(true);
     });
 
-    it("应该接受字母数字组合", () => {
-      expect(isValidKey("user123")).toBe(true);
-    });
-
-    it("应该拒绝空字符串", () => {
+    it("should return false for invalid keys", () => {
       expect(isValidKey("")).toBe(false);
-    });
-
-    it("应该拒绝只有空格的字符串", () => {
-      expect(isValidKey("   ")).toBe(false);
-    });
-
-    it("应该拒绝包含空格的键", () => {
-      expect(isValidKey("user name")).toBe(false);
-    });
-
-    it("应该拒绝包含换行符的键", () => {
-      expect(isValidKey("user\nname")).toBe(false);
-    });
-
-    it("应该拒绝包含制表符的键", () => {
-      expect(isValidKey("user\tname")).toBe(false);
-    });
-
-    it("应该拒绝包含特殊字符的键", () => {
-      expect(isValidKey("user@name")).toBe(false);
+      expect(isValidKey("user@123")).toBe(false);
+      expect(isValidKey("user#123")).toBe(false);
+      expect(isValidKey("user 123")).toBe(false);
+      expect(isValidKey("a".repeat(257))).toBe(false);
     });
   });
 
-  describe("generatePattern()", () => {
-    it("应该生成简单模式", () => {
-      const pattern = generatePattern("cache", "user:*");
-      expect(pattern).toBe("cache:user:*");
+  describe("sanitizeKey", () => {
+    it("should sanitize invalid characters", () => {
+      expect(sanitizeKey("user@123")).toBe("user_123");
+      expect(sanitizeKey("user#profile")).toBe("user_profile");
+      expect(sanitizeKey("user profile")).toBe("user_profile");
+      expect(sanitizeKey("user@profile#123")).toBe("user_profile_123");
     });
 
-    it("应该生成复杂模式", () => {
-      const pattern = generatePattern("cache", "tenant:123:*");
-      expect(pattern).toBe("cache:tenant:123:*");
+    it("should preserve valid characters", () => {
+      expect(sanitizeKey("user:123")).toBe("user:123");
+      expect(sanitizeKey("user_profile")).toBe("user_profile");
+      expect(sanitizeKey("user-profile")).toBe("user-profile");
     });
 
-    it("应该处理空前缀", () => {
-      const pattern = generatePattern("", "user:*");
-      expect(pattern).toBe("user:*");
-    });
-
-    it("应该处理空模式", () => {
-      const pattern = generatePattern("cache", "");
-      expect(pattern).toBe("cache");
+    it("should handle empty or invalid input", () => {
+      expect(sanitizeKey("")).toBe("");
+      expect(sanitizeKey(null as any)).toBe("");
+      expect(sanitizeKey(undefined as any)).toBe("");
     });
   });
 });

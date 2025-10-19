@@ -1,151 +1,207 @@
 /**
- * 缓存键生成工具
+ * 简化的键生成工具
  *
- * @description 提供缓存键的生成和清理功能
- *
- * ## 业务规则
- *
- * ### 键生成规则
- * - 使用冒号（:）分隔各部分
- * - 自动过滤空值
- * - 自动清理非法字符
- *
- * ### 字符清理规则
- * - 移除空格
- * - 移除换行符
- * - 移除控制字符
- * - 保留字母、数字、下划线、横线、冒号
- *
- * @example
- * ```typescript
- * // 生成缓存键
- * const key = generateKey(['user', 'profile', userId]);
- * // 结果: "user:profile:123"
- *
- * // 清理键
- * const cleanKey = sanitizeKey('user name: 123');
- * // 结果: "username:123"
- * ```
+ * @description 提供简单直接的缓存键生成功能，替代复杂的 CacheKey 值对象
  *
  * @since 1.0.0
  */
 
+import type { IsolationContext } from "@hl8/isolation-model";
+import { CacheKeyValidationError } from "../exceptions/cache.exceptions.js";
+
 /**
  * 生成缓存键
  *
- * @param parts - 键的各个部分
- * @returns 生成的缓存键
+ * @description 根据隔离上下文自动生成缓存键，支持多层级隔离
+ *
+ * @param namespace - 命名空间
+ * @param key - 缓存键名
+ * @param context - 隔离上下文（可选）
+ * @param prefix - 键前缀（可选）
+ * @returns 完整的缓存键字符串
+ *
+ * @throws {CacheKeyValidationError} 如果键无效
  *
  * @example
  * ```typescript
- * // 基础用法
- * const key = generateKey(['user', 'profile', '123']);
- * // 结果: "user:profile:123"
+ * // 平台级键
+ * const platformKey = generateCacheKey('user', 'profile');
+ * // 输出: platform:user:profile
  *
- * // 自动过滤空值
- * const key2 = generateKey(['user', '', null, 'list']);
- * // 结果: "user:list"
+ * // 租户级键
+ * const tenantKey = generateCacheKey('user', 'profile', tenantContext);
+ * // 输出: tenant:tenant-123:user:profile
  *
- * // 自动清理非法字符
- * const key3 = generateKey(['user name', 'profile @123']);
- * // 结果: "username:profile123"
+ * // 组织级键
+ * const orgKey = generateCacheKey('user', 'profile', orgContext);
+ * // 输出: tenant:tenant-123:org:org-456:user:profile
  * ```
  */
-export function generateKey(
-  parts: (string | number | null | undefined)[],
+export function generateCacheKey(
+  namespace: string,
+  key: string,
+  context?: IsolationContext,
+  prefix: string = "",
 ): string {
-  return parts
-    .filter((part) => part !== null && part !== undefined && part !== "")
-    .map((part) => sanitizeKey(String(part)))
-    .join(":");
+  // 验证输入参数
+  validateKeyInputs(namespace, key);
+
+  // 使用隔离上下文生成键
+  if (context) {
+    const isolationKey = context.buildCacheKey(namespace, key);
+    return `${prefix}${isolationKey}`;
+  }
+
+  // 默认平台级键
+  const platformKey = `platform:${namespace}:${key}`;
+  return `${prefix}${platformKey}`;
 }
 
 /**
- * 清理缓存键中的非法字符
+ * 生成缓存键模式
  *
- * @param key - 要清理的键
- * @returns 清理后的键
+ * @description 生成用于批量删除的键模式
+ *
+ * @param namespace - 命名空间
+ * @param pattern - 键模式（可选）
+ * @param context - 隔离上下文（可选）
+ * @param prefix - 键前缀（可选）
+ * @returns 键模式字符串
  *
  * @example
  * ```typescript
- * // 移除空格和特殊字符
- * const clean1 = sanitizeKey('user name');
- * // 结果: "username"
+ * // 清除所有用户缓存
+ * const pattern = generateCachePattern('user', '*');
+ * // 输出: platform:user:*
  *
- * // 保留合法字符
- * const clean2 = sanitizeKey('user-profile_123');
- * // 结果: "user-profile_123"
- *
- * // 移除控制字符
- * const clean3 = sanitizeKey('user\nprofile\t123');
- * // 结果: "userprofile123"
+ * // 清除租户的所有用户缓存
+ * const tenantPattern = generateCachePattern('user', '*', tenantContext);
+ * // 输出: tenant:tenant-123:user:*
  * ```
  */
-export function sanitizeKey(key: string): string {
-  return (
-    key
-      // 移除空格
-      .replace(/\s+/g, "")
-      // 移除换行符和制表符
-      .replace(/[\r\n\t]/g, "")
-      // 移除控制字符
-      .replace(/[\x00-\x1F\x7F]/g, "")
-      // 只保留字母、数字、下划线、横线、冒号
-      .replace(/[^a-zA-Z0-9_:-]/g, "")
-      // 移除连续的冒号
-      .replace(/:+/g, ":")
-      // 移除开头和结尾的冒号
-      .replace(/^:+|:+$/g, "")
-  );
+export function generateCachePattern(
+  namespace: string,
+  pattern: string = "*",
+  context?: IsolationContext,
+  prefix: string = "",
+): string {
+  // 验证输入参数
+  validateKeyInputs(namespace, pattern);
+
+  // 使用隔离上下文生成模式
+  if (context) {
+    const isolationKey = context.buildCacheKey(namespace, pattern);
+    return `${prefix}${isolationKey}`;
+  }
+
+  // 默认平台级模式
+  const platformPattern = `platform:${namespace}:${pattern}`;
+  return `${prefix}${platformPattern}`;
 }
 
 /**
- * 验证缓存键是否有效
+ * 验证键输入参数
  *
- * @param key - 要验证的键
- * @returns 如果键有效返回 true
+ * @description 验证命名空间和键的有效性
+ *
+ * @param namespace - 命名空间
+ * @param key - 键名
+ * @throws {CacheKeyValidationError} 如果参数无效
+ * @private
+ */
+function validateKeyInputs(namespace: string, key: string): void {
+  // 验证命名空间
+  if (!namespace || typeof namespace !== "string") {
+    throw new CacheKeyValidationError("命名空间必须是非空字符串", {
+      namespace,
+    });
+  }
+
+  if (namespace.length > 64) {
+    throw new CacheKeyValidationError("命名空间长度不能超过 64 字符", {
+      namespace,
+      length: namespace.length,
+    });
+  }
+
+  // 验证键名
+  if (!key || typeof key !== "string") {
+    throw new CacheKeyValidationError("键名必须是非空字符串", {
+      key,
+    });
+  }
+
+  if (key.length > 128) {
+    throw new CacheKeyValidationError("键名长度不能超过 128 字符", {
+      key,
+      length: key.length,
+    });
+  }
+
+  // 验证字符
+  const invalidChars = /[^\w:_-]/;
+  if (invalidChars.test(namespace)) {
+    throw new CacheKeyValidationError(
+      "命名空间包含无效字符，只能包含字母、数字、冒号、下划线和连字符",
+      { namespace },
+    );
+  }
+
+  if (invalidChars.test(key)) {
+    throw new CacheKeyValidationError(
+      "键名包含无效字符，只能包含字母、数字、冒号、下划线和连字符",
+      { key },
+    );
+  }
+}
+
+/**
+ * 检查键是否有效
+ *
+ * @description 检查键是否符合规范
+ *
+ * @param key - 要检查的键
+ * @returns 如果键有效返回 true，否则返回 false
  *
  * @example
  * ```typescript
- * // 有效的键
- * isValidKey('user:profile:123'); // true
- * isValidKey('user-profile_123'); // true
- *
- * // 无效的键
- * isValidKey('');                 // false
- * isValidKey('  ');               // false
- * isValidKey('user name');        // false
- * isValidKey('user\nprofile');    // false
+ * if (isValidKey('user:profile')) {
+ *   // 键有效，可以安全使用
+ * }
  * ```
  */
 export function isValidKey(key: string): boolean {
-  if (!key || key.trim() === "") {
+  if (!key || typeof key !== "string") {
     return false;
   }
 
-  // 检查是否只包含合法字符
-  return /^[a-zA-Z0-9_:-]+$/.test(key);
+  if (key.length > 256) {
+    return false;
+  }
+
+  const invalidChars = /[^\w:_-]/;
+  return !invalidChars.test(key);
 }
 
 /**
- * 生成模式匹配键
+ * 清理键名
  *
- * @param prefix - 键前缀
- * @param pattern - 匹配模式（* 表示通配符）
- * @returns 模式匹配键
+ * @description 清理键名中的无效字符
+ *
+ * @param key - 原始键名
+ * @returns 清理后的键名
  *
  * @example
  * ```typescript
- * // 匹配所有用户缓存
- * const pattern1 = generatePattern('cache', 'user:*');
- * // 结果: "cache:user:*"
- *
- * // 匹配特定租户的所有缓存
- * const pattern2 = generatePattern('cache', `tenant:${tenantId}:*`);
- * // 结果: "cache:tenant:123:*"
+ * const cleanKey = sanitizeKey('user@profile#123');
+ * // 输出: user_profile_123
  * ```
  */
-export function generatePattern(prefix: string, pattern: string): string {
-  const parts = [prefix, pattern].filter(Boolean);
-  return parts.join(":");
+export function sanitizeKey(key: string): string {
+  if (!key || typeof key !== "string") {
+    return "";
+  }
+
+  // 替换无效字符为下划线
+  return key.replace(/[^\w:_-]/g, "_");
 }

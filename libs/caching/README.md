@@ -1,6 +1,6 @@
 # @hl8/caching
 
-> 企业级 NestJS 缓存库 - 自动多层级数据隔离 + DDD 充血模型
+> 简化的企业级 NestJS 缓存库 - 自动多层级数据隔离 + 简化架构
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue)](https://www.typescriptlang.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
@@ -41,12 +41,12 @@
 ## ✨ 核心特性
 
 - 🎯 **自动多层级隔离**：支持平台/租户/组织/部门/用户 5 级隔离，零侵入
-- 🏗️ **DDD 充血模型**：业务逻辑封装在领域对象中，易于维护
+- 🏗️ **简化架构**：基于基础设施模块的简化设计，易于理解和维护
 - 🎨 **装饰器模式**：`@Cacheable`、`@CacheEvict`、`@CachePut`，声明式 API
 - 📊 **性能监控**：实时命中率、延迟统计、错误追踪
 - 🔒 **类型安全**：TypeScript strict mode + 完整类型定义
-- ⚡ **高性能**：Flyweight 模式、批量操作、连接池管理
-- 🧪 **完整测试**：140 个测试，100% 通过
+- ⚡ **高性能**：简化的序列化、批量操作、连接池管理
+- 🧪 **完整测试**：全面的测试用例覆盖
 
 ---
 

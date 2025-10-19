@@ -1,43 +1,22 @@
 /**
- * 序列化工具
+ * 简化的序列化工具
  *
- * @description 提供缓存值的序列化和反序列化功能
- *
- * ## 业务规则
- *
- * ### 序列化规则
- * - 使用 JSON.stringify 进行序列化
- * - 支持 Date、RegExp、undefined 等特殊类型
- * - 处理循环引用
- *
- * ### 反序列化规则
- * - 使用 JSON.parse 进行反序列化
- * - 自动恢复特殊类型
- * - 错误处理
- *
- * @example
- * ```typescript
- * // 序列化对象
- * const obj = { name: 'John', date: new Date(), regex: /test/g };
- * const serialized = serialize(obj);
- *
- * // 反序列化
- * const deserialized = deserialize<typeof obj>(serialized);
- * console.log(deserialized.date instanceof Date); // true
- * ```
+ * @description 提供简单直接的序列化/反序列化功能，替代复杂的 CacheEntry 值对象
  *
  * @since 1.0.0
  */
 
-import { CacheSerializationException } from "../exceptions/cache-serialization.exception.js";
+import { CacheSerializationError } from "../exceptions/cache.exceptions.js";
 
 /**
  * 序列化值为字符串
  *
+ * @description 将任意值序列化为 JSON 字符串，支持特殊类型处理
+ *
  * @param value - 要序列化的值
  * @returns 序列化后的字符串
  *
- * @throws {Error} 当值无法序列化时抛出
+ * @throws {CacheSerializationError} 当值无法序列化时抛出
  *
  * @example
  * ```typescript
@@ -50,12 +29,7 @@ import { CacheSerializationException } from "../exceptions/cache-serialization.e
  * const serialized = serialize(obj);
  * await redis.set('user:123', serialized);
  * ```
- *
- * @remarks
- * 使用 any 符合宪章 IX 允许场景：通用工具函数必须支持任意类型。
- * 这是序列化函数的标准模式，类似于 JSON.stringify。
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 序列化函数必须支持任意类型（宪章 IX 允许场景）
 export function serialize(value: any): string {
   if (value === undefined) {
     return "undefined";
@@ -82,33 +56,57 @@ export function serialize(value: any): string {
   // 处理循环引用
   const seen = new WeakSet();
 
-  return JSON.stringify(value, (key, val) => {
-    // 注意：嵌套的 Date/RegExp 会被 JSON.stringify 自动转换
-    // 只有顶层的特殊类型需要特殊处理（已在上面处理）
-
-    if (val === undefined) {
-      return { __type: "undefined" };
-    }
-
-    // 处理循环引用
-    if (typeof val === "object" && val !== null) {
-      if (seen.has(val)) {
-        return { __type: "CircularReference" };
+  try {
+    return JSON.stringify(value, (key, val) => {
+      // 处理循环引用
+      if (typeof val === "object" && val !== null) {
+        if (seen.has(val)) {
+          return "[Circular]";
+        }
+        seen.add(val);
       }
-      seen.add(val);
-    }
 
-    return val;
-  });
+      // 处理特殊类型
+      if (val instanceof Date) {
+        return { __type: "Date", value: val.toISOString() };
+      }
+
+      if (val instanceof RegExp) {
+        return { __type: "RegExp", value: val.toString() };
+      }
+
+      if (val instanceof Set) {
+        return { __type: "Set", value: Array.from(val) };
+      }
+
+      if (val instanceof Map) {
+        return { __type: "Map", value: Array.from(val.entries()) };
+      }
+
+      if (Buffer.isBuffer(val)) {
+        return { __type: "Buffer", value: val.toString("base64") };
+      }
+
+      return val;
+    });
+  } catch (error) {
+    throw new CacheSerializationError(
+      `序列化失败: ${error instanceof Error ? error.message : String(error)}`,
+      error instanceof Error ? error : undefined,
+      { value: typeof value },
+    );
+  }
 }
 
 /**
  * 反序列化字符串为值
  *
+ * @description 将序列化的字符串反序列化为原始值，支持特殊类型恢复
+ *
  * @param value - 要反序列化的字符串
  * @returns 反序列化后的值
  *
- * @throws {Error} 当字符串无法反序列化时抛出
+ * @throws {CacheSerializationError} 当字符串无法反序列化时抛出
  *
  * @example
  * ```typescript
@@ -144,10 +142,19 @@ export function deserialize<T = any>(value: string): T {
             return new RegExp(val.value);
           }
 
+          case "Set":
+            return new Set(val.value);
+
+          case "Map":
+            return new Map(val.value);
+
+          case "Buffer":
+            return Buffer.from(val.value, "base64");
+
           case "undefined":
             return undefined;
 
-          case "CircularReference":
+          case "Circular":
             return "[Circular]";
 
           default:
@@ -158,9 +165,10 @@ export function deserialize<T = any>(value: string): T {
       return val;
     });
   } catch (error) {
-    throw new CacheSerializationException(
+    throw new CacheSerializationError(
       `反序列化失败: ${error instanceof Error ? error.message : String(error)}`,
       error instanceof Error ? error : undefined,
+      { value: value.substring(0, 100) },
     );
   }
 }
@@ -168,8 +176,10 @@ export function deserialize<T = any>(value: string): T {
 /**
  * 检查值是否可序列化
  *
+ * @description 检查值是否可以安全序列化
+ *
  * @param value - 要检查的值
- * @returns 如果可序列化返回 true
+ * @returns 如果可序列化返回 true，否则返回 false
  *
  * @example
  * ```typescript
@@ -179,11 +189,7 @@ export function deserialize<T = any>(value: string): T {
  *   await cacheService.set('user', 'john', obj);
  * }
  * ```
- *
- * @remarks
- * 使用 any 符合宪章 IX 允许场景：通用工具函数必须支持任意类型。
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 检查函数必须支持任意类型（宪章 IX 允许场景）
 export function isSerializable(value: any): boolean {
   if (value === undefined || value === null) {
     return true;
@@ -205,4 +211,53 @@ export function isSerializable(value: any): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * 获取序列化后的大小
+ *
+ * @description 获取值序列化后的字节大小
+ *
+ * @param value - 要检查的值
+ * @returns 序列化后的字节大小
+ *
+ * @example
+ * ```typescript
+ * const size = getSerializedSize(largeObject);
+ * if (size > 1024 * 1024) {
+ *   console.warn('对象过大，可能影响性能');
+ * }
+ * ```
+ */
+export function getSerializedSize(value: any): number {
+  try {
+    const serialized = serialize(value);
+    return Buffer.byteLength(serialized, "utf-8");
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * 检查序列化大小是否超过限制
+ *
+ * @description 检查序列化后的大小是否超过指定限制
+ *
+ * @param value - 要检查的值
+ * @param maxSize - 最大大小（字节），默认 1MB
+ * @returns 如果超过限制返回 true，否则返回 false
+ *
+ * @example
+ * ```typescript
+ * if (isOversized(largeObject, 512 * 1024)) {
+ *   console.warn('对象超过 512KB 限制');
+ * }
+ * ```
+ */
+export function isOversized(
+  value: any,
+  maxSize: number = 1024 * 1024,
+): boolean {
+  const size = getSerializedSize(value);
+  return size > maxSize;
 }
