@@ -16,13 +16,15 @@
 ### 基本使用
 
 ```typescript
-import { MessagingModule } from '@hl8/messaging';
+import { MessagingModule } from "@hl8/messaging";
 
 @Module({
-  imports: [MessagingModule.forRoot({
-    adapter: 'kafka',
-    brokers: ['localhost:9092'],
-  })],
+  imports: [
+    MessagingModule.forRoot({
+      adapter: "kafka",
+      brokers: ["localhost:9092"],
+    }),
+  ],
 })
 export class AppModule {}
 ```
@@ -30,14 +32,14 @@ export class AppModule {}
 ### 发布消息
 
 ```typescript
-import { MessagingService } from '@hl8/messaging';
+import { MessagingService } from "@hl8/messaging";
 
 @Injectable()
 export class OrderService {
   constructor(private messagingService: MessagingService) {}
 
   async createOrder(orderData: any) {
-    await this.messagingService.publish('order.created', {
+    await this.messagingService.publish("order.created", {
       orderId: order.id,
       customerId: order.customerId,
       amount: order.amount,
@@ -49,13 +51,13 @@ export class OrderService {
 ### 订阅消息
 
 ```typescript
-import { MessageHandler } from '@hl8/messaging';
+import { MessageHandler } from "@hl8/messaging";
 
 @Injectable()
 export class NotificationService {
-  @MessageHandler('order.created')
+  @MessageHandler("order.created")
   async handleOrderCreated(message: any) {
-    await this.sendNotification(message.customerId, '订单创建成功');
+    await this.sendNotification(message.customerId, "订单创建成功");
   }
 }
 ```

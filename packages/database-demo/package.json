@@ -14,7 +14,13 @@
     "test:mongodb-fixed": "node src/test-mongodb-fixed.js",
     "test:all": "npm run test && npm run test:advanced && npm run test:hl8-simple && npm run test:mongodb-fixed"
   },
-  "keywords": ["database", "test", "postgresql", "mongodb", "redis"],
+  "keywords": [
+    "database",
+    "test",
+    "postgresql",
+    "mongodb",
+    "redis"
+  ],
   "author": "HL8 Team",
   "license": "MIT",
   "packageManager": "pnpm@10.12.1",
