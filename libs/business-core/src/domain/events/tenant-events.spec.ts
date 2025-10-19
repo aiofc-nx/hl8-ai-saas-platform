@@ -1,9 +1,8 @@
-import { EntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/isolation-model";
 import {
   TenantCreatedEvent,
   TenantUpdatedEvent,
-  TenantActivatedEvent,
-  TenantDeactivatedEvent,
+  TenantStatusChangedEvent,
   TenantDeletedEvent,
 } from "./tenant-events.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
@@ -14,8 +13,8 @@ describe("Tenant Events", () => {
   let version: number;
 
   beforeEach(() => {
-    tenantId = EntityId.generate();
-    platformId = EntityId.generate();
+    tenantId = GenericEntityId.generate();
+    platformId = GenericEntityId.generate();
     version = 1;
   });
 

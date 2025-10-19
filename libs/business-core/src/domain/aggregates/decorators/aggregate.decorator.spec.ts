@@ -3,28 +3,29 @@ import { Aggregate } from "./aggregate.decorator.js";
 describe("Aggregate Decorator", () => {
   describe("基本功能", () => {
     it("应该能够装饰类", () => {
-      @Aggregate("TestAggregate")
+      @Aggregate({ name: "TestAggregate" })
       class TestAggregate {}
 
       expect(TestAggregate).toBeDefined();
     });
 
     it("应该能够设置聚合根名称", () => {
-      @Aggregate("UserAggregate")
+      @Aggregate({ name: "UserAggregate" })
       class UserAggregate {}
 
       expect(UserAggregate).toBeDefined();
     });
 
     it("应该能够设置版本", () => {
-      @Aggregate("TestAggregate", { version: "1.0.0" })
+      @Aggregate({ name: "TestAggregate", version: "1.0.0" })
       class TestAggregate {}
 
       expect(TestAggregate).toBeDefined();
     });
 
     it("应该能够设置快照策略", () => {
-      @Aggregate("TestAggregate", {
+      @Aggregate({
+        name: "TestAggregate",
         snapshot: {
           enabled: true,
           frequency: 10,
@@ -36,7 +37,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该能够设置事件存储配置", () => {
-      @Aggregate("TestAggregate", {
+      @Aggregate({
+        name: "TestAggregate",
         eventStore: {
           provider: "in-memory",
           options: {
@@ -52,7 +54,7 @@ describe("Aggregate Decorator", () => {
 
   describe("元数据管理", () => {
     it("应该能够获取聚合根元数据", () => {
-      @Aggregate("TestAggregate")
+      @Aggregate({ name: "TestAggregate" })
       class TestAggregate {}
 
       const metadata = Reflect.getMetadata("aggregate:metadata", TestAggregate);
@@ -61,7 +63,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该能够获取版本信息", () => {
-      @Aggregate("TestAggregate", { version: "2.0.0" })
+      @Aggregate({
+        name: "TestAggregate", version: "2.0.0" })
       class TestAggregate {}
 
       const metadata = Reflect.getMetadata("aggregate:metadata", TestAggregate);
@@ -69,7 +72,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该能够获取快照配置", () => {
-      @Aggregate("TestAggregate", {
+      @Aggregate({
+        name: "TestAggregate", {
         snapshot: {
           enabled: true,
           frequency: 5,
@@ -83,7 +87,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该能够获取事件存储配置", () => {
-      @Aggregate("TestAggregate", {
+      @Aggregate({
+        name: "TestAggregate", {
         eventStore: {
           provider: "database",
           options: {
@@ -101,7 +106,7 @@ describe("Aggregate Decorator", () => {
 
   describe("默认配置", () => {
     it("应该使用默认版本", () => {
-      @Aggregate("TestAggregate")
+      @Aggregate({ name: "TestAggregate" })
       class TestAggregate {}
 
       const metadata = Reflect.getMetadata("aggregate:metadata", TestAggregate);
@@ -109,7 +114,7 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该使用默认快照配置", () => {
-      @Aggregate("TestAggregate")
+      @Aggregate({ name: "TestAggregate" })
       class TestAggregate {}
 
       const metadata = Reflect.getMetadata("aggregate:metadata", TestAggregate);
@@ -118,7 +123,7 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该使用默认事件存储配置", () => {
-      @Aggregate("TestAggregate")
+      @Aggregate({ name: "TestAggregate" })
       class TestAggregate {}
 
       const metadata = Reflect.getMetadata("aggregate:metadata", TestAggregate);
@@ -137,14 +142,16 @@ describe("Aggregate Decorator", () => {
 
     it("应该验证版本格式", () => {
       expect(() => {
-        @Aggregate("TestAggregate", { version: "invalid" })
+        @Aggregate({
+        name: "TestAggregate", { version: "invalid" })
         class TestAggregate {}
       }).toThrow();
     });
 
     it("应该验证快照频率", () => {
       expect(() => {
-        @Aggregate("TestAggregate", {
+        @Aggregate({
+        name: "TestAggregate", {
           snapshot: {
             enabled: true,
             frequency: -1,
@@ -156,7 +163,8 @@ describe("Aggregate Decorator", () => {
 
     it("应该验证事件存储提供者", () => {
       expect(() => {
-        @Aggregate("TestAggregate", {
+        @Aggregate({
+        name: "TestAggregate", {
           eventStore: {
             provider: "invalid",
           },
@@ -168,7 +176,8 @@ describe("Aggregate Decorator", () => {
 
   describe("业务规则", () => {
     it("应该支持租户感知聚合根", () => {
-      @Aggregate("TenantAggregate", {
+      @Aggregate({
+        name: "TenantAggregate", {
         tenantAware: true,
       })
       class TenantAggregate {}
@@ -181,7 +190,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该支持隔离级别配置", () => {
-      @Aggregate("IsolationAggregate", {
+      @Aggregate({
+        name: "IsolationAggregate", {
         isolationLevel: "tenant",
       })
       class IsolationAggregate {}
@@ -194,7 +204,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该支持事件版本控制", () => {
-      @Aggregate("VersionedAggregate", {
+      @Aggregate({
+        name: "VersionedAggregate", {
         eventVersioning: {
           enabled: true,
           currentVersion: "2.0.0",
@@ -213,7 +224,8 @@ describe("Aggregate Decorator", () => {
 
   describe("性能配置", () => {
     it("应该支持缓存配置", () => {
-      @Aggregate("CachedAggregate", {
+      @Aggregate({
+        name: "CachedAggregate", {
         cache: {
           enabled: true,
           ttl: 300,
@@ -230,7 +242,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该支持批处理配置", () => {
-      @Aggregate("BatchAggregate", {
+      @Aggregate({
+        name: "BatchAggregate", {
         batch: {
           enabled: true,
           size: 100,
@@ -247,7 +260,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该支持并发控制", () => {
-      @Aggregate("ConcurrentAggregate", {
+      @Aggregate({
+        name: "ConcurrentAggregate", {
         concurrency: {
           maxConcurrent: 10,
           timeout: 5000,
@@ -266,7 +280,8 @@ describe("Aggregate Decorator", () => {
 
   describe("监控配置", () => {
     it("应该支持指标收集", () => {
-      @Aggregate("MonitoredAggregate", {
+      @Aggregate({
+        name: "MonitoredAggregate", {
         metrics: {
           enabled: true,
           interval: 1000,
@@ -283,7 +298,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该支持健康检查", () => {
-      @Aggregate("HealthyAggregate", {
+      @Aggregate({
+        name: "HealthyAggregate", {
         healthCheck: {
           enabled: true,
           interval: 5000,
@@ -300,7 +316,8 @@ describe("Aggregate Decorator", () => {
     });
 
     it("应该支持审计日志", () => {
-      @Aggregate("AuditedAggregate", {
+      @Aggregate({
+        name: "AuditedAggregate", {
         audit: {
           enabled: true,
           level: "all",
@@ -327,14 +344,16 @@ describe("Aggregate Decorator", () => {
 
     it("应该处理无效的版本号", () => {
       expect(() => {
-        @Aggregate("TestAggregate", { version: "1.0" })
+        @Aggregate({
+        name: "TestAggregate", { version: "1.0" })
         class TestAggregate {}
       }).toThrow("版本号格式无效");
     });
 
     it("应该处理无效的快照配置", () => {
       expect(() => {
-        @Aggregate("TestAggregate", {
+        @Aggregate({
+        name: "TestAggregate", {
           snapshot: {
             enabled: true,
             frequency: 0,
@@ -347,7 +366,8 @@ describe("Aggregate Decorator", () => {
 
   describe("集成测试", () => {
     it("应该支持完整的聚合根配置", () => {
-      @Aggregate("FullAggregate", {
+      @Aggregate({
+        name: "FullAggregate", {
         version: "1.0.0",
         snapshot: {
           enabled: true,

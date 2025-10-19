@@ -18,6 +18,7 @@ export { IsolationContext } from "./entities/isolation-context.entity.js";
 // 值对象
 export { DepartmentId } from "./value-objects/department-id.vo.js";
 export { EntityId } from "./value-objects/entity-id.vo.js";
+export { GenericEntityId } from "./value-objects/generic-entity-id.vo.js";
 export { OrganizationId } from "./value-objects/organization-id.vo.js";
 export { TenantId } from "./value-objects/tenant-id.vo.js";
 export { UserId } from "./value-objects/user-id.vo.js";

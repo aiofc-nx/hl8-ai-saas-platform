@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { GenericEntityId, TenantId } from "@hl8/isolation-model";
 import { IsolationAwareAggregateRoot } from "./base/isolation-aware-aggregate-root.js";
 import { Permission } from "../entities/permission/permission.entity.js";
 import { PermissionType } from "../value-objects/types/permission-type.vo.js";
@@ -46,7 +46,7 @@ import { ErrorCodes } from "../../common/constants/index.js";
  * ```typescript
  * // 创建权限聚合根
  * const permissionAggregate = new PermissionAggregate(
- *   EntityId.generate(),
+ *   GenericEntityId.generate(),
  *   TenantId.generate(),
  *   permission,
  *   { createdBy: "system" }

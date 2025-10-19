@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { GenericEntityId, TenantId } from "@hl8/isolation-model";
 import { Organization } from "./organization.entity.js";
 import { OrganizationType } from "../../value-objects/types/organization-type.vo.js";
 import {
@@ -15,7 +15,7 @@ import {
 } from "../../exceptions/domain-exceptions.js";
 
 describe("Organization Entity", () => {
-  let validEntityId: EntityId;
+  let validEntityId: GenericEntityId;
   let validOrganizationProps: any;
   let validAuditInfo: any;
 
@@ -23,7 +23,7 @@ describe("Organization Entity", () => {
     validEntityId = TenantId.create("123e4567-e89b-4d3a-a456-426614174000");
     validOrganizationProps = {
       name: "Test Organization",
-      type: OrganizationType.COMMITTEE,
+      type: OrganizationType.create(OrganizationType.ENTERPRISE),
       description: "Test organization description",
       isActive: true,
       parentId: undefined,
@@ -45,7 +45,7 @@ describe("Organization Entity", () => {
       );
 
       expect(organization.name).toBe("Test Organization");
-      expect(organization.type).toBe(OrganizationType.COMMITTEE);
+      expect(organization.type.value).toBe(OrganizationType.ENTERPRISE);
       expect(organization.description).toBe("Test organization description");
       expect(organization.isActive).toBe(true);
       expect(organization.parentId).toBeUndefined();
@@ -173,9 +173,9 @@ describe("Organization Entity", () => {
         validAuditInfo,
       );
 
-      organization.updateType(OrganizationType.PROJECT_TEAM);
+      organization.updateType(OrganizationType.create(OrganizationType.GOVERNMENT));
 
-      expect(organization.type).toBe(OrganizationType.PROJECT_TEAM);
+      expect(organization.type.value).toBe(OrganizationType.GOVERNMENT);
     });
 
     it("应该验证新类型不能为空", () => {

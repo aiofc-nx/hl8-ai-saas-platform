@@ -1,4 +1,4 @@
-import { EntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/isolation-model";
 import { ITenantRepository } from "./tenant.repository.js";
 import { TenantAggregate } from "../aggregates/tenant-aggregate.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
@@ -131,8 +131,8 @@ describe("TenantRepository", () => {
 
   beforeEach(() => {
     repository = new MockTenantRepository();
-    platformId = EntityId.generate();
-    tenantId = EntityId.generate();
+    platformId = GenericEntityId.generate();
+    tenantId = GenericEntityId.generate();
 
     // 创建模拟租户聚合根
     tenant = {
@@ -182,7 +182,7 @@ describe("TenantRepository", () => {
     });
 
     it("应该返回null当租户不存在时", async () => {
-      const nonExistentId = EntityId.generate();
+      const nonExistentId = GenericEntityId.generate();
       const foundTenant = await repository.findById(nonExistentId);
 
       expect(foundTenant).toBeNull();
@@ -233,7 +233,7 @@ describe("TenantRepository", () => {
       const exists = await repository.existsById(tenantId);
       expect(exists).toBe(true);
 
-      const nonExistentId = EntityId.generate();
+      const nonExistentId = GenericEntityId.generate();
       const notExists = await repository.existsById(nonExistentId);
       expect(notExists).toBe(false);
     });
@@ -333,13 +333,13 @@ describe("TenantRepository", () => {
 
   describe("边界情况", () => {
     it("应该处理空平台ID", async () => {
-      const emptyPlatformId = EntityId.generate();
+      const emptyPlatformId = GenericEntityId.generate();
       const tenants = await repository.findByPlatform(emptyPlatformId);
       expect(tenants).toHaveLength(0);
     });
 
     it("应该处理无效的租户ID", async () => {
-      const invalidId = EntityId.generate();
+      const invalidId = GenericEntityId.generate();
       const exists = await repository.existsById(invalidId);
       expect(exists).toBe(false);
     });
@@ -356,7 +356,7 @@ describe("TenantRepository", () => {
 
       const duplicateTenant = {
         ...tenant,
-        id: EntityId.generate(),
+        id: GenericEntityId.generate(),
       };
 
       const exists = await repository.existsByName(platformId, "测试租户");
@@ -366,7 +366,7 @@ describe("TenantRepository", () => {
     it("应该支持不同平台的同名租户", async () => {
       await repository.save(tenant);
 
-      const differentPlatformId = EntityId.generate();
+      const differentPlatformId = GenericEntityId.generate();
       const exists = await repository.existsByName(
         differentPlatformId,
         "测试租户",

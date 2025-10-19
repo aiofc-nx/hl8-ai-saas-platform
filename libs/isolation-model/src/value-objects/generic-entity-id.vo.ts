@@ -1,40 +1,40 @@
 /**
- * 组织 ID 值对象
+ * 通用实体 ID 值对象
  *
- * @description 封装组织标识符，使用 UUID v4 格式
+ * @description 提供通用的实体 ID 实现，用于测试和通用场景
  *
  * @since 1.0.0
  */
 
 import { EntityId } from "./entity-id.vo.js";
 
-export class OrganizationId extends EntityId<"OrganizationId"> {
-  private static cache = new Map<string, OrganizationId>();
+export class GenericEntityId extends EntityId<"GenericEntityId"> {
+  private static cache = new Map<string, GenericEntityId>();
 
   private constructor(value: string) {
-    super(value, "OrganizationId");
+    super(value, "GenericEntityId");
   }
 
-  static create(value: string): OrganizationId {
+  static create(value: string): GenericEntityId {
     let instance = this.cache.get(value);
     if (!instance) {
-      instance = new OrganizationId(value);
+      instance = new GenericEntityId(value);
       this.cache.set(value, instance);
     }
     return instance;
   }
 
   /**
-   * 生成新的组织 ID
+   * 生成新的通用实体 ID
    *
-   * @returns 新生成的 OrganizationId 实例
+   * @returns 新生成的 GenericEntityId 实例
    *
    * @example
    * ```typescript
-   * const organizationId = OrganizationId.generate();
+   * const entityId = GenericEntityId.generate();
    * ```
    */
-  static generate(): OrganizationId {
+  static generate(): GenericEntityId {
     // 生成 UUID v4
     const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
       /[xy]/g,
@@ -51,7 +51,7 @@ export class OrganizationId extends EntityId<"OrganizationId"> {
     this.cache.clear();
   }
 
-  override equals(other?: OrganizationId): boolean {
+  override equals(other?: GenericEntityId): boolean {
     return super.equals(other);
   }
 }

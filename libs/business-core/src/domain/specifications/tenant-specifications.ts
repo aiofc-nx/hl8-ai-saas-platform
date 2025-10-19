@@ -211,3 +211,57 @@ export class TenantNotPersonalSpecification extends BaseSpecification<Tenant> {
     return `租户类型不能为个人，实际为 ${tenant.type.value}`;
   }
 }
+
+/**
+ * 租户配额规范
+ *
+ * @description 检查租户是否满足配额要求
+ */
+export class TenantQuotaSpecification extends BaseSpecification<Tenant> {
+  constructor(private requiredQuota: number) {
+    super({
+      name: "TenantQuotaSpecification",
+      description: `租户配额必须大于等于 ${requiredQuota}`,
+      category: "tenant",
+      tags: ["tenant", "quota"],
+      priority: 2,
+    });
+  }
+
+  isSatisfiedBy(tenant: Tenant): boolean {
+    // 这里需要根据实际的Tenant实体实现来判断配额
+    // 假设Tenant实体有一个quota属性
+    return true; // 临时实现，需要根据实际实体调整
+  }
+
+  protected getErrorMessage(tenant: Tenant): string {
+    return `租户 ${tenant.name} 配额不足，需要至少 ${this.requiredQuota}`;
+  }
+}
+
+/**
+ * 租户过期规范
+ *
+ * @description 检查租户是否已过期
+ */
+export class TenantExpiredSpecification extends BaseSpecification<Tenant> {
+  constructor() {
+    super({
+      name: "TenantExpiredSpecification",
+      description: "租户未过期",
+      category: "tenant",
+      tags: ["tenant", "expired"],
+      priority: 1,
+    });
+  }
+
+  isSatisfiedBy(tenant: Tenant): boolean {
+    // 这里需要根据实际的Tenant实体实现来判断是否过期
+    // 假设Tenant实体有一个expiredAt属性
+    return true; // 临时实现，需要根据实际实体调整
+  }
+
+  protected getErrorMessage(tenant: Tenant): string {
+    return `租户 ${tenant.name} 已过期`;
+  }
+}

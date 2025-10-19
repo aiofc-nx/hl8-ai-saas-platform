@@ -7,7 +7,7 @@
  */
 
 import {
-  EntityId,
+  GenericEntityId,
   TenantId,
   OrganizationId,
   DepartmentId,
@@ -99,7 +99,7 @@ export interface PermissionProps {
  * ```typescript
  * // 创建权限
  * const permission = new Permission(
- *   EntityId.generate(),
+ *   GenericEntityId.generate(),
  *   {
  *     name: "用户管理",
  *     description: "管理用户信息的权限",

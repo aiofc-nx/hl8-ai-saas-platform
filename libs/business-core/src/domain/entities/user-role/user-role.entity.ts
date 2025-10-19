@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, UserId } from "@hl8/isolation-model";
+import { GenericEntityId, UserId } from "@hl8/isolation-model";
 import { BaseEntity } from "../base/base-entity.js";
 import {
   BusinessRuleException,
@@ -25,7 +25,7 @@ export interface UserRoleProps {
   userId: UserId;
 
   /** 角色ID */
-  roleId: EntityId;
+  roleId: GenericEntityId;
 
   /** 是否启用 */
   isActive: boolean;
@@ -75,7 +75,7 @@ export interface UserRoleProps {
  * ```typescript
  * // 创建用户角色关联
  * const userRole = new UserRole(
- *   EntityId.generate(),
+ *   GenericEntityId.generate(),
  *   {
  *     userId: UserId.generate(),
  *     roleId: role.id,

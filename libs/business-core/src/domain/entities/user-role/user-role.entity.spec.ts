@@ -1,20 +1,20 @@
-import { EntityId, UserId } from "@hl8/isolation-model";
+import { GenericEntityId, UserId } from "@hl8/isolation-model";
 import { UserRole, UserRoleProps } from "./user-role.entity.js";
 import { IPartialAuditInfo } from "../base/audit-info.js";
 import { IPureLogger } from "@hl8/pure-logger";
 
 describe("UserRole", () => {
-  let validEntityId: EntityId;
+  let validEntityId: GenericEntityId;
   let validUserId: UserId;
-  let validRoleId: EntityId;
+  let validRoleId: GenericEntityId;
   let validProps: UserRoleProps;
   let validAuditInfo: IPartialAuditInfo;
   let mockLogger: IPureLogger;
 
   beforeEach(() => {
-    validEntityId = EntityId.generate();
+    validEntityId = GenericEntityId.generate();
     validUserId = UserId.create("550e8400-e29b-41d4-a716-446655440000");
-    validRoleId = EntityId.generate();
+    validRoleId = GenericEntityId.generate();
 
     validProps = {
       userId: validUserId,
@@ -377,7 +377,7 @@ describe("UserRole", () => {
         mockLogger,
       );
       const userRole2 = new UserRole(
-        EntityId.generate(),
+        GenericEntityId.generate(),
         validProps,
         validAuditInfo,
         mockLogger,

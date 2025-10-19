@@ -7,7 +7,7 @@ import {
 } from "./tenant-specifications.js";
 import { Tenant } from "../entities/tenant/tenant.entity.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
-import { EntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/isolation-model";
 import { IPartialAuditInfo } from "../entities/base/audit-info.js";
 
 // 模拟Tenant实体
@@ -29,7 +29,7 @@ describe("Tenant Specifications", () => {
 
   beforeEach(() => {
     tenant = new MockTenant(
-      EntityId.generate(),
+      GenericEntityId.generate(),
       "测试租户",
       TenantType.ENTERPRISE,
       true,

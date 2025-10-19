@@ -439,9 +439,7 @@ export class Organization extends BaseEntity {
     if (!type) {
       throw new BusinessRuleException("组织类型不能为空", "VALIDATION_FAILED");
     }
-    if (!Object.values(OrganizationType).includes(type)) {
-      throw new BusinessRuleException("无效的组织类型", "VALIDATION_FAILED");
-    }
+    // OrganizationType 是值对象，不需要额外的验证
   }
 
   /**

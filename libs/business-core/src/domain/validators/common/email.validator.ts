@@ -36,7 +36,7 @@ export class EmailValidator {
     isValid: boolean;
     error?: string;
   } {
-    if (!email || email.trim().length === 0) {
+    if (!email || typeof email !== "string" || email.trim().length === 0) {
       return { isValid: false, error: "邮箱不能为空" };
     }
 
@@ -53,8 +53,8 @@ export class EmailValidator {
       return { isValid: false, error: "邮箱本地部分长度不能超过64个字符" };
     }
 
-    // RFC 5322 基本验证
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // RFC 5322 基本验证 - 支持引号字符串格式
+    const emailRegex = /^(?:[^\s@]+|"[^"]+")@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return { isValid: false, error: "邮箱格式无效" };
     }
@@ -82,10 +82,15 @@ export class EmailValidator {
    * @returns 验证结果
    * @private
    */
-  private static validateLocalPart(localPart: string): {
+  public static validateLocalPart(localPart: string): {
     isValid: boolean;
     error?: string;
   } {
+    // 检查长度限制
+    if (localPart.length > 64) {
+      return { isValid: false, error: "本地部分长度不能超过64个字符" };
+    }
+
     // 检查是否以点开头或结尾
     if (localPart.startsWith(".") || localPart.endsWith(".")) {
       return { isValid: false, error: "本地部分不能以点开头或结尾" };
@@ -96,9 +101,9 @@ export class EmailValidator {
       return { isValid: false, error: "本地部分不能包含连续的点" };
     }
 
-    // 检查特殊字符
-    const validChars = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/;
-    if (!validChars.test(localPart)) {
+    // 检查特殊字符 - 更严格的验证
+    const invalidChars = /[{}|^`~\\/=?:<>\[\]]/;
+    if (invalidChars.test(localPart)) {
       return { isValid: false, error: "本地部分包含非法字符" };
     }
 
@@ -113,7 +118,7 @@ export class EmailValidator {
    * @returns 验证结果
    * @private
    */
-  private static validateDomain(domain: string): {
+  public static validateDomain(domain: string): {
     isValid: boolean;
     error?: string;
   } {
@@ -137,6 +142,12 @@ export class EmailValidator {
       }
       if (label.startsWith("-") || label.endsWith("-")) {
         return { isValid: false, error: "域名标签不能以连字符开头或结尾" };
+      }
+      
+      // 检查特殊字符
+      const invalidChars = /[{}|^`~\\/=?:<>\[\]]/;
+      if (invalidChars.test(label)) {
+        return { isValid: false, error: "域名标签包含非法字符" };
       }
     }
 
@@ -178,6 +189,57 @@ export class EmailValidator {
     if (blockedDomains.includes(domain)) {
       return { isValid: false, error: `邮箱域名被禁止: ${domain}` };
     }
+    return { isValid: true };
+  }
+
+  /**
+   * 验证业务规则
+   *
+   * @description 验证邮箱是否符合业务规则
+   * @param email - 邮箱地址
+   * @returns 验证结果
+   */
+  public static validateBusinessRules(email: string): {
+    isValid: boolean;
+    error?: string;
+  } {
+    // 首先验证格式
+    const formatResult = this.validateFormat(email);
+    if (!formatResult.isValid) {
+      return formatResult;
+    }
+
+    // 验证长度限制
+    if (email.length > 254) {
+      return { isValid: false, error: "邮箱长度不能超过254个字符" };
+    }
+
+    return { isValid: true };
+  }
+
+  /**
+   * 验证邮箱
+   *
+   * @description 完整的邮箱验证，包括格式和业务规则
+   * @param email - 邮箱地址
+   * @returns 验证结果
+   */
+  public static validate(email: string): {
+    isValid: boolean;
+    error?: string;
+  } {
+    // 首先验证格式
+    const formatResult = this.validateFormat(email);
+    if (!formatResult.isValid) {
+      return formatResult;
+    }
+
+    // 然后验证业务规则
+    const businessResult = this.validateBusinessRules(email);
+    if (!businessResult.isValid) {
+      return businessResult;
+    }
+
     return { isValid: true };
   }
 }

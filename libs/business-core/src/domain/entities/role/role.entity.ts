@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/isolation-model";
 import { BaseEntity } from "../base/base-entity.js";
 import { RoleType } from "../../value-objects/types/role-type.vo.js";
 import { PermissionType } from "../../value-objects/types/permission-type.vo.js";
@@ -89,7 +89,7 @@ export interface RoleProps {
  * ```typescript
  * // 创建角色
  * const role = new Role(
- *   EntityId.generate(),
+ *   GenericEntityId.generate(),
  *   {
  *     name: "管理员",
  *     description: "系统管理员角色",

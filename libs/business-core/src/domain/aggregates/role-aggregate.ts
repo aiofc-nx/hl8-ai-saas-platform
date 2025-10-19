@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { GenericEntityId, TenantId } from "@hl8/isolation-model";
 import { IsolationAwareAggregateRoot } from "./base/isolation-aware-aggregate-root.js";
 import { Role } from "../entities/role/role.entity.js";
 import { Permission } from "../entities/permission/permission.entity.js";
@@ -47,7 +47,7 @@ import { ErrorCodes } from "../../common/constants/index.js";
  * ```typescript
  * // 创建角色聚合根
  * const roleAggregate = new RoleAggregate(
- *   EntityId.generate(),
+ *   GenericEntityId.generate(),
  *   TenantId.generate(),
  *   role,
  *   { createdBy: "system" }

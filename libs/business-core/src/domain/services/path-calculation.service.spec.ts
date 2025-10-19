@@ -1,4 +1,4 @@
-import { EntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/isolation-model";
 import { PathCalculationService } from "./path-calculation.service.js";
 import { IPureLogger } from "@hl8/pure-logger";
 import { ValidationException } from "../exceptions/domain-exceptions.js";
@@ -29,7 +29,7 @@ describe("PathCalculationService", () => {
 
   describe("计算部门路径", () => {
     it("应该为根部门计算正确的路径", () => {
-      const departmentId = EntityId.generate();
+      const departmentId = GenericEntityId.generate();
       const path = pathService.calculateDepartmentPath(
         departmentId,
         undefined,
@@ -40,8 +40,8 @@ describe("PathCalculationService", () => {
     });
 
     it("应该为子部门计算正确的路径", () => {
-      const departmentId = EntityId.generate();
-      const parentId = EntityId.generate();
+      const departmentId = GenericEntityId.generate();
+      const parentId = GenericEntityId.generate();
       const parentPath = `/${parentId.toString()}`;
 
       const path = pathService.calculateDepartmentPath(
@@ -54,9 +54,9 @@ describe("PathCalculationService", () => {
     });
 
     it("应该为多层嵌套部门计算正确的路径", () => {
-      const departmentId = EntityId.generate();
-      const parentId = EntityId.generate();
-      const grandParentId = EntityId.generate();
+      const departmentId = GenericEntityId.generate();
+      const parentId = GenericEntityId.generate();
+      const grandParentId = GenericEntityId.generate();
       const parentPath = `/${grandParentId.toString()}/${parentId.toString()}`;
 
       const path = pathService.calculateDepartmentPath(
@@ -73,7 +73,7 @@ describe("PathCalculationService", () => {
 
   describe("计算组织路径", () => {
     it("应该为根组织计算正确的路径", () => {
-      const organizationId = EntityId.generate();
+      const organizationId = GenericEntityId.generate();
       const path = pathService.calculateOrganizationPath(
         organizationId,
         undefined,
@@ -84,8 +84,8 @@ describe("PathCalculationService", () => {
     });
 
     it("应该为子组织计算正确的路径", () => {
-      const organizationId = EntityId.generate();
-      const parentId = EntityId.generate();
+      const organizationId = GenericEntityId.generate();
+      const parentId = GenericEntityId.generate();
       const parentPath = `/${parentId.toString()}`;
 
       const path = pathService.calculateOrganizationPath(
@@ -260,7 +260,7 @@ describe("PathCalculationService", () => {
 
   describe("日志记录", () => {
     it("应该记录路径计算操作", () => {
-      const departmentId = EntityId.generate();
+      const departmentId = GenericEntityId.generate();
       pathService.calculateDepartmentPath(departmentId, undefined, undefined);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(

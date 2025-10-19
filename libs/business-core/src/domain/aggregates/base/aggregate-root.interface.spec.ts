@@ -6,7 +6,7 @@ import {
   AggregateVersion,
   AggregateSnapshot,
 } from "./aggregate-root.interface.js";
-import { EntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/isolation-model";
 
 describe("Aggregate Root Interface", () => {
   describe("IAggregateRoot", () => {
@@ -68,7 +68,7 @@ describe("Aggregate Root Interface", () => {
   describe("AggregateMetadata", () => {
     it("应该定义聚合元数据", () => {
       const metadata: AggregateMetadata = {
-        id: EntityId.generate(),
+        id: GenericEntityId.generate(),
         type: "TestAggregate",
         version: 1,
         createdAt: new Date(),
@@ -100,7 +100,7 @@ describe("Aggregate Root Interface", () => {
   describe("AggregateSnapshot", () => {
     it("应该定义聚合快照", () => {
       const snapshot: AggregateSnapshot = {
-        aggregateId: EntityId.generate(),
+        aggregateId: GenericEntityId.generate(),
         version: 1,
         data: { state: "test" },
         createdAt: new Date(),

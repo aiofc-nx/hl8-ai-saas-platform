@@ -50,17 +50,20 @@ import {
  * @since 1.0.0
  */
 export class OrganizationType extends BaseValueObject<string> {
-  /** 委员会 - 决策型组织 */
-  static readonly COMMITTEE = OrganizationTypeEnum.COMMITTEE;
+  /** 企业组织 - 商业型组织 */
+  static readonly ENTERPRISE = OrganizationTypeEnum.ENTERPRISE;
 
-  /** 项目组 - 执行型组织 */
-  static readonly PROJECT_TEAM = OrganizationTypeEnum.PROJECT_TEAM;
+  /** 非营利组织 - 公益型组织 */
+  static readonly NON_PROFIT = OrganizationTypeEnum.NON_PROFIT;
 
-  /** 质量组 - 质量型组织 */
-  static readonly QUALITY_GROUP = OrganizationTypeEnum.QUALITY_GROUP;
+  /** 政府组织 - 公共型组织 */
+  static readonly GOVERNMENT = OrganizationTypeEnum.GOVERNMENT;
 
-  /** 绩效组 - 绩效型组织 */
-  static readonly PERFORMANCE_GROUP = OrganizationTypeEnum.PERFORMANCE_GROUP;
+  /** 教育组织 - 教育型组织 */
+  static readonly EDUCATION = OrganizationTypeEnum.EDUCATION;
+
+  /** 其他组织 - 其他型组织 */
+  static readonly OTHER = OrganizationTypeEnum.OTHER;
 
   /**
    * 验证组织类型
@@ -104,10 +107,11 @@ export class OrganizationType extends BaseValueObject<string> {
    */
   getDescription(): string {
     const descriptions: Record<string, string> = {
-      [OrganizationType.COMMITTEE]: "委员会",
-      [OrganizationType.PROJECT_TEAM]: "项目组",
-      [OrganizationType.QUALITY_GROUP]: "质量组",
-      [OrganizationType.PERFORMANCE_GROUP]: "绩效组",
+      [OrganizationType.ENTERPRISE]: "企业组织",
+      [OrganizationType.NON_PROFIT]: "非营利组织",
+      [OrganizationType.GOVERNMENT]: "政府组织",
+      [OrganizationType.EDUCATION]: "教育组织",
+      [OrganizationType.OTHER]: "其他组织",
     };
 
     return descriptions[this.value] || "未知类型";
@@ -128,10 +132,11 @@ export class OrganizationType extends BaseValueObject<string> {
    */
   getPermissionLevel(): number {
     const levels: Record<string, number> = {
-      [OrganizationType.COMMITTEE]: 4, // 最高权限
-      [OrganizationType.PROJECT_TEAM]: 3, // 高权限
-      [OrganizationType.QUALITY_GROUP]: 2, // 中等权限
-      [OrganizationType.PERFORMANCE_GROUP]: 2, // 中等权限
+      [OrganizationType.GOVERNMENT]: 5, // 最高权限
+      [OrganizationType.EDUCATION]: 4, // 高权限
+      [OrganizationType.ENTERPRISE]: 3, // 中等权限
+      [OrganizationType.NON_PROFIT]: 2, // 低权限
+      [OrganizationType.OTHER]: 1, // 最低权限
     };
 
     return levels[this.value] || 1;
@@ -152,10 +157,11 @@ export class OrganizationType extends BaseValueObject<string> {
    */
   getFunctionScope(): string {
     const scopes: Record<string, string> = {
-      [OrganizationType.COMMITTEE]: "决策管理、战略规划、重大事项审批",
-      [OrganizationType.PROJECT_TEAM]: "项目执行、任务分配、进度管理",
-      [OrganizationType.QUALITY_GROUP]: "质量管理、标准制定、质量审核",
-      [OrganizationType.PERFORMANCE_GROUP]: "绩效评估、激励管理、考核管理",
+      [OrganizationType.ENTERPRISE]: "商业管理、盈利运营、市场拓展",
+      [OrganizationType.GOVERNMENT]: "公共服务、政策制定、社会治理",
+      [OrganizationType.EDUCATION]: "教育服务、人才培养、学术研究",
+      [OrganizationType.NON_PROFIT]: "公益服务、社会救助、慈善活动",
+      [OrganizationType.OTHER]: "基础管理功能",
     };
 
     return scopes[this.value] || "基础管理功能";
@@ -175,7 +181,7 @@ export class OrganizationType extends BaseValueObject<string> {
    * ```
    */
   isDecisionType(): boolean {
-    return this.value === OrganizationType.COMMITTEE;
+    return this.value === OrganizationType.GOVERNMENT || this.value === OrganizationType.ENTERPRISE;
   }
 
   /**
@@ -192,7 +198,7 @@ export class OrganizationType extends BaseValueObject<string> {
    * ```
    */
   isExecutionType(): boolean {
-    return this.value === OrganizationType.PROJECT_TEAM;
+    return this.value === OrganizationType.EDUCATION || this.value === OrganizationType.NON_PROFIT;
   }
 
   /**
@@ -209,10 +215,7 @@ export class OrganizationType extends BaseValueObject<string> {
    * ```
    */
   isProfessionalType(): boolean {
-    return (
-      this.value === OrganizationType.QUALITY_GROUP ||
-      this.value === OrganizationType.PERFORMANCE_GROUP
-    );
+    return this.value === OrganizationType.EDUCATION || this.value === OrganizationType.GOVERNMENT;
   }
 
   /**
@@ -234,10 +237,11 @@ export class OrganizationType extends BaseValueObject<string> {
    */
   static isValid(type: string): boolean {
     const validTypes = [
-      OrganizationType.COMMITTEE,
-      OrganizationType.PROJECT_TEAM,
-      OrganizationType.QUALITY_GROUP,
-      OrganizationType.PERFORMANCE_GROUP,
+      OrganizationType.ENTERPRISE,
+      OrganizationType.NON_PROFIT,
+      OrganizationType.GOVERNMENT,
+      OrganizationType.EDUCATION,
+      OrganizationType.OTHER,
     ];
     return validTypes.includes(type as any);
   }
