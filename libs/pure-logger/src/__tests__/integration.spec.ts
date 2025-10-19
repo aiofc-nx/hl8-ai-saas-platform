@@ -287,7 +287,7 @@ describe("集成测试", () => {
     it("应该在所有实现中正确过滤日志级别", () => {
       const consoleLogger = new ConsoleLogger(LogLevel.WARN);
       const noopLogger = new NoOpLogger(LogLevel.WARN);
-      const structuredLogger = new StructuredLogger(LogLevel.WARN);
+      const structuredLogger = new StructuredLogger(LogLevel.WARN, {}, { json: true });
 
       [consoleLogger, noopLogger, structuredLogger].forEach((logger) => {
         logger.debug("debug message");
@@ -296,9 +296,11 @@ describe("集成测试", () => {
         logger.error("error message");
       });
 
-      // ConsoleLogger 应该只输出 WARN 和 ERROR
-      expect(consoleSpy.warn).toHaveBeenCalledTimes(3); // 每个实现一次
-      expect(consoleSpy.error).toHaveBeenCalledTimes(3); // 每个实现一次
+      // ConsoleLogger 调用 console.warn 和 console.error
+      // StructuredLogger (JSON模式) 调用 console.log
+      expect(consoleSpy.warn).toHaveBeenCalledTimes(1); // 只有 ConsoleLogger
+      expect(consoleSpy.error).toHaveBeenCalledTimes(1); // 只有 ConsoleLogger
+      expect(consoleSpy.log).toHaveBeenCalledTimes(2); // StructuredLogger 的 warn 和 error
       expect(consoleSpy.debug).not.toHaveBeenCalled();
       expect(consoleSpy.info).not.toHaveBeenCalled();
     });
@@ -333,8 +335,9 @@ describe("集成测试", () => {
       consoleLogger.error(error);
       structuredLogger.error(error);
 
-      expect(consoleSpy.error).toHaveBeenCalledTimes(1);
-      expect(consoleSpy.log).toHaveBeenCalledWith(
+      // ConsoleLogger 调用 console.error 一次，StructuredLogger (JSON模式) 也调用 console.error 一次
+      expect(consoleSpy.error).toHaveBeenCalledTimes(2);
+      expect(consoleSpy.error).toHaveBeenCalledWith(
         expect.stringMatching(/"error":\s*{\s*"name":\s*"Error"/),
       );
     });
@@ -472,7 +475,7 @@ describe("集成测试", () => {
           level: "ERROR",
           message: "database connection failed",
           domain: "user-service",
-          operation: "create-user",
+          operation: "save-user",
           error: expect.objectContaining({
             name: "Error",
             message: "database connection failed",

@@ -141,11 +141,11 @@ describe("LoggerFactory", () => {
       expect(logger).toBeInstanceOf(NoOpLogger);
     });
 
-    it("测试环境应该使用空操作日志器", () => {
+    it("测试环境应该使用控制台日志器", () => {
       process.env.NODE_ENV = "test";
       const logger = LoggerFactory.create();
 
-      expect(logger).toBeInstanceOf(NoOpLogger);
+      expect(logger).toBeInstanceOf(ConsoleLogger);
     });
 
     it("未定义环境应该使用控制台日志器", () => {

@@ -286,7 +286,17 @@ export class StructuredLogger implements IPureLogger {
     if (value === null) return "null";
     if (value === undefined) return "undefined";
     if (typeof value === "string") return `"${value}"`;
-    if (typeof value === "object") return JSON.stringify(value);
+    if (typeof value === "object") {
+      try {
+        return JSON.stringify(value);
+      } catch (error) {
+        // 处理循环引用或其他序列化错误
+        if (error instanceof TypeError && error.message.includes("circular structure")) {
+          return "[Circular Reference]";
+        }
+        return `[Serialization Error: ${error instanceof Error ? error.message : "Unknown error"}]`;
+      }
+    }
     return String(value);
   }
 }
