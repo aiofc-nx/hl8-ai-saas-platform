@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nest build && tsc --noEmit",
     "clean": "rm -rf dist",
-    "dev": "nest start -b swc -w",
+    "dev": "nest start --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "start": "node dist/src/main.js",
