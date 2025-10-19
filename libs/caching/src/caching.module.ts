@@ -14,12 +14,7 @@ import { SimplifiedCacheMetricsService } from "./monitoring/cache-metrics.servic
 import { SimplifiedCacheInterceptor } from "./interceptors/cache.interceptor.js";
 import type { SimplifiedModuleOptions } from "./types/cache.types.js";
 
-/**
- * 缓存选项令牌
- *
- * @description 用于注入缓存配置的令牌
- */
-export const CACHE_OPTIONS = "CACHE_OPTIONS";
+import { CACHE_OPTIONS } from "./tokens/cache.tokens.js";
 
 /**
  * 简化的缓存模块

@@ -63,7 +63,7 @@ import {
 } from "@hl8/nestjs-fastify";
 
 // 从 @hl8/caching 导入配置类（单一配置源）
-import { CachingModuleConfig } from "@hl8/caching";
+import { CachingModule } from "@hl8/caching";
 
 // 从 @hl8/database 导入配置类（单一配置源）
 import { DatabaseConfig } from "@hl8/database";
@@ -107,12 +107,19 @@ export class AppConfig {
   /**
    * 缓存配置
    *
-   * @description 直接使用 @hl8/caching 的 CachingModuleConfig
+   * @description 直接使用 @hl8/caching 的配置
    */
-  @ValidateNested()
-  @Type(() => CachingModuleConfig)
   @IsOptional()
-  public readonly caching: CachingModuleConfig = new CachingModuleConfig();
+  public readonly caching: any = {
+    redis: {
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "6379"),
+      password: process.env.REDIS_PASSWORD || undefined,
+      db: parseInt(process.env.REDIS_DB || "0"),
+    },
+    defaultTtl: 300, // 5分钟
+    keyPrefix: "aiofix:",
+  };
 
   /**
    * Metrics 配置

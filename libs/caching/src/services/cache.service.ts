@@ -15,7 +15,7 @@ import {
   generateCachePattern,
 } from "../utils/key-generator.util.js";
 import { serialize, deserialize } from "../utils/serializer.util.js";
-import { CACHE_OPTIONS } from "../caching.module.js";
+import { CACHE_OPTIONS } from "../tokens/cache.tokens.js";
 import type { SimplifiedCacheConfig } from "../types/cache.types.js";
 
 /**

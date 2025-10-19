@@ -92,4 +92,4 @@ export type {
 } from "./decorators/cacheable.decorator.js";
 
 // 常量
-export { CACHE_OPTIONS } from "./caching.module.js";
+export { CACHE_OPTIONS } from "./tokens/cache.tokens.js";

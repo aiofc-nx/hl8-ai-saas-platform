@@ -12,6 +12,7 @@ import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller.js";
 import { AppConfig } from "./config/app.config.js";
 import { User } from "./entities/user.entity.js";
+import { CacheModule } from "./modules/cache.module.js";
 import { UserModule } from "./modules/user.module.js";
 
 /**
@@ -170,6 +171,9 @@ import { UserModule } from "./modules/user.module.js";
 
     // 用户模块 - 演示 database 模块的使用
     UserModule,
+
+    // 缓存测试模块 - 演示缓存模块的使用
+    CacheModule,
   ],
 })
 export class AppModule {}
