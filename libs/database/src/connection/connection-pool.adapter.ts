@@ -9,7 +9,7 @@
 import { Injectable } from "@nestjs/common";
 import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { DatabaseDriver } from "../drivers/database-driver.interface.js";
-import type { PoolStats, PoolConfig } from "../types/connection.types.js";
+import type { PoolConfig } from "../types/connection.types.js";
 
 // PoolConfig interface is now imported from types module
 

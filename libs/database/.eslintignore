@@ -1,0 +1,5 @@
+jest.config.ts
+dist/
+node_modules/
+*.d.ts
+*.js.map
