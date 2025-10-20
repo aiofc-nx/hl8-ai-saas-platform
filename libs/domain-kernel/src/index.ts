@@ -1,23 +1,39 @@
 // 纯领域层导出入口
 // 只包含领域层组件：实体、值对象、领域事件、聚合根、领域错误
 
-// 实体
-export { IsolationContext } from "./entities/isolation-context.entity.js";
+// 基础实体和值对象
+export { BaseEntity } from "./entities/base-entity.js";
+export { BaseValueObject } from "./value-objects/base-value-object.js";
+
+// 审计信息相关
+export {
+  AuditInfo,
+  AuditInfoBuilder,
+  type IAuditInfo,
+  type IPartialAuditInfo,
+} from "./value-objects/audit-info.vo.js";
 
 // 值对象
-export { EntityId } from "./value-objects/entity-id.vo.js";
-export { TenantId } from "./value-objects/tenant-id.vo.js";
-export { OrganizationId } from "./value-objects/organization-id.vo.js";
-export { DepartmentId } from "./value-objects/department-id.vo.js";
-export { UserId } from "./value-objects/user-id.vo.js";
-export { GenericEntityId } from "./value-objects/generic-entity-id.vo.js";
+export { EntityId } from "./value-objects/ids/entity-id.vo.js";
+export { TenantId } from "./value-objects/ids/tenant-id.vo.js";
+export { OrganizationId } from "./value-objects/ids/organization-id.vo.js";
+export { DepartmentId } from "./value-objects/ids/department-id.vo.js";
+export { UserId } from "./value-objects/ids/user-id.vo.js";
+export { GenericEntityId } from "./value-objects/ids/generic-entity-id.vo.js";
 
-// 枚举
-export { IsolationLevel } from "./enums/isolation-level.enum.js";
-export { SharingLevel } from "./enums/sharing-level.enum.js";
+// 数据隔离相关
+export * from "./isolation/index.js";
 
 // 接口
-export type { IIsolationContextProvider, DataAccessContext, IIsolationValidator } from "./interfaces/index.js";
+export type {
+  IBaseEntity,
+  IEntity,
+  IEntityFactory,
+  IEntitySpecification,
+  IEntityValidator,
+  IEntityValidationResult,
+  IEntityAuditInfo,
+} from "./interfaces/entity.interface.js";
 
 // 聚合根
 export { AggregateRoot } from "./aggregates/aggregate-root.js";
@@ -26,8 +42,27 @@ export type { DomainEvent } from "./aggregates/aggregate-root.js";
 // 领域事件
 export { DomainEvent as DomainEventBase } from "./events/domain-event.js";
 export { DataAccessDeniedEvent } from "./events/data-access-denied.event.js";
-export { IsolationContextCreatedEvent } from "./events/context-created.event.js";
-export { IsolationContextSwitchedEvent } from "./events/context-switched.event.js";
+// 注意：隔离相关事件已通过 isolation 模块导出
+
+// 领域服务
+export { BaseDomainService } from "./services/base-domain-service.js";
+
+// 业务规则
+export {
+  BusinessRuleValidator,
+  BusinessRuleManager,
+  BusinessRules,
+  type BusinessRuleValidationResult,
+} from "./rules/business-rule-validator.js";
+
+// 示例实现
+export {
+  UserStatus,
+  UserStatusTransition,
+} from "./examples/user-status.enum.js";
+export { Email } from "./examples/email.vo.js";
+export { Username } from "./examples/username.vo.js";
+export { User } from "./examples/user.entity.js";
 
 // 领域错误
-export { IsolationValidationError } from "./errors/isolation-validation.error.js";
+// 注意：IsolationValidationError 已移动到 isolation 目录

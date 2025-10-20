@@ -1,4 +1,2 @@
 // 接口导出文件
-export type { IIsolationContextProvider } from "./isolation-context-provider.interface.js";
-export type { DataAccessContext } from "./data-access-context.interface.js";
-export type { IIsolationValidator } from "./isolation-validator.interface.js";
+// 注意：隔离相关的接口已移动到 isolation 目录

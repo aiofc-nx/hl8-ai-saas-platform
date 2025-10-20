@@ -1,10 +1,10 @@
 import { AccessControlService } from "./access-control.service.js";
 import { IsolationContext } from "../isolation/isolation-context.js";
-import { IsolationLevel } from "../enums/isolation-level.enum.js";
-import { TenantId } from "../value-objects/tenant-id.vo.js";
-import { OrganizationId } from "../value-objects/organization-id.vo.js";
-import { DepartmentId } from "../value-objects/department-id.vo.js";
-import { UserId } from "../value-objects/user-id.vo.js";
+import { IsolationLevel } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
+import { OrganizationId } from "@hl8/domain-kernel";
+import { DepartmentId } from "@hl8/domain-kernel";
+import { UserId } from "@hl8/domain-kernel";
 
 describe("AccessControlService", () => {
   let service: AccessControlService;
