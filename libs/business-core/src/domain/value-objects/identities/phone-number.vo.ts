@@ -1,0 +1,126 @@
+/**
+ * 电话号码值对象
+ *
+ * @description 通用的电话号码值对象，包含格式验证
+ *
+ * ## 业务规则
+ *
+ * - 支持国际格式：+86 1234567890
+ * - 长度：8-15 字符（不含 + 和空格）
+ * - 格式：+ 国家代码 + 号码
+ * - 自动去除空格和连字符
+ *
+ * @example
+ * ```typescript
+ * const phone = PhoneNumber.create('+86 138-1234-5678');
+ * console.log(phone.value); // '+8613812345678'
+ * console.log(phone.getCountryCode()); // '86'
+ * ```
+ *
+ * @since 1.0.0
+ * @updated 1.1.0 - 使用新的 BaseValueObject 泛型 API
+ */
+
+import { BaseValueObject } from "../base-value-object.js";
+import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";
+import { ErrorCodes } from "../../../common/constants/index.js";
+
+export class PhoneNumber extends BaseValueObject<string> {
+  /**
+   * 验证电话号码格式
+   *
+   * @protected
+   * @override
+   */
+  protected validate(value: string): void {
+    this.validateNotEmpty(value, "电话号码");
+
+    // 移除空格和连字符后的长度验证
+    const cleanValue = value.replace(/[\s-]/g, "");
+    if (cleanValue.length < 8 || cleanValue.length > 16) {
+      throw new BusinessRuleException(
+        "电话号码长度必须在8-16个字符之间",
+        ErrorCodes.VALIDATION_FAILED,
+      );
+    }
+
+    // 格式验证（支持国际格式）
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(cleanValue)) {
+      throw new BusinessRuleException(
+        `电话号码格式无效: ${value}`,
+        ErrorCodes.VALIDATION_FAILED,
+      );
+    }
+  }
+
+  /**
+   * 转换电话号码（移除空格和连字符）
+   *
+   * @protected
+   * @override
+   */
+  protected override transform(value: string): string {
+    return value.replace(/[\s-]/g, "").trim();
+  }
+
+  /**
+   * 获取国家代码
+   *
+   * @returns {string | null} 国家代码，如果没有则返回 null
+   */
+  public getCountryCode(): string | null {
+    if (!this.value.startsWith("+")) {
+      return null;
+    }
+    // 提取 + 后的1-3位数字作为国家代码
+    const match = this.value.match(/^\+(\d{1,3})/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * 获取号码部分（不含国家代码）
+   *
+   * @returns {string} 号码部分
+   */
+  public getNumber(): string {
+    const countryCode = this.getCountryCode();
+    if (countryCode) {
+      return this.value.substring(countryCode.length + 1);
+    }
+    return this.value;
+  }
+
+  /**
+   * 检查是否为国际号码
+   *
+   * @returns {boolean} 如果是国际号码返回true，否则返回false
+   */
+  public isInternational(): boolean {
+    return this.value.startsWith("+");
+  }
+
+  /**
+   * 获取格式化显示
+   *
+   * @returns {string} 格式化后的电话号码
+   */
+  public getFormattedDisplay(): string {
+    if (this.isInternational()) {
+      const countryCode = this.getCountryCode();
+      const number = this.getNumber();
+      if (countryCode && number) {
+        // 格式化国际号码：+86 138-1234-5678
+        const formattedNumber = number.replace(
+          /(\d{3})(\d{4})(\d{4})/,
+          "$1-$2-$3",
+        );
+        return `+${countryCode} ${formattedNumber}`;
+      }
+    } else {
+      // 格式化国内号码：138-1234-5678
+      return this.value.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    }
+    return this.value;
+  }
+}

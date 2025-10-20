@@ -81,6 +81,8 @@ import { UserModule } from "./modules/user.module.js";
         dotenvLoader({
           separator: "__", // 支持嵌套配置：REDIS__HOST
           envFilePath: ".env", // 使用单个文件路径
+          // 当 .env 缺失时不报错，使用进程环境变量启动
+          ignoreEnvFile: true,
           enableExpandVariables: true, // 支持 ${VAR} 语法
         }),
       ],
@@ -157,14 +159,13 @@ import { UserModule } from "./modules/user.module.js";
         }
 
         return {
+          type: "postgresql",
           connection: dbConfig.getConnectionConfig(),
           pool: dbConfig.getPoolConfig(),
           // 注册实体
           entities: [User],
           // 开发环境启用调试
           debug: config.isDevelopment,
-          // 显式指定 driver 选项
-          driver: "PostgreSqlDriver",
         };
       },
     }),

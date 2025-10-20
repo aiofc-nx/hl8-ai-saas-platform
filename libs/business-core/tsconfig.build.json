@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "noEmit": false,
+    "emitDeclarationOnly": false
+  },
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "examples",
+    "jest.config.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "src/domain/**"
+  ]
+}
