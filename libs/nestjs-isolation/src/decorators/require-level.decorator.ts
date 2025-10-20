@@ -12,7 +12,7 @@
  * @since 1.0.0
  */
 
-import { IsolationLevel } from "@hl8/isolation-model";
+import { IsolationLevel } from "@hl8/domain-kernel";
 import { SetMetadata } from "@nestjs/common";
 
 export const REQUIRED_ISOLATION_LEVEL_KEY = "requiredIsolationLevel";

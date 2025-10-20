@@ -24,7 +24,7 @@ import {
   OrganizationId,
   TenantId,
   UserId,
-} from "@hl8/isolation-model";
+} from "@hl8/domain-kernel";
 import { Injectable } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 

@@ -1,7 +1,7 @@
 {
   "name": "@hl8/nestjs-isolation",
   "version": "1.0.0",
-  "description": "NestJS 数据隔离实现库 - 基于 @hl8/isolation-model 领域模型",
+  "description": "NestJS 数据隔离实现库 - 基于 @repo/domain-kernel 领域内核",
   "keywords": [
     "nestjs",
     "isolation",
@@ -35,7 +35,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@hl8/isolation-model": "workspace:*",
+    "@hl8/domain-kernel": "workspace:*",
     "nestjs-cls": "^6.0.1"
   },
   "devDependencies": {

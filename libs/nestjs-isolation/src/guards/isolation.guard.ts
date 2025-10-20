@@ -18,7 +18,7 @@
  * @since 1.0.0
  */
 
-import { IsolationContext, IsolationLevel } from "@hl8/isolation-model";
+import { IsolationContext, IsolationLevel } from "@hl8/domain-kernel";
 import {
   CanActivate,
   ExecutionContext,

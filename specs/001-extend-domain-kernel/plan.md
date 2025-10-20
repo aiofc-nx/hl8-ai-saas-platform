@@ -24,7 +24,7 @@
 -->
 
 **Language/Version**: TypeScript 5.9.x  
-**Primary Dependencies**: 无（内核零依赖）；仅 Node 运行时 `crypto.randomUUID()`  ㅤ
+**Primary Dependencies**: 无（内核零依赖）；仅 Node 运行时 `crypto.randomUUID()` ㅤ
 **Storage**: N/A（仅定义契约，不实现事件存储/查询存储）  
 **Testing**: Jest（就近单测，逻辑覆盖率≥90% 目标）  
 **Target Platform**: Node.js ≥ 20（ESM/NodeNext）  
