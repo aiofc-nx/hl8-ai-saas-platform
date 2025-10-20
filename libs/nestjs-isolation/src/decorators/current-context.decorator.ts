@@ -11,7 +11,7 @@
  * @since 1.0.0
  */
 
-import { IsolationContext } from "@hl8/isolation-model";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 import { CLS_REQ } from "nestjs-cls";
 

@@ -12,7 +12,7 @@
  *
  * ## 依赖
  *
- * - @hl8/isolation-model - 纯领域模型库（零依赖）
+ * - @repo/domain-kernel - 领域内核库（零依赖）
  * - NestJS >= 11.0
  * - nestjs-cls >= 6.0
  *

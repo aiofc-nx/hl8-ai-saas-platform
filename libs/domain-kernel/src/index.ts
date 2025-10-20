@@ -17,9 +17,7 @@ export { IsolationLevel } from "./enums/isolation-level.enum.js";
 export { SharingLevel } from "./enums/sharing-level.enum.js";
 
 // 接口
-export type { IIsolationContextProvider } from "./interfaces/isolation-context-provider.interface.js";
-export type { DataAccessContext } from "./interfaces/data-access-context.interface.js";
-export type { IIsolationValidator } from "./interfaces/isolation-validator.interface.js";
+export type { IIsolationContextProvider, DataAccessContext, IIsolationValidator } from "./interfaces/index.js";
 
 // 聚合根
 export { AggregateRoot } from "./aggregates/aggregate-root.js";

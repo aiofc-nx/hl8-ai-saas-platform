@@ -1,6 +1,6 @@
 # @hl8/nestjs-isolation
 
-NestJS 数据隔离实现库 - 基于 `@hl8/isolation-model` 领域模型
+NestJS 数据隔离实现库 - 基于 `@repo/domain-kernel` 领域模型
 
 ---
 
@@ -57,7 +57,7 @@ export class AppModule {}
 
 - ✅ **多租户隔离**：支持租户、组织、部门、用户多级隔离
 - ✅ **自动上下文提取**：从请求头自动提取隔离上下文
-- ✅ **类型安全**：基于 `@hl8/isolation-model` 领域模型
+- ✅ **类型安全**：基于 `@repo/domain-kernel` 领域模型
 - ✅ **装饰器支持**：提供 `@RequireTenant()`、`@CurrentContext()` 等装饰器
 - ✅ **守卫保护**：自动验证隔离级别要求
 - ✅ **框架无关**：支持 Fastify 和 Express
@@ -80,7 +80,7 @@ export class AppModule {}
 - ✅ **全局模块**：注册一次，全局可用
 - ✅ **类型安全**：完整的 TypeScript 类型定义
 - ✅ **零配置**：开箱即用，无需复杂配置
-- ✅ **领域驱动**：基于纯领域模型 `@hl8/isolation-model`
+- ✅ **领域驱动**：基于纯领域模型 `@repo/domain-kernel`
 
 ## 📦 安装
 
@@ -111,7 +111,7 @@ export class AppModule {}
 // user.controller.ts
 import { Controller, Get } from "@nestjs/common";
 import { RequireTenant, CurrentContext } from "@hl8/nestjs-isolation";
-import { IsolationContext } from "@hl8/isolation-model/index.js";
+import { IsolationContext } from "@repo/domain-kernel/index.js";
 
 @Controller("users")
 export class UserController {
@@ -231,7 +231,7 @@ if (有 deptId && orgId && tenantId) {
 
 ```typescript
 import { CurrentContext } from '@hl8/nestjs-isolation';
-import { IsolationContext } from '@hl8/isolation-model';
+import { IsolationContext } from '@repo/domain-kernel';
 
 @Get('profile')
 async getProfile(@CurrentContext() context: IsolationContext) {
@@ -804,14 +804,14 @@ this.logger.info("User action", {
 
 ### 依赖关系
 
-本库依赖于纯领域模型库 `@hl8/isolation-model`，遵循依赖倒置原则：
+本库依赖于纯领域模型库 `@repo/domain-kernel`，遵循依赖倒置原则：
 
 ```
 业务代码（Controllers, Services）
   ↓ 使用
 @hl8/nestjs-isolation（NestJS 实现）
   ↓ 依赖
-@hl8/isolation-model（纯领域模型，零依赖）
+@repo/domain-kernel（纯领域模型，零依赖）
 ```
 
 ### 模块结构
@@ -896,7 +896,7 @@ CREATE INDEX idx_org_id ON users(organization_id);
 
 ### 相关模块
 
-- [@hl8/isolation-model](../isolation-model) - 纯领域模型
+- [@repo/domain-kernel](../isolation-model) - 纯领域模型
 - [@hl8/exceptions](../exceptions) - 异常处理
 - [@hl8/nestjs-fastify](../nestjs-fastify) - Fastify 增强
 

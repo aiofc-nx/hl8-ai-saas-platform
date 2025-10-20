@@ -30,7 +30,7 @@ import {
   OrganizationId,
   TenantId,
   UserId,
-} from "@hl8/isolation-model";
+} from "@hl8/domain-kernel";
 import { Global, Module } from "@nestjs/common";
 import { ClsModule } from "nestjs-cls";
 import { IsolationGuard } from "./guards/isolation.guard.js";

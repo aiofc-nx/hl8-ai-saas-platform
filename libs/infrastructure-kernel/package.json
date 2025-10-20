@@ -1,5 +1,5 @@
 {
-  "name": "@repo/infrastructure-kernel",
+  "name": "@hl8/infrastructure-kernel",
   "version": "0.1.0",
   "description": "Infrastructure layer kernel - repositories, isolation, and access control",
   "type": "module",
@@ -19,20 +19,16 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@repo/domain-kernel": "workspace:*",
-    "@repo/application-kernel": "workspace:*"
+    "@hl8/domain-kernel": "workspace:*",
+    "@hl8/application-kernel": "workspace:*"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
-    "@repo/jest-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.10.2",
     "jest": "^30.2.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5.9.3"
-  },
-  "jest": {
-    "preset": "@repo/jest-config"
   }
 }

@@ -32,7 +32,7 @@ import {
   OrganizationId,
   TenantId,
   UserId,
-} from "@hl8/isolation-model";
+} from "@hl8/domain-kernel";
 import { Injectable, Logger, NestMiddleware } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
 import { IsolationContextService } from "../services/isolation-context.service.js";

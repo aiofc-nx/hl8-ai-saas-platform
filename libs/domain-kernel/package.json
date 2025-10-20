@@ -1,5 +1,5 @@
 {
-  "name": "@repo/domain-kernel",
+  "name": "@hl8/domain-kernel",
   "version": "0.1.0",
   "description": "Pure domain layer kernel - entities, value objects, domain events, and aggregates",
   "type": "module",
@@ -18,7 +18,6 @@
   "dependencies": {},
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
-    "@repo/jest-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.10.2",

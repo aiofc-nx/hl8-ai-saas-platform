@@ -18,7 +18,7 @@ import {
   IsolationContext,
   IsolationLevel,
   SharingLevel,
-} from "@hl8/isolation-model";
+} from "@hl8/domain-kernel";
 import { Injectable } from "@nestjs/common";
 import { IsolationContextService } from "./isolation-context.service.js";
 
@@ -82,7 +82,7 @@ export class MultiLevelIsolationService implements IIsolationValidator {
     }
 
     // 委托给领域模型的业务逻辑
-    return userContext.canAccess(dataContext, isShared, sharingLevel);
+    return userContext.canAccess(dataContext, sharingLevel);
   }
 
   /**
