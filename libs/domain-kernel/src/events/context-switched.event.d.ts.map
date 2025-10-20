@@ -1,1 +1,0 @@
-{"version":3,"file":"context-switched.event.d.ts","sourceRoot":"","sources":["context-switched.event.ts"],"names":[],"mappings":"AAcA,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,yCAAyC,CAAC;AAEhF,qBAAa,6BAA6B;aAGtB,IAAI,EAAE,gBAAgB;aAGtB,EAAE,EAAE,gBAAgB;aAGpB,MAAM,EAAE,MAAM;aAGd,UAAU,EAAE,IAAI;gBAThB,IAAI,EAAE,gBAAgB,EAGtB,EAAE,EAAE,gBAAgB,EAGpB,MAAM,EAAE,MAAM,EAGd,UAAU,GAAE,IAAiB;CAEhD"}

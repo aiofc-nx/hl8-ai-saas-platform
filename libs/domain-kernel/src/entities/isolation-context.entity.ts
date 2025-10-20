@@ -501,7 +501,7 @@ export class IsolationContext {
         this.compareIsolationLevels(
           targetContext.getIsolationLevel(),
           IsolationLevel.TENANT,
-        ) >= 0 && this.tenantId?.equals(targetContext.tenantId)
+        ) >= 0 && (this.tenantId?.equals(targetContext.tenantId) ?? false)
       );
     }
 
@@ -512,7 +512,7 @@ export class IsolationContext {
         this.compareIsolationLevels(
           targetContext.getIsolationLevel(),
           IsolationLevel.ORGANIZATION,
-        ) >= 0 && this.organizationId?.equals(targetContext.organizationId)
+        ) >= 0 && (this.organizationId?.equals(targetContext.organizationId) ?? false)
       );
     }
 
@@ -523,7 +523,7 @@ export class IsolationContext {
         this.compareIsolationLevels(
           targetContext.getIsolationLevel(),
           IsolationLevel.DEPARTMENT,
-        ) >= 0 && this.departmentId?.equals(targetContext.departmentId)
+        ) >= 0 && (this.departmentId?.equals(targetContext.departmentId) ?? false)
       );
     }
 
@@ -532,7 +532,7 @@ export class IsolationContext {
       // 目标上下文必须是用户级，且用户ID相同
       return (
         targetContext.getIsolationLevel() === IsolationLevel.USER &&
-        this.userId?.equals(targetContext.userId)
+        (this.userId?.equals(targetContext.userId) ?? false)
       );
     }
 
