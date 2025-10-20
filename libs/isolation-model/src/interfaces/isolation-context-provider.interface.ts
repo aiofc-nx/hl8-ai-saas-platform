@@ -29,8 +29,7 @@
  * @since 1.0.0
  */
 
-// 前向声明，避免循环依赖
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// 前向声明，避免循环依赖（仅用于类型标注）
 import type { IsolationContext } from "../entities/isolation-context.entity.js";
 
 export interface IIsolationContextProvider {
