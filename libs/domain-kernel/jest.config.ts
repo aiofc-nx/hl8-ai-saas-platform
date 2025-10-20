@@ -1,7 +1,7 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  preset: "ts-jest/presets/default-esm",
+  preset: "ts-jest",
   testEnvironment: "node",
   roots: ["<rootDir>/src"],
   testMatch: ["<rootDir>/src/**/*.spec.ts", "<rootDir>/src/**/*.test.ts"],
@@ -21,13 +21,11 @@ const config: Config = {
       statements: 80,
     },
   },
-  extensionsToTreatAsEsm: [".ts"],
   transform: {
-    "^.+\\.ts$": ["ts-jest", { useESM: true }],
+    "^.+\\.ts$": "ts-jest",
   },
-  moduleNameMapper: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
-  },
+  moduleFileExtensions: ["ts", "js", "json"],
+  testTimeout: 10000,
 };
 
 export default config;

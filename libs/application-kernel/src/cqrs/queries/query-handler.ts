@@ -2,7 +2,7 @@
  * 查询处理器接口
  * @description 定义查询处理的契约
  */
-import { Query } from "./query.js";
+import { Query } from "./query";
 
 /**
  * 查询处理器接口

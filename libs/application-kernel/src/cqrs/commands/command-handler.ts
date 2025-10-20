@@ -3,7 +3,7 @@
  * @description 定义命令处理的契约
  */
 import { Command } from "./command.js";
-import { DomainEvent } from "../../events/domain-event.js";
+import { DomainEvent } from "@repo/domain-kernel";
 
 /**
  * 命令处理器接口

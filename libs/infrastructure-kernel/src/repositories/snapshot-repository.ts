@@ -2,8 +2,7 @@
  * 快照仓储接口
  * @description 定义聚合快照的读写契约（可选）
  */
-import { EntityId } from "../value-objects/entity-id.vo.js";
-import { AggregateRoot } from "../aggregates/aggregate-root.js";
+import { EntityId, AggregateRoot } from "@repo/domain-kernel";
 
 /**
  * 快照仓储接口

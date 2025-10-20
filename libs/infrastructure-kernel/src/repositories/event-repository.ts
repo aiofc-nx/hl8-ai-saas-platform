@@ -2,8 +2,7 @@
  * 事件仓储接口
  * @description 定义事件流的读写契约
  */
-import { EntityId } from "../value-objects/entity-id.vo.js";
-import { DomainEvent } from "../events/domain-event.js";
+import { EntityId, DomainEvent } from "@repo/domain-kernel";
 
 /**
  * 事件仓储接口

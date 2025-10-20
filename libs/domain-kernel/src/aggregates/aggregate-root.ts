@@ -3,7 +3,6 @@
  * @description 提供版本控制、事件收集与发布的基础能力
  */
 import { EntityId } from "../value-objects/entity-id.vo.js";
-import { IsolationContext } from "../isolation/isolation-context.js";
 
 /**
  * 领域事件接口
@@ -13,7 +12,6 @@ export interface DomainEvent {
   readonly occurredAt: Date;
   readonly aggregateId: EntityId;
   readonly version: number;
-  readonly isolationContext: IsolationContext;
 }
 
 /**

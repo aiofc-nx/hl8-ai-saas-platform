@@ -2,13 +2,15 @@
  * 隔离上下文实体
  * @description 封装多层级数据隔离的核心业务逻辑
  */
-import { IsolationLevel } from "../enums/isolation-level.enum.js";
-import { SharingLevel } from "../enums/sharing-level.enum.js";
-import { IsolationValidationError } from "../errors/isolation-validation.error.js";
-import type { DepartmentId } from "../value-objects/department-id.vo.js";
-import type { OrganizationId } from "../value-objects/organization-id.vo.js";
-import type { TenantId } from "../value-objects/tenant-id.vo.js";
-import type { UserId } from "../value-objects/user-id.vo.js";
+import { 
+  IsolationLevel, 
+  SharingLevel, 
+  IsolationValidationError,
+  DepartmentId,
+  OrganizationId,
+  TenantId,
+  UserId
+} from "@repo/domain-kernel";
 
 export class IsolationContext {
   private _level?: IsolationLevel;

@@ -2,11 +2,13 @@
  * 隔离上下文提供者
  * @description 提供隔离上下文的设置与获取能力
  */
-import { IsolationContext } from "../isolation/isolation-context.js";
-import { TenantId } from "../value-objects/tenant-id.vo.js";
-import { OrganizationId } from "../value-objects/organization-id.vo.js";
-import { DepartmentId } from "../value-objects/department-id.vo.js";
-import { UserId } from "../value-objects/user-id.vo.js";
+// 暂时注释掉，等基础设施层构建完成后再启用
+// import { IsolationContext } from "@repo/infrastructure-kernel";
+
+// 临时定义，避免循环依赖
+export interface IsolationContext {
+  // 临时接口定义
+}
 
 /**
  * 隔离上下文提供者接口

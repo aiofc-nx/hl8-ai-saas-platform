@@ -2,8 +2,8 @@
  * 访问控制服务
  * @description 提供基于隔离上下文的访问控制能力
  */
-import { IsolationContext } from "../isolation/isolation-context.js";
-import { IsolationLevel } from "../enums/isolation-level.enum.js";
+import { IsolationContext } from "../isolation/isolation-context";
+import { IsolationLevel } from "@repo/domain-kernel";
 
 /**
  * 访问控制服务

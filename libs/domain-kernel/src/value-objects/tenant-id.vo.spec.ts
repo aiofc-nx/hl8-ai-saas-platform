@@ -1,5 +1,5 @@
-import { TenantId } from "./tenant-id.vo.js";
-import { IsolationValidationError } from "../errors/isolation-validation.error.js";
+import { TenantId } from "./tenant-id.vo";
+import { IsolationValidationError } from "../errors/isolation-validation.error";
 
 describe("TenantId", () => {
   beforeEach(() => {
