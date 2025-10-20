@@ -5,14 +5,14 @@
 import type { IsolationContext } from "../isolation/isolation-context.js";
 
 export class DataAccessDeniedEvent {
-	constructor(
-		/** 用户上下文 */
-		public readonly userContext: IsolationContext,
-		/** 数据上下文 */
-		public readonly dataContext: IsolationContext,
-		/** 拒绝原因 */
-		public readonly reason: string,
-		/** 发生时间 */
-		public readonly occurredAt: Date = new Date(),
-	) {}
+  constructor(
+    /** 用户上下文 */
+    public readonly userContext: IsolationContext,
+    /** 数据上下文 */
+    public readonly dataContext: IsolationContext,
+    /** 拒绝原因 */
+    public readonly reason: string,
+    /** 发生时间 */
+    public readonly occurredAt: Date = new Date(),
+  ) {}
 }

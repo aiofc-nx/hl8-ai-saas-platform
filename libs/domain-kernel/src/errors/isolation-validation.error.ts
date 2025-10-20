@@ -27,17 +27,17 @@
  * @since 0.1.0
  */
 export class IsolationValidationError extends Error {
-	constructor(
-		message: string,
-		/** 错误代码 */
-		public readonly code: string,
-		/** 上下文信息 */
-		public readonly context?: Record<string, any>,
-	) {
-		super(message);
-		this.name = "IsolationValidationError";
+  constructor(
+    message: string,
+    /** 错误代码 */
+    public readonly code: string,
+    /** 上下文信息 */
+    public readonly context?: Record<string, any>,
+  ) {
+    super(message);
+    this.name = "IsolationValidationError";
 
-		// 设置原型链（TypeScript 继承 Error 的必需操作）
-		Object.setPrototypeOf(this, IsolationValidationError.prototype);
-	}
+    // 设置原型链（TypeScript 继承 Error 的必需操作）
+    Object.setPrototypeOf(this, IsolationValidationError.prototype);
+  }
 }

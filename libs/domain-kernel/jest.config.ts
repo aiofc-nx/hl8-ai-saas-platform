@@ -1,7 +1,6 @@
 import type { Config } from "jest";
 
 const config: Config = {
-	overrideGlobalSetup: undefined,
 	preset: "ts-jest/presets/default-esm",
 	testEnvironment: "node",
 	roots: ["<rootDir>/src"],
