@@ -34,5 +34,18 @@ export type { EventRepository } from "./repositories/event-repository.js";
 export type { SnapshotRepository } from "./repositories/snapshot-repository.js";
 export type { ReadModelRepository } from "./repositories/read-model-repository.js";
 
+// 上下文
+export type { IsolationContextProvider } from "./context/isolation-context-provider.js";
+export {
+  DefaultIsolationContextProvider,
+  globalIsolationContextProvider,
+  getCurrentIsolationContext,
+  setCurrentIsolationContext,
+  clearCurrentIsolationContext,
+} from "./context/isolation-context-provider.js";
+
+// 访问控制
+export { AccessControlService } from "./access-control/access-control.service.js";
+
 // 错误
 export { IsolationValidationError } from "./errors/isolation-validation.error.js";
