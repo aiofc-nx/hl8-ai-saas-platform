@@ -7,6 +7,7 @@
  */
 
 import { EntityId } from "./entity-id.vo.js";
+import { randomUUID } from "node:crypto";
 
 export class UserId extends EntityId<"UserId"> {
   private static cache = new Map<string, UserId>();
@@ -35,16 +36,7 @@ export class UserId extends EntityId<"UserId"> {
    * ```
    */
   static generate(): UserId {
-    // 生成 UUID v4
-    const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-      /[xy]/g,
-      (c) => {
-        const r = (Math.random() * 16) | 0;
-        const v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      },
-    );
-    return this.create(uuid);
+    return this.create(randomUUID());
   }
 
   static clearCache(): void {

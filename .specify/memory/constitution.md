@@ -1,32 +1,141 @@
 <!--
 Sync Impact Report:
-Version change: 1.0.0 → 1.0.1
-Modified principles: None (initial creation)
-Added sections: Architecture Principles, Monorepo Organization, Quality Assurance, Testing Architecture, Data Isolation, Unified Language, TypeScript any Usage, Error Handling
-Removed sections: None (initial creation)
+Version change: 1.3.0 → 1.3.1
+Modified principles: Clean Architecture (added domain layer purity requirements)
+Added sections: Domain layer purity requirements with NestJS integration guidelines
+Removed sections: None
 Templates requiring updates:
 ✅ Updated: .specify/memory/constitution.md
-⚠ Pending: .specify/templates/plan-template.md (Constitution Check section needs update)
-⚠ Pending: .specify/templates/spec-template.md (may need alignment with data isolation principles)
-⚠ Pending: .specify/templates/tasks-template.md (may need updates for testing architecture)
-Follow-up TODOs: Update template files to align with new constitution principles
+⚠ Pending: .specify/templates/plan-template.md (Constitution Check section needs update for domain layer purity principles)
+⚠ Pending: .specify/templates/spec-template.md (may need alignment with domain layer purity principles)
+⚠ Pending: .specify/templates/tasks-template.md (may need updates for domain layer purity requirements)
+Follow-up TODOs: Update template files to align with domain layer purity principles
 -->
 
 # HL8 SAAS Platform Constitution
 
 ## Core Principles
 
-### I. Architecture Principles
+### I. 中文优先原则 (NON-NEGOTIABLE)
+
+**所有代码注释、文档、错误消息和用户界面必须使用中文**
+
+- **代码注释必须使用中文**，遵循 TSDoc 规范
+- **技术文档必须使用中文编写**
+- **用户界面文本必须使用中文**
+- **错误消息和日志必须使用中文**
+- **API 文档和接口说明必须使用中文**
+- **Git 提交消息推荐使用中文**
+- **代码变量命名使用英文，但必须有中文注释说明**
+
+**理由**：本项目面向中国大陆地区的企业级SAAS平台，中文优先确保团队沟通效率、代码可维护性和业务理解的一致性。
+
+### II. 代码即文档原则
+
+**代码注释必须清晰、准确、完整地描述业务规则与逻辑**
+
+- **遵循 TSDoc 注释规范**
+- **所有公共 API、类、方法、接口、枚举都必须添加完整的 TSDoc 注释**
+- **注释必须包含**：
+  - @description: 功能描述和业务逻辑
+  - @param: 参数说明（含业务含义）
+  - @returns: 返回值说明
+  - @throws: 异常情况说明
+  - @example: 使用示例
+- **业务规则详细描述**
+- **前置条件和后置条件**
+- **使用场景和注意事项**
+- **代码变更时必须同步更新注释**
+
+**理由**：通过详细的注释让代码本身成为最好的业务文档，减少文档维护成本，提高团队协作效率，确保业务逻辑的准确传承。
+
+### III. Architecture Principles
 
 **项目采用混合架构模式：Clean Architecture + DDD + CQRS + 事件溯源 (ES) + 事件驱动架构 (EDA)**
 
-- **Clean Architecture**：四层架构（领域层、应用层、基础设施层、接口层），依赖关系从外向内，核心业务逻辑独立于框架
-- **领域驱动设计 (DDD)**：充血模型，领域对象必须包含业务逻辑和数据，禁止贫血模型
-- **CQRS 模式**：命令和查询必须分离，支持读写模型的独立优化
-- **事件溯源 (ES)**：所有状态变更通过事件记录，支持完整的审计追踪和时间旅行
-- **事件驱动架构 (EDA)**：系统组件通过事件通信，实现松耦合和异步处理
+#### Clean Architecture
 
-### II. Monorepo Organization Principles
+**四层架构设计，确保核心业务逻辑独立于框架和基础设施**
+
+- **四层架构**：领域层、应用层、基础设施层、接口层
+- **依赖关系**：从外向内，内层不依赖外层
+- **核心业务逻辑**：独立于框架和基础设施
+- **用例要求**：用例（Use Cases）必须在文档和设计中明确提及
+
+**领域层纯净性要求**：
+
+- **领域层必须保持纯净性**，不能与任何数据库和ORM框架关联
+- **领域层可以与NestJS框架结合**，充分利用NestJS的模块化、装饰器等基础能力
+- **禁止在领域层直接使用数据库相关技术**（如TypeORM、Prisma等ORM框架）
+- **领域层应专注于业务逻辑**，通过接口定义与基础设施层的交互
+- **NestJS装饰器可用于领域层**，如@Injectable、@Component等，用于依赖注入和模块化
+- **领域层可使用NestJS的模块系统**，但不得依赖具体的数据持久化实现
+
+#### 领域驱动设计 (DDD)
+
+**充血模型设计，确保领域对象包含完整的业务逻辑和行为**
+
+**充血模型（Rich Domain Model）要求**：
+
+- **领域对象必须包含业务逻辑和数据**，禁止使用贫血模型
+- **实体和聚合根必须封装业务行为**，而非仅作为数据容器
+- **业务规则必须在领域对象内部实现**，而非在服务层
+- **领域对象通过方法暴露行为**，而非直接暴露属性
+- **对象状态变更必须通过业务方法**，确保业务规则的执行
+- **禁止贫血模型（Anemic Domain Model）**：领域对象只有 getter/setter 没有业务逻辑
+
+**战术设计模式**：
+
+- **领域实体和聚合根必须分离**（entities/ 和 aggregates/）
+- **聚合根管理聚合边界和一致性规则**
+- **值对象（Value Objects）**表示无标识的不可变概念
+- **领域服务（Domain Services）**处理跨实体的领域逻辑
+- **仓储（Repositories）**负责聚合的持久化
+- **规格模式（Specifications）**封装复杂的业务规则
+- **领域事件（Domain Events）**记录领域内发生的重要事实
+
+**统一语言要求**：
+
+- **技术实现必须使用业务术语**
+- **代码结构反映业务模型**
+- **开发者和业务专家使用相同的术语交流**
+
+#### CQRS 模式
+
+**命令查询职责分离，支持读写模型的独立优化和扩展**
+
+- **命令（Command）和查询（Query）必须分离**
+- **写操作使用命令模型**，改变系统状态
+- **读操作使用查询模型**，不改变状态
+- **支持读写模型的独立优化和扩展**
+- **命令和查询通过总线（Bus）分发**
+- **事件投影器（Projectors）**构建读模型
+
+#### 事件溯源 (ES)
+
+**所有状态变更通过事件记录，事件是事实来源**
+
+- **所有状态变更通过事件记录**，事件是事实来源
+- **事件是不可变的事实记录**，只能追加不能修改
+- **支持通过重放事件重建聚合状态**
+- **支持完整的审计追踪和时间旅行**
+- **事件存储（Event Store）**是核心基础设施
+- **快照（Snapshots）**优化事件重放性能
+
+#### 事件驱动架构 (EDA)
+
+**系统组件通过事件通信，实现松耦合和最终一致性**
+
+- **系统组件通过事件通信**，实现松耦合
+- **领域事件在聚合内部传播**
+- **集成事件在服务间传播**
+- **支持异步处理和最终一致性**
+- **事件总线（Event Bus）**负责事件的发布和订阅
+- **Saga 模式**协调跨聚合的长事务
+
+**架构模式理由**：混合架构模式为企业级SAAS平台提供高可扩展性、高性能、高可靠性和高可维护性。DDD 确保技术实现与业务需求一致；Clean Architecture 确保核心逻辑独立于技术；CQRS 支持读写分离和独立优化；事件溯源提供完整的审计追踪；事件驱动实现系统解耦。这些模式的有机结合，适应复杂的业务场景和未来微服务部署需求。
+
+### IV. Monorepo Organization Principles
 
 **使用 Turborepo 管理多个相关项目，实现代码共享和独立部署**
 
@@ -35,7 +144,7 @@ Follow-up TODOs: Update template files to align with new constitution principles
 - **服务模块命名**：服务模块放在 services 目录时去掉 "-service" 后缀
 - **包管理**：必须使用 pnpm 作为包管理工具，通过 pnpm-workspace.yaml 管理依赖
 
-### III. Quality Assurance Principles
+### V. Quality Assurance Principles
 
 **确保代码质量、可维护性和可测试性**
 
@@ -43,7 +152,7 @@ Follow-up TODOs: Update template files to align with new constitution principles
 - **TypeScript 配置**：每个 `libs/<package>/tsconfig.json` 必须扩展 monorepo 根 tsconfig.json
 - **文档规范**：详细设计文件使用 "XS" 前缀，保持文档与代码同步更新
 
-### IV. Testing Architecture Principles
+### VI. Testing Architecture Principles
 
 **分层测试架构，确保代码质量和快速反馈**
 
@@ -52,18 +161,120 @@ Follow-up TODOs: Update template files to align with new constitution principles
 - **类型分离**：单元测试与源代码同目录，集成测试按模块组织，端到端测试按功能组织
 - **测试覆盖率要求**：核心业务逻辑 ≥ 80%，关键路径 ≥ 90%，所有公共 API 必须有测试用例
 
-### V. Data Isolation and Sharing Principles
+### VII. Data Isolation and Sharing Principles
 
-**多层级数据隔离，支持共享数据和非共享数据的细粒度访问控制**
+**系统必须实现多层级数据隔离，支持共享数据和非共享数据的细粒度访问控制**
 
-- **五级隔离**：平台级、租户级、组织级、部门级、用户级
-- **数据分类**：共享数据（可在指定层级内被下级访问）和非共享数据（仅限特定层级访问）
-- **访问规则**：所有数据访问必须携带完整的隔离上下文，系统自动根据上下文过滤数据
-- **技术实现**：所有业务表必须包含隔离字段，API 请求必须携带隔离标识，缓存键必须包含隔离层级信息
+这是企业级SAAS平台的核心安全能力，确保数据在正确的范围内访问，防止数据泄露。
+
+#### 多层级数据隔离
+
+基于宪章定义的统一语言体系，系统支持以下5个隔离层级：
+
+**平台级隔离（Platform Level）**：
+
+- **平台数据与租户数据完全隔离**
+- **平台管理数据仅平台管理员可访问**
+- **例如**：平台配置、全局统计、系统监控数据
+
+**租户级隔离（Tenant Level）**：
+
+- **不同租户的数据完全隔离**，这是最基础的隔离要求
+- **租户间数据不可跨访问**，即使是相同类型的数据
+- **支持企业租户、社群租户、团队租户、个人租户四种类型**
+- **例如**：租户A的订单数据对租户B完全不可见
+
+**组织级隔离（Organization Level）**：
+
+- **同一租户内，不同组织的非共享数据相互隔离**
+- **组织是租户内的横向管理单位**（专业委员会、项目团队、质量小组等）
+- **组织间是平行关系，无从属关系**
+- **例如**：技术委员会的评审数据对市场委员会不可见
+
+**部门级隔离（Department Level）**：
+
+- **同一组织内，不同部门的非共享数据相互隔离**
+- **部门是纵向管理单位，具有层级关系，支持8层嵌套**
+- **部门间遵循上下级关系，上级部门可访问下级部门的共享数据**
+- **例如**：财务部门的预算数据对人力资源部门不可见
+
+**用户级隔离（User Level）**：
+
+- **用户私有数据仅该用户可访问**
+- **即使在同一部门，用户私有数据也相互隔离**
+- **例如**：用户A的个人笔记对用户B不可见
+
+#### 数据分类
+
+系统将所有数据分为两类：
+
+**共享数据（Shared Data）**：
+
+- **可以在特定层级内被所有下级访问**
+- **必须明确定义共享级别**（平台共享、租户共享、组织共享、部门共享）
+- **共享数据对指定层级及其所有下级层级可见**
+- **例如**：租户级共享的公告，对该租户内所有组织、部门、用户可见
+
+**非共享数据（Non-Shared Data）**：
+
+- **仅限特定层级访问，不可跨层级访问**
+- **数据所有者层级决定访问权限**
+- **非共享数据是默认状态，确保数据安全**
+- **例如**：部门级非共享的财务数据，仅该部门成员可访问
+
+#### 数据访问规则
+
+**隔离规则**：
+
+- **所有数据访问必须携带完整的隔离上下文**（租户ID、组织ID、部门ID、用户ID）
+- **系统自动根据隔离上下文过滤数据**，开发者无需手动处理
+- **跨层级数据访问必须经过明确授权**
+- **所有数据访问都必须记录审计日志**
+
+**共享规则**：
+
+- **上级层级的共享数据对下级可见**（如租户共享数据对所有组织可见）
+- **下级层级的数据对上级不可见**（除非明确授权）
+- **同级层级的非共享数据相互隔离**
+- **数据的共享级别在创建时确定，可通过权限管理修改**
+
+**兼职场景**：
+
+- **用户可以同时属于多个组织或部门**（兼职）
+- **系统支持上下文切换，用户可选择当前工作的组织和部门**
+- **用户可访问所有归属层级的数据，但同一时刻只能在一个上下文中操作**
+
+#### 技术实现要求
+
+**数据模型**：
+
+- **所有业务表必须包含隔离字段**（tenantId、organizationId、departmentId、userId）
+- **必须为隔离字段创建索引以优化查询性能**
+- **建议使用数据库行级安全策略**（如 PostgreSQL RLS）
+
+**API设计**：
+
+- **所有API请求必须携带隔离标识**（X-Tenant-Id、X-Organization-Id、X-Department-Id、X-User-Id）
+- **API响应只包含当前隔离上下文有权访问的数据**
+- **数据创建时必须指定共享级别和所有者层级**
+
+**缓存策略**：
+
+- **缓存键必须包含完整的隔离层级信息**
+- **支持基于层级的批量缓存失效**
+- **例如**：清除整个租户的缓存时，使用租户ID前缀匹配
+
+**审计追踪**：
+
+- **所有数据访问必须记录完整的隔离上下文**
+- **跨层级数据访问必须触发审计事件**
+- **数据访问拒绝必须记录原因和上下文**
+
+**理由**：多层级数据隔离是企业级SAAS平台的核心安全能力，确保数据在正确的范围内访问。通过统一的数据分类和访问规则，既保证了数据安全，又支持了灵活的数据共享需求，是实现细粒度权限控制的基础。
 
 ## Unified Language Principles
 
-### VI. Ubiquitous Language
+### VIII. Ubiquitous Language
 
 **所有团队成员必须使用统一的领域术语进行沟通和文档编写**
 
@@ -71,7 +282,7 @@ Follow-up TODOs: Update template files to align with new constitution principles
 - **术语使用规范**：一致性、精确性、可追溯性、演进性
 - **业务实体映射**：技术实现必须能够追溯到业务术语，代码命名应反映业务术语
 
-### VII. TypeScript `any` Type Usage Principles
+### IX. TypeScript `any` Type Usage Principles
 
 **`any` 类型应被视为"逃生舱口"，在"危险的潜在性"与"安全的宽泛性"之间保持严格平衡**
 
@@ -79,7 +290,7 @@ Follow-up TODOs: Update template files to align with new constitution principles
 - **工程化约束**：启用 ESLint 规则，代码审查要求，度量和监控
 - **禁止模式**：懒惰使用、仅为避免类型错误而使用 any
 
-### VIII. Error Handling and Logging Principles
+### X. Error Handling and Logging Principles
 
 **错误处理必须遵循"异常优先，日志辅助"的设计原则**
 
@@ -93,7 +304,7 @@ Follow-up TODOs: Update template files to align with new constitution principles
 
 - **运行环境**：Node.js >= 20
 - **开发语言**：TypeScript 5.9.2
-- **包管理器**：pnpm 10.11.0
+- **包管理器**：pnpm 10.12.1
 - **构建工具**：Turborepo 2.5.8
 - **后端框架**：NestJS（推荐）
 - **架构模式**：Clean + DDD + CQRS + ES + EDA
@@ -137,4 +348,4 @@ Follow-up TODOs: Update template files to align with new constitution principles
 - MINOR：新增原则/章节或实质性扩展指导
 - PATCH：澄清、措辞、拼写错误修复、非语义改进
 
-**Version**: 1.0.1 | **Ratified**: 2025-01-19 | **Last Amended**: 2025-01-19
+**Version**: 1.3.1 | **Ratified**: 2025-01-19 | **Last Amended**: 2025-01-19
