@@ -110,9 +110,7 @@ describe("PathCalculationService", () => {
     });
 
     it("应该在路径为空时抛出异常", () => {
-      expect(() => pathService.validatePath("")).toThrow(
-        ValidationException,
-      );
+      expect(() => pathService.validatePath("")).toThrow(ValidationException);
       expect(() => pathService.validatePath("   ")).toThrow(
         ValidationException,
       );

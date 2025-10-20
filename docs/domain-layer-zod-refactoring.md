@@ -47,11 +47,11 @@ export class EmailValidator {
     if (!email || typeof email !== "string" || email.trim().length === 0) {
       return { isValid: false, error: "邮箱不能为空" };
     }
-    
+
     if (email.length > 254) {
       return { isValid: false, error: "邮箱长度不能超过254个字符" };
     }
-    
+
     // ... 更多验证逻辑
     return { isValid: true };
   }
@@ -60,12 +60,12 @@ export class EmailValidator {
 
 ### 现有验证器清单
 
-| 验证器类型 | 文件位置 | 复杂度 | 维护成本 |
-|-----------|----------|--------|----------|
-| EmailValidator | `src/domain/validators/common/email.validator.ts` | 高 | 高 |
-| UsernameValidator | `src/domain/validators/common/username.validator.ts` | 中 | 中 |
-| 各种实体验证 | 散布在实体类中 | 高 | 高 |
-| 业务规则验证 | 散布在聚合根中 | 很高 | 很高 |
+| 验证器类型        | 文件位置                                             | 复杂度 | 维护成本 |
+| ----------------- | ---------------------------------------------------- | ------ | -------- |
+| EmailValidator    | `src/domain/validators/common/email.validator.ts`    | 高     | 高       |
+| UsernameValidator | `src/domain/validators/common/username.validator.ts` | 中     | 中       |
+| 各种实体验证      | 散布在实体类中                                       | 高     | 高       |
+| 业务规则验证      | 散布在聚合根中                                       | 很高   | 很高     |
 
 ### 问题统计
 
@@ -115,7 +115,7 @@ domain/
 
 ```typescript
 // src/domain/schemas/base.schema.ts
-import { z } from 'zod';
+import { z } from "zod";
 
 // 基础值对象验证模式
 export const EntityIdSchema = z.string().uuid();
@@ -123,16 +123,19 @@ export const TenantIdSchema = z.string().uuid();
 export const UserIdSchema = z.string().uuid();
 
 // 基础验证模式
-export const EmailSchema = z.string()
+export const EmailSchema = z
+  .string()
   .email("邮箱格式无效")
   .max(254, "邮箱长度不能超过254个字符");
 
-export const UsernameSchema = z.string()
+export const UsernameSchema = z
+  .string()
   .min(3, "用户名长度不能少于3个字符")
   .max(50, "用户名长度不能超过50个字符")
   .regex(/^[a-zA-Z0-9_-]+$/, "用户名只能包含字母、数字、下划线和连字符");
 
-export const PhoneSchema = z.string()
+export const PhoneSchema = z
+  .string()
   .regex(/^1[3-9]\d{9}$/, "手机号格式无效")
   .optional();
 ```
@@ -141,27 +144,28 @@ export const PhoneSchema = z.string()
 
 ```typescript
 // src/domain/schemas/user.schema.ts
-import { z } from 'zod';
-import { EmailSchema, UsernameSchema, PhoneSchema } from './base.schema.js';
+import { z } from "zod";
+import { EmailSchema, UsernameSchema, PhoneSchema } from "./base.schema.js";
 
 export const UserPropsSchema = z.object({
   username: UsernameSchema,
   email: EmailSchema,
-  displayName: z.string()
+  displayName: z
+    .string()
     .min(1, "显示名称不能为空")
     .max(100, "显示名称长度不能超过100个字符"),
   phone: PhoneSchema,
   status: z.enum(["ACTIVE", "INACTIVE", "PENDING"], {
-    errorMap: () => ({ message: "用户状态必须是ACTIVE、INACTIVE或PENDING" })
+    errorMap: () => ({ message: "用户状态必须是ACTIVE、INACTIVE或PENDING" }),
   }),
   role: z.enum(["ADMIN", "USER", "GUEST"], {
-    errorMap: () => ({ message: "用户角色必须是ADMIN、USER或GUEST" })
-  })
+    errorMap: () => ({ message: "用户角色必须是ADMIN、USER或GUEST" }),
+  }),
 });
 
 export const UserCreateCommandSchema = UserPropsSchema.extend({
   departmentId: z.string().uuid(),
-  tenantId: z.string().uuid()
+  tenantId: z.string().uuid(),
 });
 
 export const UserUpdateCommandSchema = UserPropsSchema.partial();
@@ -176,7 +180,7 @@ export type UserUpdateCommand = z.infer<typeof UserUpdateCommandSchema>;
 
 ```typescript
 // src/domain/validators/base/base.validator.ts
-import { z, ZodSchema, ZodError } from 'zod';
+import { z, ZodSchema, ZodError } from "zod";
 
 export interface ValidationResult<T = unknown> {
   success: boolean;
@@ -205,11 +209,11 @@ export abstract class BaseValidator<T> {
       if (error instanceof ZodError) {
         return {
           success: false,
-          errors: error.errors.map(err => ({
+          errors: error.errors.map((err) => ({
             path: err.path,
             message: err.message,
-            code: err.code
-          }))
+            code: err.code,
+          })),
         };
       }
       throw error;
@@ -220,7 +224,9 @@ export abstract class BaseValidator<T> {
     return this.schema.parse(input);
   }
 
-  public safeValidate(input: unknown): { success: true; data: T } | { success: false; error: ZodError } {
+  public safeValidate(
+    input: unknown,
+  ): { success: true; data: T } | { success: false; error: ZodError } {
     return this.schema.safeParse(input);
   }
 }
@@ -230,29 +236,31 @@ export abstract class BaseValidator<T> {
 
 ```typescript
 // src/domain/validators/business-rule.validator.ts
-import { z } from 'zod';
-import { BaseValidator } from './base/base.validator.js';
+import { z } from "zod";
+import { BaseValidator } from "./base/base.validator.js";
 
 export const TenantQuotaSchema = z.object({
   maxUsers: z.number().int().min(1).max(1000000),
   maxStorage: z.number().int().min(1),
-  maxApiCalls: z.number().int().min(1)
+  maxApiCalls: z.number().int().min(1),
 });
 
-export class TenantQuotaValidator extends BaseValidator<z.infer<typeof TenantQuotaSchema>> {
+export class TenantQuotaValidator extends BaseValidator<
+  z.infer<typeof TenantQuotaSchema>
+> {
   constructor() {
     super(TenantQuotaSchema);
   }
 
   public validateQuotaBusinessRules(
     currentQuota: z.infer<typeof TenantQuotaSchema>,
-    newQuota: z.infer<typeof TenantQuotaSchema>
+    newQuota: z.infer<typeof TenantQuotaSchema>,
   ): ValidationResult<boolean> {
     // 验证新配额不能小于当前使用量
     const usageValidation = z.object({
       currentUsers: z.number().int().min(0).max(currentQuota.maxUsers),
       currentStorage: z.number().int().min(0).max(currentQuota.maxStorage),
-      currentApiCalls: z.number().int().min(0).max(currentQuota.maxApiCalls)
+      currentApiCalls: z.number().int().min(0).max(currentQuota.maxApiCalls),
     });
 
     try {
@@ -260,11 +268,13 @@ export class TenantQuotaValidator extends BaseValidator<z.infer<typeof TenantQuo
       if (newQuota.maxUsers < currentQuota.maxUsers) {
         return {
           success: false,
-          errors: [{
-            path: ['maxUsers'],
-            message: "新用户配额不能小于当前配额",
-            code: 'BUSINESS_RULE_VIOLATION'
-          }]
+          errors: [
+            {
+              path: ["maxUsers"],
+              message: "新用户配额不能小于当前配额",
+              code: "BUSINESS_RULE_VIOLATION",
+            },
+          ],
         };
       }
 
@@ -272,11 +282,13 @@ export class TenantQuotaValidator extends BaseValidator<z.infer<typeof TenantQuo
     } catch (error) {
       return {
         success: false,
-        errors: [{
-          path: [],
-          message: "业务规则验证失败",
-          code: 'BUSINESS_RULE_ERROR'
-        }]
+        errors: [
+          {
+            path: [],
+            message: "业务规则验证失败",
+            code: "BUSINESS_RULE_ERROR",
+          },
+        ],
       };
     }
   }
@@ -287,8 +299,8 @@ export class TenantQuotaValidator extends BaseValidator<z.infer<typeof TenantQuo
 
 ```typescript
 // src/domain/entities/user/user.entity.ts
-import { UserPropsSchema, UserProps } from '../schemas/user.schema.js';
-import { BaseValidator } from '../validators/base/base.validator.js';
+import { UserPropsSchema, UserProps } from "../schemas/user.schema.js";
+import { BaseValidator } from "../validators/base/base.validator.js";
 
 export class User extends BaseEntity {
   private _username: string;
@@ -302,13 +314,13 @@ export class User extends BaseEntity {
     id: UserId,
     props: UserProps,
     auditInfo: IPartialAuditInfo,
-    logger?: IPureLogger
+    logger?: IPureLogger,
   ) {
     super(id, auditInfo, logger);
-    
+
     // 使用Zod验证输入
     const validatedProps = UserPropsSchema.parse(props);
-    
+
     this._username = validatedProps.username;
     this._email = validatedProps.email;
     this._displayName = validatedProps.displayName;
@@ -328,7 +340,7 @@ export class User extends BaseEntity {
     // 使用部分验证模式
     const updateSchema = UserPropsSchema.partial();
     const validatedProfile = updateSchema.parse(profile);
-    
+
     // 更新属性
     Object.assign(this, validatedProfile);
     this.markModified();
@@ -340,27 +352,32 @@ export class User extends BaseEntity {
 
 ```typescript
 // src/domain/aggregates/tenant-aggregate.ts
-import { TenantCreatePropsSchema, TenantUpdatePropsSchema } from '../schemas/tenant.schema.js';
+import {
+  TenantCreatePropsSchema,
+  TenantUpdatePropsSchema,
+} from "../schemas/tenant.schema.js";
 
 export class TenantAggregate extends IsolationAwareAggregateRoot {
   constructor(
     id: EntityId,
     props: z.infer<typeof TenantCreatePropsSchema>,
     auditInfo: IPartialAuditInfo,
-    logger?: IPureLogger
+    logger?: IPureLogger,
   ) {
     super(id, auditInfo, logger);
-    
+
     // 使用Zod验证输入
     const validatedProps = TenantCreatePropsSchema.parse(props);
-    
+
     // 继续业务逻辑...
   }
 
-  public updateTenant(updateProps: Partial<z.infer<typeof TenantUpdatePropsSchema>>): void {
+  public updateTenant(
+    updateProps: Partial<z.infer<typeof TenantUpdatePropsSchema>>,
+  ): void {
     // 验证更新属性
     const validatedUpdate = TenantUpdatePropsSchema.parse(updateProps);
-    
+
     // 执行业务逻辑...
   }
 }
@@ -371,6 +388,7 @@ export class TenantAggregate extends IsolationAwareAggregateRoot {
 ### 阶段1：基础设施搭建（1-2周）
 
 1. **安装依赖**
+
    ```bash
    pnpm add zod
    pnpm add -D @types/zod
@@ -443,19 +461,19 @@ export class TenantAggregate extends IsolationAwareAggregateRoot {
 
 ### 技术风险
 
-| 风险 | 概率 | 影响 | 缓解措施 |
-|------|------|------|----------|
-| 性能下降 | 低 | 中 | 性能测试，优化关键路径 |
-| 类型兼容性问题 | 中 | 高 | 渐进式迁移，充分测试 |
-| 学习曲线陡峭 | 高 | 低 | 培训文档，代码示例 |
+| 风险           | 概率 | 影响 | 缓解措施               |
+| -------------- | ---- | ---- | ---------------------- |
+| 性能下降       | 低   | 中   | 性能测试，优化关键路径 |
+| 类型兼容性问题 | 中   | 高   | 渐进式迁移，充分测试   |
+| 学习曲线陡峭   | 高   | 低   | 培训文档，代码示例     |
 
 ### 业务风险
 
-| 风险 | 概率 | 影响 | 缓解措施 |
-|------|------|------|----------|
-| 功能回归 | 中 | 高 | 全面测试覆盖，灰度发布 |
-| 开发效率暂时下降 | 高 | 中 | 培训支持，工具辅助 |
-| 第三方依赖风险 | 低 | 中 | 版本锁定，备用方案 |
+| 风险             | 概率 | 影响 | 缓解措施               |
+| ---------------- | ---- | ---- | ---------------------- |
+| 功能回归         | 中   | 高   | 全面测试覆盖，灰度发布 |
+| 开发效率暂时下降 | 高   | 中   | 培训支持，工具辅助     |
+| 第三方依赖风险   | 低   | 中   | 版本锁定，备用方案     |
 
 ### 缓解策略
 
@@ -503,17 +521,17 @@ export class TenantAggregate extends IsolationAwareAggregateRoot {
 
 ```typescript
 // 性能测试示例
-import { benchmark } from 'benchmark';
+import { benchmark } from "benchmark";
 
 const emailValidator = new EmailValidator();
 const zodValidator = z.string().email();
 
-benchmark('EmailValidator.validate', () => {
-  emailValidator.validate('test@example.com');
+benchmark("EmailValidator.validate", () => {
+  emailValidator.validate("test@example.com");
 });
 
-benchmark('Zod.email', () => {
-  zodValidator.parse('test@example.com');
+benchmark("Zod.email", () => {
+  zodValidator.parse("test@example.com");
 });
 ```
 

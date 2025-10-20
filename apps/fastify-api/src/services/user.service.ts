@@ -43,13 +43,8 @@
  * ```
  */
 
-import {
-  DatabaseIsolationService,
-  IsolationAware,
-  IsolationLevel,
-  Transactional,
-  TransactionService,
-} from "@hl8/database";
+import { Transactional, TransactionService } from "@hl8/database";
+import { IsolationContextService } from "@hl8/nestjs-isolation";
 import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { EntityManager } from "@mikro-orm/core";
 import { Injectable } from "@nestjs/common";
@@ -82,7 +77,7 @@ export class UserService {
   constructor(
     private readonly em: EntityManager,
     private readonly transactionService: TransactionService,
-    private readonly isolationService: DatabaseIsolationService,
+    private readonly isolationService: IsolationContextService,
     private readonly logger: FastifyLoggerService,
   ) {}
 
@@ -102,7 +97,6 @@ export class UserService {
    * @throws {DatabaseTransactionException} 事务执行失败
    */
   @Transactional()
-  @IsolationAware(IsolationLevel.TENANT)
   async createUser(dto: CreateUserDto): Promise<User> {
     this.logger.log("创建用户", { dto });
 
@@ -113,7 +107,7 @@ export class UserService {
     }
 
     const user = new User();
-    user.tenantId = tenantId;
+    user.tenantId = tenantId.getValue();
     user.username = dto.username;
     user.email = dto.email;
     user.firstName = dto.firstName;
@@ -137,7 +131,6 @@ export class UserService {
    * @returns 创建的用户实体数组
    */
   @Transactional()
-  @IsolationAware(IsolationLevel.TENANT)
   async createMany(dtos: CreateUserDto[]): Promise<User[]> {
     this.logger.log("批量创建用户", { count: dtos.length });
 
@@ -148,7 +141,7 @@ export class UserService {
 
     const users = dtos.map((dto) => {
       const user = new User();
-      user.tenantId = tenantId;
+      user.tenantId = tenantId.getValue();
       user.username = dto.username;
       user.email = dto.email;
       user.firstName = dto.firstName;
@@ -172,12 +165,12 @@ export class UserService {
    *
    * @returns 用户列表
    */
-  @IsolationAware(IsolationLevel.TENANT)
   async findAll(): Promise<User[]> {
     // 构建隔离过滤条件
-    const isolationFilter = this.isolationService.buildIsolationFilter(
-      IsolationLevel.TENANT,
-    );
+    const tenantId = this.isolationService.getTenantId();
+    const isolationFilter = tenantId
+      ? { tenantId: tenantId.getValue(), deletedAt: null }
+      : { deletedAt: null };
 
     const users = await this.em.find(User, {
       ...isolationFilter,
@@ -195,17 +188,14 @@ export class UserService {
    * @param id - 用户 ID
    * @returns 用户实体，不存在则返回 null
    */
-  @IsolationAware(IsolationLevel.TENANT)
   async findById(id: string): Promise<User | null> {
-    const isolationFilter = this.isolationService.buildIsolationFilter(
-      IsolationLevel.TENANT,
+    const tenantId = this.isolationService.getTenantId();
+    const user = await this.em.findOne(
+      User,
+      tenantId
+        ? { id, tenantId: tenantId.getValue(), deletedAt: null }
+        : { id, deletedAt: null },
     );
-
-    const user = await this.em.findOne(User, {
-      id,
-      ...isolationFilter,
-      deletedAt: null,
-    });
 
     return user;
   }
@@ -220,7 +210,6 @@ export class UserService {
    * @returns 更新后的用户实体
    */
   @Transactional()
-  @IsolationAware(IsolationLevel.TENANT)
   async updateUser(id: string, dto: UpdateUserDto): Promise<User | null> {
     const user = await this.findById(id);
     if (!user) {
@@ -246,7 +235,6 @@ export class UserService {
    * @returns 是否删除成功
    */
   @Transactional()
-  @IsolationAware(IsolationLevel.TENANT)
   async softDelete(id: string): Promise<boolean> {
     const user = await this.findById(id);
     if (!user) {
@@ -268,17 +256,14 @@ export class UserService {
    * @returns 是否恢复成功
    */
   @Transactional()
-  @IsolationAware(IsolationLevel.TENANT)
   async restore(id: string): Promise<boolean> {
-    const isolationFilter = this.isolationService.buildIsolationFilter(
-      IsolationLevel.TENANT,
+    const tenantId = this.isolationService.getTenantId();
+    const user = await this.em.findOne(
+      User,
+      tenantId
+        ? { id, tenantId: tenantId.getValue(), deletedAt: { $ne: null } as any }
+        : { id, deletedAt: { $ne: null } as any },
     );
-
-    const user = await this.em.findOne(User, {
-      id,
-      ...isolationFilter,
-      deletedAt: { $ne: null },
-    });
 
     if (!user) {
       return false;

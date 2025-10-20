@@ -143,7 +143,7 @@ export class EmailValidator {
       if (label.startsWith("-") || label.endsWith("-")) {
         return { isValid: false, error: "域名标签不能以连字符开头或结尾" };
       }
-      
+
       // 检查特殊字符
       const invalidChars = /[{}|^`~\\/=?:<>\[\]]/;
       if (invalidChars.test(label)) {

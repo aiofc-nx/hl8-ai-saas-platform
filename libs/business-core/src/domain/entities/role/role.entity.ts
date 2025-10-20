@@ -376,15 +376,10 @@ export class Role extends BaseEntity {
       });
     }
     if (this._isSystemRole) {
-      throw new StateException(
-        "系统角色不能停用",
-        "system",
-        "deactivate",
-        {
-          roleId: this.id.toString(),
-          isSystemRole: this._isSystemRole,
-        },
-      );
+      throw new StateException("系统角色不能停用", "system", "deactivate", {
+        roleId: this.id.toString(),
+        isSystemRole: this._isSystemRole,
+      });
     }
     this._isActive = false;
     this.updateTimestamp();
@@ -621,10 +616,7 @@ export class Role extends BaseEntity {
     const actionValues = actions.map((a) => a.value);
     const uniqueValues = [...new Set(actionValues)];
     if (actionValues.length !== uniqueValues.length) {
-      throw new BusinessRuleException(
-        "权限动作不能重复",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("权限动作不能重复", "VALIDATION_FAILED");
     }
   }
 
@@ -636,10 +628,7 @@ export class Role extends BaseEntity {
    */
   private validateActionAddition(action: PermissionAction): void {
     if (!action) {
-      throw new BusinessRuleException(
-        "权限动作不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("权限动作不能为空", "VALIDATION_FAILED");
     }
   }
 
@@ -651,10 +640,7 @@ export class Role extends BaseEntity {
    */
   private validateActionRemoval(action: PermissionAction): void {
     if (!action) {
-      throw new BusinessRuleException(
-        "权限动作不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("权限动作不能为空", "VALIDATION_FAILED");
     }
     if (this._actions.length === 1) {
       throw new BusinessRuleException(
@@ -673,10 +659,7 @@ export class Role extends BaseEntity {
    */
   private validateTypeChange(oldType: RoleType, newType: RoleType): void {
     if (!newType) {
-      throw new BusinessRuleException(
-        "角色类型不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("角色类型不能为空", "VALIDATION_FAILED");
     }
     if (
       this._isSystemRole &&
@@ -704,10 +687,7 @@ export class Role extends BaseEntity {
     newType: PermissionType,
   ): void {
     if (!newType) {
-      throw new BusinessRuleException(
-        "权限类型不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("权限类型不能为空", "VALIDATION_FAILED");
     }
   }
 
@@ -734,10 +714,7 @@ export class Role extends BaseEntity {
    */
   private validateParentRole(parentRoleId: EntityId): void {
     if (!parentRoleId) {
-      throw new BusinessRuleException(
-        "父角色ID不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("父角色ID不能为空", "VALIDATION_FAILED");
     }
     if (parentRoleId.equals(this.id)) {
       throw new StateException(
@@ -757,10 +734,7 @@ export class Role extends BaseEntity {
    */
   private validateTag(tag: string): void {
     if (!tag || !tag.trim()) {
-      throw new BusinessRuleException(
-        "标签不能为空",
-        "VALIDATION_FAILED",
-      );
+      throw new BusinessRuleException("标签不能为空", "VALIDATION_FAILED");
     }
     if (tag.trim().length > 50) {
       throw new BusinessRuleException(

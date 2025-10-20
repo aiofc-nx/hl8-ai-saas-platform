@@ -173,7 +173,9 @@ describe("Organization Entity", () => {
         validAuditInfo,
       );
 
-      organization.updateType(OrganizationType.create(OrganizationType.GOVERNMENT));
+      organization.updateType(
+        OrganizationType.create(OrganizationType.GOVERNMENT),
+      );
 
       expect(organization.type.value).toBe(OrganizationType.GOVERNMENT);
     });

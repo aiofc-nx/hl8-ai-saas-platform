@@ -181,7 +181,10 @@ export class OrganizationType extends BaseValueObject<string> {
    * ```
    */
   isDecisionType(): boolean {
-    return this.value === OrganizationType.GOVERNMENT || this.value === OrganizationType.ENTERPRISE;
+    return (
+      this.value === OrganizationType.GOVERNMENT ||
+      this.value === OrganizationType.ENTERPRISE
+    );
   }
 
   /**
@@ -198,7 +201,10 @@ export class OrganizationType extends BaseValueObject<string> {
    * ```
    */
   isExecutionType(): boolean {
-    return this.value === OrganizationType.EDUCATION || this.value === OrganizationType.NON_PROFIT;
+    return (
+      this.value === OrganizationType.EDUCATION ||
+      this.value === OrganizationType.NON_PROFIT
+    );
   }
 
   /**
@@ -215,7 +221,10 @@ export class OrganizationType extends BaseValueObject<string> {
    * ```
    */
   isProfessionalType(): boolean {
-    return this.value === OrganizationType.EDUCATION || this.value === OrganizationType.GOVERNMENT;
+    return (
+      this.value === OrganizationType.EDUCATION ||
+      this.value === OrganizationType.GOVERNMENT
+    );
   }
 
   /**
