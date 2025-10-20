@@ -27,6 +27,6 @@ export type {
 } from "./base-aggregate-repository.interface.js";
 
 // 重新导出常用类型
-export type { EntityId } from "@hl8/isolation-model";
+export type { EntityId } from "@hl8/domain-kernel";
 export type { IAggregateRoot } from "../../aggregates/base/aggregate-root.interface.js";
 export type { BaseDomainEvent } from "../../events/base/base-domain-event.js";

@@ -9,7 +9,7 @@ import { BaseSpecification } from "./base/base-specification.js";
 import { Organization } from "../entities/organization/organization.entity.js";
 import { OrganizationType } from "../value-objects/types/organization-type.vo.js";
 import { OrganizationLevel } from "../value-objects/types/organization-level.vo.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 
 /**
  * 组织激活规范

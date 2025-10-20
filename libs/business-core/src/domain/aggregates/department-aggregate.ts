@@ -1,4 +1,4 @@
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { EntityId, TenantId } from "@hl8/domain-kernel";
 import { IsolationAwareAggregateRoot } from "./base/isolation-aware-aggregate-root.js";
 import { Department } from "../entities/department/department.entity.js";
 import type { IPureLogger } from "@hl8/pure-logger";

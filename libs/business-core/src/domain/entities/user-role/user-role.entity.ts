@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { GenericEntityId, UserId } from "@hl8/isolation-model";
+import { GenericEntityId, UserId } from "@hl8/domain-kernel";
 import { BaseEntity } from "../base/base-entity.js";
 import {
   BusinessRuleException,

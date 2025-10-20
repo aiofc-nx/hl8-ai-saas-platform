@@ -1,5 +1,5 @@
 import { BaseEntity } from "../base/base-entity.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import type { IPureLogger } from "@hl8/pure-logger";
 import { TenantType } from "../../value-objects/types/tenant-type.vo.js";
 import type { IPartialAuditInfo } from "../base/audit-info.js";

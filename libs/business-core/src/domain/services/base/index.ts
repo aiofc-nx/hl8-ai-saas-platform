@@ -17,4 +17,4 @@ export type {
 export { BaseDomainService } from "./domain-service.interface.js";
 
 // 重新导出常用类型
-export type { EntityId } from "@hl8/isolation-model";
+export type { EntityId } from "@hl8/domain-kernel";

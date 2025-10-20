@@ -2,7 +2,7 @@
  * 读模型仓储接口
  * @description 定义查询模型访问契约
  */
-import { Query } from "@repo/application-kernel";
+import { Query } from "@hl8/application-kernel";
 
 /**
  * 读模型仓储接口

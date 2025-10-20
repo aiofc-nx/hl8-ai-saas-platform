@@ -6,7 +6,7 @@
  */
 
 import { IsolationAwareAggregateRoot } from "./isolation-aware-aggregate-root.js";
-import { EntityId, TenantId, IsolationContext } from "@hl8/isolation-model";
+import { EntityId, TenantId, IsolationContext } from "@hl8/domain-kernel";
 import { IPartialAuditInfo } from "../../entities/base/audit-info.js";
 import { BaseDomainEvent } from "../../events/base/base-domain-event.js";
 import type { IPureLogger } from "@hl8/pure-logger";

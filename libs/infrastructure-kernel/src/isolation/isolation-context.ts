@@ -10,7 +10,7 @@ import {
   OrganizationId,
   TenantId,
   UserId
-} from "@repo/domain-kernel";
+} from "@hl8/domain-kernel";
 
 export class IsolationContext {
   private _level?: IsolationLevel;

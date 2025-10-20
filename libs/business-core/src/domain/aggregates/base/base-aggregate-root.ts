@@ -90,7 +90,7 @@
  */
 import { BaseEntity } from "../../entities/base/base-entity.js";
 import { BaseDomainEvent } from "../../events/base/base-domain-event.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { IPartialAuditInfo } from "../../entities/base/audit-info.js";
 // import { any } from '@hl8/nestjs-isolation'; // TODO: 需要实现
 import type { IPureLogger } from "@hl8/pure-logger";

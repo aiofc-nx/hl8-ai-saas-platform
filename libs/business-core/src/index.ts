@@ -12,4 +12,4 @@ export * from "./common/types/index.js";
 export * from "./common/utils/index.js";
 
 // 从isolation-model重新导出ID值对象
-export { EntityId, TenantId, UserId } from "@hl8/isolation-model";
+export { EntityId, TenantId, UserId } from "@hl8/domain-kernel";

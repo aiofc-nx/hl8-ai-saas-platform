@@ -1,4 +1,4 @@
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { EntityId, TenantId } from "@hl8/domain-kernel";
 import { PermissionAggregate } from "./permission-aggregate.js";
 import { Permission } from "../entities/permission/permission.entity.js";
 import { PermissionType } from "../value-objects/types/permission-type.vo.js";

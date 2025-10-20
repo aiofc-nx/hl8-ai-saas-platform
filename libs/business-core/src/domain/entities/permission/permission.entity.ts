@@ -11,7 +11,7 @@ import {
   TenantId,
   OrganizationId,
   DepartmentId,
-} from "@hl8/isolation-model";
+} from "@hl8/domain-kernel";
 import { BaseEntity } from "../base/base-entity.js";
 import { PermissionType } from "../../value-objects/types/permission-type.vo.js";
 import { PermissionAction } from "../../value-objects/types/permission-action.vo.js";

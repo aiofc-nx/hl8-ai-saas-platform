@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from "@jest/globals";
-import { TenantId } from "@hl8/isolation-model";
+import { TenantId } from "@hl8/domain-kernel";
 import { Tenant } from "./tenant.entity.js";
 import { TenantType } from "../../value-objects/types/tenant-type.vo.js";
 import type { IPartialAuditInfo } from "../base/audit-info.js";

@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { GenericEntityId, TenantId } from "@hl8/isolation-model";
+import { GenericEntityId, TenantId } from "@hl8/domain-kernel";
 import { IsolationAwareAggregateRoot } from "./base/isolation-aware-aggregate-root.js";
 import { Permission } from "../entities/permission/permission.entity.js";
 import { PermissionType } from "../value-objects/types/permission-type.vo.js";

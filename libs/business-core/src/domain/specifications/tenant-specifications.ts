@@ -8,7 +8,7 @@
 import { BaseSpecification } from "./base/base-specification.js";
 import { Tenant } from "../entities/tenant/tenant.entity.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 
 /**
  * 租户激活规范

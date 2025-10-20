@@ -64,8 +64,8 @@
  *
  * @since 1.0.0
  */
-import { EntityId } from "@hl8/isolation-model";
-import { TenantId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
 import { DomainExceptionFactory } from "../../exceptions/domain-exception-factory.js";
 
 export abstract class BaseDomainEvent {

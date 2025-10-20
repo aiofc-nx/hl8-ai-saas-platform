@@ -1,4 +1,4 @@
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { EntityId, TenantId } from "@hl8/domain-kernel";
 import { DepartmentAggregate } from "./department-aggregate.js";
 import { Department } from "../entities/department/department.entity.js";
 import { DepartmentLevel } from "../value-objects/types/department-level.vo.js";

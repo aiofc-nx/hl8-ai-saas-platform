@@ -1,4 +1,4 @@
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
 import { BaseDomainEvent } from "./base/base-domain-event.js";
 

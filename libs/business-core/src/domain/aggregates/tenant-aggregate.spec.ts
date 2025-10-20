@@ -1,4 +1,4 @@
-import { TenantId, EntityId } from "@hl8/isolation-model";
+import { TenantId, EntityId } from "@hl8/domain-kernel";
 import {
   TenantAggregate,
   TenantCreatedEvent,

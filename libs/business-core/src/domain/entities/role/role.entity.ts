@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { GenericEntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/domain-kernel";
 import { BaseEntity } from "../base/base-entity.js";
 import { RoleType } from "../../value-objects/types/role-type.vo.js";
 import { PermissionType } from "../../value-objects/types/permission-type.vo.js";

@@ -1,4 +1,4 @@
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { BaseEntity } from "../base/base-entity.js";
 import { DepartmentLevel } from "../../value-objects/types/department-level.vo.js";
 import {

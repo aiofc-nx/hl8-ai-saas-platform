@@ -32,7 +32,7 @@
  * @description 实体审计信息接口，提供完整的生命周期追踪
  * @example
  * ```typescript
- * import { EntityId  } from '@hl8/isolation-model';
+ * import { EntityId  } from '@hl8/domain-kernel';
  *
  * const auditInfo: AuditInfo = {
  *   createdBy: 'user-123',
@@ -53,8 +53,8 @@
  *
  * @since 1.0.0
  */
-import { EntityId } from "@hl8/isolation-model";
-import { TenantId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
 
 export interface IAuditInfo {
   /**

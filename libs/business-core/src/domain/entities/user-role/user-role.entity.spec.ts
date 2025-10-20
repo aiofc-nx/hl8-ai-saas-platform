@@ -1,4 +1,4 @@
-import { GenericEntityId, UserId } from "@hl8/isolation-model";
+import { GenericEntityId, UserId } from "@hl8/domain-kernel";
 import { UserRole, UserRoleProps } from "./user-role.entity.js";
 import { IPartialAuditInfo } from "../base/audit-info.js";
 import { IPureLogger } from "@hl8/pure-logger";

@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { BusinessRuleException } from "../exceptions/base/base-domain-exception.js";
 import { ErrorCodes } from "../../common/constants/index.js";
 

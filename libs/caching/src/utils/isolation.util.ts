@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import type { IsolationContext } from "@hl8/isolation-model";
+import type { IsolationContext } from "@hl8/domain-kernel";
 
 /**
  * 获取隔离级别

@@ -14,11 +14,11 @@
  */
 
 import { BaseEntity } from "./base-entity.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { IPartialAuditInfo } from "./audit-info.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import { BadRequestException } from "@nestjs/common";
-import { TenantId } from "@hl8/isolation-model";
+import { TenantId } from "@hl8/domain-kernel";
 
 // 测试用的具体实体类
 class TestEntity extends BaseEntity {

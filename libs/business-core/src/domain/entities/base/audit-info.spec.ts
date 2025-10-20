@@ -12,8 +12,8 @@ import {
   IPartialAuditInfo,
   AuditInfoBuilder,
 } from "./audit-info.js";
-import { EntityId } from "@hl8/isolation-model";
-import { TenantId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
 
 describe("AuditInfo", () => {
   describe("IAuditInfo 接口", () => {

@@ -2,7 +2,7 @@
  * 事件仓储接口
  * @description 定义事件流的读写契约
  */
-import { EntityId, DomainEvent } from "@repo/domain-kernel";
+import { EntityId, DomainEvent } from "@hl8/domain-kernel";
 
 /**
  * 事件仓储接口

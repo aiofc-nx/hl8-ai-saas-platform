@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { EntityId, TenantId } from "@hl8/domain-kernel";
 import { RoleAggregate } from "../aggregates/role-aggregate.js";
 import { Role } from "../entities/role/role.entity.js";
 import { RoleType } from "../value-objects/types/role-type.vo.js";

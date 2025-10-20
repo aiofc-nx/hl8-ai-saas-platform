@@ -6,7 +6,7 @@ import {
   AggregateVersion,
   AggregateSnapshot,
 } from "./aggregate-root.interface.js";
-import { GenericEntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/domain-kernel";
 
 describe("Aggregate Root Interface", () => {
   describe("IAggregateRoot", () => {

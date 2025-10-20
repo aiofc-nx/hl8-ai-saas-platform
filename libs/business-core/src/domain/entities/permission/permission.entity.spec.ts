@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { EntityId, TenantId } from "@hl8/domain-kernel";
 import { Permission } from "./permission.entity.js";
 import { PermissionType } from "../../value-objects/types/permission-type.vo.js";
 import { PermissionAction } from "../../value-objects/types/permission-action.vo.js";

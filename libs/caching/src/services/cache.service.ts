@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { IsolationContext } from "@hl8/isolation-model";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { Injectable, Inject } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { SimplifiedRedisService as RedisService } from "./redis.service.js";

@@ -8,7 +8,7 @@
 import { BaseSpecification } from "./base/base-specification.js";
 import { Department } from "../entities/department/department.entity.js";
 import { DepartmentLevel } from "../value-objects/types/department-level.vo.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 
 /**
  * 部门激活规范

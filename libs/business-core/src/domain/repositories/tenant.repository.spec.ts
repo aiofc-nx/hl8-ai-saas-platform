@@ -1,4 +1,4 @@
-import { GenericEntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/domain-kernel";
 import { ITenantRepository } from "./tenant.repository.js";
 import { TenantAggregate } from "../aggregates/tenant-aggregate.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";

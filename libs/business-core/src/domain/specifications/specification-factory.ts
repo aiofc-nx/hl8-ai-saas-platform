@@ -32,7 +32,7 @@ import { Department } from "../entities/department/department.entity.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
 import { OrganizationType } from "../value-objects/types/organization-type.vo.js";
 import { DepartmentLevel } from "../value-objects/types/department-level.vo.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 
 /**
  * 规范工厂

@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId, UserId } from "@hl8/isolation-model";
+import { EntityId, TenantId, UserId } from "@hl8/domain-kernel";
 import { UserRoleAggregate } from "../aggregates/user-role-aggregate.js";
 import { UserRole } from "../entities/user-role/user-role.entity.js";
 

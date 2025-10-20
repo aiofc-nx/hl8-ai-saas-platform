@@ -8,7 +8,7 @@
  * @since 1.0.0
  */
 
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 
 /**
  * 权限作用域枚举

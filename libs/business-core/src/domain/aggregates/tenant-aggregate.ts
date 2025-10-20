@@ -1,4 +1,4 @@
-import { EntityId, IsolationContext } from "@hl8/isolation-model";
+import { EntityId, IsolationContext } from "@hl8/domain-kernel";
 import { IsolationAwareAggregateRoot } from "./base/isolation-aware-aggregate-root.js";
 import { Tenant } from "../entities/tenant/tenant.entity.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";

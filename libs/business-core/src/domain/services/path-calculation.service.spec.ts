@@ -1,4 +1,4 @@
-import { GenericEntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/domain-kernel";
 import { PathCalculationService } from "./path-calculation.service.js";
 import { IPureLogger } from "@hl8/pure-logger";
 import { ValidationException } from "../exceptions/domain-exceptions.js";

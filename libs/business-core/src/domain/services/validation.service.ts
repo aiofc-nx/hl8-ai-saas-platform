@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 // 使用领域层异常体系，不再需要导入common异常
 import { ValidationUtils } from "../../common/utils/index.js";
 

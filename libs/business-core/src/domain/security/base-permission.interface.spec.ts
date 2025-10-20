@@ -4,7 +4,7 @@ import {
   IBasePermission,
   IPermissionManager,
 } from "./base-permission.interface.js";
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 
 describe("Base Permission Interface", () => {
   describe("PermissionScope", () => {

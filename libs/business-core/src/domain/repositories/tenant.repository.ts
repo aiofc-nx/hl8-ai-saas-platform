@@ -1,4 +1,4 @@
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { TenantAggregate } from "../aggregates/tenant-aggregate.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
 import { IAggregateRepository } from "./base/base-aggregate-repository.interface.js";

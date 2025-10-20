@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { GenericEntityId, TenantId } from "@hl8/isolation-model";
+import { GenericEntityId, TenantId } from "@hl8/domain-kernel";
 import { Organization } from "./organization.entity.js";
 import { OrganizationType } from "../../value-objects/types/organization-type.vo.js";
 import {

@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { EntityId, TenantId } from "@hl8/domain-kernel";
 import { Department } from "./department.entity.js";
 import { DepartmentLevel } from "../../value-objects/types/department-level.vo.js";
 import {

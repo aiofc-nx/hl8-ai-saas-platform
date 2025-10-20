@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId, UserId } from "@hl8/isolation-model";
+import { EntityId, TenantId, UserId } from "@hl8/domain-kernel";
 import { Ability, AbilityBuilder, createMongoAbility } from "@casl/ability";
 import { Role } from "../entities/role/role.entity.js";
 import { Permission } from "../entities/permission/permission.entity.js";

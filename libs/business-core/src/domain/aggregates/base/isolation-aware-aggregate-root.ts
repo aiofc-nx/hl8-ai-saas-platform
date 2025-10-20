@@ -30,7 +30,7 @@
  * - 提供隔离级别的操作审计
  *
  * @description 为多租户SAAS应用提供聚合根级别的完整数据隔离支持。
- * 整合 @hl8/isolation-model 的隔离上下文服务，提供多层级隔离验证、
+ * 整合 @hl8/domain-kernel 的隔离上下文服务，提供多层级隔离验证、
  * 隔离事件发布、隔离日志记录等通用功能，为业务聚合根提供统一的数据隔离能力。
  *
  * ## 业务规则
@@ -120,8 +120,8 @@
  * @since 1.0.0
  */
 
-import { EntityId } from "@hl8/isolation-model";
-import { IsolationContext, IsolationLevel } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
+import { IsolationContext, IsolationLevel } from "@hl8/domain-kernel";
 import { BaseAggregateRoot } from "./base-aggregate-root.js";
 import { BaseDomainEvent } from "../../events/base/base-domain-event.js";
 import { BusinessRuleException } from "../../exceptions/base/base-domain-exception.js";

@@ -69,7 +69,7 @@
  *
  * @since 1.0.0
  */
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { IAuditInfo, IPartialAuditInfo } from "./audit-info.js";
 import { IEntity } from "./entity.interface.js";
 import {
@@ -78,7 +78,7 @@ import {
 } from "../../exceptions/domain-exceptions.js";
 import type { IPureLogger } from "@hl8/pure-logger";
 import { ENTITY_OPERATIONS } from "../../../common/constants/index.js";
-import { TenantId } from "@hl8/isolation-model";
+import { TenantId } from "@hl8/domain-kernel";
 
 export abstract class BaseEntity implements IEntity {
   private readonly _id: EntityId;

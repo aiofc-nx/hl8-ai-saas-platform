@@ -1,4 +1,4 @@
-import { GenericEntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/domain-kernel";
 import {
   TenantCreatedEvent,
   TenantUpdatedEvent,

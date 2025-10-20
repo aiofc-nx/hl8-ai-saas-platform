@@ -5,8 +5,8 @@
  * @since 1.0.0
  */
 import { BaseDomainEvent } from "./base-domain-event.js";
-import { EntityId } from "@hl8/isolation-model";
-import { TenantId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
 
 // 测试用的具体事件类
 class TestDomainEvent extends BaseDomainEvent {

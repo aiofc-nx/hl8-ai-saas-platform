@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import { IPaginatedResult, IQueryOptions } from "./common.types.js";
 
 /**

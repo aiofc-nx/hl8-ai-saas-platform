@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { UserId } from "@hl8/isolation-model";
+import { UserId } from "@hl8/domain-kernel";
 
 describe("UserId", () => {
   describe("构造函数", () => {

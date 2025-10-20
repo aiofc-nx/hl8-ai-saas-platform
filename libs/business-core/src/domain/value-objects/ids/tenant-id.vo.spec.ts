@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { TenantId, EntityId } from "@hl8/isolation-model";
+import { TenantId, EntityId } from "@hl8/domain-kernel";
 
 describe("TenantId", () => {
   describe("构造函数", () => {

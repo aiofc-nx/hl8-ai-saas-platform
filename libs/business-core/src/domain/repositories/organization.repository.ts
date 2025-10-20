@@ -6,7 +6,7 @@
  * @since 1.0.0
  */
 
-import { EntityId, TenantId } from "@hl8/isolation-model";
+import { EntityId, TenantId } from "@hl8/domain-kernel";
 import { OrganizationAggregate } from "../aggregates/organization-aggregate.js";
 import { OrganizationType } from "../value-objects/types/organization-type.vo.js";
 import { IPaginatedResult } from "./base/repository.interface.js";

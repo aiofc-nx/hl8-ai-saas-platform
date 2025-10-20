@@ -1,4 +1,4 @@
-import { EntityId } from "@hl8/isolation-model";
+import { EntityId } from "@hl8/domain-kernel";
 import type { IPureLogger } from "@hl8/pure-logger";
 import { DomainExceptionFactory } from "../exceptions/domain-exception-factory.js";
 

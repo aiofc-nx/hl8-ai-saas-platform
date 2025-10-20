@@ -7,7 +7,7 @@ import {
 } from "./tenant-specifications.js";
 import { Tenant } from "../entities/tenant/tenant.entity.js";
 import { TenantType } from "../value-objects/types/tenant-type.vo.js";
-import { GenericEntityId } from "@hl8/isolation-model";
+import { GenericEntityId } from "@hl8/domain-kernel";
 import { IPartialAuditInfo } from "../entities/base/audit-info.js";
 
 // 模拟Tenant实体
