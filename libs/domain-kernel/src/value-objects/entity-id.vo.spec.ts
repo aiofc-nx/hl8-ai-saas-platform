@@ -1,5 +1,5 @@
-import { EntityId } from "./entity-id.vo";
-import { IsolationValidationError } from "../errors/isolation-validation.error";
+import { EntityId } from "./entity-id.vo.js";
+import { IsolationValidationError } from "../errors/isolation-validation.error.js";
 
 // 测试用的具体实现
 class TestEntityId extends EntityId<"TestEntityId"> {
