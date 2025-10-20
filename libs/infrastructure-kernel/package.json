@@ -1,7 +1,7 @@
 {
-  "name": "@repo/domain-kernel",
+  "name": "@repo/infrastructure-kernel",
   "version": "0.1.0",
-  "description": "Pure domain layer kernel - entities, value objects, domain events, and aggregates",
+  "description": "Infrastructure layer kernel - repositories, isolation, and access control",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,7 +18,10 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@repo/domain-kernel": "workspace:*",
+    "@repo/application-kernel": "workspace:*"
+  },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/jest-config": "workspace:*",
@@ -28,5 +31,8 @@
     "jest": "^30.2.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5.9.3"
+  },
+  "jest": {
+    "preset": "@repo/jest-config"
   }
 }
