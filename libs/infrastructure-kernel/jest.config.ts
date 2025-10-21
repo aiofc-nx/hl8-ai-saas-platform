@@ -3,6 +3,16 @@ import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest",
   testEnvironment: "node",
+  extensionsToTreatAsEsm: [".ts"],
+  globals: {
+    "ts-jest": {
+      useESM: true,
+    },
+  },
+  transform: {
+    "^.+\\.(ts|tsx)$": ["ts-jest", { useESM: true }],
+  },
+  moduleFileExtensions: ["ts", "js", "json"],
   roots: ["<rootDir>/src"],
   testMatch: ["<rootDir>/src/**/*.spec.ts", "<rootDir>/src/**/*.test.ts"],
   collectCoverageFrom: [
@@ -23,7 +33,9 @@ const config: Config = {
   },
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@/(.*)$": "<rootDir>/src/$1",
   },
+  setupFilesAfterEnv: ["<rootDir>/../../jest.setup.js"],
 };
 
 export default config;

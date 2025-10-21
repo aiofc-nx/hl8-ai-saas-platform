@@ -6,6 +6,7 @@
  */
 
 import { Injectable } from '@nestjs/common';
+import { IsolationContext } from '@hl8/domain-kernel';
 import type { IAuditLogService, AuditConfig } from '../interfaces/isolation-service.interface.js';
 import type { AuditLog, AuditLogQueryFilters } from '../types/isolation.types.js';
 import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';

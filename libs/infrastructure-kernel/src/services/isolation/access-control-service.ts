@@ -6,8 +6,8 @@
  */
 
 import { Injectable } from '@nestjs/common';
+import { IsolationContext, SharingLevel } from '@hl8/domain-kernel';
 import type { IAccessControlService, AccessRule, PermissionSummary } from '../interfaces/isolation-service.interface.js';
-import type { IsolationContext } from '../types/isolation.types.js';
 
 /**
  * 访问控制服务
@@ -31,15 +31,49 @@ export class AccessControlService implements IAccessControlService {
         return false;
       }
 
-      // 获取资源类型和ID
-      const resourceType = this.getResourceType(resource);
-      const resourceId = this.getResourceId(resource);
-      const action = this.getAction(resource);
+      // 使用领域模型的权限检查逻辑
+      // 这里需要根据实际的资源隔离上下文来检查权限
+      const resourceContext = this.extractResourceContext(resource);
+      if (!resourceContext) {
+        return false;
+      }
 
-      // 检查访问权限
-      return await this.checkResourceAccess(context, resourceType, resourceId, action);
+      // 使用领域模型的 canAccess 方法
+      return context.canAccess(resourceContext, SharingLevel.TENANT);
     } catch (error) {
+      console.error('访问权限验证失败:', error);
       return false;
+    }
+  }
+
+  /**
+   * 提取资源的隔离上下文
+   */
+  private extractResourceContext(resource: any): IsolationContext | null {
+    try {
+      // 从资源中提取隔离信息
+      if (resource.tenantId) {
+        if (resource.departmentId && resource.organizationId) {
+          return IsolationContext.department(
+            resource.tenantId,
+            resource.organizationId,
+            resource.departmentId
+          );
+        } else if (resource.organizationId) {
+          return IsolationContext.organization(
+            resource.tenantId,
+            resource.organizationId
+          );
+        } else {
+          return IsolationContext.tenant(resource.tenantId);
+        }
+      } else if (resource.userId) {
+        return IsolationContext.user(resource.userId, resource.tenantId);
+      }
+      return IsolationContext.platform();
+    } catch (error) {
+      console.error('提取资源隔离上下文失败:', error);
+      return null;
     }
   }
 
