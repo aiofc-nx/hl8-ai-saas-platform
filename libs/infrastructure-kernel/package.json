@@ -20,7 +20,16 @@
   },
   "dependencies": {
     "@hl8/domain-kernel": "workspace:*",
-    "@hl8/application-kernel": "workspace:*"
+    "@hl8/application-kernel": "workspace:*",
+    "@hl8/database": "workspace:*",
+    "@hl8/nestjs-fastify": "workspace:*",
+    "@mikro-orm/core": "^6.4.2",
+    "@mikro-orm/postgresql": "^6.4.2",
+    "@mikro-orm/mongodb": "^6.4.2",
+    "pg": "^8.11.3",
+    "mongodb": "^6.3.0",
+    "redis": "^4.6.12",
+    "pino": "^8.17.2"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

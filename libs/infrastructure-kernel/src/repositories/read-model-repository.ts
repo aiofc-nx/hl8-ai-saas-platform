@@ -2,7 +2,7 @@
  * 读模型仓储接口
  * @description 定义查询模型访问契约
  */
-import { Query } from "@hl8/application-kernel";
+import { BaseQuery } from "@hl8/application-kernel";
 
 /**
  * 读模型仓储接口
@@ -10,7 +10,7 @@ import { Query } from "@hl8/application-kernel";
  * @template TResult - 结果类型
  */
 export interface ReadModelRepository<
-  TQuery extends Query = Query,
+  TQuery extends BaseQuery = BaseQuery,
   TResult = any,
 > {
   /**
