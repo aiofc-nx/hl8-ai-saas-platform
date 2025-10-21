@@ -6,6 +6,7 @@
 // import { IsolationContext } from "@repo/infrastructure-kernel";
 
 // 临时定义，避免循环依赖
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IsolationContext {
   // 临时接口定义
 }

@@ -49,11 +49,11 @@ graph TB
     E --> F[数据访问层]
     F --> G[应用隔离规则]
     G --> H[数据库查询]
-    
+
     I[IsolationContext] --> J[隔离级别判断]
     J --> K[权限验证]
     K --> L[WHERE条件生成]
-    
+
     M[共享数据机制] --> N[共享级别检查]
     N --> O[访问权限验证]
 ```
@@ -91,7 +91,7 @@ const context = IsolationContext.platform();
 - **访问权限**：租户管理员
 
 ```typescript
-const context = IsolationContext.tenant(TenantId.create('tenant-123'));
+const context = IsolationContext.tenant(TenantId.create("tenant-123"));
 // 只能访问租户ID为'tenant-123'的数据
 ```
 
@@ -103,8 +103,8 @@ const context = IsolationContext.tenant(TenantId.create('tenant-123'));
 
 ```typescript
 const context = IsolationContext.organization(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
 );
 // 只能访问特定租户下特定组织的数据
 ```
@@ -117,9 +117,9 @@ const context = IsolationContext.organization(
 
 ```typescript
 const context = IsolationContext.department(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456'),
-  DepartmentId.create('dept-789')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
+  DepartmentId.create("dept-789"),
 );
 // 只能访问特定租户下特定组织特定部门的数据
 ```
@@ -132,8 +132,8 @@ const context = IsolationContext.department(
 
 ```typescript
 const context = IsolationContext.user(
-  UserId.create('user-001'),
-  TenantId.create('tenant-123') // 可选
+  UserId.create("user-001"),
+  TenantId.create("tenant-123"), // 可选
 );
 // 只能访问特定用户的数据
 ```
@@ -173,18 +173,28 @@ export class IsolationContext {
   ) {}
 
   // 静态工厂方法
-  static platform(): IsolationContext
-  static tenant(tenantId: TenantId): IsolationContext
-  static organization(tenantId: TenantId, organizationId: OrganizationId): IsolationContext
-  static department(tenantId: TenantId, organizationId: OrganizationId, departmentId: DepartmentId): IsolationContext
-  static user(userId: UserId, tenantId?: TenantId): IsolationContext
+  static platform(): IsolationContext;
+  static tenant(tenantId: TenantId): IsolationContext;
+  static organization(
+    tenantId: TenantId,
+    organizationId: OrganizationId,
+  ): IsolationContext;
+  static department(
+    tenantId: TenantId,
+    organizationId: OrganizationId,
+    departmentId: DepartmentId,
+  ): IsolationContext;
+  static user(userId: UserId, tenantId?: TenantId): IsolationContext;
 
   // 核心业务方法
-  getIsolationLevel(): IsolationLevel
-  buildWhereClause(alias?: string): Record<string, any>
-  canAccess(targetContext: IsolationContext, sharingLevel?: SharingLevel): boolean
-  buildCacheKey(prefix: string, suffix: string): string
-  buildLogContext(): Record<string, string>
+  getIsolationLevel(): IsolationLevel;
+  buildWhereClause(alias?: string): Record<string, any>;
+  canAccess(
+    targetContext: IsolationContext,
+    sharingLevel?: SharingLevel,
+  ): boolean;
+  buildCacheKey(prefix: string, suffix: string): string;
+  buildLogContext(): Record<string, string>;
 }
 ```
 
@@ -257,10 +267,10 @@ canAccess(targetContext: IsolationContext, sharingLevel?: SharingLevel): boolean
 
 ```typescript
 // 租户A的用户请求
-const tenantAContext = IsolationContext.tenant(TenantId.create('company-a'));
+const tenantAContext = IsolationContext.tenant(TenantId.create("company-a"));
 
-// 租户B的用户请求  
-const tenantBContext = IsolationContext.tenant(TenantId.create('company-b'));
+// 租户B的用户请求
+const tenantBContext = IsolationContext.tenant(TenantId.create("company-b"));
 
 // 查询客户数据
 const customersA = await customerService.findAll(tenantAContext);
@@ -277,16 +287,16 @@ const customersB = await customerService.findAll(tenantBContext);
 ```typescript
 // 销售部门上下文
 const salesContext = IsolationContext.department(
-  TenantId.create('enterprise-x'),
-  OrganizationId.create('asia-pacific'),
-  DepartmentId.create('sales')
+  TenantId.create("enterprise-x"),
+  OrganizationId.create("asia-pacific"),
+  DepartmentId.create("sales"),
 );
 
 // 财务部门上下文
 const financeContext = IsolationContext.department(
-  TenantId.create('enterprise-x'),
-  OrganizationId.create('asia-pacific'),
-  DepartmentId.create('finance')
+  TenantId.create("enterprise-x"),
+  OrganizationId.create("asia-pacific"),
+  DepartmentId.create("finance"),
 );
 
 // 销售部门只能访问销售相关数据
@@ -305,12 +315,15 @@ const financeData = await dataService.findAll(financeContext);
 const sharedData = {
   isolationContext: organizationContext,
   isShared: true,
-  sharingLevel: SharingLevel.ORGANIZATION
+  sharingLevel: SharingLevel.ORGANIZATION,
 };
 
 // 部门级用户访问组织级共享数据
 const departmentUser = IsolationContext.department(tenantId, orgId, deptId);
-const canAccess = departmentUser.canAccess(organizationContext, SharingLevel.ORGANIZATION);
+const canAccess = departmentUser.canAccess(
+  organizationContext,
+  SharingLevel.ORGANIZATION,
+);
 // 返回 true，部门用户可以访问组织级共享数据
 ```
 
@@ -321,12 +334,12 @@ const canAccess = departmentUser.canAccess(organizationContext, SharingLevel.ORG
 ### 1. 控制器层使用
 
 ```typescript
-import { Controller, Get } from '@nestjs/common';
-import { CurrentContext } from '@hl8/nestjs-isolation';
-import { RequireTenant } from '@hl8/nestjs-isolation';
-import { IsolationContext } from '@hl8/domain-kernel';
+import { Controller, Get } from "@nestjs/common";
+import { CurrentContext } from "@hl8/nestjs-isolation";
+import { RequireTenant } from "@hl8/nestjs-isolation";
+import { IsolationContext } from "@hl8/domain-kernel";
 
-@Controller('users')
+@Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -337,7 +350,7 @@ export class UserController {
     return this.userService.findByContext(context);
   }
 
-  @Get('profile')
+  @Get("profile")
   @RequireUser() // 要求必须有用户上下文
   async getProfile(@CurrentContext() context: IsolationContext) {
     return this.userService.findProfile(context);
@@ -348,8 +361,8 @@ export class UserController {
 ### 2. 服务层实现
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { IsolationContext } from '@hl8/domain-kernel';
+import { Injectable } from "@nestjs/common";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 @Injectable()
 export class UserService {
@@ -358,25 +371,25 @@ export class UserService {
   async findByContext(context: IsolationContext): Promise<User[]> {
     // 验证隔离级别
     if (context.getIsolationLevel() === IsolationLevel.PLATFORM) {
-      throw new BadRequestException('需要指定租户上下文');
+      throw new BadRequestException("需要指定租户上下文");
     }
 
     // 使用隔离上下文生成查询条件
-    const whereClause = context.buildWhereClause('u');
-    
+    const whereClause = context.buildWhereClause("u");
+
     return this.userRepository.find({
-      where: whereClause
+      where: whereClause,
     });
   }
 
   async findProfile(context: IsolationContext): Promise<User> {
     // 确保是用户级上下文
     if (!context.isUserLevel()) {
-      throw new BadRequestException('需要用户上下文');
+      throw new BadRequestException("需要用户上下文");
     }
 
     return this.userRepository.findOne({
-      where: { userId: context.userId!.getValue() }
+      where: { userId: context.userId!.getValue() },
     });
   }
 }
@@ -385,24 +398,27 @@ export class UserService {
 ### 3. 数据访问层
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { IsolationContext } from '@hl8/domain-kernel';
+import { Injectable } from "@nestjs/common";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 @Injectable()
 export class UserRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async find(context: IsolationContext, options?: FindOptions): Promise<User[]> {
+  async find(
+    context: IsolationContext,
+    options?: FindOptions,
+  ): Promise<User[]> {
     const queryBuilder = this.dataSource
       .getRepository(User)
-      .createQueryBuilder('user');
+      .createQueryBuilder("user");
 
     // 根据隔离上下文添加WHERE条件
-    const whereClause = context.buildWhereClause('user');
-    
+    const whereClause = context.buildWhereClause("user");
+
     Object.entries(whereClause).forEach(([key, value]) => {
-      queryBuilder.andWhere(`${key} = :${key.replace('.', '_')}`, {
-        [key.replace('.', '_')]: value
+      queryBuilder.andWhere(`${key} = :${key.replace(".", "_")}`, {
+        [key.replace(".", "_")]: value,
       });
     });
 
@@ -419,8 +435,8 @@ export class UserRepository {
 ### 4. 缓存集成
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { IsolationContext } from '@hl8/domain-kernel';
+import { Injectable } from "@nestjs/common";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 @Injectable()
 export class CacheService {
@@ -428,12 +444,17 @@ export class CacheService {
 
   async get<T>(key: string, context: IsolationContext): Promise<T | null> {
     // 生成包含隔离信息的缓存键
-    const isolationKey = context.buildCacheKey('data', key);
+    const isolationKey = context.buildCacheKey("data", key);
     return this.cache.get<T>(isolationKey);
   }
 
-  async set<T>(key: string, value: T, context: IsolationContext, ttl?: number): Promise<void> {
-    const isolationKey = context.buildCacheKey('data', key);
+  async set<T>(
+    key: string,
+    value: T,
+    context: IsolationContext,
+    ttl?: number,
+  ): Promise<void> {
+    const isolationKey = context.buildCacheKey("data", key);
     await this.cache.set(isolationKey, value, ttl);
   }
 }
@@ -442,8 +463,8 @@ export class CacheService {
 ### 5. 日志集成
 
 ```typescript
-import { Injectable, Logger } from '@nestjs/common';
-import { IsolationContext } from '@hl8/domain-kernel';
+import { Injectable, Logger } from "@nestjs/common";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 @Injectable()
 export class LoggingService {
@@ -452,11 +473,11 @@ export class LoggingService {
   logAction(action: string, context: IsolationContext, details?: any): void {
     // 生成包含隔离信息的日志上下文
     const logContext = context.buildLogContext();
-    
+
     this.logger.log(action, {
       ...logContext,
       ...details,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 }
@@ -471,7 +492,7 @@ export class LoggingService {
 #### ✅ 好的做法
 
 ```typescript
-@Controller('users')
+@Controller("users")
 export class UserController {
   @Get()
   @RequireTenant() // 明确要求隔离级别
@@ -479,7 +500,7 @@ export class UserController {
     return this.userService.findByContext(context);
   }
 
-  @Get('profile')
+  @Get("profile")
   @RequireUser() // 明确要求用户上下文
   async getProfile(@CurrentContext() context: IsolationContext) {
     return this.userService.findProfile(context);
@@ -490,7 +511,7 @@ export class UserController {
 #### ❌ 避免的做法
 
 ```typescript
-@Controller('users')
+@Controller("users")
 export class UserController {
   @Get()
   async getUsers() {
@@ -510,7 +531,7 @@ export class UserService {
   async findByContext(context: IsolationContext) {
     // 验证隔离级别
     if (!context.isTenantLevel()) {
-      throw new BadRequestException('需要租户上下文');
+      throw new BadRequestException("需要租户上下文");
     }
 
     return this.repo.find(context);
@@ -559,10 +580,10 @@ export class Repository {
 
     // 使用隔离上下文生成WHERE条件
     const whereClause = context.buildWhereClause();
-    
+
     Object.entries(whereClause).forEach(([key, value]) => {
-      query.andWhere(`${key} = :${key.replace('.', '_')}`, {
-        [key.replace('.', '_')]: value
+      query.andWhere(`${key} = :${key.replace(".", "_")}`, {
+        [key.replace(".", "_")]: value,
       });
     });
 
@@ -580,16 +601,16 @@ export class DataService {
     try {
       // 验证访问权限
       if (!this.canAccessData(context, dataId)) {
-        throw new ForbiddenException('无权访问此数据');
+        throw new ForbiddenException("无权访问此数据");
       }
 
       return await this.repository.findById(dataId, context);
     } catch (error) {
       // 记录隔离相关的错误日志
-      this.logger.error('数据访问失败', {
+      this.logger.error("数据访问失败", {
         context: context.buildLogContext(),
         dataId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -610,13 +631,13 @@ export class DataService {
 const sharedData = {
   isolationContext: IsolationContext.platform(), // 平台级数据
   isShared: true,
-  sharingLevel: SharingLevel.TENANT // 租户级共享
+  sharingLevel: SharingLevel.TENANT, // 租户级共享
 };
 
 // 验证访问权限
 const canAccess = userContext.canAccess(
-  sharedData.isolationContext, 
-  sharedData.sharingLevel
+  sharedData.isolationContext,
+  sharedData.sharingLevel,
 );
 ```
 
@@ -626,17 +647,17 @@ const canAccess = userContext.canAccess(
 
 ```typescript
 // 在服务中添加调试日志
-this.logger.debug('隔离上下文信息', {
+this.logger.debug("隔离上下文信息", {
   level: context.getIsolationLevel(),
   tenantId: context.tenantId?.getValue(),
   organizationId: context.organizationId?.getValue(),
   departmentId: context.departmentId?.getValue(),
-  userId: context.userId?.getValue()
+  userId: context.userId?.getValue(),
 });
 
 // 使用buildLogContext()获取标准化的日志上下文
 const logContext = context.buildLogContext();
-this.logger.info('用户操作', logContext);
+this.logger.info("用户操作", logContext);
 ```
 
 ### Q3: 如何处理历史数据的迁移？
@@ -647,18 +668,18 @@ this.logger.info('用户操作', logContext);
 // 迁移脚本示例
 async function migrateHistoricalData() {
   const historicalData = await oldRepository.findAll();
-  
+
   for (const data of historicalData) {
     // 根据业务规则确定隔离上下文
     const context = determineIsolationContext(data);
-    
+
     // 迁移到新的数据结构
     await newRepository.save({
       ...data,
       tenantId: context.tenantId?.getValue(),
       organizationId: context.organizationId?.getValue(),
       departmentId: context.departmentId?.getValue(),
-      userId: context.userId?.getValue()
+      userId: context.userId?.getValue(),
     });
   }
 }
@@ -684,11 +705,11 @@ SELECT * FROM users WHERE tenant_id = ? AND organization_id = ?;
 
 ```typescript
 // 生成唯一的缓存键
-const cacheKey = context.buildCacheKey('user', 'list');
+const cacheKey = context.buildCacheKey("user", "list");
 // 结果: "tenant:t123:org:o456:dept:d789:user:list"
 
 // 避免使用全局缓存键
-const globalKey = 'user:list'; // ❌ 可能导致数据泄露
+const globalKey = "user:list"; // ❌ 可能导致数据泄露
 ```
 
 ---
@@ -708,11 +729,11 @@ const globalKey = 'user:list'; // ❌ 可能导致数据泄露
 ```typescript
 // 检查请求头
 const headers = req.headers;
-console.log('请求头:', {
-  'x-tenant-id': headers['x-tenant-id'],
-  'x-organization-id': headers['x-organization-id'],
-  'x-department-id': headers['x-department-id'],
-  'x-user-id': headers['x-user-id']
+console.log("请求头:", {
+  "x-tenant-id": headers["x-tenant-id"],
+  "x-organization-id": headers["x-organization-id"],
+  "x-department-id": headers["x-department-id"],
+  "x-user-id": headers["x-user-id"],
 });
 
 // 确保中间件正确配置
@@ -732,14 +753,14 @@ export class AppModule {}
 
 ```typescript
 // 检查隔离级别
-console.log('用户隔离级别:', userContext.getIsolationLevel());
-console.log('数据隔离级别:', dataContext.getIsolationLevel());
+console.log("用户隔离级别:", userContext.getIsolationLevel());
+console.log("数据隔离级别:", dataContext.getIsolationLevel());
 
 // 检查共享级别
 if (data.isShared) {
-  console.log('数据共享级别:', data.sharingLevel);
+  console.log("数据共享级别:", data.sharingLevel);
   const canAccess = userContext.canAccess(dataContext, data.sharingLevel);
-  console.log('是否可以访问:', canAccess);
+  console.log("是否可以访问:", canAccess);
 }
 ```
 
@@ -753,10 +774,10 @@ if (data.isShared) {
 
 ```typescript
 // 使用隔离感知的缓存键
-const cacheKey = context.buildCacheKey('data', originalKey);
+const cacheKey = context.buildCacheKey("data", originalKey);
 
 // 检查生成的缓存键
-console.log('缓存键:', cacheKey);
+console.log("缓存键:", cacheKey);
 // 应该包含: tenant:t123:org:o456:data:originalKey
 ```
 
@@ -771,13 +792,13 @@ console.log('缓存键:', cacheKey);
 ```typescript
 // 检查生成的WHERE条件
 const whereClause = context.buildWhereClause();
-console.log('WHERE条件:', whereClause);
+console.log("WHERE条件:", whereClause);
 
 // 确保在查询中应用
 const query = repository.createQueryBuilder();
 Object.entries(whereClause).forEach(([key, value]) => {
-  query.andWhere(`${key} = :${key.replace('.', '_')}`, {
-    [key.replace('.', '_')]: value
+  query.andWhere(`${key} = :${key.replace(".", "_")}`, {
+    [key.replace(".", "_")]: value,
   });
 });
 ```
@@ -790,16 +811,16 @@ Object.entries(whereClause).forEach(([key, value]) => {
 // 创建调试工具类
 export class IsolationDebugger {
   static debug(context: IsolationContext): void {
-    console.log('=== 隔离上下文调试信息 ===');
-    console.log('隔离级别:', context.getIsolationLevel());
-    console.log('租户ID:', context.tenantId?.getValue());
-    console.log('组织ID:', context.organizationId?.getValue());
-    console.log('部门ID:', context.departmentId?.getValue());
-    console.log('用户ID:', context.userId?.getValue());
-    console.log('WHERE条件:', context.buildWhereClause());
-    console.log('缓存键前缀:', context.buildCacheKey('test', 'key'));
-    console.log('日志上下文:', context.buildLogContext());
-    console.log('========================');
+    console.log("=== 隔离上下文调试信息 ===");
+    console.log("隔离级别:", context.getIsolationLevel());
+    console.log("租户ID:", context.tenantId?.getValue());
+    console.log("组织ID:", context.organizationId?.getValue());
+    console.log("部门ID:", context.departmentId?.getValue());
+    console.log("用户ID:", context.userId?.getValue());
+    console.log("WHERE条件:", context.buildWhereClause());
+    console.log("缓存键前缀:", context.buildCacheKey("test", "key"));
+    console.log("日志上下文:", context.buildLogContext());
+    console.log("========================");
   }
 }
 
@@ -814,14 +835,17 @@ export class PermissionDebugger {
   static debugAccess(
     userContext: IsolationContext,
     dataContext: IsolationContext,
-    sharingLevel?: SharingLevel
+    sharingLevel?: SharingLevel,
   ): void {
-    console.log('=== 权限验证调试信息 ===');
-    console.log('用户上下文级别:', userContext.getIsolationLevel());
-    console.log('数据上下文级别:', dataContext.getIsolationLevel());
-    console.log('数据共享级别:', sharingLevel);
-    console.log('是否可以访问:', userContext.canAccess(dataContext, sharingLevel));
-    console.log('======================');
+    console.log("=== 权限验证调试信息 ===");
+    console.log("用户上下文级别:", userContext.getIsolationLevel());
+    console.log("数据上下文级别:", dataContext.getIsolationLevel());
+    console.log("数据共享级别:", sharingLevel);
+    console.log(
+      "是否可以访问:",
+      userContext.canAccess(dataContext, sharingLevel),
+    );
+    console.log("======================");
   }
 }
 ```
@@ -868,4 +892,4 @@ HL8 SAAS平台的数据隔离机制提供了：
 
 ---
 
-*最后更新：2024年1月*
+_最后更新：2024年1月_

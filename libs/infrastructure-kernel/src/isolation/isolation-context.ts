@@ -2,14 +2,14 @@
  * 隔离上下文实体
  * @description 封装多层级数据隔离的核心业务逻辑
  */
-import { 
-  IsolationLevel, 
-  SharingLevel, 
+import {
+  IsolationLevel,
+  SharingLevel,
   IsolationValidationError,
   DepartmentId,
   OrganizationId,
   TenantId,
-  UserId
+  UserId,
 } from "@hl8/domain-kernel";
 
 export class IsolationContext {
