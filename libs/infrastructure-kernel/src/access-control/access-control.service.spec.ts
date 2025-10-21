@@ -1,10 +1,6 @@
-import { AccessControlService } from "./access-control.service.js";
-import { IsolationContext } from "../isolation/isolation-context.js";
-import { IsolationLevel } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
-import { OrganizationId } from "@hl8/domain-kernel";
-import { DepartmentId } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel";
+import { AccessControlService } from "./access-control.service";
+import { IsolationContext } from "../isolation/isolation-context";
+import { IsolationLevel, TenantId, OrganizationId, DepartmentId, UserId } from "@hl8/domain-kernel";
 
 describe("AccessControlService", () => {
   let service: AccessControlService;

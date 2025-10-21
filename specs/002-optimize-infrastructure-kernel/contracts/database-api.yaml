@@ -1,0 +1,482 @@
+openapi: 3.0.3
+info:
+  title: 基础设施层数据库API
+  description: 基础设施层数据库管理API，支持PostgreSQL和MongoDB
+  version: 1.0.0
+  contact:
+    name: HL8 SAAS Platform
+    email: dev@hl8.com
+
+servers:
+  - url: https://api.hl8.com/infrastructure
+    description: 生产环境
+  - url: https://staging-api.hl8.com/infrastructure
+    description: 测试环境
+
+paths:
+  /database/connections:
+    get:
+      summary: 获取数据库连接列表
+      description: 获取所有数据库连接配置
+      tags:
+        - Database
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 租户ID
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [POSTGRESQL, MONGODB]
+          description: 数据库类型过滤
+      responses:
+        "200":
+          description: 成功获取连接列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DatabaseConnection"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      summary: 创建数据库连接
+      description: 创建新的数据库连接配置
+      tags:
+        - Database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDatabaseConnectionRequest"
+      responses:
+        "201":
+          description: 连接创建成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseConnection"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /database/connections/{connectionId}:
+    get:
+      summary: 获取数据库连接详情
+      description: 根据ID获取数据库连接详情
+      tags:
+        - Database
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 连接ID
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 租户ID
+      responses:
+        "200":
+          description: 成功获取连接详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseConnection"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    put:
+      summary: 更新数据库连接
+      description: 更新数据库连接配置
+      tags:
+        - Database
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 连接ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDatabaseConnectionRequest"
+      responses:
+        "200":
+          description: 连接更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseConnection"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    delete:
+      summary: 删除数据库连接
+      description: 删除数据库连接配置
+      tags:
+        - Database
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 连接ID
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 租户ID
+      responses:
+        "204":
+          description: 连接删除成功
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /database/connections/{connectionId}/test:
+    post:
+      summary: 测试数据库连接
+      description: 测试数据库连接是否可用
+      tags:
+        - Database
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 连接ID
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 租户ID
+      responses:
+        "200":
+          description: 连接测试成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionTestResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /database/health:
+    get:
+      summary: 数据库健康检查
+      description: 检查所有数据库连接的健康状态
+      tags:
+        - Database
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 租户ID
+      responses:
+        "200":
+          description: 健康检查完成
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseHealthStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+components:
+  schemas:
+    DatabaseConnection:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - host
+        - port
+        - database
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: 连接ID
+        name:
+          type: string
+          description: 连接名称
+        type:
+          type: string
+          enum: [POSTGRESQL, MONGODB]
+          description: 数据库类型
+        host:
+          type: string
+          description: 主机地址
+        port:
+          type: integer
+          description: 端口号
+        database:
+          type: string
+          description: 数据库名称
+        username:
+          type: string
+          description: 用户名
+        ssl:
+          type: boolean
+          description: 是否启用SSL
+        poolSize:
+          type: integer
+          description: 连接池大小
+        timeout:
+          type: integer
+          description: 连接超时时间(秒)
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, ERROR]
+          description: 连接状态
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    CreateDatabaseConnectionRequest:
+      type: object
+      required:
+        - name
+        - type
+        - host
+        - port
+        - database
+        - username
+        - password
+      properties:
+        name:
+          type: string
+          description: 连接名称
+        type:
+          type: string
+          enum: [POSTGRESQL, MONGODB]
+          description: 数据库类型
+        host:
+          type: string
+          description: 主机地址
+        port:
+          type: integer
+          description: 端口号
+        database:
+          type: string
+          description: 数据库名称
+        username:
+          type: string
+          description: 用户名
+        password:
+          type: string
+          description: 密码
+        ssl:
+          type: boolean
+          default: false
+          description: 是否启用SSL
+        poolSize:
+          type: integer
+          default: 10
+          description: 连接池大小
+        timeout:
+          type: integer
+          default: 30
+          description: 连接超时时间(秒)
+
+    UpdateDatabaseConnectionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 连接名称
+        host:
+          type: string
+          description: 主机地址
+        port:
+          type: integer
+          description: 端口号
+        database:
+          type: string
+          description: 数据库名称
+        username:
+          type: string
+          description: 用户名
+        password:
+          type: string
+          description: 密码
+        ssl:
+          type: boolean
+          description: 是否启用SSL
+        poolSize:
+          type: integer
+          description: 连接池大小
+        timeout:
+          type: integer
+          description: 连接超时时间(秒)
+
+    ConnectionTestResult:
+      type: object
+      required:
+        - success
+        - message
+        - responseTime
+      properties:
+        success:
+          type: boolean
+          description: 测试是否成功
+        message:
+          type: string
+          description: 测试结果消息
+        responseTime:
+          type: number
+          description: 响应时间(毫秒)
+        details:
+          type: object
+          description: 详细信息
+
+    DatabaseHealthStatus:
+      type: object
+      required:
+        - overall
+        - connections
+      properties:
+        overall:
+          type: string
+          enum: [HEALTHY, DEGRADED, UNHEALTHY]
+          description: 整体健康状态
+        connections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConnectionHealthStatus"
+          description: 连接健康状态列表
+
+    ConnectionHealthStatus:
+      type: object
+      required:
+        - connectionId
+        - status
+        - responseTime
+      properties:
+        connectionId:
+          type: string
+          description: 连接ID
+        status:
+          type: string
+          enum: [HEALTHY, DEGRADED, UNHEALTHY]
+          description: 连接状态
+        responseTime:
+          type: number
+          description: 响应时间(毫秒)
+        lastCheck:
+          type: string
+          format: date-time
+          description: 最后检查时间
+        errorRate:
+          type: number
+          description: 错误率
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Unauthorized:
+      description: 未授权访问
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Forbidden:
+      description: 禁止访问
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+      properties:
+        error:
+          type: string
+          description: 错误代码
+        message:
+          type: string
+          description: 错误消息
+        timestamp:
+          type: string
+          format: date-time
+          description: 错误时间
+        details:
+          type: object
+          description: 错误详情
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
