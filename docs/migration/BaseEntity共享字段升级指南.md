@@ -35,7 +35,7 @@ export class User extends BaseEntity {
     private email: string,
     organizationId?: OrganizationId,
     departmentId?: DepartmentId,
-    auditInfo?: Partial<AuditInfo>
+    auditInfo?: Partial<AuditInfo>,
   ) {
     super(id, tenantId, organizationId, departmentId, undefined, auditInfo);
   }
@@ -55,9 +55,18 @@ export class User extends BaseEntity {
     departmentId?: DepartmentId,
     isShared: boolean = false,
     sharingLevel?: SharingLevel,
-    auditInfo?: Partial<AuditInfo>
+    auditInfo?: Partial<AuditInfo>,
   ) {
-    super(id, tenantId, organizationId, departmentId, undefined, isShared, sharingLevel, auditInfo);
+    super(
+      id,
+      tenantId,
+      organizationId,
+      departmentId,
+      undefined,
+      isShared,
+      sharingLevel,
+      auditInfo,
+    );
   }
 }
 ```
@@ -70,9 +79,9 @@ export class User extends BaseEntity {
 // 私有数据 - 默认行为，无需额外参数
 const privateUser = new User(
   UserId.generate(),
-  TenantId.create('tenant-123'),
-  '张三',
-  'zhangsan@example.com'
+  TenantId.create("tenant-123"),
+  "张三",
+  "zhangsan@example.com",
 );
 // isShared = false, sharingLevel = undefined
 ```
@@ -83,25 +92,25 @@ const privateUser = new User(
 // 租户级共享数据
 const tenantSharedUser = new User(
   UserId.generate(),
-  TenantId.create('tenant-123'),
-  '李四',
-  'lisi@example.com',
+  TenantId.create("tenant-123"),
+  "李四",
+  "lisi@example.com",
   undefined,
   undefined,
   true, // 标记为共享数据
-  SharingLevel.TENANT // 租户级共享
+  SharingLevel.TENANT, // 租户级共享
 );
 
 // 组织级共享数据
 const orgSharedUser = new User(
   UserId.generate(),
-  TenantId.create('tenant-123'),
-  '王五',
-  'wangwu@example.com',
-  OrganizationId.create('org-456'),
+  TenantId.create("tenant-123"),
+  "王五",
+  "wangwu@example.com",
+  OrganizationId.create("org-456"),
   undefined,
   true, // 标记为共享数据
-  SharingLevel.ORGANIZATION // 组织级共享
+  SharingLevel.ORGANIZATION, // 组织级共享
 );
 ```
 
@@ -115,7 +124,7 @@ export class UserService {
       console.log(`共享数据: ${user.getSharingScopeDescription()}`);
       await this.processSharedUser(user);
     } else {
-      console.log('私有数据，仅限所有者访问');
+      console.log("私有数据，仅限所有者访问");
       await this.processPrivateUser(user);
     }
 
@@ -145,32 +154,41 @@ export class Announcement extends BaseEntity {
     departmentId?: DepartmentId,
     isShared: boolean = false,
     sharingLevel?: SharingLevel,
-    auditInfo?: Partial<AuditInfo>
+    auditInfo?: Partial<AuditInfo>,
   ) {
-    super(id, tenantId, organizationId, departmentId, undefined, isShared, sharingLevel, auditInfo);
+    super(
+      id,
+      tenantId,
+      organizationId,
+      departmentId,
+      undefined,
+      isShared,
+      sharingLevel,
+      auditInfo,
+    );
   }
 }
 
 // 创建租户级共享公告
 const tenantAnnouncement = new Announcement(
   AnnouncementId.generate(),
-  TenantId.create('tenant-123'),
-  '重要通知',
-  '系统维护通知...',
+  TenantId.create("tenant-123"),
+  "重要通知",
+  "系统维护通知...",
   undefined,
   undefined,
   true, // 共享数据
-  SharingLevel.TENANT // 租户内所有用户可见
+  SharingLevel.TENANT, // 租户内所有用户可见
 );
 
 // 创建部门级私有公告
 const deptAnnouncement = new Announcement(
   AnnouncementId.generate(),
-  TenantId.create('tenant-123'),
-  '部门内部通知',
-  '部门会议通知...',
-  OrganizationId.create('org-456'),
-  DepartmentId.create('dept-789')
+  TenantId.create("tenant-123"),
+  "部门内部通知",
+  "部门会议通知...",
+  OrganizationId.create("org-456"),
+  DepartmentId.create("dept-789"),
   // 默认私有数据
 );
 ```
@@ -188,32 +206,41 @@ export class Document extends BaseEntity {
     departmentId?: DepartmentId,
     isShared: boolean = false,
     sharingLevel?: SharingLevel,
-    auditInfo?: Partial<AuditInfo>
+    auditInfo?: Partial<AuditInfo>,
   ) {
-    super(id, tenantId, organizationId, departmentId, undefined, isShared, sharingLevel, auditInfo);
+    super(
+      id,
+      tenantId,
+      organizationId,
+      departmentId,
+      undefined,
+      isShared,
+      sharingLevel,
+      auditInfo,
+    );
   }
 }
 
 // 创建组织级共享文档
 const sharedDocument = new Document(
   DocumentId.generate(),
-  TenantId.create('tenant-123'),
-  '组织章程',
-  '组织章程内容...',
-  OrganizationId.create('org-456'),
+  TenantId.create("tenant-123"),
+  "组织章程",
+  "组织章程内容...",
+  OrganizationId.create("org-456"),
   undefined,
   true, // 共享数据
-  SharingLevel.ORGANIZATION // 组织内所有部门可见
+  SharingLevel.ORGANIZATION, // 组织内所有部门可见
 );
 
 // 创建私有文档
 const privateDocument = new Document(
   DocumentId.generate(),
-  TenantId.create('tenant-123'),
-  '个人笔记',
-  '个人笔记内容...',
+  TenantId.create("tenant-123"),
+  "个人笔记",
+  "个人笔记内容...",
   undefined,
-  undefined
+  undefined,
   // 默认私有数据
 );
 ```
@@ -225,67 +252,69 @@ const privateDocument = new Document(
 ### 共享字段验证测试
 
 ```typescript
-describe('BaseEntity Sharing Fields', () => {
-  it('should create private data by default', () => {
+describe("BaseEntity Sharing Fields", () => {
+  it("should create private data by default", () => {
     const user = new User(
       UserId.generate(),
-      TenantId.create('tenant-123'),
-      '张三',
-      'zhangsan@example.com'
+      TenantId.create("tenant-123"),
+      "张三",
+      "zhangsan@example.com",
     );
-    
+
     expect(user.isShared).toBe(false);
     expect(user.sharingLevel).toBeUndefined();
     expect(user.isPrivateData()).toBe(true);
     expect(user.isSharedData()).toBe(false);
   });
 
-  it('should create shared data with sharing level', () => {
+  it("should create shared data with sharing level", () => {
     const user = new User(
       UserId.generate(),
-      TenantId.create('tenant-123'),
-      '李四',
-      'lisi@example.com',
+      TenantId.create("tenant-123"),
+      "李四",
+      "lisi@example.com",
       undefined,
       undefined,
       true,
-      SharingLevel.TENANT
+      SharingLevel.TENANT,
     );
-    
+
     expect(user.isShared).toBe(true);
     expect(user.sharingLevel).toBe(SharingLevel.TENANT);
     expect(user.isPrivateData()).toBe(false);
     expect(user.isSharedData()).toBe(true);
-    expect(user.getSharingScopeDescription()).toContain('租户级共享');
+    expect(user.getSharingScopeDescription()).toContain("租户级共享");
   });
 
-  it('should validate sharing level compatibility', () => {
+  it("should validate sharing level compatibility", () => {
     expect(() => {
       new User(
         UserId.generate(),
-        TenantId.create('tenant-123'),
-        '王五',
-        'wangwu@example.com',
-        OrganizationId.create('org-456'),
-        DepartmentId.create('dept-789'),
+        TenantId.create("tenant-123"),
+        "王五",
+        "wangwu@example.com",
+        OrganizationId.create("org-456"),
+        DepartmentId.create("dept-789"),
         true,
-        SharingLevel.PLATFORM // 错误：部门级数据不能设置为平台级共享
+        SharingLevel.PLATFORM, // 错误：部门级数据不能设置为平台级共享
       );
-    }).toThrow('Sharing level \'platform\' is not compatible with entity level \'department\'');
+    }).toThrow(
+      "Sharing level 'platform' is not compatible with entity level 'department'",
+    );
   });
 
-  it('should require sharing level for shared data', () => {
+  it("should require sharing level for shared data", () => {
     expect(() => {
       new User(
         UserId.generate(),
-        TenantId.create('tenant-123'),
-        '赵六',
-        'zhaoliu@example.com',
+        TenantId.create("tenant-123"),
+        "赵六",
+        "zhaoliu@example.com",
         undefined,
         undefined,
-        true // 错误：共享数据必须指定共享级别
+        true, // 错误：共享数据必须指定共享级别
       );
-    }).toThrow('Shared data must specify sharing level');
+    }).toThrow("Shared data must specify sharing level");
   });
 });
 ```
@@ -343,7 +372,7 @@ const sharedUser = new User(
   privateUser.organizationId,
   privateUser.departmentId,
   true, // 标记为共享
-  SharingLevel.TENANT // 设置共享级别
+  SharingLevel.TENANT, // 设置共享级别
 );
 ```
 
@@ -355,9 +384,14 @@ const sharedUser = new User(
 // 错误示例：部门级数据不能设置为平台级共享
 try {
   new User(
-    id, tenantId, name, email,
-    orgId, deptId,
-    true, SharingLevel.PLATFORM // 会抛出错误
+    id,
+    tenantId,
+    name,
+    email,
+    orgId,
+    deptId,
+    true,
+    SharingLevel.PLATFORM, // 会抛出错误
   );
 } catch (error) {
   console.log(error.message); // "Sharing level 'platform' is not compatible with entity level 'department'"
@@ -393,4 +427,4 @@ try {
 
 ---
 
-*最后更新：2024年1月*
+_最后更新：2024年1月_

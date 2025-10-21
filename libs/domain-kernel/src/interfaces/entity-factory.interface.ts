@@ -26,14 +26,14 @@
  *       createdBy: 'system',
  *       tenantId: data.tenantId
  *     });
- *     
+ *
  *     return new User(userId, data.name, data.email, auditInfo);
  *   }
  *
  *   reconstitute(data: Record<string, unknown>): User {
  *     const userId = UserId.create(data.id as string);
  *     const auditInfo = AuditInfo.fromJSON(data.auditInfo as Record<string, unknown>);
- *     
+ *
  *     return new User(userId, data.name as string, data.email as string, auditInfo);
  *   }
  * }

@@ -1,7 +1,7 @@
 /**
  * 用户实体测试
  * @description 测试用户实体的功能和业务逻辑
- * 
+ *
  * @since 1.0.0
  */
 
@@ -59,7 +59,7 @@ describe("User", () => {
 
     it("应该能够重复激活已激活的用户", () => {
       user.activate();
-      
+
       expect(() => user.activate()).toThrow(IsolationValidationError);
     });
 
@@ -86,13 +86,13 @@ describe("User", () => {
 
     it("应该能够重复禁用已禁用的用户", () => {
       user.disable();
-      
+
       expect(() => user.disable()).not.toThrow();
     });
 
     it("应该能够禁用已删除的用户", () => {
       user.delete();
-      
+
       expect(() => user.disable()).toThrow(IsolationValidationError);
     });
   });
@@ -112,13 +112,13 @@ describe("User", () => {
 
     it("应该能够重复启用已启用的用户", () => {
       user.enable();
-      
+
       expect(() => user.enable()).not.toThrow();
     });
 
     it("应该能够启用已删除的用户", () => {
       user.delete();
-      
+
       expect(() => user.enable()).toThrow(IsolationValidationError);
     });
   });
@@ -133,7 +133,7 @@ describe("User", () => {
 
     it("应该能够重复删除已删除的用户", () => {
       user.delete();
-      
+
       expect(() => user.delete()).toThrow(IsolationValidationError);
     });
   });
@@ -156,15 +156,19 @@ describe("User", () => {
     it("应该能够更新已删除用户的邮箱", () => {
       user.delete();
       const newEmail = Email.create("new@example.com");
-      
-      expect(() => user.updateEmail(newEmail)).toThrow(IsolationValidationError);
+
+      expect(() => user.updateEmail(newEmail)).toThrow(
+        IsolationValidationError,
+      );
     });
 
     it("应该能够更新已删除用户的用户名", () => {
       user.delete();
       const newUsername = Username.create("newuser");
-      
-      expect(() => user.updateUsername(newUsername)).toThrow(IsolationValidationError);
+
+      expect(() => user.updateUsername(newUsername)).toThrow(
+        IsolationValidationError,
+      );
     });
   });
 
@@ -178,7 +182,7 @@ describe("User", () => {
     it("应该能够重复记录用户登录", () => {
       user.recordLogin();
       const firstLogin = user.getLastLoginAt();
-      
+
       // 等待一小段时间确保时间不同
       setTimeout(() => {
         user.recordLogin();

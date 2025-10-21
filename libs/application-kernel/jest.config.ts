@@ -1,10 +1,15 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  preset: "ts-jest/presets/default-esm",
+  preset: "ts-jest",
   testEnvironment: "node",
-  roots: ["<rootDir>/src"],
-  testMatch: ["<rootDir>/src/**/*.spec.ts", "<rootDir>/src/**/*.test.ts"],
+  roots: ["<rootDir>/src", "<rootDir>/tests"],
+  testMatch: [
+    "<rootDir>/src/**/*.spec.ts",
+    "<rootDir>/src/**/*.test.ts",
+    "<rootDir>/tests/**/*.spec.ts",
+    "<rootDir>/tests/**/*.test.ts",
+  ],
   collectCoverageFrom: [
     "src/**/*.ts",
     "!src/**/*.spec.ts",
@@ -21,15 +26,25 @@ const config: Config = {
       statements: 80,
     },
   },
-  extensionsToTreatAsEsm: [".ts"],
-  globals: {
-    "ts-jest": {
-      useESM: true,
-    },
+  transform: {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        tsconfig: {
+          module: "commonjs",
+          target: "es2020",
+          moduleResolution: "node",
+          allowImportingTsExtensions: false,
+          noEmit: true,
+        },
+      },
+    ],
   },
-  moduleNameMapping: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
+  moduleNameMapper: {
+    "^@hl8/application-kernel$": "<rootDir>/src/index.ts",
+    "^@hl8/domain-kernel$": "<rootDir>/../domain-kernel/src/index.ts",
   },
+  transformIgnorePatterns: ["node_modules/(?!(.*\\.mjs$))"],
 };
 
 export default config;

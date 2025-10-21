@@ -18,8 +18,28 @@ import { EntityId } from "../value-objects/ids/entity-id.vo.js";
  */
 export interface BusinessRuleValidationResult {
   isValid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: BusinessRuleValidationError[];
+  warnings: BusinessRuleValidationWarning[];
+}
+
+/**
+ * 业务规则验证错误
+ */
+export interface BusinessRuleValidationError {
+  code: string;
+  message: string;
+  field?: string;
+  context?: Record<string, any>;
+}
+
+/**
+ * 业务规则验证警告
+ */
+export interface BusinessRuleValidationWarning {
+  code: string;
+  message: string;
+  field?: string;
+  context?: Record<string, any>;
 }
 
 /**
@@ -88,13 +108,21 @@ export class BusinessRuleManager {
       .filter((validator) => validator.isApplicable(context))
       .sort((a, b) => a.getPriority() - b.getPriority());
 
-    const errors: string[] = [];
-    const warnings: string[] = [];
+    const errors: BusinessRuleValidationError[] = [];
+    const warnings: BusinessRuleValidationWarning[] = [];
 
     for (const validator of applicableValidators) {
-      const result = validator.validate(context);
-      errors.push(...result.errors);
-      warnings.push(...result.warnings);
+      try {
+        const result = validator.validate(context);
+        errors.push(...result.errors);
+        warnings.push(...result.warnings);
+      } catch (error) {
+        errors.push({
+          code: 'VALIDATOR_ERROR',
+          message: `验证器 ${validator.getRuleName()} 执行失败: ${error instanceof Error ? error.message : '未知错误'}`,
+          context: { validator: validator.getRuleName() }
+        });
+      }
     }
 
     return {

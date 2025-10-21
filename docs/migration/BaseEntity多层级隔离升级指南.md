@@ -56,7 +56,7 @@ export class User extends BaseEntity {
     id: UserId,
     private name: string,
     private email: string,
-    auditInfo: IPartialAuditInfo
+    auditInfo: IPartialAuditInfo,
   ) {
     super(id, auditInfo);
   }
@@ -74,7 +74,7 @@ export class User extends BaseEntity {
     private email: string,
     organizationId?: OrganizationId,
     departmentId?: DepartmentId,
-    auditInfo?: IPartialAuditInfo
+    auditInfo?: IPartialAuditInfo,
   ) {
     super(id, tenantId, organizationId, departmentId, undefined, auditInfo);
   }
@@ -86,12 +86,10 @@ export class User extends BaseEntity {
 #### 旧代码
 
 ```typescript
-const user = new User(
-  UserId.generate(),
-  '张三',
-  'zhangsan@example.com',
-  { createdBy: 'system', tenantId: TenantId.create('tenant-123') }
-);
+const user = new User(UserId.generate(), "张三", "zhangsan@example.com", {
+  createdBy: "system",
+  tenantId: TenantId.create("tenant-123"),
+});
 ```
 
 #### 新代码
@@ -100,28 +98,28 @@ const user = new User(
 // 租户级用户
 const tenantUser = new User(
   UserId.generate(),
-  TenantId.create('tenant-123'),
-  '张三',
-  'zhangsan@example.com'
+  TenantId.create("tenant-123"),
+  "张三",
+  "zhangsan@example.com",
 );
 
 // 组织级用户
 const orgUser = new User(
   UserId.generate(),
-  TenantId.create('tenant-123'),
-  '李四',
-  'lisi@example.com',
-  OrganizationId.create('org-456')
+  TenantId.create("tenant-123"),
+  "李四",
+  "lisi@example.com",
+  OrganizationId.create("org-456"),
 );
 
 // 部门级用户
 const deptUser = new User(
   UserId.generate(),
-  TenantId.create('tenant-123'),
-  '王五',
-  'wangwu@example.com',
-  OrganizationId.create('org-456'),
-  DepartmentId.create('dept-789')
+  TenantId.create("tenant-123"),
+  "王五",
+  "wangwu@example.com",
+  OrganizationId.create("org-456"),
+  DepartmentId.create("dept-789"),
 );
 ```
 
@@ -150,24 +148,28 @@ export class UserService {
 export class UserRepository {
   async findByContext(context: IsolationContext): Promise<User[]> {
     const users = await this.findAll();
-    
-    return users.filter(user => {
+
+    return users.filter((user) => {
       // 根据隔离上下文过滤用户
       if (context.isTenantLevel()) {
         return user.tenantId.equals(context.tenantId!);
       }
-      
+
       if (context.isOrganizationLevel()) {
-        return user.tenantId.equals(context.tenantId!) &&
-               user.organizationId?.equals(context.organizationId!);
+        return (
+          user.tenantId.equals(context.tenantId!) &&
+          user.organizationId?.equals(context.organizationId!)
+        );
       }
-      
+
       if (context.isDepartmentLevel()) {
-        return user.tenantId.equals(context.tenantId!) &&
-               user.organizationId?.equals(context.organizationId!) &&
-               user.departmentId?.equals(context.departmentId!);
+        return (
+          user.tenantId.equals(context.tenantId!) &&
+          user.organizationId?.equals(context.organizationId!) &&
+          user.departmentId?.equals(context.departmentId!)
+        );
       }
-      
+
       return true;
     });
   }
@@ -204,63 +206,63 @@ export class UserRepository {
 ### 隔离级别测试
 
 ```typescript
-describe('BaseEntity Isolation Levels', () => {
-  it('should create tenant-level entity', () => {
+describe("BaseEntity Isolation Levels", () => {
+  it("should create tenant-level entity", () => {
     const user = new User(
       UserId.generate(),
-      TenantId.create('tenant-123'),
-      '张三',
-      'zhangsan@example.com'
+      TenantId.create("tenant-123"),
+      "张三",
+      "zhangsan@example.com",
     );
-    
-    expect(user.getIsolationLevel()).toBe('tenant');
+
+    expect(user.getIsolationLevel()).toBe("tenant");
     expect(user.isTenantLevel()).toBe(true);
     expect(user.organizationId).toBeUndefined();
     expect(user.departmentId).toBeUndefined();
   });
 
-  it('should create organization-level entity', () => {
+  it("should create organization-level entity", () => {
     const user = new User(
       UserId.generate(),
-      TenantId.create('tenant-123'),
-      '李四',
-      'lisi@example.com',
-      OrganizationId.create('org-456')
+      TenantId.create("tenant-123"),
+      "李四",
+      "lisi@example.com",
+      OrganizationId.create("org-456"),
     );
-    
-    expect(user.getIsolationLevel()).toBe('organization');
+
+    expect(user.getIsolationLevel()).toBe("organization");
     expect(user.isOrganizationLevel()).toBe(true);
     expect(user.organizationId).toBeDefined();
     expect(user.departmentId).toBeUndefined();
   });
 
-  it('should create department-level entity', () => {
+  it("should create department-level entity", () => {
     const user = new User(
       UserId.generate(),
-      TenantId.create('tenant-123'),
-      '王五',
-      'wangwu@example.com',
-      OrganizationId.create('org-456'),
-      DepartmentId.create('dept-789')
+      TenantId.create("tenant-123"),
+      "王五",
+      "wangwu@example.com",
+      OrganizationId.create("org-456"),
+      DepartmentId.create("dept-789"),
     );
-    
-    expect(user.getIsolationLevel()).toBe('department');
+
+    expect(user.getIsolationLevel()).toBe("department");
     expect(user.isDepartmentLevel()).toBe(true);
     expect(user.organizationId).toBeDefined();
     expect(user.departmentId).toBeDefined();
   });
 
-  it('should validate isolation hierarchy', () => {
+  it("should validate isolation hierarchy", () => {
     expect(() => {
       new User(
         UserId.generate(),
-        TenantId.create('tenant-123'),
-        '测试用户',
-        'test@example.com',
+        TenantId.create("tenant-123"),
+        "测试用户",
+        "test@example.com",
         undefined,
-        DepartmentId.create('dept-789') // 错误：部门级必须有组织
+        DepartmentId.create("dept-789"), // 错误：部门级必须有组织
       );
-    }).toThrow('Department level data must have organization ID');
+    }).toThrow("Department level data must have organization ID");
   });
 });
 ```
@@ -268,22 +270,22 @@ describe('BaseEntity Isolation Levels', () => {
 ### 数据序列化测试
 
 ```typescript
-describe('BaseEntity Data Serialization', () => {
-  it('should serialize with all isolation fields', () => {
+describe("BaseEntity Data Serialization", () => {
+  it("should serialize with all isolation fields", () => {
     const user = new User(
       UserId.generate(),
-      TenantId.create('tenant-123'),
-      '张三',
-      'zhangsan@example.com',
-      OrganizationId.create('org-456'),
-      DepartmentId.create('dept-789')
+      TenantId.create("tenant-123"),
+      "张三",
+      "zhangsan@example.com",
+      OrganizationId.create("org-456"),
+      DepartmentId.create("dept-789"),
     );
 
     const data = user.toData();
-    
-    expect(data.tenantId).toBe('tenant-123');
-    expect(data.organizationId).toBe('org-456');
-    expect(data.departmentId).toBe('dept-789');
+
+    expect(data.tenantId).toBe("tenant-123");
+    expect(data.organizationId).toBe("org-456");
+    expect(data.departmentId).toBe("dept-789");
     expect(data.userId).toBeUndefined();
   });
 });
@@ -301,13 +303,13 @@ describe('BaseEntity Data Serialization', () => {
 // 迁移脚本示例
 async function migrateExistingEntities() {
   const users = await userRepository.findAll();
-  
+
   for (const user of users) {
     // 为现有用户分配默认租户
     if (!user.tenantId) {
-      user.tenantId = TenantId.create('default-tenant');
+      user.tenantId = TenantId.create("default-tenant");
     }
-    
+
     await userRepository.save(user);
   }
 }
@@ -322,7 +324,7 @@ async function migrateExistingEntities() {
 const sharedData = {
   tenantId: null, // 不允许
   organizationId: null,
-  departmentId: null
+  departmentId: null,
 };
 
 // 正确：平台级数据
@@ -331,7 +333,7 @@ const platformData = {
   organizationId: null,
   departmentId: null,
   // 明确标记为平台级数据
-  isolationLevel: 'platform'
+  isolationLevel: "platform",
 };
 ```
 
@@ -346,10 +348,10 @@ export class LegacyUserWrapper extends BaseEntity {
     id: UserId,
     private name: string,
     private email: string,
-    auditInfo: IPartialAuditInfo
+    auditInfo: IPartialAuditInfo,
   ) {
     // 从auditInfo中提取tenantId
-    const tenantId = auditInfo.tenantId || TenantId.create('default-tenant');
+    const tenantId = auditInfo.tenantId || TenantId.create("default-tenant");
     super(id, tenantId, undefined, undefined, undefined, auditInfo);
   }
 }
@@ -383,4 +385,4 @@ export class LegacyUserWrapper extends BaseEntity {
 
 ---
 
-*最后更新：2024年1月*
+_最后更新：2024年1月_
