@@ -38,11 +38,16 @@
  * class User extends BaseEntity {
  *   constructor(
  *     id: EntityId,
+ *     tenantId: TenantId,
  *     private name: string,
  *     private email: string,
- *     auditInfo: Partial<AuditInfo>
+ *     organizationId?: OrganizationId,
+ *     departmentId?: DepartmentId,
+ *     isShared: boolean = false,
+ *     sharingLevel?: SharingLevel,
+ *     auditInfo?: Partial<AuditInfo>
  *   ) {
- *     super(id, auditInfo);
+ *     super(id, tenantId, organizationId, departmentId, undefined, isShared, sharingLevel, auditInfo);
  *   }
  *
  *   getName(): string {
@@ -55,28 +60,59 @@
  *   }
  * }
  *
- * // 创建用户实体
- * const user = new User(
- *   TenantId.generate(),
+ * // 创建租户级私有用户实体
+ * const privateUser = new User(
+ *   UserId.generate(),
+ *   TenantId.create('tenant-123'),
  *   '张三',
- *   'zhangsan@example.com',
- *   { createdBy: 'system', tenantId: TenantId.create('tenant-123') }
+ *   'zhangsan@example.com'
  * );
  *
+ * // 创建租户级共享用户实体
+ * const sharedUser = new User(
+ *   UserId.generate(),
+ *   TenantId.create('tenant-123'),
+ *   '李四',
+ *   'lisi@example.com',
+ *   undefined,
+ *   undefined,
+ *   true, // 标记为共享数据
+ *   SharingLevel.TENANT // 租户级共享
+ * );
+ *
+ * // 创建部门级用户实体
+ * const departmentUser = new User(
+ *   UserId.generate(),
+ *   TenantId.create('tenant-123'),
+ *   '王五',
+ *   'wangwu@example.com',
+ *   OrganizationId.create('org-456'),
+ *   DepartmentId.create('dept-789')
+ * );
+ *
+ * // 检查共享状态
+ * console.log(privateUser.isSharedData()); // false
+ * console.log(sharedUser.getSharingScopeDescription()); // "租户级共享，租户内所有组织、部门、用户可访问"
+ *
  * // 更新用户信息
- * user.updateName('李四');
+ * privateUser.updateName('张三更新');
  * ```
  *
  * @since 1.0.0
  */
 
 import { EntityId } from "../value-objects/ids/entity-id.vo.js";
+import { TenantId } from "../value-objects/ids/tenant-id.vo.js";
+import { OrganizationId } from "../value-objects/ids/organization-id.vo.js";
+import { DepartmentId } from "../value-objects/ids/department-id.vo.js";
+import { UserId } from "../value-objects/ids/user-id.vo.js";
+import { SharingLevel } from "../isolation/sharing-level.enum.js";
 import {
   AuditInfo,
   IAuditInfo,
   IPartialAuditInfo,
 } from "../value-objects/audit-info.vo.js";
-import { IEntity } from "../interfaces/entity.interface.js";
+import { IEntity } from "../interfaces/base-entity.interface.js";
 
 /**
  * 基础实体类
@@ -88,14 +124,57 @@ export abstract class BaseEntity<TId extends EntityId = EntityId>
   private readonly _id: TId;
   private _auditInfo: AuditInfo;
 
+  // 多层级隔离字段
+  private readonly _tenantId: TenantId;
+  private readonly _organizationId?: OrganizationId;
+  private readonly _departmentId?: DepartmentId;
+  private readonly _userId?: UserId;
+
+  // 数据共享字段
+  private readonly _isShared: boolean;
+  private readonly _sharingLevel?: SharingLevel;
+
   /**
    * 构造函数
    * @param id - 实体唯一标识符
+   * @param tenantId - 租户ID（必填）
+   * @param organizationId - 组织ID（可选）
+   * @param departmentId - 部门ID（可选）
+   * @param userId - 用户ID（可选）
+   * @param isShared - 是否为共享数据（默认false）
+   * @param sharingLevel - 共享级别（可选，仅在isShared为true时有效）
    * @param auditInfo - 审计信息，可以是完整的或部分的
    */
-  protected constructor(id: TId, auditInfo: IPartialAuditInfo) {
+  protected constructor(
+    id: TId,
+    tenantId: TenantId,
+    organizationId?: OrganizationId,
+    departmentId?: DepartmentId,
+    userId?: UserId,
+    isShared: boolean = false,
+    sharingLevel?: SharingLevel,
+    auditInfo?: IPartialAuditInfo,
+  ) {
     this._id = id;
-    this._auditInfo = this.buildAuditInfo(auditInfo);
+    this._tenantId = tenantId;
+    this._organizationId = organizationId;
+    this._departmentId = departmentId;
+    this._userId = userId;
+    this._isShared = isShared;
+    this._sharingLevel = sharingLevel;
+
+    // 构建审计信息，包含隔离上下文
+    const fullAuditInfo: IPartialAuditInfo = {
+      ...auditInfo,
+      tenantId: tenantId,
+    };
+    this._auditInfo = this.buildAuditInfo(fullAuditInfo);
+
+    // 验证隔离字段的层级依赖关系
+    this.validateIsolationHierarchy();
+
+    // 验证共享字段的完整性
+    this.validateSharingFields();
   }
 
   /**
@@ -137,7 +216,42 @@ export abstract class BaseEntity<TId extends EntityId = EntityId>
    * 获取租户标识符
    */
   get tenantId(): EntityId {
-    return this._auditInfo.tenantId;
+    return this._tenantId;
+  }
+
+  /**
+   * 获取组织标识符
+   */
+  get organizationId(): EntityId | undefined {
+    return this._organizationId;
+  }
+
+  /**
+   * 获取部门标识符
+   */
+  get departmentId(): EntityId | undefined {
+    return this._departmentId;
+  }
+
+  /**
+   * 获取用户标识符
+   */
+  get userId(): EntityId | undefined {
+    return this._userId;
+  }
+
+  /**
+   * 是否为共享数据
+   */
+  get isShared(): boolean {
+    return this._isShared;
+  }
+
+  /**
+   * 获取共享级别
+   */
+  get sharingLevel(): SharingLevel | undefined {
+    return this._sharingLevel;
   }
 
   /**
@@ -330,7 +444,12 @@ export abstract class BaseEntity<TId extends EntityId = EntityId>
       createdAt: this._auditInfo.createdAt,
       updatedAt: this._auditInfo.updatedAt,
       version: this._auditInfo.version,
-      tenantId: this._auditInfo.tenantId.toString(),
+      tenantId: this._tenantId.toString(),
+      organizationId: this._organizationId?.toString(),
+      departmentId: this._departmentId?.toString(),
+      userId: this._userId?.toString(),
+      isShared: this._isShared,
+      sharingLevel: this._sharingLevel,
       isDeleted: this._auditInfo.deletedAt !== null,
     };
   }
@@ -415,8 +534,211 @@ export abstract class BaseEntity<TId extends EntityId = EntityId>
       throw new Error("Entity ID cannot be null or empty");
     }
 
-    if (!this._auditInfo.tenantId || this._auditInfo.tenantId.isEmpty()) {
+    if (!this._tenantId || this._tenantId.isEmpty()) {
       throw new Error("Tenant ID cannot be null or empty");
     }
+  }
+
+  /**
+   * 验证隔离字段的层级依赖关系
+   *
+   * @description 确保隔离字段的层级依赖关系正确：
+   * - 组织级数据必须有租户
+   * - 部门级数据必须有租户和组织
+   * - 用户级数据可选租户
+   *
+   * @protected
+   */
+  protected validateIsolationHierarchy(): void {
+    // 组织级数据必须有租户
+    if (this._organizationId && (!this._tenantId || this._tenantId.isEmpty())) {
+      throw new Error("Organization level data must have tenant ID");
+    }
+
+    // 部门级数据必须有租户和组织
+    if (this._departmentId && (!this._tenantId || this._tenantId.isEmpty())) {
+      throw new Error("Department level data must have tenant ID");
+    }
+    if (
+      this._departmentId &&
+      (!this._organizationId || this._organizationId.isEmpty())
+    ) {
+      throw new Error("Department level data must have organization ID");
+    }
+
+    // 用户级数据可选租户，但如果指定了租户，必须有效
+    if (this._userId && this._tenantId && this._tenantId.isEmpty()) {
+      throw new Error("User level data cannot have empty tenant ID");
+    }
+  }
+
+  /**
+   * 验证共享字段的完整性
+   *
+   * @description 确保共享字段的逻辑正确：
+   * - 如果isShared为true，必须指定sharingLevel
+   * - 如果isShared为false，sharingLevel应该为undefined
+   * - 共享级别必须与实体的隔离级别兼容
+   *
+   * @protected
+   */
+  protected validateSharingFields(): void {
+    // 如果标记为共享数据，必须指定共享级别
+    if (this._isShared && !this._sharingLevel) {
+      throw new Error("Shared data must specify sharing level");
+    }
+
+    // 如果不是共享数据，不应该有共享级别
+    if (!this._isShared && this._sharingLevel) {
+      throw new Error("Non-shared data should not have sharing level");
+    }
+
+    // 如果设置了共享级别，验证其与隔离级别的兼容性
+    if (this._sharingLevel) {
+      this.validateSharingLevelCompatibility();
+    }
+  }
+
+  /**
+   * 验证共享级别与隔离级别的兼容性
+   *
+   * @description 确保共享级别与实体的隔离级别兼容：
+   * - 共享级别不能低于实体的隔离级别
+   * - 例如：用户级数据不能设置为组织级共享
+   *
+   * @protected
+   */
+  protected validateSharingLevelCompatibility(): void {
+    if (!this._sharingLevel) return;
+
+    const entityLevel = this.getIsolationLevel();
+    const sharingLevel = this._sharingLevel;
+
+    // 定义级别优先级（数字越小优先级越高）
+    const levelPriority = {
+      platform: 0,
+      tenant: 1,
+      organization: 2,
+      department: 3,
+      user: 4,
+    };
+
+    const entityPriority =
+      levelPriority[entityLevel as keyof typeof levelPriority];
+    const sharingPriority =
+      levelPriority[sharingLevel as keyof typeof levelPriority];
+
+    // 共享级别不能低于实体的隔离级别
+    if (sharingPriority < entityPriority) {
+      throw new Error(
+        `Sharing level '${sharingLevel}' is not compatible with entity level '${entityLevel}'. ` +
+          `Sharing level cannot be lower than entity isolation level.`,
+      );
+    }
+  }
+
+  /**
+   * 获取实体的隔离级别
+   *
+   * @description 根据隔离字段判断实体的隔离级别
+   * @returns 隔离级别字符串
+   */
+  public getIsolationLevel(): string {
+    if (this._userId) return "user";
+    if (this._departmentId) return "department";
+    if (this._organizationId) return "organization";
+    if (this._tenantId) return "tenant";
+    return "platform";
+  }
+
+  /**
+   * 检查是否为特定隔离级别
+   */
+  public isTenantLevel(): boolean {
+    return (
+      this.getIsolationLevel() === "tenant" &&
+      !this._organizationId &&
+      !this._departmentId &&
+      !this._userId
+    );
+  }
+
+  public isOrganizationLevel(): boolean {
+    return (
+      this.getIsolationLevel() === "organization" &&
+      !!this._organizationId &&
+      !this._departmentId &&
+      !this._userId
+    );
+  }
+
+  public isDepartmentLevel(): boolean {
+    return (
+      this.getIsolationLevel() === "department" &&
+      !!this._departmentId &&
+      !this._userId
+    );
+  }
+
+  public isUserLevel(): boolean {
+    return this.getIsolationLevel() === "user" && !!this._userId;
+  }
+
+  public isPlatformLevel(): boolean {
+    return this.getIsolationLevel() === "platform";
+  }
+
+  /**
+   * 检查是否为共享数据
+   */
+  public isSharedData(): boolean {
+    return this._isShared;
+  }
+
+  /**
+   * 检查是否为非共享数据（私有数据）
+   */
+  public isPrivateData(): boolean {
+    return !this._isShared;
+  }
+
+  /**
+   * 检查是否可以与指定隔离上下文共享
+   *
+   * @param targetContext - 目标隔离上下文
+   * @returns 是否可以共享
+   */
+  public canShareWith(targetContext: any): boolean {
+    if (!this._isShared || !this._sharingLevel) {
+      return false;
+    }
+
+    // 这里可以根据具体的共享规则进行判断
+    // 例如：检查目标上下文是否在共享级别范围内
+    return true; // 简化实现，实际应该根据业务规则判断
+  }
+
+  /**
+   * 获取共享数据的访问范围描述
+   *
+   * @returns 共享范围描述
+   */
+  public getSharingScopeDescription(): string {
+    if (!this._isShared) {
+      return "私有数据，仅限所有者访问";
+    }
+
+    const sharingLevel = this._sharingLevel;
+    const descriptions = {
+      platform: "平台级共享，所有租户可访问",
+      tenant: "租户级共享，租户内所有组织、部门、用户可访问",
+      organization: "组织级共享，组织内所有部门、用户可访问",
+      department: "部门级共享，部门内所有用户可访问",
+      user: "用户级共享，指定用户可访问",
+    };
+
+    return (
+      descriptions[sharingLevel as keyof typeof descriptions] || "未知共享级别"
+    );
   }
 }

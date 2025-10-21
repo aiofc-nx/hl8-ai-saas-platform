@@ -14,6 +14,7 @@
 
 import { BaseEntity } from "../entities/base-entity.js";
 import { UserId } from "../value-objects/ids/user-id.vo.js";
+import { TenantId } from "../value-objects/ids/tenant-id.vo.js";
 import { Email } from "./email.vo.js";
 import { Username } from "./username.vo.js";
 import { UserStatus, UserStatusTransition } from "./user-status.enum.js";
@@ -42,14 +43,18 @@ export class User extends BaseEntity<UserId> {
    */
   private constructor(
     id: UserId,
+    tenantId: TenantId,
     email: Email,
     username: Username,
     status: UserStatus,
     createdAt?: Date,
     updatedAt?: Date,
-    version: number = 0,
+    _version: number = 0,
   ) {
-    super(id, createdAt, updatedAt, version);
+    super(id, tenantId, undefined, undefined, undefined, false, undefined, {
+      createdBy: "system",
+      updatedBy: "system",
+    });
     this._email = email;
     this._username = username;
     this._status = status;
@@ -278,7 +283,7 @@ export class User extends BaseEntity<UserId> {
    * 检查用户是否已删除
    * @returns 是否已删除
    */
-  isDeleted(): boolean {
+  isUserDeleted(): boolean {
     return this._status === UserStatus.DELETED;
   }
 
@@ -315,9 +320,10 @@ export class User extends BaseEntity<UserId> {
    * );
    * ```
    */
-  static create(email: Email, username: Username): User {
+  static create(tenantId: TenantId, email: Email, username: Username): User {
     return new User(
       UserId.create(crypto.randomUUID()),
+      tenantId,
       email,
       username,
       UserStatus.PENDING,
@@ -337,13 +343,23 @@ export class User extends BaseEntity<UserId> {
    */
   static fromExisting(
     id: UserId,
+    tenantId: TenantId,
     email: Email,
     username: Username,
     status: UserStatus,
     createdAt?: Date,
     updatedAt?: Date,
-    version: number = 0,
+    _version: number = 0,
   ): User {
-    return new User(id, email, username, status, createdAt, updatedAt, version);
+    return new User(
+      id,
+      tenantId,
+      email,
+      username,
+      status,
+      createdAt,
+      updatedAt,
+      _version,
+    );
   }
 }

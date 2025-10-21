@@ -1,5 +1,5 @@
 /**
- * 实体接口
+ * 基础实体接口
  *
  * 定义实体的基础契约，实体是DDD中具有唯一标识的业务对象。
  * 实体的相等性基于其标识符，而不是属性值。
@@ -65,6 +65,7 @@
 
 import { EntityId } from "../value-objects/ids/entity-id.vo.js";
 import { IAuditInfo } from "../value-objects/audit-info.vo.js";
+import { SharingLevel } from "../isolation/sharing-level.enum.js";
 
 /**
  * 最基础的空接口，提供最小的类型约束，用于泛型约束
@@ -172,6 +173,32 @@ export interface IEntity extends IBaseEntity {
    * @readonly
    */
   readonly auditInfo: IAuditInfo;
+
+  /**
+   * 是否为共享数据
+   *
+   * @description 指示实体是否为共享数据，用于：
+   * - 数据访问权限控制
+   * - 跨层级数据共享
+   * - 数据安全策略
+   * - 业务逻辑判断
+   *
+   * @readonly
+   */
+  readonly isShared: boolean;
+
+  /**
+   * 共享级别
+   *
+   * @description 数据的共享级别，用于：
+   * - 定义共享范围
+   * - 访问权限验证
+   * - 数据隔离策略
+   * - 跨层级访问控制
+   *
+   * @readonly
+   */
+  readonly sharingLevel?: SharingLevel;
 
   /**
    * 实体相等性比较
@@ -302,144 +329,4 @@ export interface IEntity extends IBaseEntity {
    * @returns JSON 表示
    */
   toJSON(): Record<string, unknown>;
-}
-
-/**
- * 实体工厂接口
- *
- * 定义创建实体的工厂方法
- */
-export interface IEntityFactory<T extends IEntity> {
-  /**
-   * 创建新的实体实例
-   *
-   * @param data - 创建实体所需的数据
-   * @returns 新创建的实体实例
-   */
-  create(data: Record<string, unknown>): T;
-
-  /**
-   * 从持久化数据重建实体
-   *
-   * @param data - 持久化的数据
-   * @returns 重建的实体实例
-   */
-  reconstitute(data: Record<string, unknown>): T;
-}
-
-/**
- * 实体规格接口
- *
- * 定义实体验证规格
- */
-export interface IEntitySpecification<T extends IEntity> {
-  /**
-   * 检查实体是否满足规格
-   *
-   * @param entity - 要检查的实体
-   * @returns 如果满足返回true，否则返回false
-   */
-  isSatisfiedBy(entity: T): boolean;
-
-  /**
-   * 获取规格描述
-   *
-   * @returns 规格描述
-   */
-  getDescription(): string;
-}
-
-/**
- * 实体验证器接口
- *
- * 定义实体验证器的契约
- */
-export interface IEntityValidator<T extends IEntity> {
-  /**
-   * 验证实体
-   *
-   * @param entity - 要验证的实体
-   * @returns 验证结果
-   */
-  validate(entity: T): Promise<IEntityValidationResult>;
-
-  /**
-   * 获取验证器名称
-   *
-   * @returns 验证器名称
-   */
-  getValidatorName(): string;
-}
-
-/**
- * 实体验证结果接口
- */
-export interface IEntityValidationResult {
-  /**
-   * 验证是否通过
-   */
-  readonly isValid: boolean;
-
-  /**
-   * 验证错误列表
-   */
-  readonly errors: Array<{
-    readonly field: string;
-    readonly message: string;
-    readonly code: string;
-  }>;
-
-  /**
-   * 验证警告列表
-   */
-  readonly warnings: Array<{
-    readonly field: string;
-    readonly message: string;
-    readonly code: string;
-  }>;
-}
-
-/**
- * 实体审计信息接口
- */
-export interface IEntityAuditInfo {
-  /**
-   * 创建者
-   */
-  readonly createdBy?: string;
-
-  /**
-   * 创建时间
-   */
-  readonly createdAt: Date;
-
-  /**
-   * 最后修改者
-   */
-  readonly updatedBy?: string;
-
-  /**
-   * 最后修改时间
-   */
-  readonly updatedAt: Date;
-
-  /**
-   * 版本号
-   */
-  readonly version: number;
-
-  /**
-   * 是否已删除
-   */
-  readonly isDeleted?: boolean;
-
-  /**
-   * 删除时间
-   */
-  readonly deletedAt?: Date;
-
-  /**
-   * 删除者
-   */
-  readonly deletedBy?: string;
 }

@@ -53,9 +53,9 @@ Domain Kernel 是 Hybrid Architecture 的核心领域层，提供纯领域层的
 ### 领域事件 (Domain Events)
 
 - **DomainEvent**: 领域事件基类
-- **DataAccessDeniedEvent**: 数据访问拒绝事件
 - **IsolationContextCreatedEvent**: 隔离上下文创建事件
 - **IsolationContextSwitchedEvent**: 隔离上下文切换事件
+- **DataAccessDeniedEvent**: 数据访问拒绝事件（已移动到isolation模块）
 
 ### 领域服务 (Domain Services)
 

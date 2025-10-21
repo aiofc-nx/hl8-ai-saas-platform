@@ -33,7 +33,7 @@ export type {
   IEntityValidator,
   IEntityValidationResult,
   IEntityAuditInfo,
-} from "./interfaces/entity.interface.js";
+} from "./interfaces/index.js";
 
 // 聚合根
 export { AggregateRoot } from "./aggregates/aggregate-root.js";
@@ -41,8 +41,7 @@ export type { DomainEvent } from "./aggregates/aggregate-root.js";
 
 // 领域事件
 export { DomainEvent as DomainEventBase } from "./events/domain-event.js";
-export { DataAccessDeniedEvent } from "./events/data-access-denied.event.js";
-// 注意：隔离相关事件已通过 isolation 模块导出
+// 注意：隔离相关事件（包括DataAccessDeniedEvent）已通过 isolation 模块导出
 
 // 领域服务
 export { BaseDomainService } from "./services/base-domain-service.js";

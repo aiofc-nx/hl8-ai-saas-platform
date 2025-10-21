@@ -20,6 +20,7 @@ export type { IIsolationValidator } from "./isolation-validator.interface.js";
 // 事件
 export { IsolationContextCreatedEvent } from "./context-created.event.js";
 export { IsolationContextSwitchedEvent } from "./context-switched.event.js";
+export { DataAccessDeniedEvent } from "./data-access-denied.event.js";
 
 // 错误
 export { IsolationValidationError } from "./isolation-validation.error.js";
