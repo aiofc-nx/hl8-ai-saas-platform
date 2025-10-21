@@ -18,6 +18,7 @@
  * @since 1.0.0
  */
 import { EntityId } from "../value-objects/ids/entity-id.vo.js";
+import { TenantId } from "../value-objects/ids/tenant-id.vo.js";
 import { BaseEntity } from "../entities/base-entity.js";
 
 /**
@@ -44,11 +45,14 @@ export abstract class AggregateRoot<
 
   constructor(
     id: TId,
+    tenantId: TenantId,
     createdAt?: Date,
     updatedAt?: Date,
     version: number = 0,
   ) {
-    super(id, createdAt, updatedAt, version);
+    super(id, tenantId, undefined, undefined, undefined, false, undefined, {
+      version
+    });
   }
 
   /**

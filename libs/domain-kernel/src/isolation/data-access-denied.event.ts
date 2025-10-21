@@ -68,7 +68,7 @@ export class DataAccessDeniedEvent {
    */
   toJSON(): Record<string, unknown> {
     return {
-      type: 'DataAccessDeniedEvent',
+      type: "DataAccessDeniedEvent",
       userId: this.userId,
       dataId: this.dataId,
       reason: this.reason,

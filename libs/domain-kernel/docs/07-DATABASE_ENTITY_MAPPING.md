@@ -60,11 +60,11 @@ graph TB
 ```typescript
 // 领域实体定义
 export class User extends BaseEntity<UserId> {
-  private _email: Email;           // 值对象
-  private _username: Username;      // 值对象
-  private _status: UserStatus;      // 枚举
-  private _activatedAt?: Date;     // 可选时间戳
-  private _lastLoginAt?: Date;     // 可选时间戳
+  private _email: Email; // 值对象
+  private _username: Username; // 值对象
+  private _status: UserStatus; // 枚举
+  private _activatedAt?: Date; // 可选时间戳
+  private _lastLoginAt?: Date; // 可选时间戳
 }
 ```
 
@@ -80,14 +80,14 @@ CREATE TABLE users (
     organization_id VARCHAR(36),
     department_id VARCHAR(36),
     user_id VARCHAR(36),
-    
+
     -- 业务字段
     email VARCHAR(255) NOT NULL,
     username VARCHAR(100) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     activated_at TIMESTAMP NULL,
     last_login_at TIMESTAMP NULL,
-    
+
     -- 审计字段
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -96,11 +96,11 @@ CREATE TABLE users (
     created_by VARCHAR(36) NOT NULL,
     updated_by VARCHAR(36) NOT NULL,
     deleted_by VARCHAR(36) NULL,
-    
+
     -- 共享字段
     is_shared BOOLEAN NOT NULL DEFAULT FALSE,
     sharing_level VARCHAR(20) NULL,
-    
+
     -- 索引
     INDEX idx_tenant_id (tenant_id),
     INDEX idx_email_tenant (email, tenant_id),
@@ -114,27 +114,27 @@ CREATE TABLE users (
 
 #### 2.2.2 字段映射关系
 
-| 领域实体字段 | 数据表字段 | 类型 | 约束 | 说明 |
-|-------------|-----------|------|------|------|
-| `id` | `id` | VARCHAR(36) | PRIMARY KEY | 实体唯一标识符 |
-| `tenantId` | `tenant_id` | VARCHAR(36) | NOT NULL | 租户标识符 |
-| `organizationId` | `organization_id` | VARCHAR(36) | NULL | 组织标识符 |
-| `departmentId` | `department_id` | VARCHAR(36) | NULL | 部门标识符 |
-| `userId` | `user_id` | VARCHAR(36) | NULL | 用户标识符 |
-| `_email.value` | `email` | VARCHAR(255) | NOT NULL | 邮箱地址 |
-| `_username.value` | `username` | VARCHAR(100) | NOT NULL | 用户名 |
-| `_status` | `status` | VARCHAR(20) | NOT NULL | 用户状态 |
-| `_activatedAt` | `activated_at` | TIMESTAMP | NULL | 激活时间 |
-| `_lastLoginAt` | `last_login_at` | TIMESTAMP | NULL | 最后登录时间 |
-| `auditInfo.createdAt` | `created_at` | TIMESTAMP | NOT NULL | 创建时间 |
-| `auditInfo.updatedAt` | `updated_at` | TIMESTAMP | NOT NULL | 更新时间 |
-| `auditInfo.deletedAt` | `deleted_at` | TIMESTAMP | NULL | 删除时间 |
-| `auditInfo.version` | `version` | INT | NOT NULL | 版本号 |
-| `auditInfo.createdBy` | `created_by` | VARCHAR(36) | NOT NULL | 创建者 |
-| `auditInfo.updatedBy` | `updated_by` | VARCHAR(36) | NOT NULL | 更新者 |
-| `auditInfo.deletedBy` | `deleted_by` | VARCHAR(36) | NULL | 删除者 |
-| `isShared` | `is_shared` | BOOLEAN | NOT NULL | 是否共享 |
-| `sharingLevel` | `sharing_level` | VARCHAR(20) | NULL | 共享级别 |
+| 领域实体字段          | 数据表字段        | 类型         | 约束        | 说明           |
+| --------------------- | ----------------- | ------------ | ----------- | -------------- |
+| `id`                  | `id`              | VARCHAR(36)  | PRIMARY KEY | 实体唯一标识符 |
+| `tenantId`            | `tenant_id`       | VARCHAR(36)  | NOT NULL    | 租户标识符     |
+| `organizationId`      | `organization_id` | VARCHAR(36)  | NULL        | 组织标识符     |
+| `departmentId`        | `department_id`   | VARCHAR(36)  | NULL        | 部门标识符     |
+| `userId`              | `user_id`         | VARCHAR(36)  | NULL        | 用户标识符     |
+| `_email.value`        | `email`           | VARCHAR(255) | NOT NULL    | 邮箱地址       |
+| `_username.value`     | `username`        | VARCHAR(100) | NOT NULL    | 用户名         |
+| `_status`             | `status`          | VARCHAR(20)  | NOT NULL    | 用户状态       |
+| `_activatedAt`        | `activated_at`    | TIMESTAMP    | NULL        | 激活时间       |
+| `_lastLoginAt`        | `last_login_at`   | TIMESTAMP    | NULL        | 最后登录时间   |
+| `auditInfo.createdAt` | `created_at`      | TIMESTAMP    | NOT NULL    | 创建时间       |
+| `auditInfo.updatedAt` | `updated_at`      | TIMESTAMP    | NOT NULL    | 更新时间       |
+| `auditInfo.deletedAt` | `deleted_at`      | TIMESTAMP    | NULL        | 删除时间       |
+| `auditInfo.version`   | `version`         | INT          | NOT NULL    | 版本号         |
+| `auditInfo.createdBy` | `created_by`      | VARCHAR(36)  | NOT NULL    | 创建者         |
+| `auditInfo.updatedBy` | `updated_by`      | VARCHAR(36)  | NOT NULL    | 更新者         |
+| `auditInfo.deletedBy` | `deleted_by`      | VARCHAR(36)  | NULL        | 删除者         |
+| `isShared`            | `is_shared`       | BOOLEAN      | NOT NULL    | 是否共享       |
+| `sharingLevel`        | `sharing_level`   | VARCHAR(20)  | NULL        | 共享级别       |
 
 ### 2.3 MongoDB 文档设计
 
@@ -144,21 +144,21 @@ CREATE TABLE users (
 // MongoDB 文档结构
 {
   _id: ObjectId("..."),
-  
+
   // 基础字段
   id: "user-123",
   tenantId: "tenant-456",
   organizationId: "org-789",
   departmentId: "dept-101",
   userId: "user-123",
-  
+
   // 业务字段
   email: "test@example.com",
   username: "testuser",
   status: "ACTIVE",
   activatedAt: ISODate("2025-01-27T10:00:00Z"),
   lastLoginAt: ISODate("2025-01-27T09:30:00Z"),
-  
+
   // 审计字段
   createdAt: ISODate("2025-01-27T08:00:00Z"),
   updatedAt: ISODate("2025-01-27T10:00:00Z"),
@@ -167,11 +167,11 @@ CREATE TABLE users (
   createdBy: "system",
   updatedBy: "system",
   deletedBy: null,
-  
+
   // 共享字段
   isShared: false,
   sharingLevel: null,
-  
+
   // MongoDB 特有字段
   _tenant: "tenant-456",  // 租户分片键
   _version: 1,            // 乐观锁版本
@@ -182,13 +182,13 @@ CREATE TABLE users (
 
 ```javascript
 // MongoDB 索引定义
-db.users.createIndex({ "tenantId": 1, "email": 1 }, { unique: true });
-db.users.createIndex({ "tenantId": 1, "username": 1 }, { unique: true });
-db.users.createIndex({ "tenantId": 1, "status": 1 });
-db.users.createIndex({ "tenantId": 1, "createdAt": -1 });
-db.users.createIndex({ "tenantId": 1, "organizationId": 1 });
-db.users.createIndex({ "tenantId": 1, "departmentId": 1 });
-db.users.createIndex({ "isShared": 1, "sharingLevel": 1 });
+db.users.createIndex({ tenantId: 1, email: 1 }, { unique: true });
+db.users.createIndex({ tenantId: 1, username: 1 }, { unique: true });
+db.users.createIndex({ tenantId: 1, status: 1 });
+db.users.createIndex({ tenantId: 1, createdAt: -1 });
+db.users.createIndex({ tenantId: 1, organizationId: 1 });
+db.users.createIndex({ tenantId: 1, departmentId: 1 });
+db.users.createIndex({ isShared: 1, sharingLevel: 1 });
 ```
 
 ### 2.4 值对象映射
@@ -202,7 +202,7 @@ export class Email extends BaseValueObject {
     super();
     this.validate();
   }
-  
+
   public getValue(): string {
     return this.value;
   }
@@ -224,7 +224,7 @@ export class Username extends BaseValueObject {
     super();
     this.validate();
   }
-  
+
   public getValue(): string {
     return this.value;
   }
@@ -244,10 +244,10 @@ username VARCHAR(100) NOT NULL
 ```typescript
 // 领域层：用户状态枚举
 export enum UserStatus {
-  PENDING = 'PENDING',
-  ACTIVE = 'ACTIVE',
-  DISABLED = 'DISABLED',
-  DELETED = 'DELETED'
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  DISABLED = "DISABLED",
+  DELETED = "DELETED",
 }
 ```
 
@@ -269,16 +269,16 @@ CONSTRAINT chk_status CHECK (status IN ('PENDING', 'ACTIVE', 'DISABLED', 'DELETE
  * PostgreSQL User 实体
  * @description MikroORM 实体，映射到 PostgreSQL 数据库
  */
-import { Entity, PrimaryKey, Property, Index, Unique } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, Index, Unique } from "@mikro-orm/core";
 
-@Entity({ tableName: 'users' })
-@Index({ properties: ['tenantId'] })
-@Index({ properties: ['tenantId', 'email'] })
-@Index({ properties: ['tenantId', 'username'] })
-@Index({ properties: ['status'] })
-@Index({ properties: ['createdAt'] })
-@Unique({ properties: ['email', 'tenantId'] })
-@Unique({ properties: ['username', 'tenantId'] })
+@Entity({ tableName: "users" })
+@Index({ properties: ["tenantId"] })
+@Index({ properties: ["tenantId", "email"] })
+@Index({ properties: ["tenantId", "username"] })
+@Index({ properties: ["status"] })
+@Index({ properties: ["createdAt"] })
+@Unique({ properties: ["email", "tenantId"] })
+@Unique({ properties: ["username", "tenantId"] })
 export class UserEntity {
   @PrimaryKey()
   id!: string;
@@ -346,16 +346,22 @@ export class UserEntity {
  * MongoDB User 实体
  * @description MikroORM 实体，映射到 MongoDB 数据库
  */
-import { Entity, PrimaryKey, Property, Index, Unique } from '@mikro-orm/mongodb';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  Index,
+  Unique,
+} from "@mikro-orm/mongodb";
 
-@Entity({ collection: 'users' })
-@Index({ properties: ['tenantId'] })
-@Index({ properties: ['tenantId', 'email'] })
-@Index({ properties: ['tenantId', 'username'] })
-@Index({ properties: ['status'] })
-@Index({ properties: ['createdAt'] })
-@Unique({ properties: ['email', 'tenantId'] })
-@Unique({ properties: ['username', 'tenantId'] })
+@Entity({ collection: "users" })
+@Index({ properties: ["tenantId"] })
+@Index({ properties: ["tenantId", "email"] })
+@Index({ properties: ["tenantId", "username"] })
+@Index({ properties: ["status"] })
+@Index({ properties: ["createdAt"] })
+@Unique({ properties: ["email", "tenantId"] })
+@Unique({ properties: ["username", "tenantId"] })
 export class UserDocument {
   @PrimaryKey()
   _id!: ObjectId;
@@ -419,7 +425,7 @@ export class UserDocument {
 
   // MongoDB 特有字段
   @Property()
-  _tenant!: string;  // 租户分片键
+  _tenant!: string; // 租户分片键
 
   @Property()
   _version!: number; // 乐观锁版本
@@ -585,7 +591,7 @@ export class UserMapper {
    * @returns 用户领域实体数组
    */
   public static toDomainEntities(dataRows: UserDataRow[]): User[] {
-    return dataRows.map(row => this.toDomainEntity(row));
+    return dataRows.map((row) => this.toDomainEntity(row));
   }
 }
 ```
@@ -604,14 +610,14 @@ export interface UserDataRow {
   organization_id?: string;
   department_id?: string;
   user_id?: string;
-  
+
   // 业务字段
   email: string;
   username: string;
   status: string;
   activated_at?: Date;
   last_login_at?: Date;
-  
+
   // 审计字段
   created_at: Date;
   updated_at: Date;
@@ -620,7 +626,7 @@ export interface UserDataRow {
   created_by: string;
   updated_by: string;
   deleted_by?: string;
-  
+
   // 共享字段
   is_shared: boolean;
   sharing_level?: string;
@@ -643,38 +649,38 @@ export class UserQueryMapper {
   public static toSqlQuery(query: UserQuery): SqlQuery {
     const conditions: string[] = [];
     const parameters: any[] = [];
-    
+
     // 租户隔离
     if (query.tenantId) {
-      conditions.push('tenant_id = ?');
+      conditions.push("tenant_id = ?");
       parameters.push(query.tenantId.getValue());
     }
-    
+
     // 邮箱查询
     if (query.email) {
-      conditions.push('email = ?');
+      conditions.push("email = ?");
       parameters.push(query.email.getValue());
     }
-    
+
     // 用户名查询
     if (query.username) {
-      conditions.push('username = ?');
+      conditions.push("username = ?");
       parameters.push(query.username.getValue());
     }
-    
+
     // 状态查询
     if (query.status) {
-      conditions.push('status = ?');
+      conditions.push("status = ?");
       parameters.push(query.status);
     }
-    
+
     // 软删除过滤
     if (!query.includeDeleted) {
-      conditions.push('deleted_at IS NULL');
+      conditions.push("deleted_at IS NULL");
     }
-    
+
     return {
-      where: conditions.length > 0 ? conditions.join(' AND ') : '1=1',
+      where: conditions.length > 0 ? conditions.join(" AND ") : "1=1",
       parameters,
     };
   }
@@ -689,12 +695,12 @@ export class UserQueryMapper {
 /**
  * PostgreSQL 用户仓储实现
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { UserEntity } from './user.entity';
-import { User } from '@hl8/domain-kernel';
-import { UserMapper } from './user.mapper';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@mikro-orm/nestjs";
+import { EntityRepository } from "@mikro-orm/postgresql";
+import { UserEntity } from "./user.entity";
+import { User } from "@hl8/domain-kernel";
+import { UserMapper } from "./user.mapper";
 
 @Injectable()
 export class PostgreSQLUserRepository {
@@ -754,12 +760,12 @@ export class PostgreSQLUserRepository {
 /**
  * MongoDB 用户仓储实现
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/mongodb';
-import { UserDocument } from './user.document';
-import { User } from '@hl8/domain-kernel';
-import { UserMapper } from './user.mapper';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@mikro-orm/nestjs";
+import { EntityRepository } from "@mikro-orm/mongodb";
+import { UserDocument } from "./user.document";
+import { User } from "@hl8/domain-kernel";
+import { UserMapper } from "./user.mapper";
 
 @Injectable()
 export class MongoDBUserRepository {
@@ -796,7 +802,9 @@ export class MongoDBUserRepository {
    * 更新用户
    */
   async update(user: User): Promise<void> {
-    const document = await this.userRepository.findOneOrFail(user.id.getValue());
+    const document = await this.userRepository.findOneOrFail(
+      user.id.getValue(),
+    );
     const updatedDocument = UserMapper.toMongoDBDocument(user);
     Object.assign(document, updatedDocument);
     await this.userRepository.flush();
@@ -826,9 +834,9 @@ export class MongoDBUserRepository {
           _id: null,
           totalCount: { $sum: 1 },
           activeCount: {
-            $sum: { $cond: [{ $eq: ['$status', 'ACTIVE'] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ["$status", "ACTIVE"] }, 1, 0] },
           },
-          users: { $push: '$$ROOT' },
+          users: { $push: "$$ROOT" },
         },
       },
     ];
@@ -857,7 +865,11 @@ export interface IUserRepository {
   findByEmailAndTenant(email: string, tenantId: string): Promise<User | null>;
   update(user: User): Promise<void>;
   delete(id: string): Promise<void>;
-  findUsersByTenant(tenantId: string, page: number, size: number): Promise<{
+  findUsersByTenant(
+    tenantId: string,
+    page: number,
+    size: number,
+  ): Promise<{
     users: User[];
     total: number;
   }>;
@@ -873,11 +885,11 @@ export class UserRepositoryFactory {
     private readonly mongodbRepo: MongoDBUserRepository,
   ) {}
 
-  create(databaseType: 'postgresql' | 'mongodb'): IUserRepository {
+  create(databaseType: "postgresql" | "mongodb"): IUserRepository {
     switch (databaseType) {
-      case 'postgresql':
+      case "postgresql":
         return this.postgresqlRepo;
-      case 'mongodb':
+      case "mongodb":
         return this.mongodbRepo;
       default:
         throw new Error(`Unsupported database type: ${databaseType}`);
@@ -904,13 +916,13 @@ export class CreateUserExample {
   ): Promise<User> {
     // 1. 创建领域实体
     const user = User.create(tenantId, email, username);
-    
+
     // 2. 转换为数据行
     const dataRow = UserMapper.toDataRow(user);
-    
+
     // 3. 保存到数据库
     await this.userRepository.save(dataRow);
-    
+
     return user;
   }
 }
@@ -935,10 +947,10 @@ export class QueryUserExample {
       tenantId,
       includeDeleted: false,
     });
-    
+
     // 2. 执行数据库查询
     const dataRow = await this.userRepository.findOne(query);
-    
+
     // 3. 转换为领域实体
     return dataRow ? UserMapper.toDomainEntity(dataRow) : null;
   }
@@ -958,18 +970,18 @@ export class UpdateUserExample {
     // 1. 查询现有用户
     const dataRow = await this.userRepository.findById(userId.getValue());
     if (!dataRow) {
-      throw new UserNotFoundException('用户不存在');
+      throw new UserNotFoundException("用户不存在");
     }
-    
+
     // 2. 转换为领域实体
     const user = UserMapper.toDomainEntity(dataRow);
-    
+
     // 3. 执行业务逻辑
     user.activate();
-    
+
     // 4. 转换回数据行
     const updatedDataRow = UserMapper.toDataRow(user);
-    
+
     // 5. 更新数据库
     await this.userRepository.update(updatedDataRow);
   }
@@ -983,19 +995,19 @@ export class UpdateUserExample {
 ```sql
 -- 租户级数据隔离
 -- 所有查询都自动添加租户过滤条件
-SELECT * FROM users 
-WHERE tenant_id = ? 
+SELECT * FROM users
+WHERE tenant_id = ?
   AND deleted_at IS NULL;
 
 -- 组织级数据隔离
-SELECT * FROM users 
-WHERE tenant_id = ? 
+SELECT * FROM users
+WHERE tenant_id = ?
   AND organization_id = ?
   AND deleted_at IS NULL;
 
 -- 部门级数据隔离
-SELECT * FROM users 
-WHERE tenant_id = ? 
+SELECT * FROM users
+WHERE tenant_id = ?
   AND organization_id = ?
   AND department_id = ?
   AND deleted_at IS NULL;
@@ -1005,14 +1017,14 @@ WHERE tenant_id = ?
 
 ```sql
 -- 共享数据查询
-SELECT * FROM users 
-WHERE tenant_id = ? 
+SELECT * FROM users
+WHERE tenant_id = ?
   AND (is_shared = TRUE OR user_id = ?)
   AND deleted_at IS NULL;
 
 -- 跨租户共享数据查询
-SELECT * FROM users 
-WHERE is_shared = TRUE 
+SELECT * FROM users
+WHERE is_shared = TRUE
   AND sharing_level IN ('PLATFORM', 'TENANT')
   AND deleted_at IS NULL;
 ```
@@ -1023,47 +1035,47 @@ WHERE is_shared = TRUE
 
 ```typescript
 // mikro-orm.config.ts
-import { defineConfig } from '@mikro-orm/core';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { UserEntity } from './entities/user.entity';
+import { defineConfig } from "@mikro-orm/core";
+import { PostgreSqlDriver } from "@mikro-orm/postgresql";
+import { UserEntity } from "./entities/user.entity";
 
 export default defineConfig({
   driver: PostgreSqlDriver,
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
-  dbName: process.env.DB_NAME || 'hl8_saas',
-  
+  host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "5432"),
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "password",
+  dbName: process.env.DB_NAME || "hl8_saas",
+
   entities: [UserEntity],
-  entitiesTs: ['./src/entities'],
-  
+  entitiesTs: ["./src/entities"],
+
   migrations: {
-    path: './migrations',
+    path: "./migrations",
     pattern: /^[\w-]+\d+\.(ts|js)$/,
   },
-  
+
   seeder: {
-    path: './seeders',
-    defaultSeeder: 'DatabaseSeeder',
+    path: "./seeders",
+    defaultSeeder: "DatabaseSeeder",
   },
-  
-  debug: process.env.NODE_ENV === 'development',
-  
+
+  debug: process.env.NODE_ENV === "development",
+
   // 连接池配置
   pool: {
     min: 2,
     max: 10,
   },
-  
+
   // 缓存配置
   cache: {
     enabled: true,
     pretty: true,
-    adapter: 'redis',
+    adapter: "redis",
     options: {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "6379"),
     },
   },
 });
@@ -1073,35 +1085,35 @@ export default defineConfig({
 
 ```typescript
 // mikro-orm.mongodb.config.ts
-import { defineConfig } from '@mikro-orm/core';
-import { MongoDriver } from '@mikro-orm/mongodb';
-import { UserDocument } from './documents/user.document';
+import { defineConfig } from "@mikro-orm/core";
+import { MongoDriver } from "@mikro-orm/mongodb";
+import { UserDocument } from "./documents/user.document";
 
 export default defineConfig({
   driver: MongoDriver,
-  clientUrl: process.env.MONGODB_URL || 'mongodb://localhost:27017',
-  dbName: process.env.MONGODB_DB_NAME || 'hl8_saas',
-  
+  clientUrl: process.env.MONGODB_URL || "mongodb://localhost:27017",
+  dbName: process.env.MONGODB_DB_NAME || "hl8_saas",
+
   entities: [UserDocument],
-  entitiesTs: ['./src/documents'],
-  
-  debug: process.env.NODE_ENV === 'development',
-  
+  entitiesTs: ["./src/documents"],
+
+  debug: process.env.NODE_ENV === "development",
+
   // MongoDB 特有配置
   ensureIndexes: true,
   forceUtc: true,
-  
+
   // 连接配置
   connect: true,
   autoLoadEntities: true,
-  
+
   // 缓存配置
   cache: {
     enabled: true,
-    adapter: 'redis',
+    adapter: "redis",
     options: {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "6379"),
     },
   },
 });
@@ -1111,10 +1123,10 @@ export default defineConfig({
 
 ```typescript
 // app.module.ts
-import { Module } from '@nestjs/common';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { UserEntity } from './entities/user.entity';
-import { UserDocument } from './documents/user.document';
+import { Module } from "@nestjs/common";
+import { MikroOrmModule } from "@mikro-orm/nestjs";
+import { UserEntity } from "./entities/user.entity";
+import { UserDocument } from "./documents/user.document";
 
 @Module({
   imports: [
@@ -1124,17 +1136,17 @@ import { UserDocument } from './documents/user.document';
       // ... PostgreSQL 配置
       entities: [UserEntity],
     }),
-    
+
     // MongoDB 配置
     MikroOrmModule.forRoot({
       driver: MongoDriver,
       // ... MongoDB 配置
       entities: [UserDocument],
     }),
-    
+
     // 实体注册
-    MikroOrmModule.forFeature([UserEntity], 'postgresql'),
-    MikroOrmModule.forFeature([UserDocument], 'mongodb'),
+    MikroOrmModule.forFeature([UserEntity], "postgresql"),
+    MikroOrmModule.forFeature([UserDocument], "mongodb"),
   ],
 })
 export class AppModule {}
@@ -1181,19 +1193,21 @@ export class OptimizedUserQuery {
   ): Promise<{ users: User[]; total: number }> {
     // 使用 LIMIT 和 OFFSET 进行分页
     const offset = (page - 1) * size;
-    
+
     const query = `
       SELECT * FROM users 
       WHERE tenant_id = ? AND deleted_at IS NULL
       ORDER BY created_at DESC
       LIMIT ? OFFSET ?
     `;
-    
+
     const [users, total] = await Promise.all([
       this.userRepository.findMany(query, [tenantId.getValue(), size, offset]),
-      this.userRepository.count(`WHERE tenant_id = ? AND deleted_at IS NULL`, [tenantId.getValue()]),
+      this.userRepository.count(`WHERE tenant_id = ? AND deleted_at IS NULL`, [
+        tenantId.getValue(),
+      ]),
     ]);
-    
+
     return {
       users: UserMapper.toDomainEntities(users),
       total,
@@ -1210,48 +1224,48 @@ export class OptimizedUserQuery {
 /**
  * 用户映射器测试
  */
-describe('UserMapper', () => {
-  it('should convert domain entity to data row', () => {
+describe("UserMapper", () => {
+  it("should convert domain entity to data row", () => {
     // 准备测试数据
     const user = User.create(
-      TenantId.create('tenant-123'),
-      Email.create('test@example.com'),
-      Username.create('testuser'),
+      TenantId.create("tenant-123"),
+      Email.create("test@example.com"),
+      Username.create("testuser"),
     );
-    
+
     // 执行转换
     const dataRow = UserMapper.toDataRow(user);
-    
+
     // 验证结果
     expect(dataRow.id).toBe(user.id.getValue());
-    expect(dataRow.email).toBe('test@example.com');
-    expect(dataRow.username).toBe('testuser');
-    expect(dataRow.status).toBe('PENDING');
+    expect(dataRow.email).toBe("test@example.com");
+    expect(dataRow.username).toBe("testuser");
+    expect(dataRow.status).toBe("PENDING");
   });
-  
-  it('should convert data row to domain entity', () => {
+
+  it("should convert data row to domain entity", () => {
     // 准备测试数据
     const dataRow: UserDataRow = {
-      id: 'user-123',
-      tenant_id: 'tenant-123',
-      email: 'test@example.com',
-      username: 'testuser',
-      status: 'ACTIVE',
+      id: "user-123",
+      tenant_id: "tenant-123",
+      email: "test@example.com",
+      username: "testuser",
+      status: "ACTIVE",
       created_at: new Date(),
       updated_at: new Date(),
       version: 1,
-      created_by: 'system',
-      updated_by: 'system',
+      created_by: "system",
+      updated_by: "system",
       is_shared: false,
     };
-    
+
     // 执行转换
     const user = UserMapper.toDomainEntity(dataRow);
-    
+
     // 验证结果
-    expect(user.id.getValue()).toBe('user-123');
-    expect(user.getEmail().getValue()).toBe('test@example.com');
-    expect(user.getStatus()).toBe('ACTIVE');
+    expect(user.id.getValue()).toBe("user-123");
+    expect(user.getEmail().getValue()).toBe("test@example.com");
+    expect(user.getStatus()).toBe("ACTIVE");
   });
 });
 ```
@@ -1262,27 +1276,27 @@ describe('UserMapper', () => {
 /**
  * 用户数据库操作集成测试
  */
-describe('UserRepository Integration', () => {
-  it('should save and retrieve user', async () => {
+describe("UserRepository Integration", () => {
+  it("should save and retrieve user", async () => {
     // 创建用户
     const user = User.create(
-      TenantId.create('tenant-123'),
-      Email.create('test@example.com'),
-      Username.create('testuser'),
+      TenantId.create("tenant-123"),
+      Email.create("test@example.com"),
+      Username.create("testuser"),
     );
-    
+
     // 保存到数据库
     await userRepository.save(UserMapper.toDataRow(user));
-    
+
     // 从数据库查询
     const retrievedUser = await userRepository.findByEmailAndTenant(
-      Email.create('test@example.com'),
-      TenantId.create('tenant-123'),
+      Email.create("test@example.com"),
+      TenantId.create("tenant-123"),
     );
-    
+
     // 验证结果
     expect(retrievedUser).toBeDefined();
-    expect(retrievedUser!.getEmail().getValue()).toBe('test@example.com');
+    expect(retrievedUser!.getEmail().getValue()).toBe("test@example.com");
   });
 });
 ```

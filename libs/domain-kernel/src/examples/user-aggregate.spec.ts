@@ -1,7 +1,7 @@
 /**
  * 用户聚合根测试
  * @description 测试用户聚合根的功能和实体与聚合根分离模式
- * 
+ *
  * @since 1.0.0
  */
 
@@ -72,8 +72,10 @@ describe("UserAggregate", () => {
 
     it("应该能够重复激活已激活的用户", () => {
       userAggregate.activateUser();
-      
-      expect(() => userAggregate.activateUser()).toThrow(IsolationValidationError);
+
+      expect(() => userAggregate.activateUser()).toThrow(
+        IsolationValidationError,
+      );
     });
   });
 
@@ -203,13 +205,27 @@ describe("UserAggregate", () => {
 
   describe("错误处理", () => {
     it("应该在用户不存在时抛出异常", () => {
-      expect(() => userAggregate.activateUser()).toThrow(IsolationValidationError);
-      expect(() => userAggregate.disableUser()).toThrow(IsolationValidationError);
-      expect(() => userAggregate.enableUser()).toThrow(IsolationValidationError);
-      expect(() => userAggregate.deleteUser()).toThrow(IsolationValidationError);
-      expect(() => userAggregate.updateUserEmail(email)).toThrow(IsolationValidationError);
-      expect(() => userAggregate.updateUserUsername(username)).toThrow(IsolationValidationError);
-      expect(() => userAggregate.recordUserLogin()).toThrow(IsolationValidationError);
+      expect(() => userAggregate.activateUser()).toThrow(
+        IsolationValidationError,
+      );
+      expect(() => userAggregate.disableUser()).toThrow(
+        IsolationValidationError,
+      );
+      expect(() => userAggregate.enableUser()).toThrow(
+        IsolationValidationError,
+      );
+      expect(() => userAggregate.deleteUser()).toThrow(
+        IsolationValidationError,
+      );
+      expect(() => userAggregate.updateUserEmail(email)).toThrow(
+        IsolationValidationError,
+      );
+      expect(() => userAggregate.updateUserUsername(username)).toThrow(
+        IsolationValidationError,
+      );
+      expect(() => userAggregate.recordUserLogin()).toThrow(
+        IsolationValidationError,
+      );
     });
   });
 
@@ -233,7 +249,7 @@ describe("UserAggregate", () => {
     it("应该能够从快照恢复", () => {
       const snapshot = userAggregate.createSnapshot();
       const newAggregate = new UserAggregate(userId, tenantId);
-      
+
       newAggregate.restoreFromSnapshot(snapshot, userAggregate.version);
 
       expect(newAggregate.getUser()?.getEmail()).toEqual(email);

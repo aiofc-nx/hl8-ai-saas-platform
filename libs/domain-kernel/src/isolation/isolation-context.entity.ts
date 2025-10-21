@@ -501,7 +501,8 @@ export class IsolationContext {
         this.compareIsolationLevels(
           targetContext.getIsolationLevel(),
           IsolationLevel.TENANT,
-        ) >= 0 && (this.tenantId?.equals(targetContext.tenantId) ?? false)
+        ) >= 0 &&
+        (this.tenantId?.equals(targetContext.tenantId) ?? false)
       );
     }
 
@@ -512,7 +513,8 @@ export class IsolationContext {
         this.compareIsolationLevels(
           targetContext.getIsolationLevel(),
           IsolationLevel.ORGANIZATION,
-        ) >= 0 && (this.organizationId?.equals(targetContext.organizationId) ?? false)
+        ) >= 0 &&
+        (this.organizationId?.equals(targetContext.organizationId) ?? false)
       );
     }
 
@@ -523,7 +525,8 @@ export class IsolationContext {
         this.compareIsolationLevels(
           targetContext.getIsolationLevel(),
           IsolationLevel.DEPARTMENT,
-        ) >= 0 && (this.departmentId?.equals(targetContext.departmentId) ?? false)
+        ) >= 0 &&
+        (this.departmentId?.equals(targetContext.departmentId) ?? false)
       );
     }
 

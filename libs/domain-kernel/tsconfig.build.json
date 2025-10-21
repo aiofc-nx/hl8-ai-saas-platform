@@ -3,5 +3,13 @@
   "compilerOptions": {
     "outDir": "./dist"
   },
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "__tests__", "jest.config.ts", "**/*.js", "**/*.js.map"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "__tests__",
+    "jest.config.ts",
+    "**/*.js",
+    "**/*.js.map"
+  ]
 }

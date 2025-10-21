@@ -46,13 +46,52 @@ export { DomainEvent as DomainEventBase } from "./events/domain-event.js";
 // 领域服务
 export { BaseDomainService } from "./services/base-domain-service.js";
 
-// 业务规则
+// 业务规则（整合后的规则系统）
 export {
   BusinessRuleValidator,
   BusinessRuleManager,
   BusinessRules,
+  BusinessRuleFactory,
   type BusinessRuleValidationResult,
-} from "./rules/business-rule-validator.js";
+  type BusinessRuleValidationError,
+  type BusinessRuleValidationWarning,
+} from "./rules/index.js";
+
+// 具体业务规则验证器
+export {
+  UserRegistrationBusinessRule,
+  OrderCreationBusinessRule,
+  UserStateBusinessRule,
+} from "./rules/index.js";
+
+// 规格模式（Specification Pattern）
+export {
+  ISpecification,
+  SpecificationResult,
+  SpecificationMetadata,
+  BaseSpecification,
+  AndSpecification,
+  OrSpecification,
+  NotSpecification,
+  SpecificationFactory,
+} from "./specifications/index.js";
+
+// 具体规格实现
+export {
+  UserActiveSpecification,
+  UserEmailFormatSpecification,
+  UsernameFormatSpecification,
+  UserLifecycleSpecification,
+  ValidUserSpecification,
+  OrderAmountSpecification,
+  OrderStatusSpecification,
+  OrderItemsSpecification,
+  OrderLifecycleSpecification,
+  ValidOrderSpecification,
+  type UserData,
+  type OrderData,
+  type OrderItemData,
+} from "./specifications/index.js";
 
 // 示例实现
 export {
