@@ -31,21 +31,25 @@
 将原有的通用 `Error` 对象替换为具体的异常类：
 
 #### BaseUseCase
+
 - **文件**: `src/use-cases/base-use-case.ts`
 - **变更**: 将 `throw new Error("请求对象不能为空")` 替换为 `throw new GeneralBadRequestException(...)`
 - **影响**: 提供更具体的错误信息和 RFC7807 标准响应
 
 #### BaseClassValidator
+
 - **文件**: `src/validation/base-class.validator.ts`
 - **变更**: 将所有 `throw new ValidationException(...)` 替换为 `throw new GeneralBadRequestException(...)`
 - **影响**: 统一异常类型，提供一致的错误处理
 
 #### 事件处理器
+
 - **文件**: `src/events/event-handler.base.ts`
 - **变更**: 将所有 `throw new ApplicationLayerException(...)` 替换为 `throw new GeneralBadRequestException(...)`
 - **影响**: 简化异常处理，使用具体的异常类
 
 #### 事件发布器
+
 - **文件**: `src/events/event-publisher.ts`
 - **变更**: 将所有 `throw new ApplicationLayerException(...)` 替换为 `throw new GeneralBadRequestException(...)`
 - **影响**: 统一异常处理模式
@@ -90,10 +94,12 @@ constructor(title: string, detail: string, data?: Record<string, unknown>)
 ### 配置更新
 
 #### TypeScript 配置
+
 - 更新了 `tsconfig.json` 的 `paths` 映射
 - 移除了 `rootDir` 限制以避免模块解析问题
 
 #### Jest 配置
+
 - 添加了 ESM 支持
 - 更新了模块映射
 - 包含了 `test` 目录的测试
@@ -101,16 +107,19 @@ constructor(title: string, detail: string, data?: Record<string, unknown>)
 ## 测试验证
 
 ### 构建测试
+
 - ✅ TypeScript 编译成功
 - ✅ 所有模块正确解析
 - ✅ 依赖关系正确建立
 
 ### 功能测试
+
 - ✅ 现有测试全部通过 (31/31)
 - ✅ 异常处理功能正常
 - ✅ 模块集成无冲突
 
 ### 集成测试
+
 - ✅ 异常类可以正确导入和使用
 - ✅ 异常对象符合 RFC7807 标准
 - ✅ 错误处理流程完整

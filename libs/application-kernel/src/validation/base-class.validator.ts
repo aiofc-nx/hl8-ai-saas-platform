@@ -6,10 +6,10 @@
  *
  * @since 1.0.0
  */
-import { BaseCommand } from "../cqrs/commands/base-command";
-import { BaseQuery } from "../cqrs/queries/base-query";
-import { BaseUseCase } from "../use-cases/base-use-case";
-import { BaseCommandUseCase } from "../use-cases/base-command-use-case";
+import { BaseCommand } from "../cqrs/commands/base-command.js";
+import { BaseQuery } from "../cqrs/queries/base-query.js";
+import { BaseUseCase } from "../use-cases/base-use-case.js";
+import { BaseCommandUseCase } from "../use-cases/base-command-use-case.js";
 import { GeneralBadRequestException } from "@hl8/exceptions";
 
 /**
