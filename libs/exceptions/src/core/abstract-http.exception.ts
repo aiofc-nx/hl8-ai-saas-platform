@@ -125,7 +125,7 @@ export interface ProblemDetails {
    *
    * @description 提供与错误相关的额外信息，不应包含敏感数据
    */
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 /**
@@ -171,7 +171,7 @@ export abstract class AbstractHttpException extends HttpException {
   public readonly title: string;
   public readonly detail: string;
   public readonly httpStatus: number;
-  public readonly data?: any;
+  public readonly data?: Record<string, unknown>;
   public readonly type?: string;
   public readonly rootCause?: Error;
 
@@ -180,7 +180,7 @@ export abstract class AbstractHttpException extends HttpException {
     title: string,
     detail: string,
     status: number,
-    data?: any,
+    data?: Record<string, unknown>,
     type?: string,
     rootCause?: Error,
   ) {

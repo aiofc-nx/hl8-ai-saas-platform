@@ -77,7 +77,7 @@ export class GeneralNotFoundException extends AbstractHttpException {
    * );
    * ```
    */
-  constructor(title: string, detail: string, data?: any) {
+  constructor(title: string, detail: string, data?: Record<string, unknown>) {
     super("NOT_FOUND", title, detail, 404, data);
   }
 }

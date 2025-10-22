@@ -90,7 +90,7 @@ export class GeneralBadRequestException extends AbstractHttpException {
    * );
    * ```
    */
-  constructor(title: string, detail: string, data?: any) {
+  constructor(title: string, detail: string, data?: Record<string, unknown>) {
     super("BAD_REQUEST", title, detail, 400, data);
   }
 }

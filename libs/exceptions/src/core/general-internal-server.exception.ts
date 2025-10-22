@@ -116,7 +116,12 @@ export class GeneralInternalServerException extends AbstractHttpException {
    * }
    * ```
    */
-  constructor(title: string, detail: string, data?: any, rootCause?: Error) {
+  constructor(
+    title: string,
+    detail: string,
+    data?: Record<string, unknown>,
+    rootCause?: Error,
+  ) {
     super(
       "INTERNAL_SERVER_ERROR",
       title,

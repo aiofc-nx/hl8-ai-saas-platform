@@ -13,7 +13,12 @@
  * @since 0.1.0
  */
 
-import { ModuleMetadata, Type } from "@nestjs/common";
+import {
+  ModuleMetadata,
+  Type,
+  InjectionToken,
+  OptionalFactoryDependency,
+} from "@nestjs/common";
 import { ILoggerService } from "../filters/http-exception.filter.js";
 import { ExceptionMessageProvider } from "../providers/exception-message.provider.js";
 
@@ -74,13 +79,13 @@ export interface ExceptionModuleAsyncOptions
    * 使用工厂函数配置
    */
   useFactory?: (
-    ...args: any[]
+    ...args: unknown[]
   ) => Promise<ExceptionModuleOptions> | ExceptionModuleOptions;
 
   /**
    * 依赖注入
    */
-  inject?: any[];
+  inject?: (InjectionToken | OptionalFactoryDependency)[];
 
   /**
    * 使用类配置

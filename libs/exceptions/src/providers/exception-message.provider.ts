@@ -76,7 +76,7 @@ export interface ExceptionMessageProvider {
   getMessage(
     errorCode: string,
     messageType: "title" | "detail",
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
   ): string | undefined;
 
   /**

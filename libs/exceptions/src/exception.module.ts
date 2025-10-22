@@ -185,7 +185,7 @@ export class ExceptionModule {
       return [
         {
           provide: EXCEPTION_MODULE_OPTIONS,
-          useFactory: async (...args: any[]) => {
+          useFactory: async (...args: unknown[]) => {
             const config = await options.useFactory!(...args);
             return { ...DEFAULT_EXCEPTION_OPTIONS, ...config };
           },

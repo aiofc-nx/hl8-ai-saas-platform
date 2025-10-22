@@ -7,7 +7,7 @@
 import { AbstractHttpException } from "./abstract-http.exception.js";
 
 export class InvalidIsolationContextException extends AbstractHttpException {
-  constructor(reason: string, data?: any) {
+  constructor(reason: string, data?: Record<string, unknown>) {
     super("INVALID_ISOLATION_CONTEXT", "无效的隔离上下文", reason, 400, data);
   }
 }

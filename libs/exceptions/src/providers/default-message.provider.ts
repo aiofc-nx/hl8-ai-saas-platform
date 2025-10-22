@@ -73,7 +73,7 @@ export class DefaultMessageProvider implements ExceptionMessageProvider {
   getMessage(
     errorCode: string,
     messageType: "title" | "detail",
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
   ): string | undefined {
     const message = this.messages[errorCode]?.[messageType];
     if (!message) {
@@ -122,7 +122,7 @@ export class DefaultMessageProvider implements ExceptionMessageProvider {
    */
   private replaceParams(
     template: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
   ): string {
     if (!params) {
       return template;
@@ -143,15 +143,15 @@ export class DefaultMessageProvider implements ExceptionMessageProvider {
    *
    * @private
    */
-  private getNestedValue(obj: any, path: string): any {
+  private getNestedValue(obj: Record<string, unknown>, path: string): unknown {
     const keys = path.split(".");
-    let value = obj;
+    let value: unknown = obj;
 
     for (const key of keys) {
-      if (value === null || value === undefined) {
+      if (value === null || value === undefined || typeof value !== "object") {
         return undefined;
       }
-      value = value[key];
+      value = (value as Record<string, unknown>)[key];
     }
 
     return value;

@@ -81,7 +81,7 @@ export interface ILoggerService {
    * @param message - 日志消息
    * @param context - 日志上下文（可选）
    */
-  log(message: string, context?: any): void;
+  log(message: string, context?: Record<string, unknown>): void;
 
   /**
    * 记录错误日志
@@ -90,7 +90,11 @@ export interface ILoggerService {
    * @param stack - 错误堆栈（可选）
    * @param context - 日志上下文（可选）
    */
-  error(message: string, stack?: string, context?: any): void;
+  error(
+    message: string,
+    stack?: string,
+    context?: Record<string, unknown>,
+  ): void;
 
   /**
    * 记录警告日志
@@ -98,7 +102,7 @@ export interface ILoggerService {
    * @param message - 日志消息
    * @param context - 日志上下文（可选）
    */
-  warn(message: string, context?: any): void;
+  warn(message: string, context?: Record<string, unknown>): void;
 }
 
 /**
@@ -118,7 +122,7 @@ export interface IExceptionMessageProvider {
   getMessage(
     errorCode: string,
     messageType: "title" | "detail",
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
   ): string | undefined;
 
   /**
@@ -213,7 +217,7 @@ export class HttpExceptionFilter
   private logException(
     exception: AbstractHttpException,
     problemDetails: ProblemDetails,
-    request: any,
+    request: Record<string, unknown>,
   ): void {
     const logContext = {
       exception: problemDetails,

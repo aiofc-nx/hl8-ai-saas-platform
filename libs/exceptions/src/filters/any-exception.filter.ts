@@ -125,11 +125,11 @@ export class AnyExceptionFilter implements ExceptionFilter {
       const exceptionResponse = exception.getResponse();
 
       if (typeof exceptionResponse === "object" && exceptionResponse !== null) {
-        const resp = exceptionResponse as any;
-        title = resp.error || resp.message || title;
+        const resp = exceptionResponse as Record<string, unknown>;
+        title = (resp.error as string) || (resp.message as string) || title;
         detail = Array.isArray(resp.message)
-          ? resp.message.join(", ")
-          : resp.message || detail;
+          ? (resp.message as string[]).join(", ")
+          : (resp.message as string) || detail;
       } else if (typeof exceptionResponse === "string") {
         detail = exceptionResponse;
       }
@@ -191,7 +191,7 @@ export class AnyExceptionFilter implements ExceptionFilter {
   private logException(
     exception: unknown,
     problemDetails: ProblemDetails,
-    request: any,
+    request: Record<string, unknown>,
   ): void {
     const logContext = {
       exception: problemDetails,
