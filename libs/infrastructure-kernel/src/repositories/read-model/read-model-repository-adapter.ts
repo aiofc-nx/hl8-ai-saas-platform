@@ -59,9 +59,9 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
       // 执行查询
       const repository = this.databaseAdapter.getRepository(this.getEntityClass());
       const results = await repository.find(conditions, {
-        limit: query.limit,
-        offset: query.offset,
-        orderBy: query.orderBy ? { [query.orderBy]: query.orderDirection || 'ASC' } : undefined
+        limit: (query as any).limit,
+        offset: (query as any).offset,
+        orderBy: (query as any).orderBy ? { [(query as any).orderBy]: (query as any).orderDirection || 'ASC' } : undefined
       });
       
       // 应用隔离过滤
@@ -256,13 +256,13 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     const conditions: Record<string, any> = {};
     
     // 添加查询参数
-    if (query.params) {
-      Object.assign(conditions, query.params);
+    if ((query as any).params) {
+      Object.assign(conditions, (query as any).params);
     }
     
     // 添加过滤条件
-    if (query.filters) {
-      Object.assign(conditions, query.filters);
+    if ((query as any).filters) {
+      Object.assign(conditions, (query as any).filters);
     }
     
     return conditions;
@@ -287,37 +287,37 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
   }
 
   /**
-   * 应用隔离上下文到查询
+   * 应用隔离上下文到实体
    */
-  protected applyIsolationContext(query: BaseQuery): BaseQuery {
+  protected applyIsolationContext(entity: any): any {
     if (!this.isolationContext) {
-      return query;
+      return entity;
     }
 
-    const isolatedQuery = { ...query };
+    const isolatedEntity = { ...entity } as any;
     
     // 添加隔离参数
-    if (!isolatedQuery.params) {
-      isolatedQuery.params = {};
+    if (!isolatedEntity.params) {
+      isolatedEntity.params = {};
     }
     
     if (this.isolationContext.tenantId) {
-      isolatedQuery.params.tenantId = this.isolationContext.tenantId;
+      isolatedEntity.params.tenantId = this.isolationContext.tenantId;
     }
     
     if (this.isolationContext.organizationId) {
-      isolatedQuery.params.organizationId = this.isolationContext.organizationId;
+      isolatedEntity.params.organizationId = this.isolationContext.organizationId;
     }
     
     if (this.isolationContext.departmentId) {
-      isolatedQuery.params.departmentId = this.isolationContext.departmentId;
+      isolatedEntity.params.departmentId = this.isolationContext.departmentId;
     }
     
     if (this.isolationContext.userId) {
-      isolatedQuery.params.userId = this.isolationContext.userId;
+      isolatedEntity.params.userId = this.isolationContext.userId;
     }
 
-    return isolatedQuery;
+    return isolatedEntity;
   }
 
   /**

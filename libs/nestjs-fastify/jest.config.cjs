@@ -1,7 +1,5 @@
-import type { Config } from "jest";
-
-const config: Config = {
-  displayName: "@hl8/business-core",
+module.exports = {
+  displayName: "@hl8/nestjs-fastify",
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
   extensionsToTreatAsEsm: [".ts"],
@@ -38,5 +36,3 @@ const config: Config = {
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
 };
-
-export default config;

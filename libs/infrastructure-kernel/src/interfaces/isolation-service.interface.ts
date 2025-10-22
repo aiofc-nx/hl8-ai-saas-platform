@@ -217,3 +217,6 @@ export interface IIsolationManager {
   /** 获取隔离统计 */
   getIsolationStats(): Promise<Record<string, any>>;
 }
+
+// 重新导出类型 - 注释掉以避免冲突
+// export type { AccessRule } from '../types/isolation.types.js';

@@ -112,3 +112,6 @@ export interface ICacheManager {
   /** 关闭所有服务 */
   closeAll(): Promise<void>;
 }
+
+// 重新导出类型
+export type { CacheStats, CacheClearOptions, CacheClearResult, CacheConfig } from '../types/cache.types.js';

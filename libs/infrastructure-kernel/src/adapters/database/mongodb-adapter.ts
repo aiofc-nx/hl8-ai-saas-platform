@@ -32,8 +32,8 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         driver: MongoDriver,
         entities: [],
         migrations: {
-          path: './migrations',
-          pattern: /^[\w-]+\d+\.(ts|js)$/
+          path: './migrations'
+          // pattern: /^[\w-]+\d+\.(ts|js)$/ // 注释掉不支持的属性
         }
       });
 

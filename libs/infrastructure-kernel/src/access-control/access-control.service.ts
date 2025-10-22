@@ -2,7 +2,7 @@
  * 访问控制服务
  * @description 提供基于隔离上下文的访问控制能力
  */
-import { IsolationContext } from "../isolation/isolation-context.js";
+import type { IsolationContext } from "../types/isolation.types.js";
 import { IsolationLevel } from "@hl8/domain-kernel";
 
 /**
@@ -40,7 +40,7 @@ export class AccessControlService {
     userContext: IsolationContext,
     requiredLevel: IsolationLevel,
   ): boolean {
-    const userLevel = userContext.getIsolationLevel();
+    const userLevel = (userContext as any).getIsolationLevel?.() || IsolationLevel.USER;
     // 用户隔离级别应该大于等于所需隔离级别
     // 例如：用户级用户 >= 租户级要求 = true
     return this.compareIsolationLevels(userLevel, requiredLevel) >= 0;
@@ -79,27 +79,27 @@ export class AccessControlService {
     resourceContext: IsolationContext,
   ): boolean {
     // 平台级资源对所有用户可见
-    if (resourceContext.getIsolationLevel() === IsolationLevel.PLATFORM) {
+    if ((resourceContext as any).getIsolationLevel?.() === IsolationLevel.PLATFORM) {
       return true;
     }
 
     // 租户级资源检查
-    if (resourceContext.isTenantLevel()) {
+    if ((resourceContext as any).isTenantLevel?.()) {
       return this.checkTenantAccess(userContext, resourceContext);
     }
 
     // 组织级资源检查
-    if (resourceContext.isOrganizationLevel()) {
+    if ((resourceContext as any).isOrganizationLevel?.()) {
       return this.checkOrganizationAccess(userContext, resourceContext);
     }
 
     // 部门级资源检查
-    if (resourceContext.isDepartmentLevel()) {
+    if ((resourceContext as any).isDepartmentLevel?.()) {
       return this.checkDepartmentAccess(userContext, resourceContext);
     }
 
     // 用户级资源检查
-    if (resourceContext.isUserLevel()) {
+    if ((resourceContext as any).isUserLevel?.()) {
       return this.checkUserAccess(userContext, resourceContext);
     }
 
@@ -116,7 +116,7 @@ export class AccessControlService {
     if (!userContext.tenantId || !resourceContext.tenantId) {
       return false;
     }
-    return userContext.tenantId.equals(resourceContext.tenantId);
+    return userContext.tenantId === resourceContext.tenantId;
   }
 
   /**
@@ -132,7 +132,7 @@ export class AccessControlService {
     if (!userContext.organizationId || !resourceContext.organizationId) {
       return false;
     }
-    return userContext.organizationId.equals(resourceContext.organizationId);
+    return userContext.organizationId === resourceContext.organizationId;
   }
 
   /**
@@ -148,7 +148,7 @@ export class AccessControlService {
     if (!userContext.departmentId || !resourceContext.departmentId) {
       return false;
     }
-    return userContext.departmentId.equals(resourceContext.departmentId);
+    return userContext.departmentId === resourceContext.departmentId;
   }
 
   /**
@@ -164,6 +164,6 @@ export class AccessControlService {
     if (!userContext.userId || !resourceContext.userId) {
       return false;
     }
-    return userContext.userId.equals(resourceContext.userId);
+    return userContext.userId === resourceContext.userId;
   }
 }

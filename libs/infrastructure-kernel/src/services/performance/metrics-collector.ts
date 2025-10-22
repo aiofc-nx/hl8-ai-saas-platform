@@ -6,9 +6,9 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 
 /**
  * 指标类型
@@ -305,21 +305,21 @@ export class MetricsCollectorService {
             {
               name: 'cache_hit_rate',
               type: 'gauge' as MetricType,
-              value: stats.hitRate || 0,
+              value: (await stats).hitRate || 0,
               timestamp: new Date(),
               description: '缓存命中率'
             },
             {
               name: 'cache_miss_rate',
               type: 'gauge' as MetricType,
-              value: stats.missRate || 0,
+              value: (await stats).missRate || 0,
               timestamp: new Date(),
               description: '缓存未命中率'
             },
             {
               name: 'cache_total_entries',
               type: 'gauge' as MetricType,
-              value: stats.totalEntries || 0,
+              value: (await stats).totalEntries || 0,
               timestamp: new Date(),
               description: '缓存总条目数'
             }
