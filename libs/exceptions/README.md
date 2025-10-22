@@ -17,6 +17,7 @@
 - [使用示例](#使用示例)
 - [最佳实践](#最佳实践)
 - [故障排除](#故障排除)
+- [文档资源](#文档资源)
 - [更新日志](#更新日志)
 - [许可证](#许可证)
 
@@ -24,12 +25,16 @@
 
 - 🎯 **RFC7807 标准**：完全遵循 RFC7807 标准，提供统一的错误响应格式
 - 🏗️ **Clean Architecture**：采用清洁架构设计，支持领域驱动开发
+- 📂 **分类管理**：按业务域分类的异常管理，支持10个主要类别
+- 🔄 **分层支持**：支持四层架构异常映射（接口层、应用层、领域层、基础设施层）
 - 🔧 **高度可配置**：支持同步和异步配置，灵活的消息提供者
 - 📝 **完整日志记录**：自动记录异常详情和请求上下文
 - 🌐 **国际化支持**：通过消息提供者支持多语言错误消息
 - 🛡️ **类型安全**：完整的 TypeScript 支持，提供类型安全保障
 - ⚡ **性能优化**：轻量级设计，最小化性能开销
-- 🔄 **事件驱动**：支持异常事件发布，便于监控和追踪
+- 🔒 **安全防护**：生产环境自动隐藏敏感信息，防止信息泄露
+- 🚀 **Fastify兼容**：完美支持Fastify HTTP适配器
+- 🧪 **测试完善**：100%测试覆盖率，确保代码质量
 
 ## 🏗️ 架构设计
 
@@ -39,10 +44,64 @@
 @hl8/exceptions/
 ├── core/                    # 核心异常类
 │   ├── AbstractHttpException    # 抽象基类
-│   ├── GeneralBadRequestException    # 通用 400 错误
-│   ├── GeneralInternalServerException # 通用 500 错误
-│   ├── GeneralNotFoundException      # 通用 404 错误
-│   └── 业务异常类...           # 特定业务异常
+│   ├── layers/                  # 分层异常基类
+│   │   ├── InterfaceLayerException      # 接口层异常
+│   │   ├── ApplicationLayerException    # 应用层异常
+│   │   ├── DomainLayerException         # 领域层异常
+│   │   └── InfrastructureLayerException # 基础设施层异常
+│   ├── auth/                   # 认证授权异常
+│   │   ├── AuthException              # 认证异常基类
+│   │   ├── AuthenticationFailedException # 认证失败
+│   │   ├── UnauthorizedException      # 未授权访问
+│   │   ├── TokenExpiredException      # 令牌过期
+│   │   ├── InvalidTokenException      # 无效令牌
+│   │   └── InsufficientPermissionsException # 权限不足
+│   ├── user/                   # 用户管理异常
+│   │   ├── UserException              # 用户异常基类
+│   │   ├── UserNotFoundException      # 用户未找到
+│   │   ├── UserAlreadyExistsException # 用户已存在
+│   │   ├── InvalidUserStatusException # 用户状态无效
+│   │   ├── UserAccountLockedException # 账户被锁定
+│   │   └── UserAccountDisabledException # 账户已禁用
+│   ├── tenant/                 # 多租户异常
+│   │   ├── TenantException            # 租户异常基类
+│   │   ├── CrossTenantAccessException # 跨租户访问违规
+│   │   ├── DataIsolationViolationException # 数据隔离违规
+│   │   └── InvalidTenantContextException # 无效租户上下文
+│   ├── validation/             # 数据验证异常
+│   │   ├── ValidationException        # 验证异常基类
+│   │   ├── ValidationFailedException  # 验证失败
+│   │   ├── BusinessRuleViolationException # 业务规则违规
+│   │   └── ConstraintViolationException # 约束违规
+│   ├── system/                 # 系统资源异常
+│   │   ├── SystemException            # 系统异常基类
+│   │   ├── RateLimitExceededException # 速率限制超出
+│   │   ├── ServiceUnavailableException # 服务不可用
+│   │   └── ResourceNotFoundException  # 资源未找到
+│   ├── organization/           # 组织管理异常
+│   │   ├── OrganizationException      # 组织异常基类
+│   │   ├── OrganizationNotFoundException # 组织未找到
+│   │   └── UnauthorizedOrganizationException # 未授权组织访问
+│   ├── department/             # 部门管理异常
+│   │   ├── DepartmentException        # 部门异常基类
+│   │   ├── DepartmentNotFoundException # 部门未找到
+│   │   ├── UnauthorizedDepartmentException # 未授权部门访问
+│   │   └── InvalidDepartmentHierarchyException # 无效部门层级
+│   ├── business/               # 业务逻辑异常
+│   │   ├── BusinessException          # 业务异常基类
+│   │   ├── OperationFailedException   # 操作失败
+│   │   ├── InvalidStateTransitionException # 无效状态转换
+│   │   └── StepFailedException        # 步骤失败
+│   ├── integration/            # 集成异常
+│   │   ├── IntegrationException       # 集成异常基类
+│   │   ├── ExternalServiceUnavailableException # 外部服务不可用
+│   │   ├── ExternalServiceErrorException # 外部服务错误
+│   │   └── ExternalServiceTimeoutException # 外部服务超时
+│   ├── general/                # 通用异常
+│   │   ├── GeneralException           # 通用异常基类
+│   │   ├── NotImplementedException    # 未实现
+│   │   └── MaintenanceModeException   # 维护模式
+│   └── 标准异常类...           # 通用异常
 ├── filters/                 # 异常过滤器
 │   ├── HttpExceptionFilter      # HTTP 异常过滤器
 │   └── AnyExceptionFilter       # 通用异常过滤器
@@ -95,48 +154,140 @@ import { ExceptionModule } from "@hl8/exceptions";
     ExceptionModule.forRoot({
       enableLogging: true,
       isProduction: process.env.NODE_ENV === "production",
+      registerGlobalFilters: true,
     }),
   ],
 })
 export class AppModule {}
 ```
 
-### 2. 创建自定义异常
+### 2. 手动注册过滤器（可选）
 
 ```typescript
-// user.exceptions.ts
-import { AbstractHttpException } from "@hl8/exceptions";
+// main.ts
+import { NestFactory } from '@nestjs/core';
+import { HttpExceptionFilter, AnyExceptionFilter } from '@hl8/exceptions';
 
-export class UserNotFoundException extends AbstractHttpException {
-  constructor(userId: string) {
-    super(
-      "USER_NOT_FOUND",
-      "用户未找到",
-      `ID 为 "${userId}" 的用户不存在`,
-      404,
-      { userId },
-    );
-  }
-}
+const app = await NestFactory.create(AppModule);
+
+// 注册全局异常过滤器
+app.useGlobalFilters(
+  new HttpExceptionFilter(logger, messageProvider),
+  new AnyExceptionFilter(logger)
+);
+
+await app.listen(3000);
 ```
 
-### 3. 在服务中使用
+### 3. 使用分类异常
+
+#### 按业务域导入异常
 
 ```typescript
-// user.service.ts
-import { Injectable } from "@nestjs/common";
-import { UserNotFoundException } from "./user.exceptions";
+// 认证相关异常
+import {
+  AuthenticationFailedException,
+  UnauthorizedException,
+  TokenExpiredException,
+  InvalidTokenException,
+  InsufficientPermissionsException
+} from "@hl8/exceptions/core/auth";
 
-@Injectable()
+// 用户管理异常
+import {
+  UserNotFoundException,
+  UserAlreadyExistsException,
+  InvalidUserStatusException,
+  UserAccountLockedException,
+  UserAccountDisabledException
+} from "@hl8/exceptions/core/user";
+
+// 多租户异常
+import {
+  CrossTenantAccessException,
+  DataIsolationViolationException,
+  InvalidTenantContextException
+} from "@hl8/exceptions/core/tenant";
+
+// 数据验证异常
+import {
+  ValidationFailedException,
+  BusinessRuleViolationException,
+  ConstraintViolationException
+} from "@hl8/exceptions/core/validation";
+
+// 系统资源异常
+import {
+  RateLimitExceededException,
+  ServiceUnavailableException,
+  ResourceNotFoundException
+} from "@hl8/exceptions/core/system";
+
+// 组织管理异常
+import {
+  OrganizationNotFoundException,
+  UnauthorizedOrganizationException
+} from "@hl8/exceptions/core/organization";
+
+// 部门管理异常
+import {
+  DepartmentNotFoundException,
+  UnauthorizedDepartmentException,
+  InvalidDepartmentHierarchyException
+} from "@hl8/exceptions/core/department";
+
+// 业务逻辑异常
+import {
+  OperationFailedException,
+  InvalidStateTransitionException,
+  StepFailedException
+} from "@hl8/exceptions/core/business";
+
+// 集成异常
+import {
+  ExternalServiceUnavailableException,
+  ExternalServiceErrorException,
+  ExternalServiceTimeoutException
+} from "@hl8/exceptions/core/integration";
+
+// 通用异常
+import {
+  NotImplementedException,
+  MaintenanceModeException
+} from "@hl8/exceptions/core/general";
+```
+
+#### 使用示例
+
+```typescript
 export class UserService {
-  async findById(id: string) {
-    const user = await this.userRepository.findById(id);
-
+  async findUser(userId: string) {
+    const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new UserNotFoundException(id);
+      throw new UserNotFoundException(userId);
     }
-
     return user;
+  }
+
+  async authenticateUser(username: string, password: string) {
+    const user = await this.userRepository.findByUsername(username);
+    if (!user || !await this.validatePassword(password, user.passwordHash)) {
+      throw new AuthenticationFailedException("用户名或密码错误", {
+        username,
+        attemptCount: this.getAttemptCount(username)
+      });
+    }
+    return user;
+  }
+
+  async validateTenantAccess(userId: string, tenantId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user.tenants.includes(tenantId)) {
+      throw new CrossTenantAccessException(user.currentTenantId, tenantId, {
+        resourceType: 'user',
+        userId
+      });
+    }
   }
 }
 ```
@@ -774,6 +925,29 @@ console.log(JSON.stringify(problemDetails, null, 2));
 - ✨ 支持自定义日志服务
 - ✨ 提供预定义异常类
 - ✨ 完整的 TypeScript 支持
+
+## 📚 文档资源
+
+### 核心文档
+
+- **[快速开始指南](docs/QUICKSTART.md)** - 快速上手指南，包含基本配置和使用示例
+- **[API 参考文档](docs/API_REFERENCE.md)** - 完整的API接口文档，包含所有异常类和配置选项
+- **[最佳实践指南](docs/BEST_PRACTICES.md)** - 异常设计原则、使用指南和性能优化建议
+- **[故障排除指南](docs/TROUBLESHOOTING.md)** - 常见问题和解决方案，调试技巧
+
+### 迁移指南
+
+- **[迁移指南](docs/MIGRATION_GUIDE.md)** - 从旧版本迁移到新版本的详细指南
+
+### 架构文档
+
+- **[架构设计](docs/ARCHITECTURE.md)** - 模块架构设计和设计原则
+- **[异常分类](docs/EXCEPTION_CATEGORIES.md)** - 异常分类体系和业务域映射
+
+### 开发文档
+
+- **[贡献指南](docs/CONTRIBUTING.md)** - 如何为项目贡献代码
+- **[开发指南](docs/DEVELOPMENT.md)** - 本地开发环境设置和开发流程
 
 ## 📄 许可证
 
