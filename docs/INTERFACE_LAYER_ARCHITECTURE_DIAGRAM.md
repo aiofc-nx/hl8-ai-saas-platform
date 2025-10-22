@@ -19,31 +19,31 @@
 
 ## System Architecture
 
-*[Content to be implemented in Phase 5]*
+_[Content to be implemented in Phase 5]_
 
 ## Component Interaction Diagrams
 
-*[Content to be implemented in Phase 5]*
+_[Content to be implemented in Phase 5]_
 
 ## Data Flow Diagrams
 
-*[Content to be implemented in Phase 5]*
+_[Content to be implemented in Phase 5]_
 
 ## Sequence Diagrams
 
-*[Content to be implemented in Phase 5]*
+_[Content to be implemented in Phase 5]_
 
 ## Deployment Diagrams
 
-*[Content to be implemented in Phase 5]*
+_[Content to be implemented in Phase 5]_
 
 ## Security Diagrams
 
-*[Content to be implemented in Phase 5]*
+_[Content to be implemented in Phase 5]_
 
 ## Diagram Legends
 
-*[Content to be implemented in Phase 5]*
+_[Content to be implemented in Phase 5]_
 
 ---
 

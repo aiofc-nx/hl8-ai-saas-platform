@@ -67,19 +67,19 @@ graph TB
         D[Rate Limiting Service]
         E[Monitoring Service]
     end
-    
+
     subgraph "Application Layer"
         F[Use Case Services]
         G[Command Handlers]
         H[Query Handlers]
     end
-    
+
     subgraph "Domain Layer"
         I[Domain Services]
         J[Aggregates]
         K[Value Objects]
     end
-    
+
     A --> B
     A --> C
     A --> D
@@ -252,13 +252,13 @@ graph TB
 
 ### Technology Decision Matrix
 
-| Technology | Performance | Developer Experience | Ecosystem | Maintenance | Score |
-|------------|-------------|---------------------|-----------|-------------|-------|
-| Fastify | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 17/20 |
-| Apollo Server | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 18/20 |
-| Socket.io | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 16/20 |
-| JWT | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 20/20 |
-| Zod | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 17/20 |
+| Technology    | Performance | Developer Experience | Ecosystem  | Maintenance | Score |
+| ------------- | ----------- | -------------------- | ---------- | ----------- | ----- |
+| Fastify       | ⭐⭐⭐⭐⭐  | ⭐⭐⭐⭐             | ⭐⭐⭐⭐   | ⭐⭐⭐⭐    | 17/20 |
+| Apollo Server | ⭐⭐⭐⭐    | ⭐⭐⭐⭐⭐           | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐    | 18/20 |
+| Socket.io     | ⭐⭐⭐⭐    | ⭐⭐⭐⭐             | ⭐⭐⭐⭐   | ⭐⭐⭐⭐    | 16/20 |
+| JWT           | ⭐⭐⭐⭐⭐  | ⭐⭐⭐⭐             | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐  | 20/20 |
+| Zod           | ⭐⭐⭐⭐    | ⭐⭐⭐⭐⭐           | ⭐⭐⭐⭐   | ⭐⭐⭐⭐    | 17/20 |
 
 ### Migration Strategy
 

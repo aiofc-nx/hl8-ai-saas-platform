@@ -106,9 +106,9 @@ export class FileCacheProvider implements CacheProvider {
       this.emitEvent("hit", key);
 
       return entry.value;
-    } catch (error) {
+    } catch (_error) {
       this.emitEvent("miss", key, {
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: _error instanceof Error ? _error.message : "Unknown error",
       });
       return null;
     }
@@ -147,11 +147,11 @@ export class FileCacheProvider implements CacheProvider {
       await this.writeCacheEntry(filePath, entry);
       this.updateStats();
       this.emitEvent("set", key, { size, ttl });
-    } catch (error) {
+    } catch (_error) {
       this.emitEvent("set", key, {
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: _error instanceof Error ? _error.message : "Unknown error",
       });
-      throw error;
+      throw _error;
     }
   }
 
@@ -175,9 +175,9 @@ export class FileCacheProvider implements CacheProvider {
       }
 
       return false;
-    } catch (error) {
+    } catch (_error) {
       this.emitEvent("delete", key, {
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: _error instanceof Error ? _error.message : "Unknown error",
       });
       return false;
     }
@@ -210,11 +210,11 @@ export class FileCacheProvider implements CacheProvider {
       };
 
       this.emitEvent("clear", "all");
-    } catch (error) {
+    } catch (_error) {
       this.emitEvent("clear", "all", {
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: _error instanceof Error ? _error.message : "Unknown error",
       });
-      throw error;
+      throw _error;
     }
   }
 
@@ -244,7 +244,7 @@ export class FileCacheProvider implements CacheProvider {
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -304,9 +304,9 @@ export class FileCacheProvider implements CacheProvider {
         recursive: true,
         mode: this.options.fileMode || 0o755,
       });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
-        throw error;
+    } catch (_error) {
+      if ((_error as NodeJS.ErrnoException).code !== "EEXIST") {
+        throw _error;
       }
     }
   }
@@ -339,7 +339,7 @@ export class FileCacheProvider implements CacheProvider {
     try {
       await stat(filePath);
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -366,7 +366,7 @@ export class FileCacheProvider implements CacheProvider {
       }
 
       return entry;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -432,7 +432,7 @@ export class FileCacheProvider implements CacheProvider {
       this.stats.topKeys = topKeys
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
-    } catch (error) {
+    } catch (_error) {
       // 忽略统计更新错误
     }
   }
@@ -491,12 +491,12 @@ export class FileCacheProvider implements CacheProvider {
       for (const listener of listeners) {
         try {
           listener(event);
-        } catch (error) {
+        } catch (_error) {
           const logger = ConfigLogger.getInstance();
           logger.error("缓存事件监听器错误", {
             event: event.type,
-            error: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined,
+            error: _error instanceof Error ? _error.message : String(_error),
+            stack: _error instanceof Error ? _error.stack : undefined,
           });
         }
       }

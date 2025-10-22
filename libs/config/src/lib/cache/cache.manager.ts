@@ -250,7 +250,7 @@ export class CacheManager {
    */
   public destroy(): void {
     if (this.provider && "destroy" in this.provider) {
-      (this.provider as any).destroy();
+      (this.provider as { destroy(): void }).destroy();
     }
     this.provider = null;
     this.listeners.clear();
@@ -266,7 +266,7 @@ export class CacheManager {
   private async initializeProvider(): Promise<void> {
     // 销毁现有提供者
     if (this.provider && "destroy" in this.provider) {
-      (this.provider as any).destroy();
+      (this.provider as { destroy(): void }).destroy();
     }
 
     // 重新添加事件监听器到新提供者

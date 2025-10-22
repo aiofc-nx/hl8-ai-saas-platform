@@ -40,7 +40,8 @@ export class AccessControlService {
     userContext: IsolationContext,
     requiredLevel: IsolationLevel,
   ): boolean {
-    const userLevel = (userContext as any).getIsolationLevel?.() || IsolationLevel.USER;
+    const userLevel =
+      (userContext as any).getIsolationLevel?.() || IsolationLevel.USER;
     // 用户隔离级别应该大于等于所需隔离级别
     // 例如：用户级用户 >= 租户级要求 = true
     return this.compareIsolationLevels(userLevel, requiredLevel) >= 0;
@@ -79,7 +80,9 @@ export class AccessControlService {
     resourceContext: IsolationContext,
   ): boolean {
     // 平台级资源对所有用户可见
-    if ((resourceContext as any).getIsolationLevel?.() === IsolationLevel.PLATFORM) {
+    if (
+      (resourceContext as any).getIsolationLevel?.() === IsolationLevel.PLATFORM
+    ) {
       return true;
     }
 

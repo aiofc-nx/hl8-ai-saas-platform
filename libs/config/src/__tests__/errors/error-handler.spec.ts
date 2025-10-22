@@ -6,8 +6,8 @@
  * @since 1.0.0
  */
 
-import { ConfigError, ConfigErrorType } from "../../lib/errors/config-error";
-import { ErrorHandler } from "../../lib/errors/error-handler";
+import { ConfigError, ConfigErrorType } from "../../lib/errors/config-error.js";
+import { ErrorHandler } from "../../lib/errors/error-handler.js";
 
 describe("ErrorHandler", () => {
   describe("文件加载错误处理", () => {
@@ -312,7 +312,9 @@ describe("ErrorHandler", () => {
       );
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        "Config Error:",
+        expect.stringMatching(
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z \[CONFIG\]:ERROR 配置错误$/,
+        ),
         expect.stringContaining("Test error"),
       );
 
@@ -353,8 +355,8 @@ describe("ErrorHandler", () => {
       expect(detailedMessage).toContain("Failed to load configuration file");
       expect(detailedMessage).toContain(filePath);
       expect(detailedMessage).toContain("Test error");
-      expect(detailedMessage).toContain("line: 10");
-      expect(detailedMessage).toContain("column: 5");
+      expect(detailedMessage).toContain('"line": 10');
+      expect(detailedMessage).toContain('"column": 5');
     });
 
     it("应该转换为 JSON 格式", () => {

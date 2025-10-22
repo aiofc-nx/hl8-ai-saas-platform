@@ -1,6 +1,6 @@
 {
   "name": "@hl8/config",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "类型安全的配置管理模块 - 支持多种加载器和验证",
   "keywords": [
     "nestjs",
@@ -28,7 +28,8 @@
     "build": "tsc -p tsconfig.build.json",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",

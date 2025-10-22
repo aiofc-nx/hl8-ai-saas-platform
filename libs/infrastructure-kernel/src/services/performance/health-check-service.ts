@@ -5,11 +5,15 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IHealthCheckService, HealthCheckResult } from '../../interfaces/health-service.interface.js';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import * as os from "os";
+import type {
+  IHealthCheckService,
+  HealthCheckResult,
+} from "../../interfaces/health-service.interface.js";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
+import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
 
 /**
  * 健康检查服务
@@ -50,7 +54,7 @@ export class HealthCheckService implements IHealthCheckService {
   }
 
   getHealthStatus(): Promise<string> {
-    return this.check().then(result => result.status as string);
+    return this.check().then((result) => result.status as string);
   }
 
   resetHealthIndicators(): void {
@@ -71,7 +75,7 @@ export class HealthCheckService implements IHealthCheckService {
 
   getComponentStatus(name: string): Promise<any> {
     // 获取组件状态
-    return Promise.resolve('healthy' as any);
+    return Promise.resolve("healthy" as any);
   }
 
   checkHealth(): Promise<any> {
@@ -95,7 +99,7 @@ export class HealthCheckService implements IHealthCheckService {
   // 添加其他缺失的接口方法
   checkComponent(component: string): Promise<any> {
     // 检查组件健康状态
-    return Promise.resolve({ status: 'healthy' as any, component });
+    return Promise.resolve({ status: "healthy" as any, component });
   }
 
   getOverallHealth(): Promise<any> {
@@ -116,13 +120,13 @@ export class HealthCheckService implements IHealthCheckService {
   private config = {
     timeout: 5000,
     retryAttempts: 3,
-    retryDelay: 1000
+    retryDelay: 1000,
   };
 
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly loggingService?: ILoggingService
+    private readonly loggingService?: ILoggingService,
   ) {
     this.registerDefaultIndicators();
   }
@@ -149,26 +153,28 @@ export class HealthCheckService implements IHealthCheckService {
       const startTime = Date.now();
       const results: Record<string, any> = {};
       const errors: Record<string, any> = {};
-      
+
       // 并行执行所有健康指示器
       const indicatorPromises = Array.from(this.indicators.entries()).map(
         async ([name, indicator]) => {
           try {
             const result = await this.executeIndicator(name, indicator);
-            if (result.status === 'up') {
+            if (result.status === "up") {
               results[name] = result;
             } else {
               errors[name] = result;
             }
           } catch (error) {
             const errorResult: any = {
-              status: 'down',
-              message: error instanceof Error ? error.message : '健康检查失败',
-              details: { error: error instanceof Error ? error.message : '未知错误' }
+              status: "down",
+              message: error instanceof Error ? error.message : "健康检查失败",
+              details: {
+                error: error instanceof Error ? error.message : "未知错误",
+              },
             };
             errors[name] = errorResult;
           }
-        }
+        },
       );
 
       await Promise.all(indicatorPromises);
@@ -184,8 +190,8 @@ export class HealthCheckService implements IHealthCheckService {
           executionTime,
           totalIndicators: this.indicators.size,
           healthyIndicators: Object.keys(results).length,
-          unhealthyIndicators: Object.keys(errors).length
-        }
+          unhealthyIndicators: Object.keys(errors).length,
+        },
       } as any;
 
       // 记录健康检查日志
@@ -193,7 +199,9 @@ export class HealthCheckService implements IHealthCheckService {
 
       return healthCheckResult;
     } catch (error) {
-      throw new Error(`健康检查失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `健康检查失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -202,7 +210,7 @@ export class HealthCheckService implements IHealthCheckService {
    */
   private async executeIndicator(
     name: string,
-    indicator: () => Promise<any>
+    indicator: () => Promise<any>,
   ): Promise<any> {
     try {
       // 设置超时
@@ -212,17 +220,14 @@ export class HealthCheckService implements IHealthCheckService {
         }, this.config.timeout);
       });
 
-      const result = await Promise.race([
-        indicator(),
-        timeoutPromise
-      ]);
+      const result = await Promise.race([indicator(), timeoutPromise]);
 
       return result;
     } catch (error) {
       return {
-        status: 'down',
-        message: error instanceof Error ? error.message : '健康指示器执行失败',
-        details: { error: error instanceof Error ? error.message : '未知错误' }
+        status: "down",
+        message: error instanceof Error ? error.message : "健康指示器执行失败",
+        details: { error: error instanceof Error ? error.message : "未知错误" },
       };
     }
   }
@@ -232,18 +237,19 @@ export class HealthCheckService implements IHealthCheckService {
    */
   private determineOverallStatus(
     results: Record<string, any>,
-    errors: Record<string, any>
-  ): 'up' | 'down' | 'degraded' {
-    const totalIndicators = Object.keys(results).length + Object.keys(errors).length;
+    errors: Record<string, any>,
+  ): "up" | "down" | "degraded" {
+    const totalIndicators =
+      Object.keys(results).length + Object.keys(errors).length;
     const healthyIndicators = Object.keys(results).length;
     const unhealthyIndicators = Object.keys(errors).length;
 
     if (unhealthyIndicators === 0) {
-      return 'up';
+      return "up";
     } else if (unhealthyIndicators < totalIndicators) {
-      return 'degraded';
+      return "degraded";
     } else {
-      return 'down';
+      return "down";
     }
   }
 
@@ -252,44 +258,48 @@ export class HealthCheckService implements IHealthCheckService {
    */
   private registerDefaultIndicators(): void {
     // 数据库健康指示器
-    this.registerIndicator('database', async () => {
+    this.registerIndicator("database", async () => {
       try {
         const isHealthy = await this.databaseAdapter.healthCheck();
         return {
-          status: isHealthy ? 'up' : 'down',
-          message: isHealthy ? '数据库连接正常' : '数据库连接异常',
+          status: isHealthy ? "up" : "down",
+          message: isHealthy ? "数据库连接正常" : "数据库连接异常",
           details: {
-            type: 'database',
-            healthy: isHealthy
-          }
+            type: "database",
+            healthy: isHealthy,
+          },
         };
       } catch (error) {
         return {
-          status: 'down',
-          message: '数据库健康检查失败',
-          details: { error: error instanceof Error ? error.message : '未知错误' }
+          status: "down",
+          message: "数据库健康检查失败",
+          details: {
+            error: error instanceof Error ? error.message : "未知错误",
+          },
         };
       }
     });
 
     // 缓存健康指示器
     if (this.cacheService) {
-      this.registerIndicator('cache', async () => {
+      this.registerIndicator("cache", async () => {
         try {
           const isHealthy = await this.cacheService.healthCheck();
           return {
-            status: isHealthy ? 'up' : 'down',
-            message: isHealthy ? '缓存服务正常' : '缓存服务异常',
+            status: isHealthy ? "up" : "down",
+            message: isHealthy ? "缓存服务正常" : "缓存服务异常",
             details: {
-              type: 'cache',
-              healthy: isHealthy
-            }
+              type: "cache",
+              healthy: isHealthy,
+            },
           };
         } catch (error) {
           return {
-            status: 'down',
-            message: '缓存健康检查失败',
-            details: { error: error instanceof Error ? error.message : '未知错误' }
+            status: "down",
+            message: "缓存健康检查失败",
+            details: {
+              error: error instanceof Error ? error.message : "未知错误",
+            },
           };
         }
       });
@@ -297,88 +307,102 @@ export class HealthCheckService implements IHealthCheckService {
 
     // 日志健康指示器
     if (this.loggingService) {
-      this.registerIndicator('logging', async () => {
+      this.registerIndicator("logging", async () => {
         try {
           // 简单的日志服务健康检查
           await this.loggingService.info(
-            { requestId: 'health_check', tenantId: 'system', operation: 'health-check', resource: 'health-check', timestamp: new Date(), level: 'info', message: '健康检查' },
-            '健康检查测试'
+            {
+              requestId: "health_check",
+              tenantId: "system",
+              operation: "health-check",
+              resource: "health-check",
+              timestamp: new Date(),
+              level: "info",
+              message: "健康检查",
+            },
+            "健康检查测试",
           );
           return {
-            status: 'up',
-            message: '日志服务正常',
+            status: "up",
+            message: "日志服务正常",
             details: {
-              type: 'logging',
-              healthy: true
-            }
+              type: "logging",
+              healthy: true,
+            },
           };
         } catch (error) {
           return {
-            status: 'down',
-            message: '日志服务健康检查失败',
-            details: { error: error instanceof Error ? error.message : '未知错误' }
+            status: "down",
+            message: "日志服务健康检查失败",
+            details: {
+              error: error instanceof Error ? error.message : "未知错误",
+            },
           };
         }
       });
     }
 
     // 内存健康指示器
-    this.registerIndicator('memory', async () => {
+    this.registerIndicator("memory", async () => {
       try {
         const memUsage = process.memoryUsage();
-        const totalMem = require('os').totalmem();
+        const totalMem = os.totalmem();
         const memoryUsage = memUsage.heapUsed / totalMem;
         const isHealthy = memoryUsage < 0.8; // 80%阈值
 
         return {
-          status: isHealthy ? 'up' : 'down',
-          message: isHealthy ? '内存使用正常' : '内存使用过高',
+          status: isHealthy ? "up" : "down",
+          message: isHealthy ? "内存使用正常" : "内存使用过高",
           details: {
-            type: 'memory',
+            type: "memory",
             usage: memoryUsage,
             healthy: isHealthy,
             heapUsed: memUsage.heapUsed,
             heapTotal: memUsage.heapTotal,
-            external: memUsage.external
-          }
+            external: memUsage.external,
+          },
         };
       } catch (error) {
         return {
-          status: 'down',
-          message: '内存健康检查失败',
-          details: { error: error instanceof Error ? error.message : '未知错误' }
+          status: "down",
+          message: "内存健康检查失败",
+          details: {
+            error: error instanceof Error ? error.message : "未知错误",
+          },
         };
       }
     });
 
     // 磁盘健康指示器
-    this.registerIndicator('disk', async () => {
+    this.registerIndicator("disk", async () => {
       try {
-        const fs = require('fs');
-        const path = require('path');
-        const os = require('os');
-        
+        const fs = await import("fs");
+        const path = await import("path");
+        // 使用已导入的os模块
+
         const tempDir = os.tmpdir();
-        const testFile = path.join(tempDir, 'health_check_test.txt');
-        
+        const testFile = path.join(tempDir, "health_check_test.txt");
+
         // 测试磁盘写入
-        fs.writeFileSync(testFile, 'health check test');
+        fs.writeFileSync(testFile, "health check test");
         fs.unlinkSync(testFile);
-        
+
         return {
-          status: 'up',
-          message: '磁盘访问正常',
+          status: "up",
+          message: "磁盘访问正常",
           details: {
-            type: 'disk',
+            type: "disk",
             healthy: true,
-            tempDir
-          }
+            tempDir,
+          },
         };
       } catch (error) {
         return {
-          status: 'down',
-          message: '磁盘健康检查失败',
-          details: { error: error instanceof Error ? error.message : '未知错误' }
+          status: "down",
+          message: "磁盘健康检查失败",
+          details: {
+            error: error instanceof Error ? error.message : "未知错误",
+          },
         };
       }
     });
@@ -392,18 +416,22 @@ export class HealthCheckService implements IHealthCheckService {
       if (this.loggingService) {
         const logContext = {
           requestId: `health_check_${Date.now()}`,
-          tenantId: 'system',
-          operation: 'health-check',
-          resource: 'health-check',
+          tenantId: "system",
+          operation: "health-check",
+          resource: "health-check",
           timestamp: new Date(),
-          level: (result.status as any) === 'up' ? 'info' : 'warn' as any,
-          message: `健康检查: ${result.status}`
+          level: (result.status as any) === "up" ? "info" : ("warn" as any),
+          message: `健康检查: ${result.status}`,
         };
-        
-        await this.loggingService.info(logContext, `健康检查: ${result.status}`, result);
+
+        await this.loggingService.info(
+          logContext,
+          `健康检查: ${result.status}`,
+          result as unknown as Record<string, unknown>,
+        );
       }
     } catch (error) {
-      console.error('记录健康检查日志失败:', error);
+      console.error("记录健康检查日志失败:", error);
     }
   }
 
@@ -434,7 +462,7 @@ export class HealthCheckService implements IHealthCheckService {
   async healthCheck(): Promise<boolean> {
     try {
       const result = await this.check();
-      return (result.status as any) === 'up';
+      return (result.status as any) === "up";
     } catch (error) {
       return false;
     }

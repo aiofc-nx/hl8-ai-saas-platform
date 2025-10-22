@@ -5,10 +5,10 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
 
 /**
  * 领域事件接口
@@ -72,22 +72,19 @@ export class EventHandlerService {
     totalProcessed: 0,
     successful: 0,
     failed: 0,
-    averageProcessingTime: 0
+    averageProcessingTime: 0,
   };
 
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
    * 注册事件处理器
    */
-  registerHandler(
-    eventType: string,
-    handler: EventHandler
-  ): void {
+  registerHandler(eventType: string, handler: EventHandler): void {
     this.handlers.set(eventType, handler);
   }
 
@@ -96,11 +93,11 @@ export class EventHandlerService {
    */
   async handleEvent(event: DomainEvent): Promise<EventHandleResult> {
     const startTime = Date.now();
-    
+
     try {
       // 应用隔离上下文
       const isolatedEvent = this.applyIsolationContext(event);
-      
+
       // 获取处理器
       const handler = this.handlers.get(event.type);
       if (!handler) {
@@ -115,7 +112,7 @@ export class EventHandlerService {
 
       // 处理事件
       const result = await handler.handle(isolatedEvent);
-      
+
       // 更新处理时间
       result.processingTime = Date.now() - startTime;
       result.eventId = event.id;
@@ -131,9 +128,9 @@ export class EventHandlerService {
       const processingTime = Date.now() - startTime;
       const result: EventHandleResult = {
         success: false,
-        error: error instanceof Error ? error.message : '事件处理失败',
+        error: error instanceof Error ? error.message : "事件处理失败",
         processingTime,
-        eventId: event.id
+        eventId: event.id,
       };
 
       // 更新统计信息
@@ -148,7 +145,7 @@ export class EventHandlerService {
    */
   async handleEvents(events: DomainEvent[]): Promise<EventHandleResult[]> {
     const results: EventHandleResult[] = [];
-    
+
     for (const event of events) {
       try {
         const result = await this.handleEvent(event);
@@ -156,13 +153,13 @@ export class EventHandlerService {
       } catch (error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : '事件处理失败',
+          error: error instanceof Error ? error.message : "事件处理失败",
           processingTime: 0,
-          eventId: event.id
+          eventId: event.id,
         });
       }
     }
-    
+
     return results;
   }
 
@@ -173,15 +170,17 @@ export class EventHandlerService {
     try {
       // 应用隔离上下文
       const isolatedEvent = this.applyIsolationContext(event);
-      
+
       this.eventQueue.push(isolatedEvent);
-      
+
       // 如果当前没有在处理，启动处理
       if (!this.isProcessing) {
         this.processEventQueue();
       }
     } catch (error) {
-      throw new Error(`队列事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `队列事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -203,7 +202,7 @@ export class EventHandlerService {
         }
       }
     } catch (error) {
-      console.error('处理事件队列失败:', error);
+      console.error("处理事件队列失败:", error);
     } finally {
       this.isProcessing = false;
     }
@@ -216,7 +215,7 @@ export class EventHandlerService {
     return {
       queueLength: this.eventQueue.length,
       isProcessing: this.isProcessing,
-      registeredHandlers: Array.from(this.handlers.keys())
+      registeredHandlers: Array.from(this.handlers.keys()),
     };
   }
 
@@ -226,9 +225,11 @@ export class EventHandlerService {
   getProcessingStats(): Record<string, any> {
     return {
       ...this.processingStats,
-      successRate: this.processingStats.totalProcessed > 0 
-        ? this.processingStats.successful / this.processingStats.totalProcessed 
-        : 0
+      successRate:
+        this.processingStats.totalProcessed > 0
+          ? this.processingStats.successful /
+            this.processingStats.totalProcessed
+          : 0,
     };
   }
 
@@ -261,7 +262,7 @@ export class EventHandlerService {
       totalProcessed: 0,
       successful: 0,
       failed: 0,
-      averageProcessingTime: 0
+      averageProcessingTime: 0,
     };
   }
 
@@ -274,24 +275,25 @@ export class EventHandlerService {
     }
 
     const isolatedEvent = { ...event };
-    
+
     // 添加隔离信息到元数据
     if (!isolatedEvent.metadata) {
       isolatedEvent.metadata = {};
     }
-    
+
     if (this.isolationContext.tenantId) {
       isolatedEvent.metadata.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.organizationId) {
-      isolatedEvent.metadata.organizationId = this.isolationContext.organizationId;
+      isolatedEvent.metadata.organizationId =
+        this.isolationContext.organizationId;
     }
-    
+
     if (this.isolationContext.departmentId) {
       isolatedEvent.metadata.departmentId = this.isolationContext.departmentId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedEvent.metadata.userId = this.isolationContext.userId;
     }
@@ -304,16 +306,20 @@ export class EventHandlerService {
    */
   private updateProcessingStats(result: EventHandleResult): void {
     this.processingStats.totalProcessed++;
-    
+
     if (result.success) {
       this.processingStats.successful++;
     } else {
       this.processingStats.failed++;
     }
-    
+
     // 更新平均处理时间
-    const totalTime = this.processingStats.averageProcessingTime * (this.processingStats.totalProcessed - 1) + result.processingTime;
-    this.processingStats.averageProcessingTime = totalTime / this.processingStats.totalProcessed;
+    const totalTime =
+      this.processingStats.averageProcessingTime *
+        (this.processingStats.totalProcessed - 1) +
+      result.processingTime;
+    this.processingStats.averageProcessingTime =
+      totalTime / this.processingStats.totalProcessed;
   }
 
   /**
@@ -321,7 +327,7 @@ export class EventHandlerService {
    */
   private async logEventProcessing(
     event: DomainEvent,
-    result: EventHandleResult
+    result: EventHandleResult,
   ): Promise<void> {
     try {
       const logData = {
@@ -331,13 +337,13 @@ export class EventHandlerService {
         success: result.success,
         processingTime: result.processingTime,
         timestamp: new Date(),
-        metadata: event.metadata
+        metadata: event.metadata,
       };
 
       // 这里应该记录到日志系统
-      console.log('事件处理日志:', logData);
+      console.log("事件处理日志:", logData);
     } catch (error) {
-      console.error('记录事件处理日志失败:', error);
+      console.error("记录事件处理日志失败:", error);
     }
   }
 

@@ -8,7 +8,7 @@
 /**
  * 日志级别枚举
  */
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 
 /**
  * 日志上下文接口
@@ -35,7 +35,7 @@ export interface LogContext {
   /** 消息 */
   message: string;
   /** 数据 */
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 /**
@@ -47,13 +47,13 @@ export interface PinoLoggerConfig {
   /** 日志级别 */
   level: LogLevel;
   /** 序列化器 */
-  serializers: Record<string, any>;
+  serializers: Record<string, unknown>;
   /** 格式化器 */
-  formatters: Record<string, any>;
+  formatters: Record<string, unknown>;
   /** 是否包含时间戳 */
   timestamp: boolean;
   /** 基础数据 */
-  base: Record<string, any>;
+  base: Record<string, unknown>;
   /** 是否启用 */
   enabled: boolean;
 }
@@ -66,38 +66,38 @@ export interface LoggingService {
   log(
     context: LogContext,
     message: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录错误日志 */
   error(
     context: LogContext,
     message: string,
     error?: Error,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录警告日志 */
   warn(
     context: LogContext,
     message: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录信息日志 */
   info(
     context: LogContext,
     message: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录调试日志 */
   debug(
     context: LogContext,
     message: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录跟踪日志 */
   trace(
     context: LogContext,
     message: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
 }
 
@@ -111,28 +111,28 @@ export interface StructuredLogging {
     tenantId: string,
     operation: string,
     resource: string,
-    level?: LogLevel
+    level?: LogLevel,
   ): LogContext;
   /** 记录结构化日志 */
   logStructured(
     context: LogContext,
     message: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录性能日志 */
   logPerformance(
     context: LogContext,
     operation: string,
     duration: number,
-    data?: Record<string, any>
+    data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录审计日志 */
   logAudit(
     context: LogContext,
     action: string,
     resource: string,
-    result: 'SUCCESS' | 'FAILURE' | 'ERROR',
-    data?: Record<string, any>
+    result: "SUCCESS" | "FAILURE" | "ERROR",
+    data?: Record<string, unknown>,
   ): Promise<void>;
 }
 
@@ -143,7 +143,7 @@ export interface LoggingAdapter {
   /** 初始化适配器 */
   initialize(): Promise<void>;
   /** 记录日志 */
-  log(level: LogLevel, message: string, data?: Record<string, any>): void;
+  log(level: LogLevel, message: string, data?: Record<string, unknown>): void;
   /** 关闭适配器 */
   close(): Promise<void>;
   /** 健康检查 */
@@ -157,7 +157,7 @@ export interface LoggingConfig {
   /** 日志级别 */
   level: LogLevel;
   /** 日志格式 */
-  format: 'json' | 'text';
+  format: "json" | "text";
   /** 是否启用结构化日志 */
   enableStructuredLogging: boolean;
   /** 是否启用性能日志 */

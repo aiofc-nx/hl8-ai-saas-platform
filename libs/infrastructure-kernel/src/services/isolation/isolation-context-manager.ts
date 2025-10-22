@@ -5,8 +5,8 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IIsolationContextManager } from '../../interfaces/isolation-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { IIsolationContextManager } from "../../interfaces/isolation-service.interface.js";
 
 /**
  * 隔离上下文管理器
@@ -26,7 +26,7 @@ export class IsolationContextManager implements IIsolationContextManager {
     tenantId: string,
     organizationId?: string,
     departmentId?: string,
-    userId?: string
+    userId?: string,
   ): any {
     // 简化的上下文创建
     return {
@@ -34,11 +34,19 @@ export class IsolationContextManager implements IIsolationContextManager {
       organizationId,
       departmentId,
       userId,
-      sharingLevel: userId ? 'USER' : departmentId ? 'DEPARTMENT' : organizationId ? 'ORGANIZATION' : tenantId ? 'TENANT' : 'PLATFORM',
+      sharingLevel: userId
+        ? "USER"
+        : departmentId
+          ? "DEPARTMENT"
+          : organizationId
+            ? "ORGANIZATION"
+            : tenantId
+              ? "TENANT"
+              : "PLATFORM",
       isShared: false,
       accessRules: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -51,7 +59,7 @@ export class IsolationContextManager implements IIsolationContextManager {
       // IsolationContext 构造函数内部已经进行了验证
       return context !== null && context !== undefined;
     } catch (error) {
-      console.error('隔离上下文验证失败:', error);
+      console.error("隔离上下文验证失败:", error);
       return false;
     }
   }
@@ -68,7 +76,7 @@ export class IsolationContextManager implements IIsolationContextManager {
    */
   setCurrentContext(context: any): void {
     if (!this.validateContext(context)) {
-      throw new Error('无效的隔离上下文');
+      throw new Error("无效的隔离上下文");
     }
 
     // 保存到历史记录
@@ -124,12 +132,12 @@ export class IsolationContextManager implements IIsolationContextManager {
    */
   getContextLevel(context: any): number {
     let level = 0;
-    
+
     if (context.tenantId) level++;
     if (context.organizationId) level++;
     if (context.departmentId) level++;
     if (context.userId) level++;
-    
+
     return level;
   }
 
@@ -139,7 +147,7 @@ export class IsolationContextManager implements IIsolationContextManager {
   async checkContextPermissions(
     context: any,
     resource: string,
-    action: string
+    action: string,
   ): Promise<boolean> {
     try {
       // 检查访问规则
@@ -161,16 +169,18 @@ export class IsolationContextManager implements IIsolationContextManager {
    */
   async getContextStats(): Promise<Record<string, any>> {
     return {
-      currentContext: this.currentContext ? {
-        tenantId: this.currentContext.tenantId,
-        organizationId: this.currentContext.organizationId,
-        departmentId: this.currentContext.departmentId,
-        userId: this.currentContext.userId,
-        sharingLevel: (this.currentContext as any).sharingLevel,
-        isShared: (this.currentContext as any).isShared
-      } : null,
+      currentContext: this.currentContext
+        ? {
+            tenantId: this.currentContext.tenantId,
+            organizationId: this.currentContext.organizationId,
+            departmentId: this.currentContext.departmentId,
+            userId: this.currentContext.userId,
+            sharingLevel: (this.currentContext as any).sharingLevel,
+            isShared: (this.currentContext as any).isShared,
+          }
+        : null,
       historySize: this.contextHistory.length,
-      maxHistorySize: this.maxHistorySize
+      maxHistorySize: this.maxHistorySize,
     };
   }
 
@@ -180,7 +190,7 @@ export class IsolationContextManager implements IIsolationContextManager {
   private checkPermissions(
     context: any,
     resource: string,
-    action: string
+    action: string,
   ): boolean {
     // 使用领域模型的权限检查逻辑
     // 这里可以根据实际需求调整逻辑
@@ -192,7 +202,7 @@ export class IsolationContextManager implements IIsolationContextManager {
    */
   private addToHistory(context: any): void {
     this.contextHistory.push(context);
-    
+
     // 限制历史记录大小
     if (this.contextHistory.length > this.maxHistorySize) {
       this.contextHistory = this.contextHistory.slice(-this.maxHistorySize);
@@ -218,7 +228,7 @@ export class IsolationContextManager implements IIsolationContextManager {
    */
   setMaxHistorySize(size: number): void {
     this.maxHistorySize = Math.max(0, size);
-    
+
     // 如果当前历史记录超过新的大小，截取
     if (this.contextHistory.length > this.maxHistorySize) {
       this.contextHistory = this.contextHistory.slice(-this.maxHistorySize);

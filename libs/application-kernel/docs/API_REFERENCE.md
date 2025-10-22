@@ -29,7 +29,7 @@ export class BaseCommand {
     public readonly description: string,
     public readonly isolationContext?: IsolationContext,
   ) {}
-  
+
   readonly commandId: string;
   readonly timestamp: Date;
 }
@@ -44,7 +44,7 @@ export class CreateUserCommand extends BaseCommand {
     public readonly username: string,
     isolationContext?: IsolationContext,
   ) {
-    super('CreateUserCommand', '创建用户命令', isolationContext);
+    super("CreateUserCommand", "创建用户命令", isolationContext);
   }
 }
 ```
@@ -60,7 +60,7 @@ export class BaseQuery {
     public readonly description: string,
     public readonly isolationContext?: IsolationContext,
   ) {}
-  
+
   readonly queryId: string;
   readonly timestamp: Date;
 }
@@ -74,7 +74,7 @@ export class GetUserQuery extends BaseQuery {
     public readonly userId: UserId,
     isolationContext?: IsolationContext,
   ) {
-    super('GetUserQuery', '获取用户查询', isolationContext);
+    super("GetUserQuery", "获取用户查询", isolationContext);
   }
 }
 ```
@@ -86,9 +86,9 @@ export class GetUserQuery extends BaseQuery {
 ```typescript
 export abstract class BaseUseCase {
   protected readonly requiredPermissions: string[] = [];
-  
+
   abstract execute(input: any): Promise<any>;
-  
+
   protected async validatePermissions(context: IUseCaseContext): Promise<void>;
   protected async validateInput(input: any): Promise<void>;
 }
@@ -165,7 +165,10 @@ export interface IUseCaseContext {
 export class ContextUtils {
   static createContext(options: ContextOptions): IUseCaseContext;
   static mergeContexts(...contexts: IUseCaseContext[]): IUseCaseContext;
-  static extractContext<T>(context: IUseCaseContext, key: string): T | undefined;
+  static extractContext<T>(
+    context: IUseCaseContext,
+    key: string,
+  ): T | undefined;
 }
 ```
 
@@ -179,9 +182,13 @@ export class ContextSecurityValidator {
     context: IUseCaseContext,
     isolationContext?: IsolationContext,
   ): SecurityValidationResult;
-  
-  static validateSensitiveData(context: IUseCaseContext): SecurityValidationResult;
-  static validatePermissionSecurity(context: IUseCaseContext): SecurityValidationResult;
+
+  static validateSensitiveData(
+    context: IUseCaseContext,
+  ): SecurityValidationResult;
+  static validatePermissionSecurity(
+    context: IUseCaseContext,
+  ): SecurityValidationResult;
 }
 ```
 
@@ -195,7 +202,7 @@ export class TenantContextValidator {
     context: IUseCaseContext,
     isolationContext?: IsolationContext,
   ): TenantContextValidationResult;
-  
+
   static validateTenantIsolation(
     context: IUseCaseContext,
     targetTenantId: string,
@@ -227,7 +234,7 @@ export interface IEventBus {
 ```typescript
 export class EventPublisher {
   constructor(private readonly eventBus: IEventBus) {}
-  
+
   async publishEvent<T>(event: T, options?: PublishOptions): Promise<void>;
   async publishEvents<T>(events: T[], options?: PublishOptions): Promise<void>;
   async publishEventAsync<T>(event: T, options?: PublishOptions): Promise<void>;
@@ -281,8 +288,12 @@ export interface ITransactionManager {
 
 ```typescript
 export class TransactionManagerUtils {
-  static createTransactionManager(options: TransactionOptions): ITransactionManager;
-  static validateTransactionBoundary(transactionManager: ITransactionManager): ValidationResult;
+  static createTransactionManager(
+    options: TransactionOptions,
+  ): ITransactionManager;
+  static validateTransactionBoundary(
+    transactionManager: ITransactionManager,
+  ): ValidationResult;
 }
 ```
 
@@ -293,9 +304,15 @@ export class TransactionManagerUtils {
 ```typescript
 export class TransactionIsolationUtils {
   static setIsolationLevel(level: IsolationLevel): void;
-  static enableDeadlockDetection(transactionManager: ITransactionManager): Promise<void>;
-  static detectDeadlock(transactionManager: ITransactionManager): Promise<boolean>;
-  static resolveDeadlock(transactionManager: ITransactionManager): Promise<boolean>;
+  static enableDeadlockDetection(
+    transactionManager: ITransactionManager,
+  ): Promise<void>;
+  static detectDeadlock(
+    transactionManager: ITransactionManager,
+  ): Promise<boolean>;
+  static resolveDeadlock(
+    transactionManager: ITransactionManager,
+  ): Promise<boolean>;
 }
 ```
 
@@ -415,7 +432,7 @@ export interface ValidationResult {
 }
 
 export interface SecurityValidationResult extends ValidationResult {
-  securityLevel: 'low' | 'medium' | 'high' | 'critical';
+  securityLevel: "low" | "medium" | "high" | "critical";
   threats: string[];
   recommendations: string[];
 }
@@ -478,9 +495,9 @@ import {
   BaseUseCase,
   EventPublisher,
   TransactionManager,
-  ContextUtils
-} from '@hl8/application-kernel';
-import { IsolationContext, TenantId, UserId } from '@hl8/domain-kernel';
+  ContextUtils,
+} from "@hl8/application-kernel";
+import { IsolationContext, TenantId, UserId } from "@hl8/domain-kernel";
 
 // 1. 定义命令
 export class CreateUserCommand extends BaseCommand {
@@ -489,7 +506,7 @@ export class CreateUserCommand extends BaseCommand {
     public readonly username: string,
     isolationContext?: IsolationContext,
   ) {
-    super('CreateUserCommand', '创建用户命令', isolationContext);
+    super("CreateUserCommand", "创建用户命令", isolationContext);
   }
 }
 
@@ -499,7 +516,7 @@ export class GetUserQuery extends BaseQuery {
     public readonly userId: UserId,
     isolationContext?: IsolationContext,
   ) {
-    super('GetUserQuery', '获取用户查询', isolationContext);
+    super("GetUserQuery", "获取用户查询", isolationContext);
   }
 }
 
@@ -512,24 +529,24 @@ export class CreateUserUseCase extends BaseUseCase {
   ) {
     super();
   }
-  
+
   async execute(command: CreateUserCommand): Promise<UserId> {
     return await this.transactionManager.executeInTransaction(async () => {
       // 创建用户
       const user = new User(command.email, command.username);
-      
+
       // 保存用户
       await this.userRepository.save(user);
-      
+
       // 发布事件
       await this.eventPublisher.publishEvent({
-        type: 'UserCreated',
+        type: "UserCreated",
         userId: user.getId(),
         email: user.getEmail(),
         username: user.getUsername(),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-      
+
       return user.getId();
     });
   }
@@ -537,26 +554,28 @@ export class CreateUserUseCase extends BaseUseCase {
 
 // 4. 使用示例
 async function example() {
-  const tenantContext = IsolationContext.createTenant(TenantId.create('tenant-123'));
+  const tenantContext = IsolationContext.createTenant(
+    TenantId.create("tenant-123"),
+  );
   const context = ContextUtils.createContext({
-    requestId: 'req-123',
-    tenant: { id: 'tenant-123', name: 'Test Tenant' }
+    requestId: "req-123",
+    tenant: { id: "tenant-123", name: "Test Tenant" },
   });
-  
+
   const createUserUseCase = new CreateUserUseCase(
     userRepository,
     eventPublisher,
-    transactionManager
+    transactionManager,
   );
-  
+
   const command = new CreateUserCommand(
-    'user@example.com',
-    'testuser',
-    tenantContext
+    "user@example.com",
+    "testuser",
+    tenantContext,
   );
-  
+
   const userId = await createUserUseCase.execute(command);
-  console.log('用户创建成功:', userId);
+  console.log("用户创建成功:", userId);
 }
 ```
 

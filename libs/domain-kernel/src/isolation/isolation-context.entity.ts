@@ -420,9 +420,9 @@ export class IsolationContext {
    * // 返回: { 'u.tenantId': 't123' }
    * ```
    */
-  buildWhereClause(alias: string = ""): Record<string, any> {
+  buildWhereClause(alias: string = ""): Record<string, unknown> {
     const prefix = alias ? `${alias}.` : "";
-    const clause: Record<string, any> = {};
+    const clause: Record<string, unknown> = {};
 
     switch (this.getIsolationLevel()) {
       case IsolationLevel.USER:

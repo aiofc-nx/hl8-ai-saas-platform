@@ -37,7 +37,7 @@ export type ConfigObject = {
  * 使用 any 符合宪章 IX 允许场景：配置值可以是任意类型（字符串、数字、对象等）。
  * 配置库必须支持动态配置的灵活性。
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 配置值可以是任意类型（宪章 IX 允许场景：通用工具）
+
 export type ConfigRecord = {
   [key: string]: any;
 };

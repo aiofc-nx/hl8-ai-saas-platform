@@ -5,11 +5,11 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import { BaseRepositoryAdapter } from '../base/base-repository-adapter.js';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import { BaseRepositoryAdapter } from "../base/base-repository-adapter.js";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
 
 /**
  * 聚合根仓储适配器
@@ -19,7 +19,7 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
   constructor(
     databaseAdapter: IDatabaseAdapter,
     cacheService?: ICacheService,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ) {
     super(databaseAdapter, cacheService, isolationContext);
   }
@@ -31,20 +31,20 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     try {
       // 应用隔离上下文
       const isolatedAggregate = this.applyIsolationContext(aggregate);
-      
+
       // 获取未提交的领域事件
       const uncommittedEvents = this.getUncommittedEvents(isolatedAggregate);
-      
+
       if (uncommittedEvents.length > 0) {
         // 在事务中保存聚合根和事件
         await this.databaseAdapter.transaction(async (em) => {
           // 保存聚合根
           const repository = em.getRepository(this.getEntityClass());
           await repository.persistAndFlush(isolatedAggregate);
-          
+
           // 保存领域事件
           await this.saveDomainEvents(uncommittedEvents);
-          
+
           // 标记事件为已提交
           this.markEventsAsCommitted(isolatedAggregate);
         });
@@ -52,14 +52,16 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         // 没有事件，直接保存聚合根
         await this.save(isolatedAggregate);
       }
-      
+
       // 更新缓存
       if (this.cacheService) {
         const cacheKey = this.generateCacheKey(isolatedAggregate);
         await this.cacheService.set(cacheKey, isolatedAggregate);
       }
     } catch (error) {
-      throw new Error(`保存聚合根失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `保存聚合根失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -78,15 +80,18 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
       }
 
       // 从数据库查询
-      const repository = this.databaseAdapter.getRepository(this.getEntityClass());
-      const aggregate = await repository.findOne({ id } as any);
-      
+      const repository = this.databaseAdapter.getRepository(
+        this.getEntityClass(),
+      );
+      const aggregate = await (repository as { findOne(conditions: unknown): Promise<unknown> }).findOne({ id } as any);
+
       if (aggregate) {
         // 应用隔离过滤
-        const filteredAggregate = this.applyIsolationFilter(aggregate);
+        const filteredAggregate = this.applyIsolationFilter(aggregate as T);
         if (filteredAggregate) {
           // 重建聚合根状态（从事件重放）
-          const reconstructedAggregate = await this.reconstructAggregateFromEvents(id);
+          const reconstructedAggregate =
+            await this.reconstructAggregateFromEvents(id);
           if (reconstructedAggregate) {
             // 更新缓存
             if (this.cacheService) {
@@ -100,7 +105,9 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
 
       return null;
     } catch (error) {
-      throw new Error(`获取聚合根失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取聚合根失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -111,9 +118,9 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     try {
       const aggregateAny = aggregate as any;
       const id = aggregateAny.id || aggregateAny._id;
-      
+
       if (!id) {
-        throw new Error('聚合根ID不能为空');
+        throw new Error("聚合根ID不能为空");
       }
 
       // 在事务中删除聚合根和相关事件
@@ -121,18 +128,20 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         // 删除聚合根
         const repository = em.getRepository(this.getEntityClass());
         await repository.removeAndFlush(aggregate);
-        
+
         // 删除相关事件
         await this.deleteDomainEvents(id);
       });
-      
+
       // 清除缓存
       if (this.cacheService) {
         const cacheKey = this.generateCacheKey(aggregate);
         await this.cacheService.delete(cacheKey);
       }
     } catch (error) {
-      throw new Error(`删除聚合根失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `删除聚合根失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -141,17 +150,21 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
    */
   async getAggregateVersion(id: string): Promise<number> {
     try {
-      const repository = this.databaseAdapter.getRepository(this.getEntityClass());
-      const aggregate = await repository.findOne({ id } as any);
-      
+      const repository = this.databaseAdapter.getRepository(
+        this.getEntityClass(),
+      );
+      const aggregate = await (repository as { findOne(conditions: unknown): Promise<unknown> }).findOne({ id } as any);
+
       if (aggregate) {
         const aggregateAny = aggregate as any;
         return aggregateAny.version || 0;
       }
-      
+
       return 0;
     } catch (error) {
-      throw new Error(`获取聚合根版本失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取聚合根版本失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -172,7 +185,9 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
    */
   protected getUncommittedEvents(aggregate: T): any[] {
     const aggregateAny = aggregate as any;
-    return aggregateAny.getUncommittedEvents ? aggregateAny.getUncommittedEvents() : [];
+    return aggregateAny.getUncommittedEvents
+      ? aggregateAny.getUncommittedEvents()
+      : [];
   }
 
   /**
@@ -193,10 +208,12 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
       for (const event of events) {
         // 这里应该调用事件存储服务
         // await this.eventStore.saveEvent(event);
-        console.log('保存领域事件:', event);
+        console.log("保存领域事件:", event);
       }
     } catch (error) {
-      throw new Error(`保存领域事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `保存领域事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -207,24 +224,30 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     try {
       // 这里应该调用事件存储服务删除事件
       // await this.eventStore.deleteEvents(aggregateId);
-      console.log('删除领域事件:', aggregateId);
+      console.log("删除领域事件:", aggregateId);
     } catch (error) {
-      throw new Error(`删除领域事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `删除领域事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
   /**
    * 从事件重建聚合根
    */
-  protected async reconstructAggregateFromEvents(aggregateId: string): Promise<T | null> {
+  protected async reconstructAggregateFromEvents(
+    aggregateId: string,
+  ): Promise<T | null> {
     try {
       // 这里应该从事件存储获取所有事件并重建聚合根
       // const events = await this.eventStore.getEvents(aggregateId);
       // return this.replayEvents(events);
-      console.log('从事件重建聚合根:', aggregateId);
+      console.log("从事件重建聚合根:", aggregateId);
       return null;
     } catch (error) {
-      throw new Error(`重建聚合根失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `重建聚合根失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -235,10 +258,12 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     try {
       // 这里应该实现事件重放逻辑
       // 根据事件类型和顺序重建聚合根状态
-      console.log('重放事件:', events);
+      console.log("重放事件:", events);
       return null;
     } catch (error) {
-      throw new Error(`重放事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `重放事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -247,16 +272,20 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
    */
   async getAggregateSnapshot(id: string): Promise<T | null> {
     try {
-      const repository = this.databaseAdapter.getRepository(this.getEntityClass());
-      const snapshot = await repository.findOne({ id } as any);
-      
+      const repository = this.databaseAdapter.getRepository(
+        this.getEntityClass(),
+      );
+      const snapshot = await (repository as { findOne(conditions: unknown): Promise<unknown> }).findOne({ id } as any);
+
       if (snapshot) {
-        return this.applyIsolationFilter(snapshot);
+        return this.applyIsolationFilter(snapshot as T);
       }
-      
+
       return null;
     } catch (error) {
-      throw new Error(`获取聚合根快照失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取聚合根快照失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -267,7 +296,9 @@ export class AggregateRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     try {
       await this.save(aggregate);
     } catch (error) {
-      throw new Error(`保存聚合根快照失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `保存聚合根快照失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 }

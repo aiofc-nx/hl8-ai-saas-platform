@@ -5,13 +5,26 @@
  * @since 1.0.0
  */
 
-import { BusinessRuleValidator, BusinessRuleValidationResult } from "./business-rule-validator.js";
+import {
+  BusinessRuleValidator,
+  BusinessRuleValidationResult,
+} from "./business-rule-validator.js";
 
 /**
  * 用户注册业务规则验证器
  */
-export class UserRegistrationBusinessRule extends BusinessRuleValidator {
-  validate(context: any): BusinessRuleValidationResult {
+export interface UserRegistrationContext {
+  operation: "user_registration" | string;
+  userData?: {
+    email: string;
+    username: string;
+    password: string;
+    age?: number;
+  };
+}
+
+export class UserRegistrationBusinessRule extends BusinessRuleValidator<UserRegistrationContext> {
+  validate(context: UserRegistrationContext): BusinessRuleValidationResult {
     const errors: BusinessRuleValidationError[] = [];
     const warnings: BusinessRuleValidationWarning[] = [];
 
@@ -19,9 +32,9 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator {
     const userData = context.userData;
     if (!userData) {
       errors.push({
-        code: 'MISSING_USER_DATA',
-        message: '用户数据不能为空',
-        field: 'userData'
+        code: "MISSING_USER_DATA",
+        message: "用户数据不能为空",
+        field: "userData",
       });
       return { isValid: false, errors, warnings };
     }
@@ -29,20 +42,20 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator {
     // 验证邮箱格式
     if (!this.isValidEmail(userData.email)) {
       errors.push({
-        code: 'INVALID_EMAIL_FORMAT',
-        message: '邮箱格式无效',
-        field: 'email',
-        context: { email: userData.email }
+        code: "INVALID_EMAIL_FORMAT",
+        message: "邮箱格式无效",
+        field: "email",
+        context: { email: userData.email },
       });
     }
 
     // 验证用户名
     if (!this.isValidUsername(userData.username)) {
       errors.push({
-        code: 'INVALID_USERNAME',
-        message: '用户名格式无效',
-        field: 'username',
-        context: { username: userData.username }
+        code: "INVALID_USERNAME",
+        message: "用户名格式无效",
+        field: "username",
+        context: { username: userData.username },
       });
     }
 
@@ -50,9 +63,9 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator {
     const passwordValidation = this.validatePasswordStrength(userData.password);
     if (!passwordValidation.isValid) {
       errors.push({
-        code: 'WEAK_PASSWORD',
+        code: "WEAK_PASSWORD",
         message: passwordValidation.message,
-        field: 'password'
+        field: "password",
       });
     }
 
@@ -60,10 +73,10 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator {
     if (userData.age !== undefined) {
       if (userData.age < 0 || userData.age > 150) {
         errors.push({
-          code: 'INVALID_AGE',
-          message: '年龄必须在0-150岁之间',
-          field: 'age',
-          context: { age: userData.age }
+          code: "INVALID_AGE",
+          message: "年龄必须在0-150岁之间",
+          field: "age",
+          context: { age: userData.age },
         });
       }
     }
@@ -71,20 +84,20 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator {
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
   getRuleName(): string {
-    return 'UserRegistrationBusinessRule';
+    return "UserRegistrationBusinessRule";
   }
 
   getRuleDescription(): string {
-    return '验证用户注册的业务规则和约束条件';
+    return "验证用户注册的业务规则和约束条件";
   }
 
-  isApplicable(context: any): boolean {
-    return context.operation === 'user_registration';
+  isApplicable(context: UserRegistrationContext): boolean {
+    return context.operation === "user_registration";
   }
 
   private isValidEmail(email: string): boolean {
@@ -96,14 +109,17 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator {
     if (!username || username.length < 3 || username.length > 50) {
       return false;
     }
-    
+
     const usernameRegex = /^[a-zA-Z0-9_-]+$/;
     return usernameRegex.test(username) && !/^\d/.test(username);
   }
 
-  private validatePasswordStrength(password: string): { isValid: boolean; message: string } {
+  private validatePasswordStrength(password: string): {
+    isValid: boolean;
+    message: string;
+  } {
     if (!password || password.length < 8) {
-      return { isValid: false, message: '密码长度至少8个字符' };
+      return { isValid: false, message: "密码长度至少8个字符" };
     }
 
     const hasUpperCase = /[A-Z]/.test(password);
@@ -112,15 +128,18 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator {
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
-      return { 
-        isValid: false, 
-        message: '密码必须包含大小写字母、数字和特殊字符' 
+      return {
+        isValid: false,
+        message: "密码必须包含大小写字母、数字和特殊字符",
       };
     }
 
-    return { isValid: true, message: '' };
+    return { isValid: true, message: "" };
   }
 }
 
 // 导入类型定义
-import type { BusinessRuleValidationError, BusinessRuleValidationWarning } from "./business-rule-validator.js";
+import type {
+  BusinessRuleValidationError,
+  BusinessRuleValidationWarning,
+} from "./business-rule-validator.js";

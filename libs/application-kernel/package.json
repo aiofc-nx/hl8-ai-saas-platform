@@ -1,6 +1,6 @@
 {
   "name": "@hl8/application-kernel",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Application layer kernel - CQRS contracts, application services, and context management",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,10 +13,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src --ext .ts",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@hl8/domain-kernel": "workspace:*"

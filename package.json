@@ -18,6 +18,7 @@
     "format:check": "prettier . --check",
     "libs:fix": "pnpm dlx sherif@latest --fix",
     "lint": "turbo lint",
+    "lint:check": "turbo lint:check",
     "lint:fastify-api": "pnpm lint --filter=fastify-api",
     "lint:libs": "pnpm lint --filter=@hl8/*",
     "start": "turbo start",

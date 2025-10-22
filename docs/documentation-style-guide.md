@@ -27,6 +27,7 @@
 ---
 
 **Cross-References**:
+
 - [Related Document 1](./RELATED_DOCUMENT_1.md)
 - [Related Document 2](./RELATED_DOCUMENT_2.md)
 - [Documentation Index](./ISOLATION_DOCUMENTATION_INDEX.md)
@@ -89,7 +90,7 @@ graph TD
 ### Tables
 
 | Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
+| -------- | -------- | -------- |
 | Data 1   | Data 2   | Data 3   |
 | Data 4   | Data 5   | Data 6   |
 
@@ -151,6 +152,7 @@ graph TD
 ---
 
 **Cross-References**:
+
 - [Related Document](./RELATED_DOCUMENT.md)
 ```
 
@@ -185,6 +187,7 @@ graph TD
 ---
 
 **Cross-References**:
+
 - [Technical Plan](./TECHNICAL_PLAN.md)
 - [Architecture Diagrams](./ARCHITECTURE_DIAGRAMS.md)
 ```

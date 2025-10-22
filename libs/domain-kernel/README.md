@@ -158,23 +158,29 @@ customManager.registerValidator(new OrderCreationBusinessRule());
 
 // 验证用户注册
 const userContext = {
-  operation: 'user_registration',
+  operation: "user_registration",
   userData: {
-    email: 'user@example.com',
-    username: 'john_doe',
-    password: 'SecurePass123!',
-    age: 25
-  }
+    email: "user@example.com",
+    username: "john_doe",
+    password: "SecurePass123!",
+    age: 25,
+  },
 };
 
 const result = customManager.validateAll(userContext);
 
 if (!result.isValid) {
-  console.log('验证失败:', result.errors.map(e => e.message));
+  console.log(
+    "验证失败:",
+    result.errors.map((e) => e.message),
+  );
 } else {
-  console.log('验证通过');
+  console.log("验证通过");
   if (result.warnings.length > 0) {
-    console.log('警告:', result.warnings.map(w => w.message));
+    console.log(
+      "警告:",
+      result.warnings.map((w) => w.message),
+    );
   }
 }
 ```
@@ -192,34 +198,34 @@ import {
 
 // 创建用户数据
 const user: UserData = {
-  id: 'user1',
-  email: 'user@example.com',
-  username: 'john_doe',
-  status: 'ACTIVE',
+  id: "user1",
+  email: "user@example.com",
+  username: "john_doe",
+  status: "ACTIVE",
   isDeleted: false,
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-02'),
+  createdAt: new Date("2024-01-01"),
+  updatedAt: new Date("2024-01-02"),
 };
 
 // 方式1：使用单个规格
 const activeSpec = SpecificationFactory.createUserActiveSpecification();
 const emailSpec = SpecificationFactory.createUserEmailFormatSpecification();
 
-console.log('用户激活检查:', activeSpec.isSatisfiedBy(user));
-console.log('用户邮箱检查:', emailSpec.isSatisfiedBy(user));
+console.log("用户激活检查:", activeSpec.isSatisfiedBy(user));
+console.log("用户邮箱检查:", emailSpec.isSatisfiedBy(user));
 
 // 方式2：组合规格
 const combinedSpec = activeSpec.and(emailSpec);
-console.log('组合规格检查:', combinedSpec.isSatisfiedBy(user));
+console.log("组合规格检查:", combinedSpec.isSatisfiedBy(user));
 
 // 方式3：使用复杂规格
 const validUserSpec = SpecificationFactory.createValidUserSpecification();
 const result = validUserSpec.check(user);
 
 if (result.isSatisfied) {
-  console.log('用户验证通过');
+  console.log("用户验证通过");
 } else {
-  console.log('用户验证失败:', result.errorMessage);
+  console.log("用户验证失败:", result.errorMessage);
 }
 ```
 

@@ -54,12 +54,12 @@ export class BusinessRuleFactory {
    */
   static createDefaultManager(): BusinessRuleManager {
     const manager = new BusinessRuleManager();
-    
+
     // 注册默认的业务规则
     manager.registerValidator(this.createUserRegistrationRule());
     manager.registerValidator(this.createOrderCreationRule());
     manager.registerValidator(this.createUserStateRule());
-    
+
     return manager;
   }
 }

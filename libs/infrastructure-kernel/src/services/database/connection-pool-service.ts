@@ -5,9 +5,9 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseConnectionManager } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseConnectionManager } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
 
 /**
  * 连接池配置
@@ -58,19 +58,16 @@ export class ConnectionPoolService {
 
   constructor(
     private readonly connectionManager: IDatabaseConnectionManager,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
    * 配置连接池
    */
-  configurePool(
-    connectionName: string,
-    config: ConnectionPoolConfig
-  ): void {
+  configurePool(connectionName: string, config: ConnectionPoolConfig): void {
     this.poolConfigs.set(connectionName, config);
     this.initializePoolStats(connectionName);
-    
+
     if (config.enabled) {
       this.startValidationTimer(connectionName);
     }
@@ -95,11 +92,11 @@ export class ConnectionPoolService {
    */
   getAllPoolStats(): Record<string, ConnectionPoolStats> {
     const stats: Record<string, ConnectionPoolStats> = {};
-    
+
     for (const [name, stat] of this.poolStats.entries()) {
       stats[name] = stat;
     }
-    
+
     return stats;
   }
 
@@ -122,7 +119,9 @@ export class ConnectionPoolService {
 
       await Promise.all(promises);
     } catch (error) {
-      throw new Error(`预热连接池失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `预热连接池失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -151,7 +150,9 @@ export class ConnectionPoolService {
         }
       }
     } catch (error) {
-      throw new Error(`清理空闲连接失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `清理空闲连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -179,7 +180,9 @@ export class ConnectionPoolService {
 
       // 检查连接错误数
       if (stats.connectionErrors > 10) {
-        console.warn(`连接池 ${connectionName} 错误数过多: ${stats.connectionErrors}`);
+        console.warn(
+          `连接池 ${connectionName} 错误数过多: ${stats.connectionErrors}`,
+        );
         return false;
       }
 
@@ -192,10 +195,7 @@ export class ConnectionPoolService {
   /**
    * 调整连接池大小
    */
-  async resizePool(
-    connectionName: string,
-    newSize: number
-  ): Promise<void> {
+  async resizePool(connectionName: string, newSize: number): Promise<void> {
     try {
       const config = this.poolConfigs.get(connectionName);
       if (!config || !config.enabled) {
@@ -208,7 +208,7 @@ export class ConnectionPoolService {
       }
 
       const currentSize = currentStats.totalConnections;
-      
+
       if (newSize > currentSize) {
         // 增加连接
         const connectionsToAdd = newSize - currentSize;
@@ -227,7 +227,9 @@ export class ConnectionPoolService {
       config.maxConnections = newSize;
       this.poolConfigs.set(connectionName, config);
     } catch (error) {
-      throw new Error(`调整连接池大小失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `调整连接池大小失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -236,19 +238,22 @@ export class ConnectionPoolService {
    */
   getRecommendedConfig(
     connectionName: string,
-    expectedLoad: number
+    expectedLoad: number,
   ): ConnectionPoolConfig {
     // 基于预期负载计算建议配置
     const minConnections = Math.max(2, Math.floor(expectedLoad * 0.1));
-    const maxConnections = Math.max(minConnections * 2, Math.floor(expectedLoad * 0.5));
-    
+    const maxConnections = Math.max(
+      minConnections * 2,
+      Math.floor(expectedLoad * 0.5),
+    );
+
     return {
       minConnections,
       maxConnections,
       connectionTimeout: 30000,
       idleTimeout: 300000,
       validationInterval: 60000,
-      enabled: true
+      enabled: true,
     };
   }
 
@@ -268,14 +273,14 @@ export class ConnectionPoolService {
       }
 
       if (stats.totalConnections >= config.maxConnections) {
-        throw new Error('连接池已满');
+        throw new Error("连接池已满");
       }
 
       // 这里应该创建实际连接
       // 暂时模拟连接创建
       stats.totalConnections++;
       stats.idleConnections++;
-      
+
       this.poolStats.set(connectionName, stats);
     } catch (error) {
       const stats = this.poolStats.get(connectionName);
@@ -310,7 +315,7 @@ export class ConnectionPoolService {
       // 暂时模拟连接关闭
       stats.totalConnections--;
       stats.idleConnections--;
-      
+
       this.poolStats.set(connectionName, stats);
     } catch (error) {
       const stats = this.poolStats.get(connectionName);
@@ -333,7 +338,7 @@ export class ConnectionPoolService {
       waitingConnections: 0,
       utilizationRate: 0,
       averageResponseTime: 0,
-      connectionErrors: 0
+      connectionErrors: 0,
     });
   }
 
@@ -375,7 +380,7 @@ export class ConnectionPoolService {
   async closePool(connectionName: string): Promise<void> {
     try {
       this.stopValidationTimer(connectionName);
-      
+
       const stats = this.poolStats.get(connectionName);
       if (stats) {
         // 关闭所有连接
@@ -385,7 +390,9 @@ export class ConnectionPoolService {
         this.poolStats.set(connectionName, stats);
       }
     } catch (error) {
-      throw new Error(`关闭连接池失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `关闭连接池失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -401,12 +408,14 @@ export class ConnectionPoolService {
           } catch (error) {
             console.error(`关闭连接池 ${connectionName} 失败:`, error);
           }
-        }
+        },
       );
 
       await Promise.all(closePromises);
     } catch (error) {
-      throw new Error(`关闭所有连接池失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `关闭所有连接池失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -415,7 +424,7 @@ export class ConnectionPoolService {
    */
   async healthCheck(): Promise<Record<string, boolean>> {
     const healthChecks: Record<string, boolean> = {};
-    
+
     const checkPromises = Array.from(this.poolConfigs.keys()).map(
       async (connectionName) => {
         try {
@@ -424,7 +433,7 @@ export class ConnectionPoolService {
         } catch (error) {
           healthChecks[connectionName] = false;
         }
-      }
+      },
     );
 
     await Promise.all(checkPromises);

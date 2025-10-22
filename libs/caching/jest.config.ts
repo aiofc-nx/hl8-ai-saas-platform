@@ -8,8 +8,6 @@ const config: Config = {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@/(.*)$": "<rootDir>/src/$1",
-    "^@hl8/isolation-model/index\\.js$":
-      "<rootDir>/../../libs/isolation-model/dist/index.js",
     "^@hl8/(.*)$": "<rootDir>/../../libs/$1/src",
   },
   transform: {

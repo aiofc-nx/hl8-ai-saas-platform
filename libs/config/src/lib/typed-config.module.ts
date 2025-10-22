@@ -305,8 +305,8 @@ export class TypedConfigModule {
    */
 
   private static getProviders(
-    config: any,
-    Config: ClassConstructor<any>,
+    config: unknown,
+    Config: ClassConstructor<unknown>,
     cacheOptions?: CacheOptions,
   ): Provider[] {
     const providers: Provider[] = [
@@ -324,7 +324,7 @@ export class TypedConfigModule {
       });
     }
 
-    forEachDeep(config, (value: any) => {
+    forEachDeep(config, (value: unknown) => {
       if (
         value &&
         typeof value === "object" &&

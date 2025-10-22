@@ -93,7 +93,7 @@ infrastructure-kernel → nestjs-isolation → domain-kernel
 
 ```typescript
 // 1. 使用装饰器获取当前上下文
-@Controller('users')
+@Controller("users")
 export class UserController {
   @Get()
   @RequireLevel(IsolationLevel.TENANT)
@@ -109,7 +109,7 @@ export class UserService {
   async findById(id: string, context: IsolationContext) {
     // 使用领域模型的权限检查
     if (!context.canAccess(targetContext, SharingLevel.TENANT)) {
-      throw new Error('Access denied');
+      throw new Error("Access denied");
     }
     return this.repository.findById(id);
   }
@@ -126,7 +126,7 @@ export class IsolationContextManager {
     // 使用领域模型的工厂方法
     return IsolationContext.organization(
       TenantId.create(tenantId),
-      OrganizationId.create(orgId)
+      OrganizationId.create(orgId),
     );
   }
 }
@@ -134,13 +134,13 @@ export class IsolationContextManager {
 
 ## 📊 架构对比
 
-| 方面 | 重构前 | 重构后 |
-|------|--------|--------|
+| 方面           | 重构前      | 重构后      |
+| -------------- | ----------- | ----------- |
 | 隔离上下文实现 | 3个重复实现 | 1个统一实现 |
-| 职责边界 | 模糊不清 | 清晰明确 |
-| 依赖关系 | 循环依赖 | 单向依赖 |
-| 维护成本 | 高 | 低 |
-| 测试复杂度 | 高 | 低 |
+| 职责边界       | 模糊不清    | 清晰明确    |
+| 依赖关系       | 循环依赖    | 单向依赖    |
+| 维护成本       | 高          | 低          |
+| 测试复杂度     | 高          | 低          |
 
 ## 🔧 下一步计划
 

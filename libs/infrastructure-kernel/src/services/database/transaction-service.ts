@@ -5,16 +5,20 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseConnectionManager } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseConnectionManager } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
 
 /**
  * 事务配置
  */
 export interface TransactionConfig {
   /** 隔离级别 */
-  isolationLevel: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
+  isolationLevel:
+    | "READ_UNCOMMITTED"
+    | "READ_COMMITTED"
+    | "REPEATABLE_READ"
+    | "SERIALIZABLE";
   /** 超时时间(毫秒) */
   timeout: number;
   /** 是否只读 */
@@ -40,7 +44,7 @@ export interface TransactionContext {
   /** 超时时间 */
   timeout: number;
   /** 状态 */
-  status: 'ACTIVE' | 'COMMITTED' | 'ROLLED_BACK' | 'TIMEOUT';
+  status: "ACTIVE" | "COMMITTED" | "ROLLED_BACK" | "TIMEOUT";
   /** 开始时间 */
   startTime: Date;
   /** 结束时间 */
@@ -58,7 +62,7 @@ export interface TransactionOperation {
   /** 操作ID */
   id: string;
   /** 操作类型 */
-  type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT';
+  type: "INSERT" | "UPDATE" | "DELETE" | "SELECT";
   /** 表名 */
   table: string;
   /** 数据 */
@@ -79,7 +83,7 @@ export class TransactionService {
 
   constructor(
     private readonly connectionManager: IDatabaseConnectionManager,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
@@ -87,7 +91,7 @@ export class TransactionService {
    */
   async beginTransaction(
     connectionName: string,
-    config?: Partial<TransactionConfig>
+    config?: Partial<TransactionConfig>,
   ): Promise<TransactionContext> {
     try {
       const transactionId = this.generateTransactionId();
@@ -99,10 +103,10 @@ export class TransactionService {
         connectionName,
         isolationLevel: finalConfig.isolationLevel,
         timeout: finalConfig.timeout,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         startTime: new Date(),
         operations: [],
-        isolationContext: this.isolationContext
+        isolationContext: this.isolationContext,
       };
 
       this.activeTransactions.set(transactionId, transactionContext);
@@ -117,7 +121,9 @@ export class TransactionService {
 
       return transactionContext;
     } catch (error) {
-      throw new Error(`开始事务失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `开始事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -131,12 +137,16 @@ export class TransactionService {
         throw new Error(`事务 ${transactionId} 不存在`);
       }
 
-      if (transaction.status !== 'ACTIVE') {
-        throw new Error(`事务 ${transactionId} 状态无效: ${transaction.status}`);
+      if (transaction.status !== "ACTIVE") {
+        throw new Error(
+          `事务 ${transactionId} 状态无效: ${transaction.status}`,
+        );
       }
 
-      const connection = await this.connectionManager.getConnection(transaction.connectionName);
-      
+      const connection = await this.connectionManager.getConnection(
+        transaction.connectionName,
+      );
+
       // 执行事务提交
       await connection.transaction(async (trx) => {
         // 执行所有操作
@@ -146,7 +156,7 @@ export class TransactionService {
       });
 
       // 更新事务状态
-      transaction.status = 'COMMITTED';
+      transaction.status = "COMMITTED";
       transaction.endTime = new Date();
       this.activeTransactions.set(transactionId, transaction);
 
@@ -154,7 +164,9 @@ export class TransactionService {
       this.cleanupTransaction(transactionId);
     } catch (error) {
       await this.rollbackTransaction(transactionId);
-      throw new Error(`提交事务失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `提交事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -169,14 +181,16 @@ export class TransactionService {
       }
 
       // 更新事务状态
-      transaction.status = 'ROLLED_BACK';
+      transaction.status = "ROLLED_BACK";
       transaction.endTime = new Date();
       this.activeTransactions.set(transactionId, transaction);
 
       // 清理事务
       this.cleanupTransaction(transactionId);
     } catch (error) {
-      throw new Error(`回滚事务失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `回滚事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -185,7 +199,7 @@ export class TransactionService {
    */
   addOperation(
     transactionId: string,
-    operation: Omit<TransactionOperation, 'id' | 'timestamp'>
+    operation: Omit<TransactionOperation, "id" | "timestamp">,
   ): void {
     try {
       const transaction = this.activeTransactions.get(transactionId);
@@ -193,20 +207,24 @@ export class TransactionService {
         throw new Error(`事务 ${transactionId} 不存在`);
       }
 
-      if (transaction.status !== 'ACTIVE') {
-        throw new Error(`事务 ${transactionId} 状态无效: ${transaction.status}`);
+      if (transaction.status !== "ACTIVE") {
+        throw new Error(
+          `事务 ${transactionId} 状态无效: ${transaction.status}`,
+        );
       }
 
       const fullOperation: TransactionOperation = {
         id: this.generateOperationId(),
         timestamp: new Date(),
-        ...operation
+        ...operation,
       };
 
       transaction.operations.push(fullOperation);
       this.activeTransactions.set(transactionId, transaction);
     } catch (error) {
-      throw new Error(`添加事务操作失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `添加事务操作失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -222,8 +240,9 @@ export class TransactionService {
    * 获取活跃事务列表
    */
   getActiveTransactions(): TransactionContext[] {
-    return Array.from(this.activeTransactions.values())
-      .filter(tx => tx.status === 'ACTIVE');
+    return Array.from(this.activeTransactions.values()).filter(
+      (tx) => tx.status === "ACTIVE",
+    );
   }
 
   /**
@@ -232,12 +251,12 @@ export class TransactionService {
   getTransactionStats(): Record<string, any> {
     const activeCount = this.getActiveTransactions().length;
     const totalCount = this.activeTransactions.size;
-    
+
     const statusCounts = {
       ACTIVE: 0,
       COMMITTED: 0,
       ROLLED_BACK: 0,
-      TIMEOUT: 0
+      TIMEOUT: 0,
     };
 
     for (const transaction of this.activeTransactions.values()) {
@@ -247,7 +266,7 @@ export class TransactionService {
     return {
       activeCount,
       totalCount,
-      statusCounts
+      statusCounts,
     };
   }
 
@@ -257,14 +276,14 @@ export class TransactionService {
   async executeDistributedTransaction(
     operations: Array<{
       connectionName: string;
-      operation: Omit<TransactionOperation, 'id' | 'timestamp'>;
-    }>
+      operation: Omit<TransactionOperation, "id" | "timestamp">;
+    }>,
   ): Promise<void> {
     try {
       const transactionId = this.generateTransactionId();
-      const transaction = await this.beginTransaction('distributed', {
+      const transaction = await this.beginTransaction("distributed", {
         distributed: true,
-        timeout: 60000
+        timeout: 60000,
       });
 
       // 添加所有操作
@@ -275,7 +294,9 @@ export class TransactionService {
       // 提交事务
       await this.commitTransaction(transactionId);
     } catch (error) {
-      throw new Error(`执行分布式事务失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `执行分布式事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -284,27 +305,33 @@ export class TransactionService {
    */
   private async executeOperation(
     connection: any,
-    operation: TransactionOperation
+    operation: TransactionOperation,
   ): Promise<void> {
     try {
       switch (operation.type) {
-        case 'INSERT':
+        case "INSERT":
           await connection.batchInsert(operation.table, [operation.data]);
           break;
-        case 'UPDATE':
-          await connection.batchUpdate(operation.table, [operation.data], operation.where);
+        case "UPDATE":
+          await connection.batchUpdate(
+            operation.table,
+            [operation.data],
+            operation.where,
+          );
           break;
-        case 'DELETE':
+        case "DELETE":
           await connection.batchDelete(operation.table, operation.where);
           break;
-        case 'SELECT':
+        case "SELECT":
           // SELECT操作通常不需要在事务中执行
           break;
         default:
           throw new Error(`不支持的操作类型: ${operation.type}`);
       }
     } catch (error) {
-      throw new Error(`执行操作失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `执行操作失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -313,8 +340,8 @@ export class TransactionService {
    */
   private handleTransactionTimeout(transactionId: string): void {
     const transaction = this.activeTransactions.get(transactionId);
-    if (transaction && transaction.status === 'ACTIVE') {
-      transaction.status = 'TIMEOUT';
+    if (transaction && transaction.status === "ACTIVE") {
+      transaction.status = "TIMEOUT";
       transaction.endTime = new Date();
       this.activeTransactions.set(transactionId, transaction);
       this.cleanupTransaction(transactionId);
@@ -348,12 +375,12 @@ export class TransactionService {
    */
   private getDefaultTransactionConfig(): TransactionConfig {
     return {
-      isolationLevel: 'READ_COMMITTED',
+      isolationLevel: "READ_COMMITTED",
       timeout: 30000,
       readOnly: false,
       distributed: false,
       retryAttempts: 3,
-      retryDelay: 1000
+      retryDelay: 1000,
     };
   }
 
@@ -362,17 +389,17 @@ export class TransactionService {
    */
   async healthCheck(): Promise<Record<string, boolean>> {
     const healthChecks: Record<string, boolean> = {};
-    
+
     try {
       const activeTransactions = this.getActiveTransactions();
       const timeoutThreshold = 300000; // 5分钟
       const now = Date.now();
-      
+
       for (const transaction of activeTransactions) {
         const duration = now - transaction.startTime.getTime();
         healthChecks[transaction.id] = duration < timeoutThreshold;
       }
-      
+
       return healthChecks;
     } catch (error) {
       return {};

@@ -8,7 +8,7 @@
 
 - **Total Tasks**: 47
 - **User Story 1 (P1)**: 15 tasks - 多数据库支持与领域层集成
-- **User Story 2 (P1)**: 12 tasks - 基础设施层与应用层集成  
+- **User Story 2 (P1)**: 12 tasks - 基础设施层与应用层集成
 - **User Story 3 (P1)**: 10 tasks - 多租户数据隔离支持
 - **User Story 4 (P2)**: 6 tasks - 性能优化和监控支持
 - **User Story 5 (P2)**: 4 tasks - 错误处理和恢复支持
@@ -279,7 +279,7 @@
 - **Test**: 创建简单仓储实现，验证能够存储和检索领域实体
 - **Criteria**: 支持PostgreSQL和MongoDB两种数据库配置，能够正确持久化领域实体
 
-### User Story 2 - 基础设施层与应用层集成  
+### User Story 2 - 基础设施层与应用层集成
 
 - **Test**: 实现具体仓储和查询服务，验证能够支持应用层用例执行
 - **Criteria**: 支持CQRS模式，提供事务管理和缓存支持
@@ -319,7 +319,7 @@ T030 [US1] Create repositories/aggregate/aggregate-repository-adapter.ts
 T036 [US2] Create services/cqrs/command-handler-service.ts &
 T037 [US2] Create services/cqrs/query-handler-service.ts &
 
-# User Story 3  
+# User Story 3
 T048 [US3] Create isolation/context/isolation-context-manager.ts &
 T051 [US3] Create isolation/access-control/access-control-service.ts
 ```

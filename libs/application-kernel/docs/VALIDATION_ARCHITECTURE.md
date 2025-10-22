@@ -47,11 +47,11 @@
 
 ## 验证类型分析
 
-| 验证类型 | 层级 | 关注点 | 示例 |
-|---------|------|--------|------|
+| 验证类型     | 层级   | 关注点         | 示例               |
+| ------------ | ------ | -------------- | ------------------ |
 | **格式验证** | 接口层 | 数据格式、类型 | JSON格式、邮箱格式 |
 | **权限验证** | 接口层 | 用户权限、角色 | 访问权限、操作权限 |
-| **模式验证** | 应用层 | 架构模式合规 | CQRS模式、依赖注入 |
+| **模式验证** | 应用层 | 架构模式合规   | CQRS模式、依赖注入 |
 | **业务验证** | 领域层 | 业务规则、约束 | 用户年龄、订单金额 |
 
 ## 实现示例
@@ -63,15 +63,15 @@
 export class PatternComplianceValidator {
   static validateCommand(commandClass: any): PatternComplianceResult {
     const violations: string[] = [];
-    
+
     // 检查是否继承自BaseCommand
     if (!this.extendsBaseCommand(commandClass)) {
-      violations.push('命令类必须继承自BaseCommand');
+      violations.push("命令类必须继承自BaseCommand");
     }
-    
+
     return {
       isCompliant: violations.length === 0,
-      violations
+      violations,
     };
   }
 }
@@ -79,11 +79,11 @@ export class PatternComplianceValidator {
 // ❌ 错误示例：应用层不应该验证业务规则
 export class CreateUserCommand extends BaseCommand {
   constructor(email: string, username: string, password: string) {
-    super('CreateUserCommand', '创建用户命令');
-    
+    super("CreateUserCommand", "创建用户命令");
+
     // ❌ 错误：业务规则验证不应该在应用层
-    if (!email.includes('@')) {
-      throw new Error('邮箱格式无效');
+    if (!email.includes("@")) {
+      throw new Error("邮箱格式无效");
     }
   }
 }
@@ -91,11 +91,11 @@ export class CreateUserCommand extends BaseCommand {
 // ✅ 正确示例：应用层只验证结构
 export class CreateUserCommand extends BaseCommand {
   constructor(email: string, username: string, password: string) {
-    super('CreateUserCommand', '创建用户命令');
-    
+    super("CreateUserCommand", "创建用户命令");
+
     // ✅ 正确：只验证参数完整性
     if (!email || !username || !password) {
-      throw new Error('命令参数不能为空');
+      throw new Error("命令参数不能为空");
     }
   }
 }
@@ -106,17 +106,19 @@ export class CreateUserCommand extends BaseCommand {
 ```typescript
 // libs/domain-kernel/src/validation/business-rule.validator.ts
 export class BusinessRuleValidator {
-  static validateUserRegistration(userData: UserRegistrationData): ValidationResult {
+  static validateUserRegistration(
+    userData: UserRegistrationData,
+  ): ValidationResult {
     const errors: string[] = [];
-    
+
     // 验证邮箱格式
     if (!this.isValidEmail(userData.email)) {
-      errors.push('邮箱格式无效');
+      errors.push("邮箱格式无效");
     }
-    
+
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
@@ -129,15 +131,15 @@ export class BusinessRuleValidator {
 export class InputValidator {
   static validateCreateUserRequest(request: any): ValidationResult {
     const errors: string[] = [];
-    
+
     // 验证必填字段
     if (!request.email) {
-      errors.push('邮箱字段必填');
+      errors.push("邮箱字段必填");
     }
-    
+
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }

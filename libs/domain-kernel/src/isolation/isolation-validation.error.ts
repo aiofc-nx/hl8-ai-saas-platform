@@ -32,7 +32,7 @@ export class IsolationValidationError extends Error {
     /** 错误代码 */
     public readonly code: string,
     /** 上下文信息 */
-    public readonly context?: Record<string, any>,
+    public readonly context?: Record<string, unknown>,
   ) {
     super(message);
     this.name = "IsolationValidationError";

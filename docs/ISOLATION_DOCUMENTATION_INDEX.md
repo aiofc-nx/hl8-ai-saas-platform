@@ -28,11 +28,11 @@
 
 ## Document Overview
 
-| Document | Audience | Purpose | Time to Read |
-|----------|----------|---------|--------------|
-| [Technical Plan](./INTERFACE_LAYER_TECHNICAL_PLAN.md) | Architects, Technical Leads | Architecture and design decisions | 30 minutes |
-| [Implementation Guide](./INTERFACE_LAYER_IMPLEMENTATION_GUIDE.md) | Developers | Development instructions and examples | 2 hours |
-| [Architecture Diagrams](./INTERFACE_LAYER_ARCHITECTURE_DIAGRAM.md) | All Stakeholders | Visual system representations | 1 hour |
+| Document                                                           | Audience                    | Purpose                               | Time to Read |
+| ------------------------------------------------------------------ | --------------------------- | ------------------------------------- | ------------ |
+| [Technical Plan](./INTERFACE_LAYER_TECHNICAL_PLAN.md)              | Architects, Technical Leads | Architecture and design decisions     | 30 minutes   |
+| [Implementation Guide](./INTERFACE_LAYER_IMPLEMENTATION_GUIDE.md)  | Developers                  | Development instructions and examples | 2 hours      |
+| [Architecture Diagrams](./INTERFACE_LAYER_ARCHITECTURE_DIAGRAM.md) | All Stakeholders            | Visual system representations         | 1 hour       |
 
 ## Common Use Cases
 

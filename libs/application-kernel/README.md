@@ -22,8 +22,8 @@ npm install @hl8/application-kernel @hl8/domain-kernel
 ## 🚀 快速开始
 
 ```typescript
-import { BaseCommand, BaseQuery, BaseUseCase } from '@hl8/application-kernel';
-import { IsolationContext, TenantId } from '@hl8/domain-kernel';
+import { BaseCommand, BaseQuery, BaseUseCase } from "@hl8/application-kernel";
+import { IsolationContext, TenantId } from "@hl8/domain-kernel";
 
 // 创建命令
 export class CreateUserCommand extends BaseCommand {
@@ -32,7 +32,7 @@ export class CreateUserCommand extends BaseCommand {
     public readonly username: string,
     isolationContext?: IsolationContext,
   ) {
-    super('CreateUserCommand', '创建用户命令', isolationContext);
+    super("CreateUserCommand", "创建用户命令", isolationContext);
   }
 }
 
@@ -42,7 +42,7 @@ export class GetUserQuery extends BaseQuery {
     public readonly userId: string,
     isolationContext?: IsolationContext,
   ) {
-    super('GetUserQuery', '获取用户查询', isolationContext);
+    super("GetUserQuery", "获取用户查询", isolationContext);
   }
 }
 
@@ -50,7 +50,7 @@ export class GetUserQuery extends BaseQuery {
 export class CreateUserUseCase extends BaseUseCase {
   async execute(command: CreateUserCommand): Promise<string> {
     // 实现用例逻辑
-    return 'user-' + Date.now();
+    return "user-" + Date.now();
   }
 }
 ```
@@ -136,14 +136,14 @@ libs/application-kernel/
 
 ### 核心组件
 
-| 组件 | 职责 | 位置 |
-|------|------|------|
-| `BaseCommand` | 命令基类 | `src/cqrs/commands/` |
-| `BaseQuery` | 查询基类 | `src/cqrs/queries/` |
-| `BaseUseCase` | 用例基类 | `src/use-cases/` |
-| `IsolationContext` | 隔离上下文 | 来自 `@hl8/domain-kernel` |
-| `IEventBus` | 事件总线接口 | `src/events/` |
-| `ITransactionManager` | 事务管理器接口 | `src/transactions/` |
+| 组件                  | 职责           | 位置                      |
+| --------------------- | -------------- | ------------------------- |
+| `BaseCommand`         | 命令基类       | `src/cqrs/commands/`      |
+| `BaseQuery`           | 查询基类       | `src/cqrs/queries/`       |
+| `BaseUseCase`         | 用例基类       | `src/use-cases/`          |
+| `IsolationContext`    | 隔离上下文     | 来自 `@hl8/domain-kernel` |
+| `IEventBus`           | 事件总线接口   | `src/events/`             |
+| `ITransactionManager` | 事务管理器接口 | `src/transactions/`       |
 
 ## 🤝 贡献
 

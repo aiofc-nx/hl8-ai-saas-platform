@@ -15,7 +15,11 @@
  * 基础领域服务类
  * @description 提供领域服务的通用功能和接口
  */
-export abstract class BaseDomainService {
+export abstract class BaseDomainService<
+  Context = unknown,
+  Input = unknown,
+  Output = unknown,
+> {
   /**
    * 构造函数
    */
@@ -30,7 +34,7 @@ export abstract class BaseDomainService {
    * @param context - 业务上下文
    * @throws {Error} 当业务规则验证失败时抛出异常
    */
-  protected validateBusinessRules(context?: any): void {
+  protected validateBusinessRules(_context?: Context): void {
     // 子类可以重写此方法进行业务规则验证
   }
 
@@ -41,7 +45,7 @@ export abstract class BaseDomainService {
    * @param input - 输入参数
    * @returns 执行结果
    */
-  abstract execute(input: any): Promise<any> | any;
+  abstract execute(input: Input): Promise<Output> | Output;
 
   /**
    * 检查服务是否可用

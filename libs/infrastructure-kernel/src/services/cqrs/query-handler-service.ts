@@ -5,11 +5,11 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
-import type { BaseQuery } from '@hl8/application-kernel';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
+import type { BaseQuery } from "@hl8/application-kernel";
 
 /**
  * 查询接口
@@ -26,7 +26,7 @@ export interface Query {
   /** 排序字段 */
   orderBy?: string;
   /** 排序方向 */
-  orderDirection?: 'ASC' | 'DESC';
+  orderDirection?: "ASC" | "DESC";
   /** 限制数量 */
   limit?: number;
   /** 偏移量 */
@@ -83,22 +83,19 @@ export class QueryHandlerService {
   private cacheConfig = {
     enabled: true,
     ttl: 300000, // 5分钟
-    maxSize: 1000
+    maxSize: 1000,
   };
 
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
    * 注册查询处理器
    */
-  registerHandler(
-    queryType: string,
-    handler: QueryHandler
-  ): void {
+  registerHandler(queryType: string, handler: QueryHandler): void {
     this.handlers.set(queryType, handler);
   }
 
@@ -107,11 +104,11 @@ export class QueryHandlerService {
    */
   async handleQuery<T = any>(query: Query): Promise<QueryResult<T>> {
     const startTime = Date.now();
-    
+
     try {
       // 应用隔离上下文
       const isolatedQuery = this.applyIsolationContext(query);
-      
+
       // 检查缓存
       if (this.cacheConfig.enabled) {
         const cacheKey = this.generateCacheKey(isolatedQuery);
@@ -120,7 +117,7 @@ export class QueryHandlerService {
           return {
             ...cached,
             executionTime: Date.now() - startTime,
-            queryId: query.id
+            queryId: query.id,
           };
         }
       }
@@ -139,7 +136,7 @@ export class QueryHandlerService {
 
       // 执行查询
       const result = await handler.handle(isolatedQuery);
-      
+
       // 更新执行时间
       result.executionTime = Date.now() - startTime;
       result.queryId = query.id;
@@ -157,9 +154,9 @@ export class QueryHandlerService {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '查询处理失败',
+        error: error instanceof Error ? error.message : "查询处理失败",
         executionTime,
-        queryId: query.id
+        queryId: query.id,
       };
     }
   }
@@ -169,7 +166,7 @@ export class QueryHandlerService {
    */
   async handleQueries(queries: Query[]): Promise<QueryResult[]> {
     const results: QueryResult[] = [];
-    
+
     for (const query of queries) {
       try {
         const result = await this.handleQuery(query);
@@ -177,13 +174,13 @@ export class QueryHandlerService {
       } catch (error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : '查询处理失败',
+          error: error instanceof Error ? error.message : "查询处理失败",
           executionTime: 0,
-          queryId: query.id
+          queryId: query.id,
         });
       }
     }
-    
+
     return results;
   }
 
@@ -209,7 +206,7 @@ export class QueryHandlerService {
       cacheSize: this.queryCache.size,
       maxSize: this.cacheConfig.maxSize,
       ttl: this.cacheConfig.ttl,
-      enabled: this.cacheConfig.enabled
+      enabled: this.cacheConfig.enabled,
     };
   }
 
@@ -236,11 +233,11 @@ export class QueryHandlerService {
     }
 
     const isolatedQuery = { ...query };
-    
+
     if (this.isolationContext.tenantId) {
       isolatedQuery.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedQuery.userId = this.isolationContext.userId;
     }
@@ -249,19 +246,20 @@ export class QueryHandlerService {
     if (!isolatedQuery.filters) {
       isolatedQuery.filters = {};
     }
-    
+
     if (this.isolationContext.tenantId) {
       isolatedQuery.filters.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.organizationId) {
-      isolatedQuery.filters.organizationId = this.isolationContext.organizationId;
+      isolatedQuery.filters.organizationId =
+        this.isolationContext.organizationId;
     }
-    
+
     if (this.isolationContext.departmentId) {
       isolatedQuery.filters.departmentId = this.isolationContext.departmentId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedQuery.filters.userId = this.isolationContext.userId;
     }
@@ -280,15 +278,15 @@ export class QueryHandlerService {
       orderBy: query.orderBy,
       orderDirection: query.orderDirection,
       limit: query.limit,
-      offset: query.offset
+      offset: query.offset,
     };
-    
+
     let cacheKey = `query:${JSON.stringify(keyData)}`;
-    
+
     if (this.isolationContext) {
       cacheKey = `${this.isolationContext.tenantId}:${cacheKey}`;
     }
-    
+
     return cacheKey;
   }
 
@@ -329,7 +327,7 @@ export class QueryHandlerService {
       const cacheKey = this.generateCacheKey(query);
       const cacheData = {
         result,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // 存储到内存缓存
@@ -338,17 +336,17 @@ export class QueryHandlerService {
         const oldestKey = this.queryCache.keys().next().value;
         this.queryCache.delete(oldestKey);
       }
-      
+
       this.queryCache.set(cacheKey, cacheData);
 
       // 存储到外部缓存服务
       if (this.cacheService) {
         await this.cacheService.set(cacheKey, result, {
-          ttl: this.cacheConfig.ttl / 1000 // 转换为秒
+          ttl: this.cacheConfig.ttl / 1000, // 转换为秒
         });
       }
     } catch (error) {
-      console.error('缓存查询结果失败:', error);
+      console.error("缓存查询结果失败:", error);
     }
   }
 
@@ -357,7 +355,7 @@ export class QueryHandlerService {
    */
   private async logQueryExecution(
     query: Query,
-    result: QueryResult
+    result: QueryResult,
   ): Promise<void> {
     try {
       const logData = {
@@ -367,13 +365,13 @@ export class QueryHandlerService {
         executionTime: result.executionTime,
         timestamp: new Date(),
         userId: query.userId,
-        tenantId: query.tenantId
+        tenantId: query.tenantId,
       };
 
       // 这里应该记录到日志系统
-      console.log('查询执行日志:', logData);
+      console.log("查询执行日志:", logData);
     } catch (error) {
-      console.error('记录查询执行日志失败:', error);
+      console.error("记录查询执行日志失败:", error);
     }
   }
 

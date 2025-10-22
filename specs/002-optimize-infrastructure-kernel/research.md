@@ -41,7 +41,7 @@ class PostgreSQLAdapter implements DatabaseAdapter {
   // MikroORM + PostgreSQL实现
 }
 
-// MongoDB适配器  
+// MongoDB适配器
 class MongoDBAdapter implements DatabaseAdapter {
   // MikroORM + MongoDB实现
 }
@@ -69,14 +69,14 @@ class MongoDBAdapter implements DatabaseAdapter {
 // 统一日志服务
 class InfrastructureLoggingService {
   constructor(private readonly pinoLogger: PinoLogger) {}
-  
+
   // 结构化日志记录
   log(context: LogContext, message: string, data?: any): void {
     this.pinoLogger.info({
       ...context,
       message,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 }
@@ -97,10 +97,15 @@ class InfrastructureLoggingService {
 ```typescript
 // 隔离上下文管理
 class IsolationContextManager {
-  createContext(tenantId: string, organizationId?: string, departmentId?: string, userId?: string): IsolationContext {
+  createContext(
+    tenantId: string,
+    organizationId?: string,
+    departmentId?: string,
+    userId?: string,
+  ): IsolationContext {
     return new IsolationContext(tenantId, organizationId, departmentId, userId);
   }
-  
+
   // 数据访问控制
   validateAccess(context: IsolationContext, resource: any): boolean {
     // 验证访问权限
@@ -123,7 +128,11 @@ class IsolationContextManager {
 ```typescript
 // 事件存储接口
 interface EventStore {
-  saveEvents(aggregateId: string, events: DomainEvent[], expectedVersion: number): Promise<void>;
+  saveEvents(
+    aggregateId: string,
+    events: DomainEvent[],
+    expectedVersion: number,
+  ): Promise<void>;
   getEvents(aggregateId: string, fromVersion?: number): Promise<DomainEvent[]>;
   getEventsByType(eventType: string): Promise<DomainEvent[]>;
 }
@@ -181,13 +190,13 @@ class BaseRepositoryAdapter<T> implements IRepository<T> {
   constructor(
     private readonly databaseAdapter: DatabaseAdapter,
     private readonly cacheService: CacheService,
-    private readonly isolationContext: IsolationContext
+    private readonly isolationContext: IsolationContext,
   ) {}
-  
+
   async save(entity: T): Promise<void> {
     // 实现保存逻辑
   }
-  
+
   async findById(id: string): Promise<T | null> {
     // 实现查询逻辑
   }

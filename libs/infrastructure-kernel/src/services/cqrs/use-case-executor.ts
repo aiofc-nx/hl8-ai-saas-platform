@@ -5,10 +5,10 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
 
 /**
  * 用例接口
@@ -19,7 +19,7 @@ export interface UseCase {
   /** 用例名称 */
   name: string;
   /** 用例类型 */
-  type: 'COMMAND' | 'QUERY';
+  type: "COMMAND" | "QUERY";
   /** 输入数据 */
   input: Record<string, any>;
   /** 输出数据 */
@@ -57,7 +57,7 @@ export interface UseCaseStep {
   /** 步骤名称 */
   name: string;
   /** 步骤类型 */
-  type: 'VALIDATION' | 'BUSINESS_LOGIC' | 'PERSISTENCE' | 'NOTIFICATION';
+  type: "VALIDATION" | "BUSINESS_LOGIC" | "PERSISTENCE" | "NOTIFICATION";
   /** 是否成功 */
   success: boolean;
   /** 执行时间(毫秒) */
@@ -69,7 +69,10 @@ export interface UseCaseStep {
 /**
  * 用例执行器接口
  */
-export interface UseCaseExecutor<TUseCase extends UseCase = UseCase, TResult = any> {
+export interface UseCaseExecutor<
+  TUseCase extends UseCase = UseCase,
+  TResult = any,
+> {
   /** 执行用例 */
   execute(useCase: TUseCase): Promise<UseCaseResult<TResult>>;
   /** 验证用例 */
@@ -90,16 +93,13 @@ export class UseCaseExecutorService {
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
    * 注册用例执行器
    */
-  registerExecutor(
-    useCaseName: string,
-    executor: UseCaseExecutor
-  ): void {
+  registerExecutor(useCaseName: string, executor: UseCaseExecutor): void {
     this.executors.set(useCaseName, executor);
   }
 
@@ -109,11 +109,11 @@ export class UseCaseExecutorService {
   async executeUseCase<T = any>(useCase: UseCase): Promise<UseCaseResult<T>> {
     const startTime = Date.now();
     const steps: UseCaseStep[] = [];
-    
+
     try {
       // 应用隔离上下文
       const isolatedUseCase = this.applyIsolationContext(useCase);
-      
+
       // 获取执行器
       const executor = this.executors.get(useCase.name);
       if (!executor) {
@@ -124,12 +124,12 @@ export class UseCaseExecutorService {
       const validationStart = Date.now();
       const isValid = await executor.validate(isolatedUseCase);
       const validationTime = Date.now() - validationStart;
-      
+
       steps.push({
-        name: '用例验证',
-        type: 'VALIDATION',
+        name: "用例验证",
+        type: "VALIDATION",
         success: isValid,
-        executionTime: validationTime
+        executionTime: validationTime,
       });
 
       if (!isValid) {
@@ -140,12 +140,12 @@ export class UseCaseExecutorService {
       const executionStart = Date.now();
       const result = await executor.execute(isolatedUseCase);
       const executionTime = Date.now() - executionStart;
-      
+
       steps.push({
-        name: '用例执行',
-        type: 'BUSINESS_LOGIC',
+        name: "用例执行",
+        type: "BUSINESS_LOGIC",
         success: result.success,
-        executionTime: executionTime
+        executionTime: executionTime,
       });
 
       // 更新执行时间
@@ -164,10 +164,10 @@ export class UseCaseExecutorService {
       const executionTime = Date.now() - startTime;
       const result: UseCaseResult<T> = {
         success: false,
-        error: error instanceof Error ? error.message : '用例执行失败',
+        error: error instanceof Error ? error.message : "用例执行失败",
         executionTime,
         useCaseId: useCase.id,
-        steps
+        steps,
       };
 
       // 记录执行历史
@@ -182,7 +182,7 @@ export class UseCaseExecutorService {
    */
   async executeUseCases(useCases: UseCase[]): Promise<UseCaseResult[]> {
     const results: UseCaseResult[] = [];
-    
+
     for (const useCase of useCases) {
       try {
         const result = await this.executeUseCase(useCase);
@@ -190,13 +190,13 @@ export class UseCaseExecutorService {
       } catch (error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : '用例执行失败',
+          error: error instanceof Error ? error.message : "用例执行失败",
           executionTime: 0,
-          useCaseId: useCase.id
+          useCaseId: useCase.id,
         });
       }
     }
-    
+
     return results;
   }
 
@@ -213,19 +213,21 @@ export class UseCaseExecutorService {
    */
   getExecutionStats(): Record<string, any> {
     const total = this.executionHistory.length;
-    const successful = this.executionHistory.filter(r => r.success).length;
+    const successful = this.executionHistory.filter((r) => r.success).length;
     const failed = total - successful;
-    
-    const averageExecutionTime = this.executionHistory.length > 0
-      ? this.executionHistory.reduce((sum, r) => sum + r.executionTime, 0) / this.executionHistory.length
-      : 0;
+
+    const averageExecutionTime =
+      this.executionHistory.length > 0
+        ? this.executionHistory.reduce((sum, r) => sum + r.executionTime, 0) /
+          this.executionHistory.length
+        : 0;
 
     return {
       total,
       successful,
       failed,
       successRate: total > 0 ? successful / total : 0,
-      averageExecutionTime
+      averageExecutionTime,
     };
   }
 
@@ -259,11 +261,11 @@ export class UseCaseExecutorService {
     }
 
     const isolatedUseCase = { ...useCase };
-    
+
     if (this.isolationContext.tenantId) {
       isolatedUseCase.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedUseCase.userId = this.isolationContext.userId;
     }
@@ -272,19 +274,20 @@ export class UseCaseExecutorService {
     if (!isolatedUseCase.input) {
       isolatedUseCase.input = {};
     }
-    
+
     if (this.isolationContext.tenantId) {
       isolatedUseCase.input.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.organizationId) {
-      isolatedUseCase.input.organizationId = this.isolationContext.organizationId;
+      isolatedUseCase.input.organizationId =
+        this.isolationContext.organizationId;
     }
-    
+
     if (this.isolationContext.departmentId) {
       isolatedUseCase.input.departmentId = this.isolationContext.departmentId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedUseCase.input.userId = this.isolationContext.userId;
     }
@@ -297,7 +300,7 @@ export class UseCaseExecutorService {
    */
   private recordExecutionHistory(result: UseCaseResult): void {
     this.executionHistory.push(result);
-    
+
     // 限制历史记录大小
     if (this.executionHistory.length > this.maxHistorySize) {
       this.executionHistory = this.executionHistory.slice(-this.maxHistorySize);
@@ -309,7 +312,7 @@ export class UseCaseExecutorService {
    */
   private async logUseCaseExecution(
     useCase: UseCase,
-    result: UseCaseResult
+    result: UseCaseResult,
   ): Promise<void> {
     try {
       const logData = {
@@ -321,13 +324,13 @@ export class UseCaseExecutorService {
         timestamp: new Date(),
         userId: useCase.userId,
         tenantId: useCase.tenantId,
-        steps: result.steps
+        steps: result.steps,
       };
 
       // 这里应该记录到日志系统
-      console.log('用例执行日志:', logData);
+      console.log("用例执行日志:", logData);
     } catch (error) {
-      console.error('记录用例执行日志失败:', error);
+      console.error("记录用例执行日志失败:", error);
     }
   }
 

@@ -99,7 +99,7 @@ import { UserModule } from "./modules/user.module.js";
     // 环境变量格式：LOGGING__LEVEL=info, LOGGING__PRETTY_PRINT=true
     FastifyLoggingModule.forRoot({
       config: {
-        level: (process.env.LOGGING__LEVEL as any) || "info",
+        level: (process.env.LOGGING__LEVEL as "fatal" | "error" | "warn" | "info" | "debug" | "trace") || "info",
         prettyPrint:
           process.env.NODE_ENV === "development" ||
           process.env.LOGGING__PRETTY_PRINT === "true",

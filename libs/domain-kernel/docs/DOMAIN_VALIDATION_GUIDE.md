@@ -92,12 +92,14 @@ export interface DomainValidationResult {
 const validationManager = new DomainValidationManager();
 
 // 2. 注册验证器
-validationManager.registerValidator(new UserRegistrationBusinessRuleValidator());
+validationManager.registerValidator(
+  new UserRegistrationBusinessRuleValidator(),
+);
 
 // 3. 创建验证上下文
 const context: DomainValidationContext = {
-  operation: 'user_registration',
-  metadata: { userData }
+  operation: "user_registration",
+  metadata: { userData },
 };
 
 // 4. 执行验证
@@ -105,7 +107,7 @@ const result = validationManager.validateAll(context);
 
 // 5. 处理验证结果
 if (!result.isValid) {
-  console.log('验证失败:', result.errors);
+  console.log("验证失败:", result.errors);
 }
 ```
 
@@ -123,9 +125,9 @@ if (!result.isValid) {
 // 验证邮箱格式
 if (!this.isValidEmail(userData.email)) {
   errors.push({
-    code: 'INVALID_EMAIL_FORMAT',
-    message: '邮箱格式无效',
-    field: 'email'
+    code: "INVALID_EMAIL_FORMAT",
+    message: "邮箱格式无效",
+    field: "email",
   });
 }
 
@@ -133,9 +135,9 @@ if (!this.isValidEmail(userData.email)) {
 const passwordValidation = this.validatePasswordStrength(userData.password);
 if (!passwordValidation.isValid) {
   errors.push({
-    code: 'WEAK_PASSWORD',
+    code: "WEAK_PASSWORD",
     message: passwordValidation.message,
-    field: 'password'
+    field: "password",
   });
 }
 ```
@@ -148,18 +150,18 @@ if (!passwordValidation.isValid) {
 // 验证订单金额
 if (!orderData.amount || orderData.amount <= 0) {
   errors.push({
-    code: 'INVALID_ORDER_AMOUNT',
-    message: '订单金额必须大于0',
-    field: 'amount'
+    code: "INVALID_ORDER_AMOUNT",
+    message: "订单金额必须大于0",
+    field: "amount",
   });
 }
 
 // 验证库存
 if (item.quantity > item.availableStock) {
   warnings.push({
-    code: 'INSUFFICIENT_STOCK',
+    code: "INSUFFICIENT_STOCK",
     message: `商品 ${item.name} 库存不足`,
-    field: 'items.stock'
+    field: "items.stock",
   });
 }
 ```
@@ -173,17 +175,17 @@ if (item.quantity > item.availableStock) {
 ```typescript
 // 验证状态转换
 const validTransitions: Record<string, string[]> = {
-  'PENDING': ['ACTIVE', 'REJECTED'],
-  'ACTIVE': ['SUSPENDED', 'INACTIVE'],
-  'SUSPENDED': ['ACTIVE', 'INACTIVE'],
-  'INACTIVE': ['ACTIVE'],
-  'REJECTED': []
+  PENDING: ["ACTIVE", "REJECTED"],
+  ACTIVE: ["SUSPENDED", "INACTIVE"],
+  SUSPENDED: ["ACTIVE", "INACTIVE"],
+  INACTIVE: ["ACTIVE"],
+  REJECTED: [],
 };
 
 if (!allowedTransitions.includes(newStatus)) {
   errors.push({
-    code: 'INVALID_STATUS_TRANSITION',
-    message: `不能从状态 ${currentStatus} 转换到 ${newStatus}`
+    code: "INVALID_STATUS_TRANSITION",
+    message: `不能从状态 ${currentStatus} 转换到 ${newStatus}`,
   });
 }
 ```
@@ -195,15 +197,15 @@ if (!allowedTransitions.includes(newStatus)) {
 ```typescript
 // 验证订单状态与支付状态的一致性
 const validCombinations: Record<string, string[]> = {
-  'CONFIRMED': ['PAID', 'PROCESSING'],
-  'SHIPPED': ['PAID'],
-  'DELIVERED': ['PAID']
+  CONFIRMED: ["PAID", "PROCESSING"],
+  SHIPPED: ["PAID"],
+  DELIVERED: ["PAID"],
 };
 
 if (!allowedPaymentStatuses.includes(paymentStatus)) {
   errors.push({
-    code: 'INCONSISTENT_ORDER_PAYMENT_STATUS',
-    message: `订单状态 ${orderStatus} 与支付状态 ${paymentStatus} 不匹配`
+    code: "INCONSISTENT_ORDER_PAYMENT_STATUS",
+    message: `订单状态 ${orderStatus} 与支付状态 ${paymentStatus} 不匹配`,
   });
 }
 ```
@@ -218,18 +220,18 @@ if (!allowedPaymentStatuses.includes(paymentStatus)) {
 // 验证邮箱格式
 if (!this.isValidEmailFormat(email)) {
   errors.push({
-    code: 'INVALID_EMAIL_FORMAT',
-    message: '邮箱格式无效',
-    field: 'email'
+    code: "INVALID_EMAIL_FORMAT",
+    message: "邮箱格式无效",
+    field: "email",
   });
 }
 
 // 验证可疑域名
-const suspiciousDomains = ['tempmail.com', '10minutemail.com'];
+const suspiciousDomains = ["tempmail.com", "10minutemail.com"];
 if (suspiciousDomains.includes(domain.toLowerCase())) {
   warnings.push({
-    code: 'SUSPICIOUS_EMAIL_DOMAIN',
-    message: '检测到临时邮箱域名，建议使用正式邮箱'
+    code: "SUSPICIOUS_EMAIL_DOMAIN",
+    message: "检测到临时邮箱域名，建议使用正式邮箱",
   });
 }
 ```
@@ -242,17 +244,19 @@ if (suspiciousDomains.includes(domain.toLowerCase())) {
 // 验证日期范围
 if (startDate >= endDate) {
   errors.push({
-    code: 'INVALID_DATE_RANGE',
-    message: '开始日期必须早于结束日期'
+    code: "INVALID_DATE_RANGE",
+    message: "开始日期必须早于结束日期",
   });
 }
 
 // 验证日期范围跨度
-const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+const daysDiff = Math.ceil(
+  (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+);
 if (daysDiff > 365) {
   warnings.push({
-    code: 'LONG_DATE_RANGE',
-    message: '日期范围跨度超过一年，请确认是否合理'
+    code: "LONG_DATE_RANGE",
+    message: "日期范围跨度超过一年，请确认是否合理",
   });
 }
 ```
@@ -266,15 +270,15 @@ if (daysDiff > 365) {
 ```typescript
 // 验证事件顺序
 const validEventSequences: Record<string, string[]> = {
-  'UserCreated': ['UserStatusChanged', 'UserEmailChanged', 'UserDeleted'],
-  'UserStatusChanged': ['UserStatusChanged', 'UserEmailChanged', 'UserDeleted'],
-  'UserDeleted': [] // 删除后不能再有其他事件
+  UserCreated: ["UserStatusChanged", "UserEmailChanged", "UserDeleted"],
+  UserStatusChanged: ["UserStatusChanged", "UserEmailChanged", "UserDeleted"],
+  UserDeleted: [], // 删除后不能再有其他事件
 };
 
 if (!allowedNextEvents.includes(event.eventType)) {
   errors.push({
-    code: 'INVALID_EVENT_SEQUENCE',
-    message: `事件 ${previousEventType} 后不能跟随 ${currentEventType}`
+    code: "INVALID_EVENT_SEQUENCE",
+    message: `事件 ${previousEventType} 后不能跟随 ${currentEventType}`,
   });
 }
 ```
@@ -286,25 +290,25 @@ if (!allowedNextEvents.includes(event.eventType)) {
 ### 4.1 用户注册验证
 
 ```typescript
-import { UserRegistrationValidationExample } from '@hl8/domain-kernel';
+import { UserRegistrationValidationExample } from "@hl8/domain-kernel";
 
 const validator = new UserRegistrationValidationExample();
 
 const userData = {
-  email: 'user@example.com',
-  username: 'john_doe',
-  password: 'SecurePass123!',
-  age: 25
+  email: "user@example.com",
+  username: "john_doe",
+  password: "SecurePass123!",
+  age: 25,
 };
 
 const result = await validator.validateUserRegistration(userData);
 
 if (!result.isValid) {
-  console.log('验证失败:', result.errors);
+  console.log("验证失败:", result.errors);
 } else {
-  console.log('验证通过');
+  console.log("验证通过");
   if (result.warnings.length > 0) {
-    console.log('警告:', result.warnings);
+    console.log("警告:", result.warnings);
   }
 }
 ```
@@ -312,53 +316,53 @@ if (!result.isValid) {
 ### 4.2 订单创建验证
 
 ```typescript
-import { OrderCreationValidationExample } from '@hl8/domain-kernel';
+import { OrderCreationValidationExample } from "@hl8/domain-kernel";
 
 const validator = new OrderCreationValidationExample();
 
 const orderData = {
-  amount: 100.00,
+  amount: 100.0,
   items: [
     {
-      id: 'item1',
-      name: '商品A',
+      id: "item1",
+      name: "商品A",
       quantity: 2,
-      availableStock: 5
-    }
-  ]
+      availableStock: 5,
+    },
+  ],
 };
 
 const result = await validator.validateOrderCreation(orderData);
 
 if (!result.isValid) {
-  console.log('订单验证失败:', result.errors);
+  console.log("订单验证失败:", result.errors);
 } else {
-  console.log('订单验证通过');
+  console.log("订单验证通过");
 }
 ```
 
 ### 4.3 综合验证
 
 ```typescript
-import { ComprehensiveValidationExample } from '@hl8/domain-kernel';
+import { ComprehensiveValidationExample } from "@hl8/domain-kernel";
 
 const validator = new ComprehensiveValidationExample();
 
 const operationData = {
   userData: {
-    email: 'user@example.com',
-    username: 'john_doe',
-    password: 'SecurePass123!'
+    email: "user@example.com",
+    username: "john_doe",
+    password: "SecurePass123!",
   },
-  operation: 'user_registration'
+  operation: "user_registration",
 };
 
 const result = await validator.validateUserOperation(operationData);
 
 if (!result.isValid) {
-  console.log('操作验证失败:', result.errors);
+  console.log("操作验证失败:", result.errors);
 } else {
-  console.log('操作验证通过');
+  console.log("操作验证通过");
 }
 ```
 
@@ -391,16 +395,16 @@ export class UniversalValidator extends DomainValidator {
 ```typescript
 // ✅ 正确：明确的错误信息
 errors.push({
-  code: 'INVALID_EMAIL_FORMAT',
-  message: '邮箱格式无效',
-  field: 'email',
-  context: { email: userData.email }
+  code: "INVALID_EMAIL_FORMAT",
+  message: "邮箱格式无效",
+  field: "email",
+  context: { email: userData.email },
 });
 
 // ❌ 错误：模糊的错误信息
 errors.push({
-  code: 'VALIDATION_ERROR',
-  message: '验证失败'
+  code: "VALIDATION_ERROR",
+  message: "验证失败",
 });
 ```
 
@@ -410,14 +414,14 @@ errors.push({
 // ✅ 正确：缓存验证结果
 export class CachedValidator extends DomainValidator {
   private static cache = new Map<string, DomainValidationResult>();
-  
+
   validate(context: DomainValidationContext): DomainValidationResult {
     const key = this.generateCacheKey(context);
-    
+
     if (this.cache.has(key)) {
       return this.cache.get(key)!;
     }
-    
+
     const result = this.performValidation(context);
     this.cache.set(key, result);
     return result;
@@ -433,7 +437,9 @@ export class CachedValidator extends DomainValidator {
 const validationManager = new DomainValidationManager();
 
 // 按优先级注册验证器
-validationManager.registerValidator(new UserRegistrationBusinessRuleValidator()); // 优先级: 100
+validationManager.registerValidator(
+  new UserRegistrationBusinessRuleValidator(),
+); // 优先级: 100
 validationManager.registerValidator(new UserStateValidator()); // 优先级: 100
 validationManager.registerValidator(new EmailValueObjectValidator()); // 优先级: 100
 
@@ -447,9 +453,9 @@ const result = validationManager.validateAll(context);
 export class ConditionalValidator extends DomainValidator {
   isApplicable(context: DomainValidationContext): boolean {
     // 只在特定条件下执行验证
-    return context.operation === 'user_registration';
+    return context.operation === "user_registration";
   }
-  
+
   validate(context: DomainValidationContext): DomainValidationResult {
     // 验证逻辑
   }
@@ -461,23 +467,27 @@ export class ConditionalValidator extends DomainValidator {
 #### **单元测试**
 
 ```typescript
-describe('UserRegistrationBusinessRuleValidator', () => {
-  it('should validate email format', () => {
+describe("UserRegistrationBusinessRuleValidator", () => {
+  it("should validate email format", () => {
     const validator = new UserRegistrationBusinessRuleValidator();
     const context: DomainValidationContext = {
-      operation: 'user_registration',
+      operation: "user_registration",
       metadata: {
-        userData: { email: 'invalid-email', username: 'test', password: 'password' }
-      }
+        userData: {
+          email: "invalid-email",
+          username: "test",
+          password: "password",
+        },
+      },
     };
-    
+
     const result = validator.validate(context);
-    
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toContainEqual({
-      code: 'INVALID_EMAIL_FORMAT',
-      message: '邮箱格式无效',
-      field: 'email'
+      code: "INVALID_EMAIL_FORMAT",
+      message: "邮箱格式无效",
+      field: "email",
     });
   });
 });
@@ -486,19 +496,19 @@ describe('UserRegistrationBusinessRuleValidator', () => {
 #### **集成测试**
 
 ```typescript
-describe('DomainValidationManager', () => {
-  it('should validate user registration with multiple validators', async () => {
+describe("DomainValidationManager", () => {
+  it("should validate user registration with multiple validators", async () => {
     const manager = new DomainValidationManager();
     manager.registerValidator(new UserRegistrationBusinessRuleValidator());
     manager.registerValidator(new EmailValueObjectValidator());
-    
+
     const context: DomainValidationContext = {
-      operation: 'user_registration',
-      metadata: { userData: validUserData }
+      operation: "user_registration",
+      metadata: { userData: validUserData },
     };
-    
+
     const result = manager.validateAll(context);
-    
+
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
@@ -520,9 +530,9 @@ export class UserRegistrationBusinessRuleValidator extends DomainValidator {
   getPriority(): number {
     return 50; // 高优先级，先执行
   }
-  
+
   isApplicable(context: DomainValidationContext): boolean {
-    return context.operation === 'user_registration';
+    return context.operation === "user_registration";
   }
 }
 ```
@@ -533,22 +543,28 @@ A: 使用异步验证器：
 
 ```typescript
 export class AsyncDomainValidator extends DomainValidator {
-  async validateAsync(context: DomainValidationContext): Promise<DomainValidationResult> {
+  async validateAsync(
+    context: DomainValidationContext,
+  ): Promise<DomainValidationResult> {
     // 异步验证逻辑
-    const emailExists = await this.checkEmailExists(context.metadata.userData.email);
-    
+    const emailExists = await this.checkEmailExists(
+      context.metadata.userData.email,
+    );
+
     if (emailExists) {
       return {
         isValid: false,
-        errors: [{
-          code: 'EMAIL_ALREADY_EXISTS',
-          message: '邮箱已被使用',
-          field: 'email'
-        }],
-        warnings: []
+        errors: [
+          {
+            code: "EMAIL_ALREADY_EXISTS",
+            message: "邮箱已被使用",
+            field: "email",
+          },
+        ],
+        warnings: [],
       };
     }
-    
+
     return { isValid: true, errors: [], warnings: [] };
   }
 }
@@ -568,14 +584,14 @@ A: 使用以下策略：
 ```typescript
 export class OptimizedValidator extends DomainValidator {
   private static cache = new Map<string, DomainValidationResult>();
-  
+
   validate(context: DomainValidationContext): DomainValidationResult {
     const key = this.generateCacheKey(context);
-    
+
     if (this.cache.has(key)) {
       return this.cache.get(key)!;
     }
-    
+
     const result = this.performValidation(context);
     this.cache.set(key, result);
     return result;
@@ -591,23 +607,23 @@ A: 使用验证规范和常量：
 
 ```typescript
 export class DomainValidationConstants {
-  static readonly INVALID_EMAIL_FORMAT = 'INVALID_EMAIL_FORMAT';
-  static readonly WEAK_PASSWORD = 'WEAK_PASSWORD';
-  static readonly INVALID_STATUS_TRANSITION = 'INVALID_STATUS_TRANSITION';
+  static readonly INVALID_EMAIL_FORMAT = "INVALID_EMAIL_FORMAT";
+  static readonly WEAK_PASSWORD = "WEAK_PASSWORD";
+  static readonly INVALID_STATUS_TRANSITION = "INVALID_STATUS_TRANSITION";
 }
 
 export class UserRegistrationBusinessRuleValidator extends DomainValidator {
   validate(context: DomainValidationContext): DomainValidationResult {
     const errors: DomainValidationError[] = [];
-    
+
     if (!this.isValidEmail(userData.email)) {
       errors.push({
         code: DomainValidationConstants.INVALID_EMAIL_FORMAT,
-        message: '邮箱格式无效',
-        field: 'email'
+        message: "邮箱格式无效",
+        field: "email",
       });
     }
-    
+
     return { isValid: errors.length === 0, errors, warnings: [] };
   }
 }

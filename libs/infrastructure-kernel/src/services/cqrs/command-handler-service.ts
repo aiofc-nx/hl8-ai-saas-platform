@@ -5,10 +5,10 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
 
 /**
  * 命令接口
@@ -68,16 +68,13 @@ export class CommandHandlerService {
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
    * 注册命令处理器
    */
-  registerHandler(
-    commandType: string,
-    handler: CommandHandler
-  ): void {
+  registerHandler(commandType: string, handler: CommandHandler): void {
     this.handlers.set(commandType, handler);
   }
 
@@ -86,11 +83,11 @@ export class CommandHandlerService {
    */
   async handleCommand(command: Command): Promise<CommandResult> {
     const startTime = Date.now();
-    
+
     try {
       // 应用隔离上下文
       const isolatedCommand = this.applyIsolationContext(command);
-      
+
       // 获取处理器
       const handler = this.handlers.get(command.type);
       if (!handler) {
@@ -105,7 +102,7 @@ export class CommandHandlerService {
 
       // 执行命令
       const result = await handler.handle(isolatedCommand);
-      
+
       // 更新执行时间
       result.executionTime = Date.now() - startTime;
       result.commandId = command.id;
@@ -118,9 +115,9 @@ export class CommandHandlerService {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '命令处理失败',
+        error: error instanceof Error ? error.message : "命令处理失败",
         executionTime,
-        commandId: command.id
+        commandId: command.id,
       };
     }
   }
@@ -130,7 +127,7 @@ export class CommandHandlerService {
    */
   async handleCommands(commands: Command[]): Promise<CommandResult[]> {
     const results: CommandResult[] = [];
-    
+
     for (const command of commands) {
       try {
         const result = await this.handleCommand(command);
@@ -138,13 +135,13 @@ export class CommandHandlerService {
       } catch (error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : '命令处理失败',
+          error: error instanceof Error ? error.message : "命令处理失败",
           executionTime: 0,
-          commandId: command.id
+          commandId: command.id,
         });
       }
     }
-    
+
     return results;
   }
 
@@ -155,15 +152,17 @@ export class CommandHandlerService {
     try {
       // 应用隔离上下文
       const isolatedCommand = this.applyIsolationContext(command);
-      
+
       this.commandQueue.push(isolatedCommand);
-      
+
       // 如果当前没有在处理，启动处理
       if (!this.isProcessing) {
         this.processCommandQueue();
       }
     } catch (error) {
-      throw new Error(`队列命令失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `队列命令失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -185,7 +184,7 @@ export class CommandHandlerService {
         }
       }
     } catch (error) {
-      console.error('处理命令队列失败:', error);
+      console.error("处理命令队列失败:", error);
     } finally {
       this.isProcessing = false;
     }
@@ -198,7 +197,7 @@ export class CommandHandlerService {
     return {
       queueLength: this.commandQueue.length,
       isProcessing: this.isProcessing,
-      registeredHandlers: Array.from(this.handlers.keys())
+      registeredHandlers: Array.from(this.handlers.keys()),
     };
   }
 
@@ -232,11 +231,11 @@ export class CommandHandlerService {
     }
 
     const isolatedCommand = { ...command };
-    
+
     if (this.isolationContext.tenantId) {
       isolatedCommand.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedCommand.userId = this.isolationContext.userId;
     }
@@ -249,7 +248,7 @@ export class CommandHandlerService {
    */
   private async logCommandExecution(
     command: Command,
-    result: CommandResult
+    result: CommandResult,
   ): Promise<void> {
     try {
       const logData = {
@@ -259,13 +258,13 @@ export class CommandHandlerService {
         executionTime: result.executionTime,
         timestamp: new Date(),
         userId: command.userId,
-        tenantId: command.tenantId
+        tenantId: command.tenantId,
       };
 
       // 这里应该记录到日志系统
-      console.log('命令执行日志:', logData);
+      console.log("命令执行日志:", logData);
     } catch (error) {
-      console.error('记录命令执行日志失败:', error);
+      console.error("记录命令执行日志失败:", error);
     }
   }
 

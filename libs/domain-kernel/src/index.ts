@@ -65,10 +65,13 @@ export {
 } from "./rules/index.js";
 
 // 规格模式（Specification Pattern）
-export {
+export type {
   ISpecification,
   SpecificationResult,
   SpecificationMetadata,
+} from "./specifications/index.js";
+
+export {
   BaseSpecification,
   AndSpecification,
   OrSpecification,

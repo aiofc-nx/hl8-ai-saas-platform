@@ -70,7 +70,15 @@ export class OrderStatusSpecification extends BaseSpecification<OrderData> {
   }
 
   isSatisfiedBy(order: OrderData): boolean {
-    const validStatuses = ['DRAFT', 'PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'COMPLETED', 'CANCELLED'];
+    const validStatuses = [
+      "DRAFT",
+      "PENDING",
+      "CONFIRMED",
+      "SHIPPED",
+      "DELIVERED",
+      "COMPLETED",
+      "CANCELLED",
+    ];
     return validStatuses.includes(order.status);
   }
 
@@ -99,10 +107,11 @@ export class OrderItemsSpecification extends BaseSpecification<OrderData> {
       return false;
     }
 
-    return order.items.every(item => 
-      item.quantity > 0 && 
-      item.price > 0 && 
-      item.availableStock >= item.quantity
+    return order.items.every(
+      (item) =>
+        item.quantity > 0 &&
+        item.price > 0 &&
+        item.availableStock >= item.quantity,
     );
   }
 
@@ -111,10 +120,11 @@ export class OrderItemsSpecification extends BaseSpecification<OrderData> {
       return `订单 ${order.id} 没有商品项`;
     }
 
-    const invalidItems = order.items.filter(item => 
-      item.quantity <= 0 || 
-      item.price <= 0 || 
-      item.availableStock < item.quantity
+    const invalidItems = order.items.filter(
+      (item) =>
+        item.quantity <= 0 ||
+        item.price <= 0 ||
+        item.availableStock < item.quantity,
     );
 
     if (invalidItems.length > 0) {
@@ -149,7 +159,7 @@ export class OrderLifecycleSpecification extends BaseSpecification<OrderData> {
     // 检查时间是否在合理范围内
     const now = new Date();
     const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-    
+
     return order.createdAt >= oneYearAgo && order.createdAt <= now;
   }
 
@@ -171,7 +181,8 @@ export class ValidOrderSpecification extends BaseSpecification<OrderData> {
   constructor() {
     super({
       name: "ValidOrderSpecification",
-      description: "订单必须是有效的（金额有效、状态有效、商品项有效、生命周期合理）",
+      description:
+        "订单必须是有效的（金额有效、状态有效、商品项有效、生命周期合理）",
       category: "order",
       tags: ["order", "valid", "composite"],
       priority: 1,
@@ -196,16 +207,24 @@ export class ValidOrderSpecification extends BaseSpecification<OrderData> {
     const errors: string[] = [];
 
     if (!this.amountSpec.isSatisfiedBy(order)) {
-      errors.push(this.amountSpec.check(order).errorMessage || '订单金额检查失败');
+      errors.push(
+        this.amountSpec.check(order).errorMessage || "订单金额检查失败",
+      );
     }
     if (!this.statusSpec.isSatisfiedBy(order)) {
-      errors.push(this.statusSpec.check(order).errorMessage || '订单状态检查失败');
+      errors.push(
+        this.statusSpec.check(order).errorMessage || "订单状态检查失败",
+      );
     }
     if (!this.itemsSpec.isSatisfiedBy(order)) {
-      errors.push(this.itemsSpec.check(order).errorMessage || '订单商品项检查失败');
+      errors.push(
+        this.itemsSpec.check(order).errorMessage || "订单商品项检查失败",
+      );
     }
     if (!this.lifecycleSpec.isSatisfiedBy(order)) {
-      errors.push(this.lifecycleSpec.check(order).errorMessage || '订单生命周期检查失败');
+      errors.push(
+        this.lifecycleSpec.check(order).errorMessage || "订单生命周期检查失败",
+      );
     }
 
     return errors.join("; ");

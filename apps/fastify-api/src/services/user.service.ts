@@ -261,8 +261,12 @@ export class UserService {
     const user = await this.em.findOne(
       User,
       tenantId
-        ? { id, tenantId: tenantId.getValue(), deletedAt: { $ne: null } as any }
-        : { id, deletedAt: { $ne: null } as any },
+        ? {
+            id,
+            tenantId: tenantId.getValue(),
+            deletedAt: { $ne: null } as unknown,
+          }
+        : { id, deletedAt: { $ne: null } as unknown },
     );
 
     if (!user) {

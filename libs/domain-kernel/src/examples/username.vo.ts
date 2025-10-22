@@ -87,7 +87,7 @@ export class Username extends BaseValueObject {
    * 获取用于相等性比较的属性
    * @returns 属性对象
    */
-  protected getPropertiesForEquality(): Record<string, any> {
+  protected getPropertiesForEquality(): Record<string, unknown> {
     return { value: this.value.toLowerCase() };
   }
 

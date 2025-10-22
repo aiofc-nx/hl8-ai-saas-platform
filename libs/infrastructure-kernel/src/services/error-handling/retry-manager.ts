@@ -5,14 +5,14 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
 
 /**
  * 重试策略
  */
-export type RetryStrategy = 'FIXED' | 'EXPONENTIAL' | 'LINEAR' | 'CUSTOM';
+export type RetryStrategy = "FIXED" | "EXPONENTIAL" | "LINEAR" | "CUSTOM";
 
 /**
  * 重试配置
@@ -72,20 +72,20 @@ export class RetryManagerService {
     totalTime: number;
     timestamp: Date;
   }> = [];
-  
+
   private defaultConfig: RetryConfig = {
     maxAttempts: 3,
-    strategy: 'EXPONENTIAL',
+    strategy: "EXPONENTIAL",
     initialDelay: 1000,
     maxDelay: 30000,
     delayMultiplier: 2,
     jitterFactor: 0.1,
-    enabled: true
+    enabled: true,
   };
 
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
-    private readonly loggingService?: ILoggingService
+    private readonly loggingService?: ILoggingService,
   ) {}
 
   /**
@@ -94,11 +94,11 @@ export class RetryManagerService {
   async executeWithRetry<T>(
     operation: string,
     fn: () => Promise<T>,
-    config?: Partial<RetryConfig>
+    config?: Partial<RetryConfig>,
   ): Promise<RetryResult<T>> {
     const startTime = Date.now();
     const retryConfig = this.getRetryConfig(operation, config);
-    
+
     if (!retryConfig.enabled) {
       try {
         const data = await fn();
@@ -107,7 +107,7 @@ export class RetryManagerService {
           data,
           attempts: 1,
           totalTime: Date.now() - startTime,
-          retryHistory: []
+          retryHistory: [],
         };
       } catch (error) {
         return {
@@ -115,74 +115,78 @@ export class RetryManagerService {
           error: error as Error,
           attempts: 1,
           totalTime: Date.now() - startTime,
-          retryHistory: []
+          retryHistory: [],
         };
       }
     }
-    
+
     const retryHistory: Array<{
       attempt: number;
       timestamp: Date;
       error?: Error;
       delay: number;
     }> = [];
-    
+
     let lastError: Error | undefined;
-    
+
     for (let attempt = 1; attempt <= retryConfig.maxAttempts; attempt++) {
       const attemptStartTime = Date.now();
-      
+
       try {
         const data = await fn();
-        
+
         // 记录成功
         this.recordRetrySuccess(operation, attempt, Date.now() - startTime);
-        
+
         return {
           success: true,
           data,
           attempts: attempt,
           totalTime: Date.now() - startTime,
-          retryHistory
+          retryHistory,
         };
       } catch (error) {
         lastError = error as Error;
-        
+
         // 检查是否应该重试
         if (!this.shouldRetry(error as Error, attempt, retryConfig)) {
           break;
         }
-        
+
         // 计算延迟时间
         const delay = this.calculateDelay(attempt, retryConfig);
-        
+
         // 记录重试历史
         retryHistory.push({
           attempt,
           timestamp: new Date(),
           error: error as Error,
-          delay
+          delay,
         });
-        
+
         // 记录重试日志
         await this.logRetryAttempt(operation, attempt, error as Error, delay);
-        
+
         // 等待延迟时间
         if (attempt < retryConfig.maxAttempts) {
           await this.sleep(delay);
         }
       }
     }
-    
+
     // 记录最终失败
-    this.recordRetryFailure(operation, retryConfig.maxAttempts, Date.now() - startTime);
-    
+    this.recordRetryFailure(
+      operation,
+      retryConfig.maxAttempts,
+      Date.now() - startTime,
+    );
+
     return {
       success: false,
       error: lastError,
       attempts: retryConfig.maxAttempts,
       totalTime: Date.now() - startTime,
-      retryHistory
+      retryHistory,
     };
   }
 
@@ -196,14 +200,17 @@ export class RetryManagerService {
   /**
    * 获取重试配置
    */
-  getRetryConfig(operation: string, config?: Partial<RetryConfig>): RetryConfig {
+  getRetryConfig(
+    operation: string,
+    config?: Partial<RetryConfig>,
+  ): RetryConfig {
     const existingConfig = this.retryConfigs.get(operation);
     const baseConfig = existingConfig || this.defaultConfig;
-    
+
     if (config) {
       return { ...baseConfig, ...config };
     }
-    
+
     return baseConfig;
   }
 
@@ -218,7 +225,7 @@ export class RetryManagerService {
     timestamp: Date;
   }> {
     if (operation) {
-      return this.retryHistory.filter(h => h.operation === operation);
+      return this.retryHistory.filter((h) => h.operation === operation);
     }
     return [...this.retryHistory];
   }
@@ -228,25 +235,33 @@ export class RetryManagerService {
    */
   getRetryStats(): Record<string, any> {
     const total = this.retryHistory.length;
-    const successful = this.retryHistory.filter(h => h.success).length;
+    const successful = this.retryHistory.filter((h) => h.success).length;
     const failed = total - successful;
-    
-    const byOperation = this.retryHistory.reduce((acc, h) => {
-      if (!acc[h.operation]) {
-        acc[h.operation] = { total: 0, successful: 0, failed: 0 };
-      }
-      acc[h.operation].total++;
-      if (h.success) {
-        acc[h.operation].successful++;
-      } else {
-        acc[h.operation].failed++;
-      }
-      return acc;
-    }, {} as Record<string, { total: number; successful: number; failed: number }>);
-    
-    const averageAttempts = this.retryHistory.reduce((sum, h) => sum + h.attempts, 0) / total;
-    const averageTime = this.retryHistory.reduce((sum, h) => sum + h.totalTime, 0) / total;
-    
+
+    const byOperation = this.retryHistory.reduce(
+      (acc, h) => {
+        if (!acc[h.operation]) {
+          acc[h.operation] = { total: 0, successful: 0, failed: 0 };
+        }
+        acc[h.operation].total++;
+        if (h.success) {
+          acc[h.operation].successful++;
+        } else {
+          acc[h.operation].failed++;
+        }
+        return acc;
+      },
+      {} as Record<
+        string,
+        { total: number; successful: number; failed: number }
+      >,
+    );
+
+    const averageAttempts =
+      this.retryHistory.reduce((sum, h) => sum + h.attempts, 0) / total;
+    const averageTime =
+      this.retryHistory.reduce((sum, h) => sum + h.totalTime, 0) / total;
+
     return {
       total,
       successful,
@@ -254,7 +269,7 @@ export class RetryManagerService {
       successRate: total > 0 ? successful / total : 0,
       byOperation,
       averageAttempts,
-      averageTime
+      averageTime,
     };
   }
 
@@ -268,35 +283,39 @@ export class RetryManagerService {
   /**
    * 检查是否应该重试
    */
-  private shouldRetry(error: Error, attempt: number, config: RetryConfig): boolean {
+  private shouldRetry(
+    error: Error,
+    attempt: number,
+    config: RetryConfig,
+  ): boolean {
     // 检查重试条件
     if (config.retryCondition && !config.retryCondition(error)) {
       return false;
     }
-    
+
     // 检查最大重试次数
     if (attempt >= config.maxAttempts) {
       return false;
     }
-    
+
     // 检查错误类型
     const message = error.message.toLowerCase();
-    
+
     // 网络错误通常可以重试
-    if (message.includes('timeout') || message.includes('connection')) {
+    if (message.includes("timeout") || message.includes("connection")) {
       return true;
     }
-    
+
     // 数据库连接错误可以重试
-    if (message.includes('database') && message.includes('connection')) {
+    if (message.includes("database") && message.includes("connection")) {
       return true;
     }
-    
+
     // 缓存错误可以重试
-    if (message.includes('cache') || message.includes('redis')) {
+    if (message.includes("cache") || message.includes("redis")) {
       return true;
     }
-    
+
     // 其他错误默认不重试
     return false;
   }
@@ -306,32 +325,33 @@ export class RetryManagerService {
    */
   private calculateDelay(attempt: number, config: RetryConfig): number {
     let delay: number;
-    
+
     switch (config.strategy) {
-      case 'FIXED':
+      case "FIXED":
         delay = config.initialDelay;
         break;
-      case 'EXPONENTIAL':
-        delay = config.initialDelay * Math.pow(config.delayMultiplier, attempt - 1);
+      case "EXPONENTIAL":
+        delay =
+          config.initialDelay * Math.pow(config.delayMultiplier, attempt - 1);
         break;
-      case 'LINEAR':
+      case "LINEAR":
         delay = config.initialDelay * attempt;
         break;
-      case 'CUSTOM':
+      case "CUSTOM":
         // 自定义策略，这里可以实现更复杂的逻辑
         delay = config.initialDelay * attempt;
         break;
       default:
         delay = config.initialDelay;
     }
-    
+
     // 应用最大延迟限制
     delay = Math.min(delay, config.maxDelay);
-    
+
     // 应用抖动因子
     const jitter = delay * config.jitterFactor * Math.random();
     delay = delay + jitter;
-    
+
     return Math.floor(delay);
   }
 
@@ -339,32 +359,40 @@ export class RetryManagerService {
    * 睡眠指定时间
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * 记录重试成功
    */
-  private recordRetrySuccess(operation: string, attempts: number, totalTime: number): void {
+  private recordRetrySuccess(
+    operation: string,
+    attempts: number,
+    totalTime: number,
+  ): void {
     this.retryHistory.push({
       operation,
       attempts,
       success: true,
       totalTime,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   /**
    * 记录重试失败
    */
-  private recordRetryFailure(operation: string, attempts: number, totalTime: number): void {
+  private recordRetryFailure(
+    operation: string,
+    attempts: number,
+    totalTime: number,
+  ): void {
     this.retryHistory.push({
       operation,
       attempts,
       success: false,
       totalTime,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -375,29 +403,33 @@ export class RetryManagerService {
     operation: string,
     attempt: number,
     error: Error,
-    delay: number
+    delay: number,
   ): Promise<void> {
     try {
       if (this.loggingService) {
         const logContext = {
           requestId: `retry_${operation}_${Date.now()}`,
-          tenantId: 'system',
-          operation: 'retry-manager',
-          resource: 'retry-manager',
+          tenantId: "system",
+          operation: "retry-manager",
+          resource: "retry-manager",
           timestamp: new Date(),
-          level: 'warn' as const,
-          message: `重试操作 ${operation}: 第 ${attempt} 次尝试失败`
+          level: "warn" as const,
+          message: `重试操作 ${operation}: 第 ${attempt} 次尝试失败`,
         };
-        
-        await this.loggingService.warn(logContext, `重试操作 ${operation}: 第 ${attempt} 次尝试失败`, {
-          operation,
-          attempt,
-          error: error.message,
-          delay
-        });
+
+        await this.loggingService.warn(
+          logContext,
+          `重试操作 ${operation}: 第 ${attempt} 次尝试失败`,
+          {
+            operation,
+            attempt,
+            error: error.message,
+            delay,
+          },
+        );
       }
     } catch (error) {
-      console.error('记录重试尝试日志失败:', error);
+      console.error("记录重试尝试日志失败:", error);
     }
   }
 

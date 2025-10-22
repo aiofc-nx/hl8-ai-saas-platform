@@ -55,7 +55,7 @@ export abstract class BaseValueObject {
   equals(other?: BaseValueObject): boolean {
     if (!other) return false;
     if (this.constructor !== other.constructor) return false;
-    return this.arePropertiesEqual(other as any);
+    return this.arePropertiesEqual(other);
   }
 
   /**
@@ -88,7 +88,7 @@ export abstract class BaseValueObject {
    *
    * @returns 属性对象
    */
-  protected getPropertiesForEquality(): Record<string, any> {
+  protected getPropertiesForEquality(): Record<string, unknown> {
     return {};
   }
 

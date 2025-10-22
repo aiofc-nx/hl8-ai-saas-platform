@@ -36,7 +36,7 @@ export class UserActiveSpecification extends BaseSpecification<UserData> {
   }
 
   isSatisfiedBy(user: UserData): boolean {
-    return user.status === 'ACTIVE' && !user.isDeleted;
+    return user.status === "ACTIVE" && !user.isDeleted;
   }
 
   protected getErrorMessage(user: UserData): string {
@@ -85,10 +85,14 @@ export class UsernameFormatSpecification extends BaseSpecification<UserData> {
   }
 
   isSatisfiedBy(user: UserData): boolean {
-    if (!user.username || user.username.length < 3 || user.username.length > 50) {
+    if (
+      !user.username ||
+      user.username.length < 3 ||
+      user.username.length > 50
+    ) {
       return false;
     }
-    
+
     const usernameRegex = /^[a-zA-Z0-9_-]+$/;
     return usernameRegex.test(user.username) && !/^\d/.test(user.username);
   }
@@ -122,7 +126,7 @@ export class UserLifecycleSpecification extends BaseSpecification<UserData> {
     // 检查时间是否在合理范围内
     const now = new Date();
     const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-    
+
     return user.createdAt >= oneYearAgo && user.createdAt <= now;
   }
 
@@ -144,7 +148,8 @@ export class ValidUserSpecification extends BaseSpecification<UserData> {
   constructor() {
     super({
       name: "ValidUserSpecification",
-      description: "用户必须是有效的（激活、邮箱格式正确、用户名格式正确、生命周期合理）",
+      description:
+        "用户必须是有效的（激活、邮箱格式正确、用户名格式正确、生命周期合理）",
       category: "user",
       tags: ["user", "valid", "composite"],
       priority: 1,
@@ -169,16 +174,24 @@ export class ValidUserSpecification extends BaseSpecification<UserData> {
     const errors: string[] = [];
 
     if (!this.activeSpec.isSatisfiedBy(user)) {
-      errors.push(this.activeSpec.check(user).errorMessage || '用户激活检查失败');
+      errors.push(
+        this.activeSpec.check(user).errorMessage || "用户激活检查失败",
+      );
     }
     if (!this.emailSpec.isSatisfiedBy(user)) {
-      errors.push(this.emailSpec.check(user).errorMessage || '用户邮箱格式检查失败');
+      errors.push(
+        this.emailSpec.check(user).errorMessage || "用户邮箱格式检查失败",
+      );
     }
     if (!this.usernameSpec.isSatisfiedBy(user)) {
-      errors.push(this.usernameSpec.check(user).errorMessage || '用户名格式检查失败');
+      errors.push(
+        this.usernameSpec.check(user).errorMessage || "用户名格式检查失败",
+      );
     }
     if (!this.lifecycleSpec.isSatisfiedBy(user)) {
-      errors.push(this.lifecycleSpec.check(user).errorMessage || '用户生命周期检查失败');
+      errors.push(
+        this.lifecycleSpec.check(user).errorMessage || "用户生命周期检查失败",
+      );
     }
 
     return errors.join("; ");

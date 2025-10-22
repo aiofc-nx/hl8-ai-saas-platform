@@ -57,14 +57,14 @@
 
 ## 🔍 关键区别
 
-| 方面 | 框架层 (Framework Layer) | 接口层 (Interface Layer) |
-|------|-------------------------|--------------------------|
-| **定位** | 框架集成层 | 用户交互层 |
-| **职责** | 提供框架功能 | 处理用户请求 |
-| **依赖** | 依赖领域层 | 依赖所有内层 |
-| **技术实现** | 框架特定功能 | 通用接口功能 |
-| **业务逻辑** | 无业务逻辑 | 无业务逻辑 |
-| **使用场景** | 框架集成 | 用户交互 |
+| 方面         | 框架层 (Framework Layer) | 接口层 (Interface Layer) |
+| ------------ | ------------------------ | ------------------------ |
+| **定位**     | 框架集成层               | 用户交互层               |
+| **职责**     | 提供框架功能             | 处理用户请求             |
+| **依赖**     | 依赖领域层               | 依赖所有内层             |
+| **技术实现** | 框架特定功能             | 通用接口功能             |
+| **业务逻辑** | 无业务逻辑               | 无业务逻辑               |
+| **使用场景** | 框架集成                 | 用户交互                 |
 
 ## 📊 在 HL8 项目中的实际体现
 
@@ -93,7 +93,7 @@ export class IsolationGuard implements CanActivate {
 
 ```typescript
 // 接口层：处理用户请求
-@Controller('users')
+@Controller("users")
 export class UserController {
   @Get()
   @RequireLevel(IsolationLevel.TENANT)
@@ -142,11 +142,12 @@ export class UserController {
 
 ```typescript
 // 接口层：使用框架层提供的功能
-@Controller('users')
+@Controller("users")
 export class UserController {
   @Get()
-  @RequireLevel(IsolationLevel.TENANT)  // 使用框架层装饰器
-  async getUsers(@CurrentContext() context: IsolationContext) {  // 使用框架层装饰器
+  @RequireLevel(IsolationLevel.TENANT) // 使用框架层装饰器
+  async getUsers(@CurrentContext() context: IsolationContext) {
+    // 使用框架层装饰器
     return this.userService.findByContext(context);
   }
 }
@@ -160,6 +161,7 @@ export class UserController {
 
 ```markdown
 ### 框架层 (Framework Layer)
+
 - **服务**: `IsolationContextService`, `MultiLevelIsolationService`
 - **守卫**: `IsolationGuard`
 - **装饰器**: `@CurrentContext`, `@RequireLevel`
@@ -170,6 +172,7 @@ export class UserController {
 
 ```markdown
 ### 框架集成层 (Framework Integration Layer)
+
 - **服务**: `IsolationContextService`, `MultiLevelIsolationService`
 - **守卫**: `IsolationGuard`
 - **装饰器**: `@CurrentContext`, `@RequireLevel`

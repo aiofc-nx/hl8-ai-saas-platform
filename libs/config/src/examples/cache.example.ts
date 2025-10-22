@@ -98,13 +98,12 @@ export async function cacheManagerExample() {
   });
 
   // 添加事件监听器
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 事件对象类型未明确定义（示例代码）
-  cacheManager.on("hit", (event: any) => {
+
+  cacheManager.on("hit", (event: { key: string }) => {
     console.log(`Cache hit: ${event.key}`);
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 事件对象类型未明确定义（示例代码）
-  cacheManager.on("miss", (event: any) => {
+  cacheManager.on("miss", (event: { key: string }) => {
     console.log(`Cache miss: ${event.key}`);
   });
 
@@ -183,17 +182,24 @@ export async function cacheMonitoringExample() {
   ] as const;
 
   for (const eventType of eventTypes) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 事件对象类型未明确定义（示例代码）
-    cacheManager.on(eventType, (event: any) => {
-      console.log(
-        `[${event.timestamp.toISOString()}] ${event.type.toUpperCase()}: ${
-          event.key
-        }`,
-      );
-      if (event.data) {
-        console.log("Event data:", event.data);
-      }
-    });
+    cacheManager.on(
+      eventType,
+      (event: {
+        timestamp: Date;
+        type: string;
+        key: string;
+        data?: unknown;
+      }) => {
+        console.log(
+          `[${event.timestamp.toISOString()}] ${event.type.toUpperCase()}: ${
+            event.key
+          }`,
+        );
+        if (event.data) {
+          console.log("Event data:", event.data);
+        }
+      },
+    );
   }
 
   // 定期输出统计信息

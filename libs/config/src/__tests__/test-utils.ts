@@ -54,8 +54,7 @@ export class TestConfig {
   @ValidateNested()
   public readonly database!: TestDatabaseConfig;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试配置类允许动态属性（测试工具）
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -174,7 +173,7 @@ export async function cleanupTempFiles(paths: string[]): Promise<void> {
       } else {
         await fs.promises.unlink(filePath);
       }
-    } catch (error) {
+    } catch (_error) {
       // 忽略文件不存在错误
     }
   }
@@ -191,7 +190,7 @@ export async function cleanupTempFiles(paths: string[]): Promise<void> {
  */
 export function mockFetch(
   url: string,
-  response: any,
+  response: unknown,
   status: number = 200,
 ): void {
   const originalFetch = global.fetch;
@@ -216,8 +215,11 @@ export function mockFetch(
  * @since 1.0.0
  */
 export function restoreFetch(): void {
-  if (global.fetch && (global.fetch as any).mockRestore) {
-    (global.fetch as any).mockRestore();
+  if (
+    global.fetch &&
+    (global.fetch as unknown as { mockRestore?: () => void }).mockRestore
+  ) {
+    (global.fetch as unknown as { mockRestore: () => void }).mockRestore();
   }
 }
 
@@ -236,7 +238,7 @@ export const testAssertions = {
    * @param expected 预期结构
    * @since 1.0.0
    */
-  assertConfigStructure(config: any, expected: any): void {
+  assertConfigStructure(config: unknown, expected: unknown): void {
     for (const [key, value] of Object.entries(expected)) {
       expect(config).toHaveProperty(key);
       if (typeof value === "object" && value !== null) {
@@ -257,14 +259,14 @@ export const testAssertions = {
    * @since 1.0.0
    */
   assertErrorType(
-    error: any,
+    error: unknown,
     expectedType: string,
     expectedMessage?: string,
   ): void {
     expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe(expectedType);
+    expect((error as Error).name).toBe(expectedType);
     if (expectedMessage) {
-      expect(error.message).toContain(expectedMessage);
+      expect((error as Error).message).toContain(expectedMessage);
     }
   },
 
@@ -276,7 +278,7 @@ export const testAssertions = {
    * @param expected 预期统计
    * @since 1.0.0
    */
-  assertCacheStats(stats: any, expected: any): void {
+  assertCacheStats(stats: unknown, expected: unknown): void {
     for (const [key, value] of Object.entries(expected)) {
       expect(stats).toHaveProperty(key);
       if (typeof value === "number") {

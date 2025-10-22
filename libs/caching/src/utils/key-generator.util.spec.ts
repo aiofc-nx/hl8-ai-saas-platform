@@ -6,8 +6,7 @@
  * @group utils
  */
 
-import { TenantId } from "@hl8/isolation-model";
-import { IsolationContext } from "@hl8/isolation-model";
+import { TenantId, IsolationContext } from "@hl8/domain-kernel";
 import {
   generateCacheKey,
   generateCachePattern,
@@ -32,7 +31,7 @@ describe("Key Generator Utils", () => {
       const tenantId = TenantId.create("550e8400-e29b-41d4-a716-446655440000");
       const context = IsolationContext.tenant(tenantId);
       const key = generateCacheKey("user", "123", context);
-      expect(key).toBe(`tenant:${tenantId.toString()}:user:123`);
+      expect(key).toBe(`cache:tenant:${tenantId.toString()}:user:123`);
     });
 
     it("should throw error for invalid namespace", () => {
@@ -83,7 +82,7 @@ describe("Key Generator Utils", () => {
       const tenantId = TenantId.create("550e8400-e29b-41d4-a716-446655440000");
       const context = IsolationContext.tenant(tenantId);
       const pattern = generateCachePattern("user", "all", context);
-      expect(pattern).toBe(`tenant:${tenantId.toString()}:user:all`);
+      expect(pattern).toBe(`cache:tenant:${tenantId.toString()}:user:all`);
     });
   });
 

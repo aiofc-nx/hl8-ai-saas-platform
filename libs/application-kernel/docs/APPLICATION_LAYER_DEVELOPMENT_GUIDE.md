@@ -82,14 +82,14 @@
 
 ### 2.2 核心组件
 
-| 组件 | 职责 | 位置 |
-|------|------|------|
-| `BaseCommand` | 命令基类 | `src/cqrs/commands/` |
-| `BaseQuery` | 查询基类 | `src/cqrs/queries/` |
-| `BaseUseCase` | 用例基类 | `src/use-cases/` |
-| `IsolationContext` | 隔离上下文 | 来自 `@hl8/domain-kernel` |
-| `IEventBus` | 事件总线接口 | `src/events/` |
-| `ITransactionManager` | 事务管理器接口 | `src/transactions/` |
+| 组件                  | 职责           | 位置                      |
+| --------------------- | -------------- | ------------------------- |
+| `BaseCommand`         | 命令基类       | `src/cqrs/commands/`      |
+| `BaseQuery`           | 查询基类       | `src/cqrs/queries/`       |
+| `BaseUseCase`         | 用例基类       | `src/use-cases/`          |
+| `IsolationContext`    | 隔离上下文     | 来自 `@hl8/domain-kernel` |
+| `IEventBus`           | 事件总线接口   | `src/events/`             |
+| `ITransactionManager` | 事务管理器接口 | `src/transactions/`       |
 
 ---
 
@@ -104,14 +104,14 @@ npm install @hl8/application-kernel @hl8/domain-kernel
 ### 3.2 基本使用
 
 ```typescript
-import { 
-  BaseCommand, 
-  BaseQuery, 
+import {
+  BaseCommand,
+  BaseQuery,
   BaseUseCase,
   IsolationContext,
-  EntityId 
-} from '@hl8/application-kernel';
-import { TenantId, UserId } from '@hl8/domain-kernel';
+  EntityId,
+} from "@hl8/application-kernel";
+import { TenantId, UserId } from "@hl8/domain-kernel";
 
 // 创建命令
 export class CreateUserCommand extends BaseCommand {
@@ -120,7 +120,7 @@ export class CreateUserCommand extends BaseCommand {
     public readonly username: string,
     isolationContext?: IsolationContext,
   ) {
-    super('CreateUserCommand', '创建用户命令', isolationContext);
+    super("CreateUserCommand", "创建用户命令", isolationContext);
   }
 }
 
@@ -130,7 +130,7 @@ export class GetUserQuery extends BaseQuery {
     public readonly userId: UserId,
     isolationContext?: IsolationContext,
   ) {
-    super('GetUserQuery', '获取用户查询', isolationContext);
+    super("GetUserQuery", "获取用户查询", isolationContext);
   }
 }
 
@@ -158,8 +158,8 @@ export class CreateUserUseCase extends BaseUseCase {
 #### 4.1.2 命令实现示例
 
 ```typescript
-import { BaseCommand } from '@hl8/application-kernel';
-import { IsolationContext, TenantId, UserId } from '@hl8/domain-kernel';
+import { BaseCommand } from "@hl8/application-kernel";
+import { IsolationContext, TenantId, UserId } from "@hl8/domain-kernel";
 
 export class CreateUserCommand extends BaseCommand {
   constructor(
@@ -169,7 +169,7 @@ export class CreateUserCommand extends BaseCommand {
     public readonly profile: UserProfileData,
     isolationContext?: IsolationContext,
   ) {
-    super('CreateUserCommand', '创建用户命令', isolationContext);
+    super("CreateUserCommand", "创建用户命令", isolationContext);
   }
 }
 
@@ -179,7 +179,7 @@ export class UpdateUserCommand extends BaseCommand {
     public readonly updates: Partial<UserProfileData>,
     isolationContext?: IsolationContext,
   ) {
-    super('UpdateUserCommand', '更新用户命令', isolationContext);
+    super("UpdateUserCommand", "更新用户命令", isolationContext);
   }
 }
 ```
@@ -187,7 +187,7 @@ export class UpdateUserCommand extends BaseCommand {
 #### 4.1.3 命令验证
 
 ```typescript
-import { BaseCommand } from '@hl8/application-kernel';
+import { BaseCommand } from "@hl8/application-kernel";
 
 export class CreateUserCommand extends BaseCommand {
   constructor(
@@ -196,26 +196,26 @@ export class CreateUserCommand extends BaseCommand {
     public readonly password: string,
     isolationContext?: IsolationContext,
   ) {
-    super('CreateUserCommand', '创建用户命令', isolationContext);
-    
+    super("CreateUserCommand", "创建用户命令", isolationContext);
+
     // ✅ 正确：应用层只验证命令结构，不验证业务规则
     this.validateCommandStructure();
   }
-  
+
   private validateCommandStructure(): void {
     // 验证命令结构完整性
     if (!this.email) {
-      throw new Error('邮箱参数不能为空');
+      throw new Error("邮箱参数不能为空");
     }
-    
+
     if (!this.username) {
-      throw new Error('用户名参数不能为空');
+      throw new Error("用户名参数不能为空");
     }
-    
+
     if (!this.password) {
-      throw new Error('密码参数不能为空');
+      throw new Error("密码参数不能为空");
     }
-    
+
     // ❌ 不要在这里验证业务规则，如邮箱格式、密码强度等
     // 这些应该在领域层或接口层验证
   }
@@ -239,15 +239,15 @@ export class CreateUserCommand extends BaseCommand {
 #### 4.2.2 查询实现示例
 
 ```typescript
-import { BaseQuery } from '@hl8/application-kernel';
-import { IsolationContext, UserId, TenantId } from '@hl8/domain-kernel';
+import { BaseQuery } from "@hl8/application-kernel";
+import { IsolationContext, UserId, TenantId } from "@hl8/domain-kernel";
 
 export class GetUserQuery extends BaseQuery {
   constructor(
     public readonly userId: UserId,
     isolationContext?: IsolationContext,
   ) {
-    super('GetUserQuery', '获取用户查询', isolationContext);
+    super("GetUserQuery", "获取用户查询", isolationContext);
   }
 }
 
@@ -259,7 +259,7 @@ export class GetUserListQuery extends BaseQuery {
     public readonly filters?: UserFilters,
     isolationContext?: IsolationContext,
   ) {
-    super('GetUserListQuery', '获取用户列表查询', isolationContext);
+    super("GetUserListQuery", "获取用户列表查询", isolationContext);
   }
 }
 ```
@@ -269,35 +269,35 @@ export class GetUserListQuery extends BaseQuery {
 #### 4.3.1 命令处理器
 
 ```typescript
-import { CommandHandler } from '@hl8/application-kernel';
-import { CreateUserCommand } from './create-user.command';
-import { UserRepository } from '../repositories/user.repository';
-import { EventBus } from '../events/event-bus';
+import { CommandHandler } from "@hl8/application-kernel";
+import { CreateUserCommand } from "./create-user.command";
+import { UserRepository } from "../repositories/user.repository";
+import { EventBus } from "../events/event-bus";
 
 export class CreateUserHandler implements CommandHandler<CreateUserCommand> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly eventBus: EventBus,
   ) {}
-  
+
   async handle(command: CreateUserCommand): Promise<void> {
     // 1. 验证命令
     this.validateCommand(command);
-    
+
     // 2. 执行业务逻辑
     const user = await this.createUser(command);
-    
+
     // 3. 保存到仓库
     await this.userRepository.save(user);
-    
+
     // 4. 发布事件
     await this.eventBus.publishAll(user.getUncommittedEvents());
   }
-  
+
   private validateCommand(command: CreateUserCommand): void {
     // 命令验证逻辑
   }
-  
+
   private async createUser(command: CreateUserCommand): Promise<User> {
     // 用户创建逻辑
   }
@@ -307,34 +307,32 @@ export class CreateUserHandler implements CommandHandler<CreateUserCommand> {
 #### 4.3.2 查询处理器
 
 ```typescript
-import { QueryHandler } from '@hl8/application-kernel';
-import { GetUserQuery } from './get-user.query';
-import { UserRepository } from '../repositories/user.repository';
+import { QueryHandler } from "@hl8/application-kernel";
+import { GetUserQuery } from "./get-user.query";
+import { UserRepository } from "../repositories/user.repository";
 
 export class GetUserHandler implements QueryHandler<GetUserQuery, UserDto> {
-  constructor(
-    private readonly userRepository: UserRepository,
-  ) {}
-  
+  constructor(private readonly userRepository: UserRepository) {}
+
   async handle(query: GetUserQuery): Promise<UserDto> {
     // 1. 验证查询
     this.validateQuery(query);
-    
+
     // 2. 执行查询
     const user = await this.userRepository.findById(query.userId);
-    
+
     if (!user) {
-      throw new Error('用户不存在');
+      throw new Error("用户不存在");
     }
-    
+
     // 3. 转换为DTO
     return this.toDto(user);
   }
-  
+
   private validateQuery(query: GetUserQuery): void {
     // 查询验证逻辑
   }
-  
+
   private toDto(user: User): UserDto {
     // DTO转换逻辑
   }
@@ -350,62 +348,67 @@ export class GetUserHandler implements QueryHandler<GetUserQuery, UserDto> {
 #### 5.1.1 上下文创建
 
 ```typescript
-import { IsolationContext } from '@hl8/domain-kernel';
-import { TenantId, OrganizationId, DepartmentId, UserId } from '@hl8/domain-kernel';
+import { IsolationContext } from "@hl8/domain-kernel";
+import {
+  TenantId,
+  OrganizationId,
+  DepartmentId,
+  UserId,
+} from "@hl8/domain-kernel";
 
 // 平台级上下文
 const platformContext = IsolationContext.createPlatform();
 
 // 租户级上下文
 const tenantContext = IsolationContext.createTenant(
-  TenantId.create('tenant-123')
+  TenantId.create("tenant-123"),
 );
 
 // 组织级上下文
 const orgContext = IsolationContext.createOrganization(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
 );
 
 // 部门级上下文
 const deptContext = IsolationContext.createDepartment(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456'),
-  DepartmentId.create('dept-789')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
+  DepartmentId.create("dept-789"),
 );
 
 // 用户级上下文
 const userContext = IsolationContext.createUser(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456'),
-  DepartmentId.create('dept-789'),
-  UserId.create('user-001')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
+  DepartmentId.create("dept-789"),
+  UserId.create("user-001"),
 );
 ```
 
 #### 5.1.2 上下文验证
 
 ```typescript
-import { ContextSecurityValidator } from '@hl8/application-kernel';
+import { ContextSecurityValidator } from "@hl8/application-kernel";
 
 // 安全验证
 const securityResult = ContextSecurityValidator.validateSecurity(
   useCaseContext,
-  isolationContext
+  isolationContext,
 );
 
-if (securityResult.securityLevel === 'critical') {
-  throw new Error('安全级别过高，拒绝执行');
+if (securityResult.securityLevel === "critical") {
+  throw new Error("安全级别过高，拒绝执行");
 }
 
 // 租户验证
 const tenantResult = TenantContextValidator.validateTenantContext(
   useCaseContext,
-  isolationContext
+  isolationContext,
 );
 
 if (!tenantResult.isValid) {
-  throw new Error('租户上下文验证失败');
+  throw new Error("租户上下文验证失败");
 }
 ```
 
@@ -414,28 +417,22 @@ if (!tenantResult.isValid) {
 #### 5.2.1 用户上下文管理
 
 ```typescript
-import { UserContextUtils } from '@hl8/application-kernel';
+import { UserContextUtils } from "@hl8/application-kernel";
 
 // 创建用户上下文
 const userContext = UserContextUtils.createUserContext({
-  userId: 'user-123',
-  tenantId: 'tenant-456',
-  organizationId: 'org-789',
-  roles: ['admin', 'user'],
-  permissions: ['read', 'write']
+  userId: "user-123",
+  tenantId: "tenant-456",
+  organizationId: "org-789",
+  roles: ["admin", "user"],
+  permissions: ["read", "write"],
 });
 
 // 验证用户权限
-const hasPermission = UserContextUtils.hasPermission(
-  userContext,
-  'user:write'
-);
+const hasPermission = UserContextUtils.hasPermission(userContext, "user:write");
 
 // 检查角色
-const hasRole = UserContextUtils.hasRole(
-  userContext,
-  'admin'
-);
+const hasRole = UserContextUtils.hasRole(userContext, "admin");
 ```
 
 ### 5.3 上下文传播
@@ -443,7 +440,7 @@ const hasRole = UserContextUtils.hasRole(
 #### 5.3.1 异步上下文传播
 
 ```typescript
-import { ContextPropagationUtils } from '@hl8/application-kernel';
+import { ContextPropagationUtils } from "@hl8/application-kernel";
 
 // 在异步操作中传播上下文
 async function processUserData(userId: string) {
@@ -456,8 +453,8 @@ async function processUserData(userId: string) {
     {
       propagateTenant: true,
       propagateUser: true,
-      propagateRequestId: true
-    }
+      propagateRequestId: true,
+    },
   );
 }
 ```
@@ -471,7 +468,7 @@ async function processUserData(userId: string) {
 #### 6.1.1 事件定义
 
 ```typescript
-import { DomainEvent } from '@hl8/domain-kernel';
+import { DomainEvent } from "@hl8/domain-kernel";
 
 export class UserCreatedEvent implements DomainEvent {
   constructor(
@@ -480,11 +477,11 @@ export class UserCreatedEvent implements DomainEvent {
     public readonly username: string,
     public readonly timestamp: Date = new Date(),
   ) {}
-  
+
   getEventType(): string {
-    return 'UserCreated';
+    return "UserCreated";
   }
-  
+
   getAggregateId(): string {
     return this.userId;
   }
@@ -494,24 +491,18 @@ export class UserCreatedEvent implements DomainEvent {
 #### 6.1.2 事件发布
 
 ```typescript
-import { EventPublisher } from '@hl8/application-kernel';
+import { EventPublisher } from "@hl8/application-kernel";
 
 export class UserService {
-  constructor(
-    private readonly eventPublisher: EventPublisher,
-  ) {}
-  
+  constructor(private readonly eventPublisher: EventPublisher) {}
+
   async createUser(userData: CreateUserData): Promise<void> {
     // 创建用户
     const user = await this.createUserEntity(userData);
-    
+
     // 发布事件
     await this.eventPublisher.publishEvent(
-      new UserCreatedEvent(
-        user.getId(),
-        user.getEmail(),
-        user.getUsername()
-      )
+      new UserCreatedEvent(user.getId(), user.getEmail(), user.getUsername()),
     );
   }
 }
@@ -522,21 +513,18 @@ export class UserService {
 #### 6.2.1 事件处理器
 
 ```typescript
-import { EventHandler } from '@hl8/application-kernel';
+import { EventHandler } from "@hl8/application-kernel";
 
 export class UserCreatedHandler implements EventHandler<UserCreatedEvent> {
   constructor(
     private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,
   ) {}
-  
+
   async handle(event: UserCreatedEvent): Promise<void> {
     // 发送欢迎邮件
-    await this.emailService.sendWelcomeEmail(
-      event.email,
-      event.username
-    );
-    
+    await this.emailService.sendWelcomeEmail(event.email, event.username);
+
     // 发送通知
     await this.notificationService.notifyUserCreated(event.userId);
   }
@@ -546,24 +534,22 @@ export class UserCreatedHandler implements EventHandler<UserCreatedEvent> {
 #### 6.2.2 事件订阅管理
 
 ```typescript
-import { EventSubscriptionManager } from '@hl8/application-kernel';
+import { EventSubscriptionManager } from "@hl8/application-kernel";
 
 export class EventService {
-  constructor(
-    private readonly subscriptionManager: EventSubscriptionManager,
-  ) {}
-  
+  constructor(private readonly subscriptionManager: EventSubscriptionManager) {}
+
   async setupSubscriptions(): Promise<void> {
     // 订阅用户创建事件
     await this.subscriptionManager.subscribe(
-      'UserCreated',
-      new UserCreatedHandler()
+      "UserCreated",
+      new UserCreatedHandler(),
     );
-    
+
     // 订阅用户更新事件
     await this.subscriptionManager.subscribe(
-      'UserUpdated',
-      new UserUpdatedHandler()
+      "UserUpdated",
+      new UserUpdatedHandler(),
     );
   }
 }
@@ -574,30 +560,30 @@ export class EventService {
 #### 6.3.1 事件存储
 
 ```typescript
-import { EventSourcingUtils } from '@hl8/application-kernel';
+import { EventSourcingUtils } from "@hl8/application-kernel";
 
 export class UserAggregate {
   private events: DomainEvent[] = [];
-  
+
   constructor(
     private readonly id: string,
     private email: string,
     private username: string,
   ) {}
-  
+
   changeEmail(newEmail: string): void {
     this.email = newEmail;
     this.addEvent(new UserEmailChangedEvent(this.id, newEmail));
   }
-  
+
   private addEvent(event: DomainEvent): void {
     this.events.push(event);
   }
-  
+
   getUncommittedEvents(): DomainEvent[] {
     return [...this.events];
   }
-  
+
   markEventsAsCommitted(): void {
     this.events = [];
   }
@@ -613,24 +599,24 @@ export class UserAggregate {
 #### 7.1.1 基本事务操作
 
 ```typescript
-import { TransactionManager } from '@hl8/application-kernel';
+import { TransactionManager } from "@hl8/application-kernel";
 
 export class UserService {
   constructor(
     private readonly transactionManager: TransactionManager,
     private readonly userRepository: UserRepository,
   ) {}
-  
+
   async createUserWithProfile(userData: CreateUserData): Promise<void> {
     await this.transactionManager.executeInTransaction(async () => {
       // 创建用户
       const user = await this.createUser(userData);
       await this.userRepository.save(user);
-      
+
       // 创建用户资料
       const profile = await this.createProfile(user.getId(), userData.profile);
       await this.profileRepository.save(profile);
-      
+
       // 发布事件
       await this.eventBus.publishAll(user.getUncommittedEvents());
     });
@@ -641,7 +627,7 @@ export class UserService {
 #### 7.1.2 事务隔离
 
 ```typescript
-import { TransactionIsolationUtils } from '@hl8/application-kernel';
+import { TransactionIsolationUtils } from "@hl8/application-kernel";
 
 export class OrderService {
   async processOrder(orderId: string): Promise<void> {
@@ -651,9 +637,9 @@ export class OrderService {
         await this.processOrderLogic(orderId);
       },
       {
-        isolationLevel: 'READ_COMMITTED',
-        timeout: 30000
-      }
+        isolationLevel: "READ_COMMITTED",
+        timeout: 30000,
+      },
     );
   }
 }
@@ -664,7 +650,7 @@ export class OrderService {
 #### 7.2.1 自动回滚
 
 ```typescript
-import { TransactionRollbackUtils } from '@hl8/application-kernel';
+import { TransactionRollbackUtils } from "@hl8/application-kernel";
 
 export class PaymentService {
   async processPayment(paymentData: PaymentData): Promise<void> {
@@ -672,16 +658,16 @@ export class PaymentService {
       await this.transactionManager.executeInTransaction(async () => {
         // 扣款
         await this.deductAmount(paymentData.amount);
-        
+
         // 更新订单状态
-        await this.updateOrderStatus(paymentData.orderId, 'PAID');
-        
+        await this.updateOrderStatus(paymentData.orderId, "PAID");
+
         // 发送确认邮件
         await this.sendConfirmationEmail(paymentData.email);
       });
     } catch (error) {
       // 自动回滚，无需手动处理
-      console.error('支付处理失败，事务已回滚:', error);
+      console.error("支付处理失败，事务已回滚:", error);
       throw error;
     }
   }
@@ -694,17 +680,17 @@ export class PaymentService {
 export class ComplexService {
   async processComplexOperation(data: ComplexData): Promise<void> {
     const transaction = await this.transactionManager.beginTransaction();
-    
+
     try {
       // 步骤1
       await this.step1(data);
-      
+
       // 步骤2
       await this.step2(data);
-      
+
       // 步骤3
       await this.step3(data);
-      
+
       await transaction.commit();
     } catch (error) {
       await transaction.rollback();
@@ -723,7 +709,7 @@ export class ComplexService {
 #### 8.1.1 基本用例
 
 ```typescript
-import { BaseUseCase } from '@hl8/application-kernel';
+import { BaseUseCase } from "@hl8/application-kernel";
 
 export class CreateUserUseCase extends BaseUseCase {
   constructor(
@@ -732,30 +718,30 @@ export class CreateUserUseCase extends BaseUseCase {
   ) {
     super();
   }
-  
+
   async execute(input: CreateUserInput): Promise<CreateUserOutput> {
     // 1. 验证输入
     this.validateInput(input);
-    
+
     // 2. 执行业务逻辑
     const user = await this.createUser(input);
-    
+
     // 3. 保存到仓库
     await this.userRepository.save(user);
-    
+
     // 4. 发布事件
     await this.eventBus.publishAll(user.getUncommittedEvents());
-    
+
     // 5. 返回结果
     return new CreateUserOutput(user.getId());
   }
-  
+
   private validateInput(input: CreateUserInput): void {
     if (!input.email || !input.username) {
-      throw new Error('邮箱和用户名不能为空');
+      throw new Error("邮箱和用户名不能为空");
     }
   }
-  
+
   private async createUser(input: CreateUserInput): Promise<User> {
     // 用户创建逻辑
   }
@@ -765,7 +751,7 @@ export class CreateUserUseCase extends BaseUseCase {
 #### 8.1.2 命令用例
 
 ```typescript
-import { BaseCommandUseCase } from '@hl8/application-kernel';
+import { BaseCommandUseCase } from "@hl8/application-kernel";
 
 export class CreateUserCommandUseCase extends BaseCommandUseCase<CreateUserCommand> {
   constructor(
@@ -774,25 +760,25 @@ export class CreateUserCommandUseCase extends BaseCommandUseCase<CreateUserComma
   ) {
     super();
   }
-  
+
   async execute(command: CreateUserCommand): Promise<void> {
     // 1. 验证命令
     this.validateCommand(command);
-    
+
     // 2. 创建用户
     const user = await this.createUser(command);
-    
+
     // 3. 保存用户
     await this.userRepository.save(user);
-    
+
     // 4. 发布事件
     await this.eventBus.publishAll(user.getUncommittedEvents());
   }
-  
+
   private validateCommand(command: CreateUserCommand): void {
     // 命令验证逻辑
   }
-  
+
   private async createUser(command: CreateUserCommand): Promise<User> {
     // 用户创建逻辑
   }
@@ -813,22 +799,22 @@ export class UserRegistrationUseCase extends BaseUseCase {
   ) {
     super();
   }
-  
+
   async execute(input: UserRegistrationInput): Promise<UserRegistrationOutput> {
     // 1. 创建用户
     const user = await this.createUser(input);
     await this.userRepository.save(user);
-    
+
     // 2. 创建用户资料
     const profile = await this.createProfile(user.getId(), input.profile);
     await this.profileRepository.save(profile);
-    
+
     // 3. 发送欢迎邮件
     await this.emailService.sendWelcomeEmail(user.getEmail());
-    
+
     // 4. 发布事件
     await this.eventBus.publishAll(user.getUncommittedEvents());
-    
+
     return new UserRegistrationOutput(user.getId());
   }
 }
@@ -843,17 +829,17 @@ export class UserRegistrationUseCase extends BaseUseCase {
 #### 9.1.1 自动验证
 
 ```typescript
-import { PatternComplianceValidator } from '@hl8/application-kernel';
+import { PatternComplianceValidator } from "@hl8/application-kernel";
 
 export class UserModuleValidator {
   async validateModule(): Promise<void> {
     const validator = new PatternComplianceValidator();
-    
-    const result = await validator.validateModule('UserModule');
-    
+
+    const result = await validator.validateModule("UserModule");
+
     if (!result.isCompliant) {
-      console.error('模块不符合规范:', result.violations);
-      throw new Error('模块验证失败');
+      console.error("模块不符合规范:", result.violations);
+      throw new Error("模块验证失败");
     }
   }
 }
@@ -862,20 +848,20 @@ export class UserModuleValidator {
 #### 9.1.2 接口合规性验证
 
 ```typescript
-import { InterfaceComplianceValidator } from '@hl8/application-kernel';
+import { InterfaceComplianceValidator } from "@hl8/application-kernel";
 
 export class HandlerValidator {
   async validateHandlers(): Promise<void> {
     const validator = new InterfaceComplianceValidator();
-    
+
     const result = await validator.validateHandlers([
       CreateUserHandler,
       UpdateUserHandler,
-      GetUserHandler
+      GetUserHandler,
     ]);
-    
+
     if (!result.isCompliant) {
-      console.error('处理器不符合接口规范:', result.violations);
+      console.error("处理器不符合接口规范:", result.violations);
     }
   }
 }
@@ -886,16 +872,16 @@ export class HandlerValidator {
 #### 9.2.1 安全验证
 
 ```typescript
-import { ContextSecurityValidator } from '@hl8/application-kernel';
+import { ContextSecurityValidator } from "@hl8/application-kernel";
 
 export class SecurityService {
   async validateContext(context: IUseCaseContext): Promise<boolean> {
     const result = ContextSecurityValidator.validateSecurity(context);
-    
-    if (result.securityLevel === 'critical') {
-      throw new Error('安全级别过高，拒绝执行');
+
+    if (result.securityLevel === "critical") {
+      throw new Error("安全级别过高，拒绝执行");
     }
-    
+
     return result.threats.length === 0;
   }
 }
@@ -904,18 +890,18 @@ export class SecurityService {
 #### 9.2.2 租户验证
 
 ```typescript
-import { TenantContextValidator } from '@hl8/application-kernel';
+import { TenantContextValidator } from "@hl8/application-kernel";
 
 export class TenantService {
   async validateTenantAccess(
     context: IUseCaseContext,
-    targetTenantId: string
+    targetTenantId: string,
   ): Promise<boolean> {
     const result = TenantContextValidator.validateTenantIsolation(
       context,
-      targetTenantId
+      targetTenantId,
     );
-    
+
     return result.isValid;
   }
 }
@@ -990,19 +976,19 @@ export class ApplicationError extends Error {
     public readonly statusCode: number = 500,
   ) {
     super(message);
-    this.name = 'ApplicationError';
+    this.name = "ApplicationError";
   }
 }
 
 export class ValidationError extends ApplicationError {
   constructor(message: string) {
-    super(message, 'VALIDATION_ERROR', 400);
+    super(message, "VALIDATION_ERROR", 400);
   }
 }
 
 export class BusinessError extends ApplicationError {
   constructor(message: string) {
-    super(message, 'BUSINESS_ERROR', 422);
+    super(message, "BUSINESS_ERROR", 422);
   }
 }
 ```
@@ -1015,16 +1001,12 @@ export class ErrorHandler {
     if (error instanceof ApplicationError) {
       return error;
     }
-    
+
     if (error instanceof ValidationError) {
       return new ValidationError(error.message);
     }
-    
-    return new ApplicationError(
-      'Internal server error',
-      'INTERNAL_ERROR',
-      500
-    );
+
+    return new ApplicationError("Internal server error", "INTERNAL_ERROR", 500);
   }
 }
 ```
@@ -1034,29 +1016,31 @@ export class ErrorHandler {
 #### 10.3.1 查询优化
 
 ```typescript
-export class GetUserListHandler implements QueryHandler<GetUserListQuery, UserListDto> {
+export class GetUserListHandler
+  implements QueryHandler<GetUserListQuery, UserListDto>
+{
   async handle(query: GetUserListQuery): Promise<UserListDto> {
     // 使用分页
     const users = await this.userRepository.findMany({
       tenantId: query.tenantId,
       page: query.page,
       limit: query.limit,
-      filters: query.filters
+      filters: query.filters,
     });
-    
+
     // 使用投影减少数据传输
-    const userDtos = users.map(user => ({
+    const userDtos = users.map((user) => ({
       id: user.getId(),
       email: user.getEmail(),
       username: user.getUsername(),
       // 不包含敏感信息
     }));
-    
+
     return {
       users: userDtos,
       total: users.total,
       page: query.page,
-      limit: query.limit
+      limit: query.limit,
     };
   }
 }
@@ -1070,22 +1054,22 @@ export class CachedUserService {
     private readonly userRepository: UserRepository,
     private readonly cache: CacheService,
   ) {}
-  
+
   async getUser(userId: string): Promise<UserDto> {
     const cacheKey = `user:${userId}`;
-    
+
     // 尝试从缓存获取
     let user = await this.cache.get<UserDto>(cacheKey);
-    
+
     if (!user) {
       // 从数据库获取
       const userEntity = await this.userRepository.findById(userId);
       user = this.toDto(userEntity);
-      
+
       // 缓存结果
       await this.cache.set(cacheKey, user, 300); // 5分钟缓存
     }
-    
+
     return user;
   }
 }
@@ -1096,40 +1080,40 @@ export class CachedUserService {
 #### 10.4.1 单元测试
 
 ```typescript
-describe('CreateUserUseCase', () => {
+describe("CreateUserUseCase", () => {
   let useCase: CreateUserUseCase;
   let mockUserRepository: jest.Mocked<UserRepository>;
   let mockEventBus: jest.Mocked<EventBus>;
-  
+
   beforeEach(() => {
     mockUserRepository = createMockUserRepository();
     mockEventBus = createMockEventBus();
     useCase = new CreateUserUseCase(mockUserRepository, mockEventBus);
   });
-  
-  it('should create user successfully', async () => {
+
+  it("should create user successfully", async () => {
     // Arrange
-    const input = new CreateUserInput('test@example.com', 'testuser');
-    const expectedUser = new User('user-123', 'test@example.com', 'testuser');
-    
+    const input = new CreateUserInput("test@example.com", "testuser");
+    const expectedUser = new User("user-123", "test@example.com", "testuser");
+
     mockUserRepository.save.mockResolvedValue(undefined);
     mockEventBus.publishAll.mockResolvedValue(undefined);
-    
+
     // Act
     const result = await useCase.execute(input);
-    
+
     // Assert
-    expect(result.userId).toBe('user-123');
+    expect(result.userId).toBe("user-123");
     expect(mockUserRepository.save).toHaveBeenCalledWith(expect.any(User));
     expect(mockEventBus.publishAll).toHaveBeenCalled();
   });
-  
-  it('should throw error for invalid input', async () => {
+
+  it("should throw error for invalid input", async () => {
     // Arrange
-    const input = new CreateUserInput('', 'testuser');
-    
+    const input = new CreateUserInput("", "testuser");
+
     // Act & Assert
-    await expect(useCase.execute(input)).rejects.toThrow('邮箱不能为空');
+    await expect(useCase.execute(input)).rejects.toThrow("邮箱不能为空");
   });
 });
 ```
@@ -1137,35 +1121,35 @@ describe('CreateUserUseCase', () => {
 #### 10.4.2 集成测试
 
 ```typescript
-describe('User Module Integration', () => {
+describe("User Module Integration", () => {
   let app: Application;
   let userService: UserService;
-  
+
   beforeAll(async () => {
     app = await createTestApplication();
     userService = app.get<UserService>(UserService);
   });
-  
+
   afterAll(async () => {
     await app.close();
   });
-  
-  it('should handle complete user creation flow', async () => {
+
+  it("should handle complete user creation flow", async () => {
     // 1. 创建用户
     const createCommand = new CreateUserCommand(
-      'test@example.com',
-      'testuser',
-      'password123'
+      "test@example.com",
+      "testuser",
+      "password123",
     );
-    
+
     await userService.createUser(createCommand);
-    
+
     // 2. 查询用户
-    const getUserQuery = new GetUserQuery('user-123');
+    const getUserQuery = new GetUserQuery("user-123");
     const user = await userService.getUser(getUserQuery);
-    
-    expect(user.email).toBe('test@example.com');
-    expect(user.username).toBe('testuser');
+
+    expect(user.email).toBe("test@example.com");
+    expect(user.username).toBe("testuser");
   });
 });
 ```
@@ -1194,7 +1178,12 @@ const platformContext = IsolationContext.createPlatform();
 const tenantContext = IsolationContext.createTenant(tenantId);
 
 // 用户级操作
-const userContext = IsolationContext.createUser(tenantId, orgId, deptId, userId);
+const userContext = IsolationContext.createUser(
+  tenantId,
+  orgId,
+  deptId,
+  userId,
+);
 ```
 
 #### Q: 如何处理跨聚合的事务？
@@ -1207,17 +1196,17 @@ export class OrderProcessingService {
     await this.transactionManager.executeInTransaction(async () => {
       // 1. 创建订单
       const order = await this.createOrder(orderData);
-      
+
       // 2. 扣减库存
       await this.reduceInventory(order.items);
-      
+
       // 3. 处理支付
       await this.processPayment(order.payment);
-      
+
       // 4. 发布事件
       await this.eventBus.publishAll([
         ...order.getUncommittedEvents(),
-        ...inventory.getUncommittedEvents()
+        ...inventory.getUncommittedEvents(),
       ]);
     });
   }
@@ -1239,11 +1228,13 @@ export class GetUserListQuery extends BaseQuery {
     public readonly filters?: UserFilters,
     isolationContext?: IsolationContext,
   ) {
-    super('GetUserListQuery', '获取用户列表查询', isolationContext);
+    super("GetUserListQuery", "获取用户列表查询", isolationContext);
   }
 }
 
-export class GetUserListHandler implements QueryHandler<GetUserListQuery, UserListDto> {
+export class GetUserListHandler
+  implements QueryHandler<GetUserListQuery, UserListDto>
+{
   async handle(query: GetUserListQuery): Promise<UserListDto> {
     // 使用分页查询
     const result = await this.userRepository.findMany({
@@ -1252,14 +1243,14 @@ export class GetUserListHandler implements QueryHandler<GetUserListQuery, UserLi
       limit: query.limit,
       filters: query.filters,
       // 只选择需要的字段
-      select: ['id', 'email', 'username', 'createdAt']
+      select: ["id", "email", "username", "createdAt"],
     });
-    
+
     return {
       users: result.data,
       total: result.total,
       page: query.page,
-      limit: query.limit
+      limit: query.limit,
     };
   }
 }
@@ -1273,23 +1264,21 @@ A: 使用异步处理和批量操作：
 export class EventProcessor {
   private readonly batchSize = 100;
   private readonly processingQueue: DomainEvent[] = [];
-  
+
   async processEvents(events: DomainEvent[]): Promise<void> {
     // 批量处理事件
     const batches = this.chunkArray(events, this.batchSize);
-    
+
     for (const batch of batches) {
       await this.processBatch(batch);
     }
   }
-  
+
   private async processBatch(events: DomainEvent[]): Promise<void> {
     // 并行处理批次内的事件
-    await Promise.all(
-      events.map(event => this.processEvent(event))
-    );
+    await Promise.all(events.map((event) => this.processEvent(event)));
   }
-  
+
   private async processEvent(event: DomainEvent): Promise<void> {
     // 事件处理逻辑
   }
@@ -1306,41 +1295,44 @@ A: 使用日志和追踪：
 export class CreateUserUseCase extends BaseUseCase {
   async execute(input: CreateUserInput): Promise<CreateUserOutput> {
     const requestId = this.generateRequestId();
-    
-    this.logger.info('开始创建用户', {
+
+    this.logger.info("开始创建用户", {
       requestId,
       email: input.email,
-      username: input.username
+      username: input.username,
     });
-    
+
     try {
       // 1. 验证输入
-      this.logger.debug('验证输入参数', { requestId });
+      this.logger.debug("验证输入参数", { requestId });
       this.validateInput(input);
-      
+
       // 2. 创建用户
-      this.logger.debug('创建用户实体', { requestId });
+      this.logger.debug("创建用户实体", { requestId });
       const user = await this.createUser(input);
-      
+
       // 3. 保存用户
-      this.logger.debug('保存用户到仓库', { requestId, userId: user.getId() });
+      this.logger.debug("保存用户到仓库", { requestId, userId: user.getId() });
       await this.userRepository.save(user);
-      
+
       // 4. 发布事件
-      this.logger.debug('发布用户创建事件', { requestId, userId: user.getId() });
-      await this.eventBus.publishAll(user.getUncommittedEvents());
-      
-      this.logger.info('用户创建成功', {
+      this.logger.debug("发布用户创建事件", {
         requestId,
-        userId: user.getId()
+        userId: user.getId(),
       });
-      
+      await this.eventBus.publishAll(user.getUncommittedEvents());
+
+      this.logger.info("用户创建成功", {
+        requestId,
+        userId: user.getId(),
+      });
+
       return new CreateUserOutput(user.getId());
     } catch (error) {
-      this.logger.error('用户创建失败', {
+      this.logger.error("用户创建失败", {
         requestId,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       throw error;
     }

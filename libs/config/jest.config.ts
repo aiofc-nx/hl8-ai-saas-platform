@@ -2,6 +2,7 @@ export default {
   displayName: "config",
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
+  rootDir: ".",
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
@@ -20,6 +21,6 @@ export default {
   },
   moduleFileExtensions: ["ts", "js"],
   coverageDirectory: "../../coverage/libs/config",
-  testMatch: ["**/__tests__/**/*.spec.ts", "**/*.spec.ts"],
+  testMatch: ["**/*.spec.ts"],
   setupFilesAfterEnv: ["<rootDir>/../../jest.setup.js"],
 };

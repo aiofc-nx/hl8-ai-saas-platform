@@ -1,6 +1,6 @@
 {
   "name": "@hl8/nestjs-fastify",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Fastify 专用的企业级基础设施模块 - 基于 @hl8/nestjs-infra 优化",
   "keywords": [
     "nestjs",
@@ -31,7 +31,8 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",

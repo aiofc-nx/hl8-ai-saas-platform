@@ -1,5 +1,5 @@
 {
-  "extends": "../../packages/typescript-config/nestjs.json",
+  "extends": "@repo/typescript-config/nestjs.json",
   "compilerOptions": {
     "allowJs": true,
     "esModuleInterop": true,
@@ -8,6 +8,6 @@
     "rootDir": "./src",
     "outDir": "./dist"
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  "include": ["src", "src/**/*.spec.ts", "src/**/*.test.ts", "__tests__"],
+  "exclude": ["node_modules", "test", "dist"]
 }

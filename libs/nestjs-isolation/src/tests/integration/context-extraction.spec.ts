@@ -21,8 +21,8 @@ import { IsolationLevel } from "@hl8/domain-kernel";
 import { Controller, Get, INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import request from "supertest";
-import { IsolationModule } from "../../src/isolation.module.js";
-import { IsolationContextService } from "../../src/services/isolation-context.service.js";
+import { IsolationModule } from "../../isolation.module.js";
+import { IsolationContextService } from "../../services/isolation-context.service.js";
 
 // 测试用的有效 UUID v4
 const UUID_TENANT = "550e8400-e29b-41d4-a716-446655440000";

@@ -60,60 +60,60 @@ pnpm add @hl8/infrastructure-kernel
 ### 数据库配置
 
 ```typescript
-import { DatabaseService } from '@hl8/infrastructure-kernel';
+import { DatabaseService } from "@hl8/infrastructure-kernel";
 
 const databaseService = new DatabaseService();
 
 // 配置PostgreSQL
-await databaseService.connect('postgres', 'postgresql', {
-  type: 'postgresql',
-  host: 'localhost',
+await databaseService.connect("postgres", "postgresql", {
+  type: "postgresql",
+  host: "localhost",
   port: 5432,
-  user: 'postgres',
-  password: 'password',
-  dbName: 'myapp'
+  user: "postgres",
+  password: "password",
+  dbName: "myapp",
 });
 
 // 配置MongoDB
-await databaseService.connect('mongodb', 'mongodb', {
-  type: 'mongodb',
-  host: 'localhost',
+await databaseService.connect("mongodb", "mongodb", {
+  type: "mongodb",
+  host: "localhost",
   port: 27017,
-  dbName: 'myapp'
+  dbName: "myapp",
 });
 ```
 
 ### 缓存配置
 
 ```typescript
-import { CacheService } from '@hl8/infrastructure-kernel';
+import { CacheService } from "@hl8/infrastructure-kernel";
 
 const cacheService = new CacheService();
 
 // 配置缓存策略
 cacheService.setConfig({
-  keyPrefix: 'myapp:',
+  keyPrefix: "myapp:",
   defaultTtl: 300,
   maxSize: 1000,
-  strategy: 'LRU',
+  strategy: "LRU",
   enableCompression: false,
-  enableSerialization: true
+  enableSerialization: true,
 });
 ```
 
 ### 隔离配置
 
 ```typescript
-import { IsolationManager } from '@hl8/infrastructure-kernel';
+import { IsolationManager } from "@hl8/infrastructure-kernel";
 
 const isolationManager = new IsolationManager();
 
 // 创建隔离上下文
 const context = isolationManager.createIsolationContext(
-  'tenant1',
-  'org1',
-  'dept1',
-  'user1'
+  "tenant1",
+  "org1",
+  "dept1",
+  "user1",
 );
 
 // 设置当前隔离上下文
@@ -125,12 +125,12 @@ isolationManager.setCurrentIsolationContext(context);
 ### 基础使用
 
 ```typescript
-import { InfrastructureKernelService } from '@hl8/infrastructure-kernel';
+import { InfrastructureKernelService } from "@hl8/infrastructure-kernel";
 
 @Injectable()
 export class AppService {
   constructor(
-    private readonly infrastructureKernel: InfrastructureKernelService
+    private readonly infrastructureKernel: InfrastructureKernelService,
   ) {}
 
   async initialize() {
@@ -153,16 +153,16 @@ export class AppService {
 ### 数据库操作
 
 ```typescript
-import { DatabaseService } from '@hl8/infrastructure-kernel';
+import { DatabaseService } from "@hl8/infrastructure-kernel";
 
 @Injectable()
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async createUser(userData: any) {
-    const connection = this.databaseService.getConnection('postgres');
+    const connection = this.databaseService.getConnection("postgres");
     // 执行数据库操作
-    return await connection.query('INSERT INTO users ...');
+    return await connection.query("INSERT INTO users ...");
   }
 }
 ```
@@ -170,7 +170,7 @@ export class UserService {
 ### 缓存操作
 
 ```typescript
-import { CacheService } from '@hl8/infrastructure-kernel';
+import { CacheService } from "@hl8/infrastructure-kernel";
 
 @Injectable()
 export class CacheService {
@@ -185,10 +185,10 @@ export class CacheService {
 
     // 从数据库获取
     const user = await this.databaseService.getUser(id);
-    
+
     // 缓存结果
     await this.cacheService.set(`user:${id}`, user, { ttl: 300 });
-    
+
     return user;
   }
 }
@@ -197,7 +197,7 @@ export class CacheService {
 ### 隔离操作
 
 ```typescript
-import { IsolationManager } from '@hl8/infrastructure-kernel';
+import { IsolationManager } from "@hl8/infrastructure-kernel";
 
 @Injectable()
 export class DataService {
@@ -206,16 +206,18 @@ export class DataService {
   async getData() {
     // 获取当前隔离上下文
     const context = this.isolationManager.getCurrentIsolationContext();
-    
+
     // 验证访问权限
-    const hasAccess = await this.isolationManager.validateAccess(context, { id: 'data1' });
+    const hasAccess = await this.isolationManager.validateAccess(context, {
+      id: "data1",
+    });
     if (!hasAccess) {
-      throw new Error('访问被拒绝');
+      throw new Error("访问被拒绝");
     }
 
     // 获取数据
     const data = await this.databaseService.getData();
-    
+
     // 应用隔离过滤
     return this.isolationManager.filterData(data, context);
   }
@@ -225,7 +227,7 @@ export class DataService {
 ### 性能监控
 
 ```typescript
-import { PerformanceMonitorService } from '@hl8/infrastructure-kernel';
+import { PerformanceMonitorService } from "@hl8/infrastructure-kernel";
 
 @Injectable()
 export class MonitoringService {
@@ -246,25 +248,30 @@ export class MonitoringService {
 ### 错误处理
 
 ```typescript
-import { ErrorHandlerService, CircuitBreakerService } from '@hl8/infrastructure-kernel';
+import {
+  ErrorHandlerService,
+  CircuitBreakerService,
+} from "@hl8/infrastructure-kernel";
 
 @Injectable()
 export class ApiService {
   constructor(
     private readonly errorHandler: ErrorHandlerService,
-    private readonly circuitBreaker: CircuitBreakerService
+    private readonly circuitBreaker: CircuitBreakerService,
   ) {}
 
   async callExternalApi() {
     try {
       // 使用熔断器保护外部API调用
-      return await this.circuitBreaker.execute('external-api', async () => {
+      return await this.circuitBreaker.execute("external-api", async () => {
         // 调用外部API
-        return await this.httpService.get('https://api.example.com');
+        return await this.httpService.get("https://api.example.com");
       });
     } catch (error) {
       // 处理错误
-      await this.errorHandler.handleError(error, { operation: 'callExternalApi' });
+      await this.errorHandler.handleError(error, {
+        operation: "callExternalApi",
+      });
       throw error;
     }
   }

@@ -5,10 +5,13 @@
  * @since 1.0.0
  */
 
-import type { IDatabaseConnectionManager, IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { DatabaseConnectionEntity } from '../../entities/database-connection.entity.js';
-import { PostgreSQLAdapter } from './postgresql-adapter.js';
-import { MongoDBAdapter } from './mongodb-adapter.js';
+import type {
+  IDatabaseConnectionManager,
+  IDatabaseAdapter,
+} from "../../interfaces/database-adapter.interface.js";
+import type { DatabaseConnectionEntity } from "../../entities/database-connection.entity.js";
+import { PostgreSQLAdapter } from "./postgresql-adapter.js";
+import { MongoDBAdapter } from "./mongodb-adapter.js";
 
 /**
  * 数据库连接管理器
@@ -33,7 +36,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
    */
   async createConnection(
     name: string,
-    config: DatabaseConnectionEntity
+    config: DatabaseConnectionEntity,
   ): Promise<IDatabaseAdapter> {
     if (this.connections.has(name)) {
       throw new Error(`连接 ${name} 已存在`);
@@ -42,10 +45,10 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
     let adapter: IDatabaseAdapter;
 
     switch (config.type) {
-      case 'POSTGRESQL':
+      case "POSTGRESQL":
         adapter = new PostgreSQLAdapter(config as any);
         break;
-      case 'MONGODB':
+      case "MONGODB":
         adapter = new MongoDBAdapter(config as any);
         break;
       default:
@@ -82,7 +85,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
         } catch (error) {
           console.error(`关闭连接 ${name} 失败:`, error);
         }
-      }
+      },
     );
 
     await Promise.all(closePromises);
@@ -96,7 +99,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
   async getConnectionStatus(name: string): Promise<string> {
     const connection = this.connections.get(name);
     if (!connection) {
-      return 'NOT_FOUND';
+      return "NOT_FOUND";
     }
     return connection.getStatus();
   }
@@ -106,7 +109,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
    */
   async getAllConnectionStatus(): Promise<Record<string, string>> {
     const statuses: Record<string, string> = {};
-    
+
     for (const [name, connection] of this.connections.entries()) {
       statuses[name] = connection.getStatus();
     }
@@ -119,7 +122,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
    */
   async healthCheck(): Promise<Record<string, boolean>> {
     const healthChecks: Record<string, boolean> = {};
-    
+
     const checkPromises = Array.from(this.connections.entries()).map(
       async ([name, connection]) => {
         try {
@@ -128,7 +131,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
         } catch (error) {
           healthChecks[name] = false;
         }
-      }
+      },
     );
 
     await Promise.all(checkPromises);
@@ -154,7 +157,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
    */
   getAllConnectionConfigs(): Record<string, DatabaseConnectionEntity> {
     const configs: Record<string, DatabaseConnectionEntity> = {};
-    
+
     for (const [name, config] of this.connectionConfigs.entries()) {
       configs[name] = config;
     }
@@ -182,7 +185,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
   async reconnect(name: string): Promise<void> {
     const connection = this.connections.get(name);
     const config = this.connectionConfigs.get(name);
-    
+
     if (!connection || !config) {
       throw new Error(`连接 ${name} 不存在`);
     }
@@ -207,7 +210,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
         } catch (error) {
           console.error(`重新连接 ${name} 失败:`, error);
         }
-      }
+      },
     );
 
     await Promise.all(reconnectPromises);
@@ -221,8 +224,8 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
       totalConnections: this.connections.size,
       connectionNames: this.getConnectionNames(),
       connectionTypes: Array.from(this.connectionConfigs.values()).map(
-        config => config.type
-      )
+        (config) => config.type,
+      ),
     };
   }
 }

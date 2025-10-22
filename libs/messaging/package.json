@@ -1,6 +1,6 @@
 {
   "name": "@hl8/messaging",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "企业级消息队列和事件总线模块 - 支持 Kafka、RabbitMQ、Redis 等多种消息中间件",
   "keywords": [
     "nestjs",
@@ -32,7 +32,8 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",

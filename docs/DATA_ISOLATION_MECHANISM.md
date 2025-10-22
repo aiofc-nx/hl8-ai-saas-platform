@@ -90,7 +90,7 @@ const platformContext = IsolationContext.platform();
 - **示例**: 租户管理员、租户级报表
 
 ```typescript
-const tenantContext = IsolationContext.tenant(TenantId.create('tenant-123'));
+const tenantContext = IsolationContext.tenant(TenantId.create("tenant-123"));
 // 只能访问 tenant-123 的数据
 ```
 
@@ -103,8 +103,8 @@ const tenantContext = IsolationContext.tenant(TenantId.create('tenant-123'));
 
 ```typescript
 const orgContext = IsolationContext.organization(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
 );
 // 只能访问 tenant-123/org-456 及其下属部门的数据
 ```
@@ -118,9 +118,9 @@ const orgContext = IsolationContext.organization(
 
 ```typescript
 const deptContext = IsolationContext.department(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456'),
-  DepartmentId.create('dept-789')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
+  DepartmentId.create("dept-789"),
 );
 // 只能访问 tenant-123/org-456/dept-789 的数据
 ```
@@ -134,8 +134,8 @@ const deptContext = IsolationContext.department(
 
 ```typescript
 const userContext = IsolationContext.user(
-  UserId.create('user-001'),
-  TenantId.create('tenant-123')
+  UserId.create("user-001"),
+  TenantId.create("tenant-123"),
 );
 // 只能访问 user-001 在 tenant-123 中的数据
 ```
@@ -164,11 +164,11 @@ return userContext.canAccessSharedData(dataContext, sharingLevel);
 
 ```typescript
 enum SharingLevel {
-  PLATFORM = 'platform',     // 平台级共享
-  TENANT = 'tenant',          // 租户级共享
-  ORGANIZATION = 'organization', // 组织级共享
-  DEPARTMENT = 'department',   // 部门级共享
-  USER = 'user'               // 用户级共享
+  PLATFORM = "platform", // 平台级共享
+  TENANT = "tenant", // 租户级共享
+  ORGANIZATION = "organization", // 组织级共享
+  DEPARTMENT = "department", // 部门级共享
+  USER = "user", // 用户级共享
 }
 ```
 
@@ -176,7 +176,7 @@ enum SharingLevel {
 
 ```typescript
 // 根据隔离上下文过滤数据
-const filteredData = data.filter(item => {
+const filteredData = data.filter((item) => {
   const itemContext = extractContextFromItem(item);
   return userContext.canAccess(itemContext, item.sharingLevel);
 });
@@ -190,12 +190,14 @@ const filteredData = data.filter(item => {
 
 ```typescript
 // 自动添加 WHERE 条件
-const whereClause = context.buildWhereClause('u');
+const whereClause = context.buildWhereClause("u");
 // 结果: { 'u.tenantId': 'tenant-123', 'u.organizationId': 'org-456' }
 
 const query = `
   SELECT * FROM users u 
-  WHERE ${Object.keys(whereClause).map(key => `${key} = ?`).join(' AND ')}
+  WHERE ${Object.keys(whereClause)
+    .map((key) => `${key} = ?`)
+    .join(" AND ")}
 `;
 ```
 
@@ -203,7 +205,7 @@ const query = `
 
 ```typescript
 // 自动生成隔离的缓存键
-const cacheKey = context.buildCacheKey('users', 'list');
+const cacheKey = context.buildCacheKey("users", "list");
 // 结果: "tenant:tenant-123:org:org-456:users:list"
 ```
 
@@ -216,11 +218,11 @@ const auditLog = {
   tenantId: context.tenantId?.getValue(),
   organizationId: context.organizationId?.getValue(),
   departmentId: context.departmentId?.getValue(),
-  action: 'READ',
-  resource: 'users',
+  action: "READ",
+  resource: "users",
   timestamp: new Date(),
   ipAddress: request.ip,
-  userAgent: request.headers['user-agent']
+  userAgent: request.headers["user-agent"],
 };
 ```
 
@@ -230,9 +232,9 @@ const auditLog = {
 // 异常访问检测
 if (accessAttempts > threshold) {
   securityMonitor.alert({
-    type: 'SUSPICIOUS_ACCESS',
+    type: "SUSPICIOUS_ACCESS",
     context: userContext,
-    details: { attempts: accessAttempts, threshold }
+    details: { attempts: accessAttempts, threshold },
   });
 }
 ```
@@ -244,7 +246,7 @@ if (accessAttempts > threshold) {
 #### 装饰器使用
 
 ```typescript
-@Controller('users')
+@Controller("users")
 export class UserController {
   @Get()
   @RequireLevel(IsolationLevel.TENANT)
@@ -261,11 +263,14 @@ export class UserController {
 export class IsolationGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
-    const requiredLevel = this.reflector.get('isolationLevel', context.getHandler());
-    
+    const requiredLevel = this.reflector.get(
+      "isolationLevel",
+      context.getHandler(),
+    );
+
     return this.isolationService.validateLevel(
-      request.isolationContext, 
-      requiredLevel
+      request.isolationContext,
+      requiredLevel,
     );
   }
 }
@@ -292,14 +297,14 @@ export class IsolationExtractionMiddleware implements NestMiddleware {
 @Injectable()
 export class IsolationContextManager {
   private currentContext: IsolationContext | null = null;
-  
+
   createContext(tenantId: string, orgId?: string): IsolationContext {
     return IsolationContext.organization(
       TenantId.create(tenantId),
-      OrganizationId.create(orgId)
+      OrganizationId.create(orgId),
     );
   }
-  
+
   setCurrentContext(context: IsolationContext): void {
     this.currentContext = context;
   }
@@ -311,7 +316,10 @@ export class IsolationContextManager {
 ```typescript
 @Injectable()
 export class AccessControlService {
-  async validateAccess(context: IsolationContext, resource: any): Promise<boolean> {
+  async validateAccess(
+    context: IsolationContext,
+    resource: any,
+  ): Promise<boolean> {
     const resourceContext = this.extractResourceContext(resource);
     return context.canAccess(resourceContext, SharingLevel.TENANT);
   }
@@ -328,8 +336,8 @@ class IsolationQueryBuilder {
     const whereClause = context.buildWhereClause();
     const conditions = Object.entries(whereClause)
       .map(([key, value]) => `${key} = '${value}'`)
-      .join(' AND ');
-    
+      .join(" AND ");
+
     return `${baseQuery} WHERE ${conditions}`;
   }
 }
@@ -339,7 +347,7 @@ class IsolationQueryBuilder {
 
 ```typescript
 async executeInContext<T>(
-  context: IsolationContext, 
+  context: IsolationContext,
   operation: (trx: Transaction) => Promise<T>
 ): Promise<T> {
   return await this.database.transaction(async (trx) => {
@@ -355,7 +363,7 @@ async executeInContext<T>(
 
 ```typescript
 // 多层级缓存键
-const cacheKey = context.buildCacheKey('users', 'list');
+const cacheKey = context.buildCacheKey("users", "list");
 // 平台级: "platform:users:list"
 // 租户级: "tenant:tenant-123:users:list"
 // 组织级: "tenant:tenant-123:org:org-456:users:list"
@@ -376,7 +384,7 @@ CREATE INDEX idx_users_tenant_org_dept ON users(tenant_id, organization_id, depa
 const pool = new ConnectionPool({
   isolation: true,
   maxConnections: 100,
-  isolationContext: context
+  isolationContext: context,
 });
 ```
 
@@ -387,11 +395,11 @@ const pool = new ConnectionPool({
 ```typescript
 // 结构化日志
 const logContext = context.buildLogContext();
-logger.info('Data access', {
+logger.info("Data access", {
   ...logContext,
-  action: 'READ',
-  resource: 'users',
-  duration: 150
+  action: "READ",
+  resource: "users",
+  duration: 150,
 });
 ```
 
@@ -403,7 +411,7 @@ const metrics = {
   isolationLevel: context.getIsolationLevel(),
   accessCount: this.getAccessCount(context),
   responseTime: this.getResponseTime(context),
-  errorRate: this.getErrorRate(context)
+  errorRate: this.getErrorRate(context),
 };
 ```
 
@@ -417,7 +425,7 @@ async healthCheck(): Promise<boolean> {
     this.cache.healthCheck(),
     this.isolation.healthCheck()
   ]);
-  
+
   return checks.every(check => check === true);
 }
 ```
@@ -429,15 +437,15 @@ async healthCheck(): Promise<boolean> {
 ```typescript
 // 创建隔离上下文
 const context = IsolationContext.organization(
-  TenantId.create('tenant-123'),
-  OrganizationId.create('org-456')
+  TenantId.create("tenant-123"),
+  OrganizationId.create("org-456"),
 );
 
 // 检查权限
 const canAccess = context.canAccess(targetContext, SharingLevel.TENANT);
 
 // 生成查询条件
-const whereClause = context.buildWhereClause('u');
+const whereClause = context.buildWhereClause("u");
 ```
 
 ### 2. 在服务中使用
@@ -448,11 +456,11 @@ export class UserService {
   async findById(id: string, context: IsolationContext): Promise<User> {
     // 权限检查
     if (!context.canAccess(targetContext, SharingLevel.TENANT)) {
-      throw new Error('Access denied');
+      throw new Error("Access denied");
     }
-    
+
     // 构建查询
-    const whereClause = context.buildWhereClause('u');
+    const whereClause = context.buildWhereClause("u");
     return this.repository.findById(id, whereClause);
   }
 }
@@ -461,7 +469,7 @@ export class UserService {
 ### 3. 在控制器中使用
 
 ```typescript
-@Controller('users')
+@Controller("users")
 export class UserController {
   @Get()
   @RequireLevel(IsolationLevel.TENANT)

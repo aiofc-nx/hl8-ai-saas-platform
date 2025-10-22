@@ -6,6 +6,10 @@
  * @since 1.0.0
  */
 
+import * as os from "os";
+import * as path from "path";
+import { promises as fs } from "fs";
+
 // 设置测试超时时间
 jest.setTimeout(10000);
 
@@ -35,14 +39,12 @@ afterEach(() => {
 });
 
 // 全局测试工具
-(global as any).testUtils = {
+(global as unknown as { testUtils: unknown }).testUtils = {
   // 等待指定时间
   wait: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
 
   // 创建临时目录
   createTempDir: (prefix: string = "test") => {
-    const os = require("os");
-    const path = require("path");
     return path.join(
       os.tmpdir(),
       `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -51,9 +53,6 @@ afterEach(() => {
 
   // 清理临时文件
   cleanupTempFiles: async (paths: string[]) => {
-    const fs = require("fs").promises;
-    const path = require("path");
-
     for (const filePath of paths) {
       try {
         const stat = await fs.stat(filePath);
@@ -62,7 +61,7 @@ afterEach(() => {
         } else {
           await fs.unlink(filePath);
         }
-      } catch (error) {
+      } catch (_error) {
         // 忽略文件不存在错误
       }
     }

@@ -5,9 +5,14 @@
  * @since 1.0.0
  */
 
-import { MikroORM, MongoDriver } from '@mikro-orm/mongodb';
-import type { IMongoDBAdapter, DatabaseOperationResult, DatabaseQueryOptions, DatabaseTransactionOptions } from '../../interfaces/database-adapter.interface.js';
-import type { MongoDBConnectionEntity } from '../../entities/mongodb-connection.entity.js';
+import { MikroORM, MongoDriver } from "@mikro-orm/mongodb";
+import type {
+  IMongoDBAdapter,
+  DatabaseOperationResult,
+  DatabaseQueryOptions,
+  DatabaseTransactionOptions,
+} from "../../interfaces/database-adapter.interface.js";
+import type { MongoDBConnectionEntity } from "../../entities/mongodb-connection.entity.js";
 
 /**
  * MongoDB数据库适配器
@@ -17,9 +22,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   private connection?: any;
   private isConnected = false;
 
-  constructor(
-    private readonly config: MongoDBConnectionEntity
-  ) {}
+  constructor(private readonly config: MongoDBConnectionEntity) {}
 
   /**
    * 连接数据库
@@ -32,16 +35,18 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         driver: MongoDriver,
         entities: [],
         migrations: {
-          path: './migrations'
+          path: "./migrations",
           // pattern: /^[\w-]+\d+\.(ts|js)$/ // 注释掉不支持的属性
-        }
+        },
       });
 
       this.connection = this.orm.em.getConnection();
       this.isConnected = true;
     } catch (error) {
       this.isConnected = false;
-      throw new Error(`MongoDB连接失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `MongoDB连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -57,7 +62,9 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         this.isConnected = false;
       }
     } catch (error) {
-      throw new Error(`MongoDB断开连接失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `MongoDB断开连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -66,7 +73,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   getRepository<T>(entity: any): any {
     if (!this.orm) {
-      throw new Error('数据库未连接');
+      throw new Error("数据库未连接");
     }
     return this.orm.em.getRepository(entity);
   }
@@ -79,8 +86,8 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       if (!this.connection) {
         return false;
       }
-      
-      await this.connection.execute('ping');
+
+      await this.connection.execute("ping");
       return true;
     } catch (error) {
       return false;
@@ -90,8 +97,8 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 获取连接状态
    */
-  getStatus(): 'ACTIVE' | 'INACTIVE' | 'ERROR' {
-    return this.isConnected ? 'ACTIVE' : 'INACTIVE';
+  getStatus(): "ACTIVE" | "INACTIVE" | "ERROR" {
+    return this.isConnected ? "ACTIVE" : "INACTIVE";
   }
 
   /**
@@ -99,13 +106,13 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async query<T = any>(
     sql: string,
-    params?: any[]
+    params?: any[],
   ): Promise<DatabaseOperationResult<T[]>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       // MongoDB使用不同的查询语法
@@ -115,14 +122,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       return {
         success: true,
         data: result,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '查询执行失败',
-        executionTime
+        error: error instanceof Error ? error.message : "查询执行失败",
+        executionTime,
       };
     }
   }
@@ -132,13 +139,13 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async transaction<T>(
     callback: (trx: any) => Promise<T>,
-    options?: DatabaseTransactionOptions
+    options?: DatabaseTransactionOptions,
   ): Promise<DatabaseOperationResult<T>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.orm) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       const result = await this.orm.em.transactional(async (em) => {
@@ -150,14 +157,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       return {
         success: true,
         data: result,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '事务执行失败',
-        executionTime
+        error: error instanceof Error ? error.message : "事务执行失败",
+        executionTime,
       };
     }
   }
@@ -168,40 +175,40 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   async batchInsert<T>(
     table: string,
     data: T[],
-    options?: DatabaseQueryOptions
+    options?: DatabaseQueryOptions,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       if (data.length === 0) {
         return {
           success: true,
           data: 0,
-          executionTime: Date.now() - startTime
+          executionTime: Date.now() - startTime,
         };
       }
 
       const result = await this.connection.execute(
         `INSERT INTO ${table} VALUES ?`,
-        [data]
+        [data],
       );
       const executionTime = Date.now() - startTime;
 
       return {
         success: true,
         data: result.affectedRows || data.length,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '批量插入失败',
-        executionTime
+        error: error instanceof Error ? error.message : "批量插入失败",
+        executionTime,
       };
     }
   }
@@ -212,20 +219,20 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   async batchUpdate<T>(
     table: string,
     data: T[],
-    where: Record<string, any>
+    where: Record<string, any>,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       if (data.length === 0) {
         return {
           success: true,
           data: 0,
-          executionTime: Date.now() - startTime
+          executionTime: Date.now() - startTime,
         };
       }
 
@@ -233,7 +240,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       for (const row of data) {
         const result = await this.connection.execute(
           `UPDATE ${table} SET ? WHERE ?`,
-          [row, where]
+          [row, where],
         );
         totalAffected += result.affectedRows || 0;
       }
@@ -243,14 +250,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       return {
         success: true,
         data: totalAffected,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '批量更新失败',
-        executionTime
+        error: error instanceof Error ? error.message : "批量更新失败",
+        executionTime,
       };
     }
   }
@@ -260,32 +267,32 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async batchDelete(
     table: string,
-    where: Record<string, any>
+    where: Record<string, any>,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       const result = await this.connection.execute(
         `DELETE FROM ${table} WHERE ?`,
-        [where]
+        [where],
       );
       const executionTime = Date.now() - startTime;
 
       return {
         success: true,
         data: result.affectedRows || 0,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '批量删除失败',
-        executionTime
+        error: error instanceof Error ? error.message : "批量删除失败",
+        executionTime,
       };
     }
   }
@@ -295,7 +302,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async getConnectionInfo(): Promise<Record<string, any>> {
     return {
-      type: 'MongoDB',
+      type: "MongoDB",
       host: this.config.host,
       port: this.config.port,
       database: this.config.database,
@@ -305,7 +312,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       maxPoolSize: this.config.maxPoolSize,
       minPoolSize: this.config.minPoolSize,
       isConnected: this.isConnected,
-      status: this.getStatus()
+      status: this.getStatus(),
     };
   }
 
@@ -318,17 +325,17 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         return {};
       }
 
-      const stats = await this.connection.execute('db.serverStatus()');
+      const stats = await this.connection.execute("db.serverStatus()");
       return {
         connections: stats.connections || {},
         network: stats.network || {},
         opcounters: stats.opcounters || {},
-        isConnected: this.isConnected
+        isConnected: this.isConnected,
       };
     } catch (error) {
       return {
-        error: error instanceof Error ? error.message : '获取统计信息失败',
-        isConnected: this.isConnected
+        error: error instanceof Error ? error.message : "获取统计信息失败",
+        isConnected: this.isConnected,
       };
     }
   }
@@ -339,32 +346,32 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   async executeMongoDBQuery<T = any>(
     collection: string,
     query: any,
-    options?: any
+    options?: any,
   ): Promise<DatabaseOperationResult<T[]>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       const result = await this.connection.execute(
         `SELECT * FROM ${collection} WHERE ?`,
-        [query]
+        [query],
       );
       const executionTime = Date.now() - startTime;
 
       return {
         success: true,
         data: result,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'MongoDB查询失败',
-        executionTime
+        error: error instanceof Error ? error.message : "MongoDB查询失败",
+        executionTime,
       };
     }
   }
@@ -374,13 +381,13 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async createCollection(
     name: string,
-    options?: any
+    options?: any,
   ): Promise<DatabaseOperationResult<void>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       await this.connection.execute(`CREATE COLLECTION ${name}`);
@@ -388,14 +395,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       return {
         success: true,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '创建集合失败',
-        executionTime
+        error: error instanceof Error ? error.message : "创建集合失败",
+        executionTime,
       };
     }
   }
@@ -403,14 +410,12 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 删除集合
    */
-  async dropCollection(
-    name: string
-  ): Promise<DatabaseOperationResult<void>> {
+  async dropCollection(name: string): Promise<DatabaseOperationResult<void>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       await this.connection.execute(`DROP COLLECTION ${name}`);
@@ -418,14 +423,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       return {
         success: true,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '删除集合失败',
-        executionTime
+        error: error instanceof Error ? error.message : "删除集合失败",
+        executionTime,
       };
     }
   }
@@ -436,23 +441,24 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   async createIndex(
     collection: string,
     keys: Record<string, any>,
-    options?: any
+    options?: any,
   ): Promise<DatabaseOperationResult<string>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
-      const indexName = options?.name || `idx_${collection}_${Object.keys(keys).join('_')}`;
-      const unique = options?.unique ? 'UNIQUE ' : '';
+      const indexName =
+        options?.name || `idx_${collection}_${Object.keys(keys).join("_")}`;
+      const unique = options?.unique ? "UNIQUE " : "";
       const keysStr = Object.entries(keys)
         .map(([key, value]) => `${key}:${value}`)
-        .join(', ');
-      
+        .join(", ");
+
       await this.connection.execute(
-        `CREATE ${unique}INDEX ${indexName} ON ${collection} (${keysStr})`
+        `CREATE ${unique}INDEX ${indexName} ON ${collection} (${keysStr})`,
       );
 
       const executionTime = Date.now() - startTime;
@@ -460,14 +466,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       return {
         success: true,
         data: indexName,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '创建索引失败',
-        executionTime
+        error: error instanceof Error ? error.message : "创建索引失败",
+        executionTime,
       };
     }
   }
@@ -477,31 +483,29 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async dropIndex(
     collection: string,
-    indexName: string
+    indexName: string,
   ): Promise<DatabaseOperationResult<void>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
-      await this.connection.execute(
-        `DROP INDEX ${indexName} ON ${collection}`
-      );
+      await this.connection.execute(`DROP INDEX ${indexName} ON ${collection}`);
 
       const executionTime = Date.now() - startTime;
 
       return {
         success: true,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '删除索引失败',
-        executionTime
+        error: error instanceof Error ? error.message : "删除索引失败",
+        executionTime,
       };
     }
   }
@@ -509,30 +513,30 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 获取集合信息
    */
-  async getCollectionInfo(collection: string): Promise<DatabaseOperationResult<any>> {
+  async getCollectionInfo(
+    collection: string,
+  ): Promise<DatabaseOperationResult<any>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
-      const result = await this.connection.execute(
-        `DESCRIBE ${collection}`
-      );
+      const result = await this.connection.execute(`DESCRIBE ${collection}`);
       const executionTime = Date.now() - startTime;
 
       return {
         success: true,
         data: result,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '获取集合信息失败',
-        executionTime
+        error: error instanceof Error ? error.message : "获取集合信息失败",
+        executionTime,
       };
     }
   }
@@ -540,30 +544,32 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 获取索引信息
    */
-  async getIndexInfo(collection: string): Promise<DatabaseOperationResult<any[]>> {
+  async getIndexInfo(
+    collection: string,
+  ): Promise<DatabaseOperationResult<any[]>> {
     const startTime = Date.now();
-    
+
     try {
       if (!this.connection) {
-        throw new Error('数据库未连接');
+        throw new Error("数据库未连接");
       }
 
       const result = await this.connection.execute(
-        `SHOW INDEX FROM ${collection}`
+        `SHOW INDEX FROM ${collection}`,
       );
       const executionTime = Date.now() - startTime;
 
       return {
         success: true,
         data: result,
-        executionTime
+        executionTime,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : '获取索引信息失败',
-        executionTime
+        error: error instanceof Error ? error.message : "获取索引信息失败",
+        executionTime,
       };
     }
   }

@@ -6,8 +6,20 @@
  */
 
 import { ISpecification } from "./specification.interface.js";
-import { UserActiveSpecification, UserEmailFormatSpecification, UsernameFormatSpecification, UserLifecycleSpecification, ValidUserSpecification } from "./user-specifications.js";
-import { OrderAmountSpecification, OrderStatusSpecification, OrderItemsSpecification, OrderLifecycleSpecification, ValidOrderSpecification } from "./order-specifications.js";
+import {
+  UserActiveSpecification,
+  UserEmailFormatSpecification,
+  UsernameFormatSpecification,
+  UserLifecycleSpecification,
+  ValidUserSpecification,
+} from "./user-specifications.js";
+import {
+  OrderAmountSpecification,
+  OrderStatusSpecification,
+  OrderItemsSpecification,
+  OrderLifecycleSpecification,
+  ValidOrderSpecification,
+} from "./order-specifications.js";
 
 /**
  * 规格工厂
@@ -87,7 +99,7 @@ export class SpecificationFactory {
   /**
    * 创建用户相关规格集合
    */
-  static createUserSpecifications(): ISpecification<any>[] {
+  static createUserSpecifications(): ISpecification<unknown>[] {
     return [
       this.createUserActiveSpecification(),
       this.createUserEmailFormatSpecification(),
@@ -99,7 +111,7 @@ export class SpecificationFactory {
   /**
    * 创建订单相关规格集合
    */
-  static createOrderSpecifications(): ISpecification<any>[] {
+  static createOrderSpecifications(): ISpecification<unknown>[] {
     return [
       this.createOrderAmountSpecification(),
       this.createOrderStatusSpecification(),
@@ -111,7 +123,7 @@ export class SpecificationFactory {
   /**
    * 创建所有规格集合
    */
-  static createAllSpecifications(): ISpecification<any>[] {
+  static createAllSpecifications(): ISpecification<unknown>[] {
     return [
       ...this.createUserSpecifications(),
       ...this.createOrderSpecifications(),

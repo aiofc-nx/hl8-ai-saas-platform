@@ -1,6 +1,6 @@
 {
   "name": "@hl8/domain-kernel",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Pure domain layer kernel - entities, value objects, domain events, and aggregates",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,7 +13,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
+    "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {},
   "devDependencies": {

@@ -61,7 +61,7 @@ export class ConfigLogger {
    * @param message 日志消息
    * @param context 日志上下文
    */
-  error(message: string, context?: Record<string, any>): void {
+  error(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog("error")) {
       this.log("ERROR", message, context);
     }
@@ -73,7 +73,7 @@ export class ConfigLogger {
    * @param message 日志消息
    * @param context 日志上下文
    */
-  warn(message: string, context?: Record<string, any>): void {
+  warn(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog("warn")) {
       this.log("WARN", message, context);
     }
@@ -85,7 +85,7 @@ export class ConfigLogger {
    * @param message 日志消息
    * @param context 日志上下文
    */
-  info(message: string, context?: Record<string, any>): void {
+  info(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog("info")) {
       this.log("INFO", message, context);
     }
@@ -97,7 +97,7 @@ export class ConfigLogger {
    * @param message 日志消息
    * @param context 日志上下文
    */
-  debug(message: string, context?: Record<string, any>): void {
+  debug(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog("debug")) {
       this.log("DEBUG", message, context);
     }
@@ -114,7 +114,7 @@ export class ConfigLogger {
   private log(
     level: string,
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): void {
     const timestamp = new Date().toISOString();
     const logMessage = `${this.prefix}:${level} ${message}`;

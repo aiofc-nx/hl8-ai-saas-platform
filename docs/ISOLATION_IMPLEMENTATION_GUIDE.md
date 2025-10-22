@@ -23,18 +23,28 @@ export class IsolationContext {
   }
 
   // 工厂方法
-  static platform(): IsolationContext
-  static tenant(tenantId: TenantId): IsolationContext
-  static organization(tenantId: TenantId, organizationId: OrganizationId): IsolationContext
-  static department(tenantId: TenantId, organizationId: OrganizationId, departmentId: DepartmentId): IsolationContext
-  static user(userId: UserId, tenantId?: TenantId): IsolationContext
+  static platform(): IsolationContext;
+  static tenant(tenantId: TenantId): IsolationContext;
+  static organization(
+    tenantId: TenantId,
+    organizationId: OrganizationId,
+  ): IsolationContext;
+  static department(
+    tenantId: TenantId,
+    organizationId: OrganizationId,
+    departmentId: DepartmentId,
+  ): IsolationContext;
+  static user(userId: UserId, tenantId?: TenantId): IsolationContext;
 
   // 业务方法
-  getIsolationLevel(): IsolationLevel
-  canAccess(targetContext: IsolationContext, sharingLevel: SharingLevel): boolean
-  buildCacheKey(namespace: string, key: string): string
-  buildLogContext(): Record<string, string>
-  buildWhereClause(alias?: string): Record<string, any>
+  getIsolationLevel(): IsolationLevel;
+  canAccess(
+    targetContext: IsolationContext,
+    sharingLevel: SharingLevel,
+  ): boolean;
+  buildCacheKey(namespace: string, key: string): string;
+  buildLogContext(): Record<string, string>;
+  buildWhereClause(alias?: string): Record<string, any>;
 }
 ```
 
@@ -43,7 +53,7 @@ export class IsolationContext {
 ```typescript
 export enum IsolationLevel {
   PLATFORM = "platform",
-  TENANT = "tenant", 
+  TENANT = "tenant",
   ORGANIZATION = "organization",
   DEPARTMENT = "department",
   USER = "user",
@@ -52,7 +62,7 @@ export enum IsolationLevel {
 export enum SharingLevel {
   PLATFORM = "platform",
   TENANT = "tenant",
-  ORGANIZATION = "organization", 
+  ORGANIZATION = "organization",
   DEPARTMENT = "department",
   USER = "user",
 }
@@ -91,15 +101,19 @@ export class MultiLevelIsolationService implements IIsolationValidator {
   validateIsolationLevel(requiredLevel: IsolationLevel): boolean {
     const context = this.contextService.getIsolationContext();
     if (!context) return false;
-    
+
     const currentLevel = context.getIsolationLevel();
     return this.compareLevels(currentLevel, requiredLevel) >= 0;
   }
 
-  checkDataAccess(dataContext: IsolationContext, isShared: boolean, sharingLevel?: SharingLevel): boolean {
+  checkDataAccess(
+    dataContext: IsolationContext,
+    isShared: boolean,
+    sharingLevel?: SharingLevel,
+  ): boolean {
     const userContext = this.contextService.getIsolationContext();
     if (!userContext) return false;
-    
+
     return userContext.canAccess(dataContext, sharingLevel);
   }
 }
@@ -112,13 +126,16 @@ export class MultiLevelIsolationService implements IIsolationValidator {
 export class IsolationGuard implements CanActivate {
   constructor(
     private readonly isolationService: MultiLevelIsolationService,
-    private readonly reflector: Reflector
+    private readonly reflector: Reflector,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredLevel = this.reflector.get<IsolationLevel>('isolationLevel', context.getHandler());
+    const requiredLevel = this.reflector.get<IsolationLevel>(
+      "isolationLevel",
+      context.getHandler(),
+    );
     if (!requiredLevel) return true;
-    
+
     return this.isolationService.validateIsolationLevel(requiredLevel);
   }
 }
@@ -132,11 +149,12 @@ export const CurrentContext = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): IsolationContext => {
     const request = ctx.switchToHttp().getRequest();
     return request.isolationContext;
-  }
+  },
 );
 
 // 隔离级别装饰器
-export const RequireLevel = (level: IsolationLevel) => SetMetadata('isolationLevel', level);
+export const RequireLevel = (level: IsolationLevel) =>
+  SetMetadata("isolationLevel", level);
 ```
 
 #### 中间件
@@ -155,21 +173,21 @@ export class IsolationExtractionMiddleware implements NestMiddleware {
 
   private extractContextFromRequest(req: Request): IsolationContext {
     // 从请求头、JWT token、查询参数等提取隔离信息
-    const tenantId = req.headers['x-tenant-id'] as string;
-    const organizationId = req.headers['x-organization-id'] as string;
-    const departmentId = req.headers['x-department-id'] as string;
+    const tenantId = req.headers["x-tenant-id"] as string;
+    const organizationId = req.headers["x-organization-id"] as string;
+    const departmentId = req.headers["x-department-id"] as string;
     const userId = req.user?.id;
 
     if (departmentId && organizationId && tenantId) {
       return IsolationContext.department(
         TenantId.create(tenantId),
         OrganizationId.create(organizationId),
-        DepartmentId.create(departmentId)
+        DepartmentId.create(departmentId),
       );
     } else if (organizationId && tenantId) {
       return IsolationContext.organization(
         TenantId.create(tenantId),
-        OrganizationId.create(organizationId)
+        OrganizationId.create(organizationId),
       );
     } else if (tenantId) {
       return IsolationContext.tenant(TenantId.create(tenantId));
@@ -197,23 +215,23 @@ export class IsolationContextManager implements IIsolationContextManager {
     tenantId: string,
     organizationId?: string,
     departmentId?: string,
-    userId?: string
+    userId?: string,
   ): IsolationContext {
     if (userId && departmentId && organizationId) {
       return IsolationContext.department(
         TenantId.create(tenantId),
         OrganizationId.create(organizationId),
-        DepartmentId.create(departmentId)
+        DepartmentId.create(departmentId),
       );
     } else if (userId && organizationId) {
       return IsolationContext.organization(
         TenantId.create(tenantId),
-        OrganizationId.create(organizationId)
+        OrganizationId.create(organizationId),
       );
     } else if (userId) {
       return IsolationContext.user(
         UserId.create(userId),
-        TenantId.create(tenantId)
+        TenantId.create(tenantId),
       );
     } else if (tenantId) {
       return IsolationContext.tenant(TenantId.create(tenantId));
@@ -224,7 +242,7 @@ export class IsolationContextManager implements IIsolationContextManager {
 
   setCurrentContext(context: IsolationContext): void {
     if (!this.validateContext(context)) {
-      throw new Error('无效的隔离上下文');
+      throw new Error("无效的隔离上下文");
     }
     this.currentContext = context;
     this.addToHistory(context);
@@ -241,10 +259,13 @@ export class IsolationContextManager implements IIsolationContextManager {
 ```typescript
 @Injectable()
 export class AccessControlService implements IAccessControlService {
-  async validateAccess(context: IsolationContext, resource: any): Promise<boolean> {
+  async validateAccess(
+    context: IsolationContext,
+    resource: any,
+  ): Promise<boolean> {
     const resourceContext = this.extractResourceContext(resource);
     if (!resourceContext) return false;
-    
+
     return context.canAccess(resourceContext, SharingLevel.TENANT);
   }
 
@@ -254,12 +275,12 @@ export class AccessControlService implements IAccessControlService {
         return IsolationContext.department(
           resource.tenantId,
           resource.organizationId,
-          resource.departmentId
+          resource.departmentId,
         );
       } else if (resource.organizationId) {
         return IsolationContext.organization(
           resource.tenantId,
-          resource.organizationId
+          resource.organizationId,
         );
       } else {
         return IsolationContext.tenant(resource.tenantId);
@@ -279,14 +300,14 @@ export class AccessControlService implements IAccessControlService {
 export class AuditLogService implements IAuditLogService {
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
-    private readonly loggingService?: ILoggingService
+    private readonly loggingService?: ILoggingService,
   ) {}
 
   async logAccess(
     context: IsolationContext,
     action: string,
     resource: string,
-    details?: any
+    details?: any,
   ): Promise<void> {
     const auditLog = {
       tenantId: context.tenantId?.getValue(),
@@ -298,13 +319,13 @@ export class AuditLogService implements IAuditLogService {
       details,
       timestamp: new Date(),
       ipAddress: this.getCurrentIpAddress(),
-      userAgent: this.getCurrentUserAgent()
+      userAgent: this.getCurrentUserAgent(),
     };
 
-    await this.databaseAdapter.insert('audit_logs', auditLog);
-    
+    await this.databaseAdapter.insert("audit_logs", auditLog);
+
     if (this.loggingService) {
-      this.loggingService.info('Audit log created', auditLog);
+      this.loggingService.info("Audit log created", auditLog);
     }
   }
 }
@@ -320,20 +341,20 @@ export class AuditLogService implements IAuditLogService {
   imports: [
     ClsModule.forRoot({
       global: true,
-      middleware: { mount: true }
-    })
+      middleware: { mount: true },
+    }),
   ],
   providers: [
     IsolationContextService,
     MultiLevelIsolationService,
     IsolationGuard,
-    IsolationExtractionMiddleware
+    IsolationExtractionMiddleware,
   ],
   exports: [
     IsolationContextService,
     MultiLevelIsolationService,
-    IsolationGuard
-  ]
+    IsolationGuard,
+  ],
 })
 export class IsolationModule {}
 ```
@@ -344,10 +365,10 @@ export class IsolationModule {}
 // main.ts
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // 注册隔离中间件
   app.use(new IsolationExtractionMiddleware());
-  
+
   await app.listen(3000);
 }
 ```
@@ -359,17 +380,17 @@ async function bootstrap() {
 export const databaseConfig = {
   isolation: {
     enabled: true,
-    level: 'READ_COMMITTED',
-    contextTable: 'isolation_contexts',
-    auditTable: 'audit_logs'
+    level: "READ_COMMITTED",
+    contextTable: "isolation_contexts",
+    auditTable: "audit_logs",
   },
   connection: {
     pool: {
       min: 2,
       max: 10,
-      isolation: true
-    }
-  }
+      isolation: true,
+    },
+  },
 };
 ```
 
@@ -378,7 +399,7 @@ export const databaseConfig = {
 ### 1. 控制器中使用
 
 ```typescript
-@Controller('users')
+@Controller("users")
 @UseGuards(IsolationGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -389,11 +410,11 @@ export class UserController {
     return this.userService.findByContext(context);
   }
 
-  @Get(':id')
+  @Get(":id")
   @RequireLevel(IsolationLevel.USER)
   async getUser(
-    @Param('id') id: string,
-    @CurrentContext() context: IsolationContext
+    @Param("id") id: string,
+    @CurrentContext() context: IsolationContext,
   ) {
     return this.userService.findById(id, context);
   }
@@ -402,7 +423,7 @@ export class UserController {
   @RequireLevel(IsolationLevel.ORGANIZATION)
   async createUser(
     @Body() createUserDto: CreateUserDto,
-    @CurrentContext() context: IsolationContext
+    @CurrentContext() context: IsolationContext,
   ) {
     return this.userService.create(createUserDto, context);
   }
@@ -417,47 +438,52 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly accessControl: AccessControlService,
-    private readonly auditLog: AuditLogService
+    private readonly auditLog: AuditLogService,
   ) {}
 
   async findById(id: string, context: IsolationContext): Promise<User> {
     // 权限检查
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     const canAccess = await this.accessControl.validateAccess(context, user);
     if (!canAccess) {
-      throw new ForbiddenException('Access denied');
+      throw new ForbiddenException("Access denied");
     }
 
     // 记录访问日志
-    await this.auditLog.logAccess(context, 'READ', 'user', { userId: id });
+    await this.auditLog.logAccess(context, "READ", "user", { userId: id });
 
     return user;
   }
 
   async findByContext(context: IsolationContext): Promise<User[]> {
-    const whereClause = context.buildWhereClause('u');
+    const whereClause = context.buildWhereClause("u");
     return this.userRepository.findByConditions(whereClause);
   }
 
-  async create(createUserDto: CreateUserDto, context: IsolationContext): Promise<User> {
+  async create(
+    createUserDto: CreateUserDto,
+    context: IsolationContext,
+  ): Promise<User> {
     // 验证权限
     if (!context.isOrganizationLevel() && !context.isPlatformLevel()) {
-      throw new ForbiddenException('Insufficient permissions');
+      throw new ForbiddenException("Insufficient permissions");
     }
 
     const user = await this.userRepository.create({
       ...createUserDto,
       tenantId: context.tenantId?.getValue(),
       organizationId: context.organizationId?.getValue(),
-      departmentId: context.departmentId?.getValue()
+      departmentId: context.departmentId?.getValue(),
     });
 
     // 记录创建日志
-    await this.auditLog.logAccess(context, 'CREATE', 'user', { userId: user.id });
+    await this.auditLog.logAccess(context, "CREATE", "user", {
+      userId: user.id,
+    });
 
     return user;
   }
@@ -472,26 +498,28 @@ export class UserRepository {
   constructor(private readonly database: DatabaseService) {}
 
   async findById(id: string, context: IsolationContext): Promise<User | null> {
-    const whereClause = context.buildWhereClause('u');
+    const whereClause = context.buildWhereClause("u");
     const query = `
       SELECT * FROM users u 
-      WHERE u.id = ? AND ${Object.keys(whereClause).map(key => `${key} = ?`).join(' AND ')}
+      WHERE u.id = ? AND ${Object.keys(whereClause)
+        .map((key) => `${key} = ?`)
+        .join(" AND ")}
     `;
-    
+
     const params = [id, ...Object.values(whereClause)];
     const result = await this.database.query(query, params);
-    
+
     return result.rows[0] || null;
   }
 
   async findByConditions(conditions: Record<string, any>): Promise<User[]> {
     const whereClause = Object.entries(conditions)
       .map(([key, value]) => `${key} = ?`)
-      .join(' AND ');
-    
+      .join(" AND ");
+
     const query = `SELECT * FROM users WHERE ${whereClause}`;
     const params = Object.values(conditions);
-    
+
     const result = await this.database.query(query, params);
     return result.rows;
   }
@@ -506,15 +534,20 @@ export class CacheService {
   constructor(private readonly redis: Redis) {}
 
   async get<T>(key: string, context: IsolationContext): Promise<T | null> {
-    const cacheKey = context.buildCacheKey('data', key);
+    const cacheKey = context.buildCacheKey("data", key);
     const value = await this.redis.get(cacheKey);
     return value ? JSON.parse(value) : null;
   }
 
-  async set<T>(key: string, value: T, context: IsolationContext, ttl?: number): Promise<void> {
-    const cacheKey = context.buildCacheKey('data', key);
+  async set<T>(
+    key: string,
+    value: T,
+    context: IsolationContext,
+    ttl?: number,
+  ): Promise<void> {
+    const cacheKey = context.buildCacheKey("data", key);
     const serialized = JSON.stringify(value);
-    
+
     if (ttl) {
       await this.redis.setex(cacheKey, ttl, serialized);
     } else {
@@ -529,26 +562,28 @@ export class CacheService {
 ### 1. 单元测试
 
 ```typescript
-describe('IsolationContext', () => {
-  it('should create tenant context', () => {
-    const context = IsolationContext.tenant(TenantId.create('tenant-123'));
+describe("IsolationContext", () => {
+  it("should create tenant context", () => {
+    const context = IsolationContext.tenant(TenantId.create("tenant-123"));
     expect(context.getIsolationLevel()).toBe(IsolationLevel.TENANT);
-    expect(context.tenantId?.getValue()).toBe('tenant-123');
+    expect(context.tenantId?.getValue()).toBe("tenant-123");
   });
 
-  it('should validate access permissions', () => {
+  it("should validate access permissions", () => {
     const userContext = IsolationContext.department(
-      TenantId.create('tenant-123'),
-      OrganizationId.create('org-456'),
-      DepartmentId.create('dept-789')
+      TenantId.create("tenant-123"),
+      OrganizationId.create("org-456"),
+      DepartmentId.create("dept-789"),
     );
-    
+
     const dataContext = IsolationContext.organization(
-      TenantId.create('tenant-123'),
-      OrganizationId.create('org-456')
+      TenantId.create("tenant-123"),
+      OrganizationId.create("org-456"),
     );
-    
-    expect(userContext.canAccess(dataContext, SharingLevel.ORGANIZATION)).toBe(true);
+
+    expect(userContext.canAccess(dataContext, SharingLevel.ORGANIZATION)).toBe(
+      true,
+    );
   });
 });
 ```
@@ -556,13 +591,13 @@ describe('IsolationContext', () => {
 ### 2. 集成测试
 
 ```typescript
-describe('UserController Integration', () => {
+describe("UserController Integration", () => {
   let app: INestApplication;
   let contextService: IsolationContextService;
 
   beforeEach(async () => {
     const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule]
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -570,12 +605,12 @@ describe('UserController Integration', () => {
     await app.init();
   });
 
-  it('should return users for tenant context', async () => {
-    const context = IsolationContext.tenant(TenantId.create('tenant-123'));
+  it("should return users for tenant context", async () => {
+    const context = IsolationContext.tenant(TenantId.create("tenant-123"));
     contextService.setIsolationContext(context);
 
     const response = await request(app.getHttpServer())
-      .get('/users')
+      .get("/users")
       .expect(200);
 
     expect(response.body).toHaveLength(2);
@@ -596,9 +631,12 @@ export class IsolationMetricsService {
     const level = context.getIsolationLevel();
     const key = `isolation.access.${level}`;
     this.metrics.set(key, (this.metrics.get(key) || 0) + 1);
-    
+
     const durationKey = `isolation.duration.${level}`;
-    this.metrics.set(durationKey, (this.metrics.get(durationKey) || 0) + duration);
+    this.metrics.set(
+      durationKey,
+      (this.metrics.get(durationKey) || 0) + duration,
+    );
   }
 
   getMetrics(): Record<string, number> {
@@ -614,14 +652,14 @@ export class IsolationMetricsService {
 export class IsolationHealthService {
   constructor(
     private readonly contextService: IsolationContextService,
-    private readonly accessControl: AccessControlService
+    private readonly accessControl: AccessControlService,
   ) {}
 
   async healthCheck(): Promise<boolean> {
     try {
       const context = this.contextService.getIsolationContext();
       if (!context) return false;
-      
+
       const isValid = context.getIsolationLevel() !== undefined;
       return isValid;
     } catch (error) {
@@ -640,16 +678,16 @@ export class IsolationHealthService {
 async accessData(dataId: string, context: IsolationContext): Promise<any> {
   // 1. 获取数据
   const data = await this.getData(dataId);
-  
+
   // 2. 检查权限
   const canAccess = await this.accessControl.validateAccess(context, data);
   if (!canAccess) {
     throw new ForbiddenException('Access denied');
   }
-  
+
   // 3. 记录访问
   await this.auditLog.logAccess(context, 'READ', 'data', { dataId });
-  
+
   return data;
 }
 ```
@@ -661,7 +699,7 @@ async accessData(dataId: string, context: IsolationContext): Promise<any> {
 async getFilteredData(context: IsolationContext): Promise<any[]> {
   const whereClause = context.buildWhereClause('d');
   return this.database.query(`
-    SELECT * FROM data d 
+    SELECT * FROM data d
     WHERE ${Object.keys(whereClause).map(key => `${key} = ?`).join(' AND ')}
   `, Object.values(whereClause));
 }

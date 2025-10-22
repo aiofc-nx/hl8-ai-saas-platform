@@ -1,6 +1,6 @@
 {
   "name": "@hl8/exceptions",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "统一的异常处理模块，遵循 RFC7807 标准",
   "keywords": [
     "nestjs",
@@ -44,7 +44,8 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",

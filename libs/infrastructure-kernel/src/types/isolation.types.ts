@@ -8,7 +8,12 @@
 /**
  * 共享级别枚举
  */
-export type SharingLevel = 'PLATFORM' | 'TENANT' | 'ORGANIZATION' | 'DEPARTMENT' | 'USER';
+export type SharingLevel =
+  | "PLATFORM"
+  | "TENANT"
+  | "ORGANIZATION"
+  | "DEPARTMENT"
+  | "USER";
 
 /**
  * 隔离上下文接口
@@ -47,7 +52,7 @@ export interface AccessRule {
   /** 是否允许 */
   allow: boolean;
   /** 条件 */
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
 }
 
 /**
@@ -59,7 +64,7 @@ export interface IsolationContextManager {
     tenantId: string,
     organizationId?: string,
     departmentId?: string,
-    userId?: string
+    userId?: string,
   ): IsolationContext;
   /** 验证隔离上下文 */
   validateContext(context: IsolationContext): boolean;
@@ -78,25 +83,19 @@ export interface AccessControlService {
   /** 验证访问权限 */
   validateAccess(
     context: IsolationContext,
-    resource: any
+    resource: unknown,
   ): Promise<boolean>;
   /** 检查资源访问权限 */
   checkResourceAccess(
     context: IsolationContext,
     resourceType: string,
     resourceId: string,
-    action: string
+    action: string,
   ): Promise<boolean>;
   /** 过滤数据 */
-  filterData<T>(
-    data: T[],
-    context: IsolationContext
-  ): T[];
+  filterData<T>(data: T[], context: IsolationContext): T[];
   /** 应用隔离过滤 */
-  applyIsolationFilter(
-    query: any,
-    context: IsolationContext
-  ): any;
+  applyIsolationFilter(query: unknown, context: IsolationContext): unknown;
 }
 
 /**
@@ -122,13 +121,13 @@ export interface AuditLog {
   /** 时间戳 */
   timestamp: Date;
   /** 详细信息 */
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   /** IP地址 */
   ipAddress: string;
   /** 用户代理 */
   userAgent: string;
   /** 操作结果 */
-  result: 'SUCCESS' | 'FAILURE' | 'ERROR';
+  result: "SUCCESS" | "FAILURE" | "ERROR";
 }
 
 /**
@@ -136,7 +135,7 @@ export interface AuditLog {
  */
 export interface AuditLogService {
   /** 记录审计日志 */
-  log(auditLog: Omit<AuditLog, 'id' | 'timestamp'>): Promise<void>;
+  log(auditLog: Omit<AuditLog, "id" | "timestamp">): Promise<void>;
   /** 查询审计日志 */
   query(filters: AuditLogQueryFilters): Promise<AuditLog[]>;
   /** 清理过期日志 */
@@ -164,7 +163,7 @@ export interface AuditLogQueryFilters {
   /** 结束时间 */
   endTime?: Date;
   /** 操作结果 */
-  result?: 'SUCCESS' | 'FAILURE' | 'ERROR';
+  result?: "SUCCESS" | "FAILURE" | "ERROR";
   /** 限制数量 */
   limit?: number;
   /** 偏移量 */
@@ -178,18 +177,16 @@ export interface SecurityMonitor {
   /** 监控访问尝试 */
   monitorAccess(
     context: IsolationContext,
-    resource: any,
-    action: string
+    resource: unknown,
+    action: string,
   ): Promise<void>;
   /** 检测异常访问 */
   detectAnomalousAccess(
     context: IsolationContext,
-    resource: any
+    resource: unknown,
   ): Promise<boolean>;
   /** 记录安全事件 */
-  recordSecurityEvent(
-    event: SecurityEvent
-  ): Promise<void>;
+  recordSecurityEvent(event: SecurityEvent): Promise<void>;
 }
 
 /**
@@ -201,7 +198,7 @@ export interface SecurityEvent {
   /** 事件类型 */
   type: string;
   /** 严重级别 */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   /** 描述 */
   description: string;
   /** 上下文 */
@@ -209,5 +206,5 @@ export interface SecurityEvent {
   /** 时间戳 */
   timestamp: Date;
   /** 详细信息 */
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }

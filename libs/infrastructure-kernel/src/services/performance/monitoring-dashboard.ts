@@ -5,13 +5,14 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
-import type { PerformanceMetrics } from './performance-monitor.js';
-import type { MetricValue } from './metrics-collector.js';
-import type { OptimizationSuggestion } from './performance-optimizer.js';
+import { Injectable } from "@nestjs/common";
+import * as os from "os";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
+import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
+import type { PerformanceMetrics } from "./performance-monitor.js";
+import type { MetricValue } from "./metrics-collector.js";
+import type { OptimizationSuggestion } from "./performance-optimizer.js";
 
 /**
  * 仪表板数据
@@ -19,7 +20,7 @@ import type { OptimizationSuggestion } from './performance-optimizer.js';
 export interface DashboardData {
   /** 系统概览 */
   overview: {
-    status: 'up' | 'down' | 'degraded';
+    status: "up" | "down" | "degraded";
     uptime: number;
     totalRequests: number;
     errorRate: number;
@@ -70,7 +71,7 @@ export interface DashboardData {
  */
 export interface ChartData {
   /** 图表类型 */
-  type: 'line' | 'bar' | 'pie' | 'gauge';
+  type: "line" | "bar" | "pie" | "gauge";
   /** 图表标题 */
   title: string;
   /** 数据标签 */
@@ -94,7 +95,7 @@ export class MonitoringDashboardService {
   private config = {
     refreshInterval: 5000, // 5秒
     dataRetention: 24 * 60 * 60 * 1000, // 24小时
-    maxDataPoints: 1000
+    maxDataPoints: 1000,
   };
   private refreshTimer?: NodeJS.Timeout;
   private isRefreshing = false;
@@ -102,7 +103,7 @@ export class MonitoringDashboardService {
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly loggingService?: ILoggingService
+    private readonly loggingService?: ILoggingService,
   ) {}
 
   /**
@@ -118,7 +119,7 @@ export class MonitoringDashboardService {
       try {
         await this.refreshDashboardData();
       } catch (error) {
-        console.error('刷新仪表板数据失败:', error);
+        console.error("刷新仪表板数据失败:", error);
       }
     }, this.config.refreshInterval);
   }
@@ -141,7 +142,7 @@ export class MonitoringDashboardService {
     if (!this.dashboardData) {
       await this.refreshDashboardData();
     }
-    
+
     return this.dashboardData!;
   }
 
@@ -150,7 +151,7 @@ export class MonitoringDashboardService {
    */
   getChartData(type?: string): ChartData[] {
     if (type) {
-      return this.chartData.filter(chart => chart.type === type);
+      return this.chartData.filter((chart) => chart.type === type);
     }
     return [...this.chartData];
   }
@@ -160,30 +161,33 @@ export class MonitoringDashboardService {
    */
   async getPerformanceTrends(
     metric: string,
-    timeRange: { start: Date; end: Date }
+    timeRange: { start: Date; end: Date },
   ): Promise<ChartData> {
     try {
       // 这里应该从实际的性能数据中获取趋势
       // 暂时返回模拟数据
       const labels: string[] = [];
       const data: number[] = [];
-      
-      const interval = (timeRange.end.getTime() - timeRange.start.getTime()) / 10;
+
+      const interval =
+        (timeRange.end.getTime() - timeRange.start.getTime()) / 10;
       for (let i = 0; i < 10; i++) {
         const timestamp = new Date(timeRange.start.getTime() + i * interval);
         labels.push(timestamp.toISOString());
         data.push(Math.random() * 100);
       }
-      
+
       return {
-        type: 'line',
+        type: "line",
         title: `${metric} 趋势`,
         labels,
         data,
-        timeRange
+        timeRange,
       };
     } catch (error) {
-      throw new Error(`获取性能趋势数据失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取性能趋势数据失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -194,22 +198,24 @@ export class MonitoringDashboardService {
     try {
       const uptime = process.uptime();
       const memUsage = process.memoryUsage();
-      const totalMem = require('os').totalmem();
-      
+      const totalMem = os.totalmem();
+
       return {
         uptime,
         memory: {
           used: memUsage.heapUsed,
           total: memUsage.heapTotal,
-          usage: memUsage.heapUsed / totalMem
+          usage: memUsage.heapUsed / totalMem,
         },
         cpu: {
-          usage: Math.random() * 100 // 模拟CPU使用率
+          usage: Math.random() * 100, // 模拟CPU使用率
         },
-        status: 'up'
+        status: "up",
       };
     } catch (error) {
-      throw new Error(`获取系统概览失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取系统概览失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -220,13 +226,13 @@ export class MonitoringDashboardService {
     try {
       const connectionInfo = await this.databaseAdapter.getConnectionInfo();
       const isHealthy = await this.databaseAdapter.healthCheck();
-      
+
       return {
         connections: connectionInfo.connections || 0,
         queries: connectionInfo.queries || 0,
         slowQueries: connectionInfo.slowQueries || 0,
         health: isHealthy,
-        responseTime: connectionInfo.responseTime || 0
+        responseTime: connectionInfo.responseTime || 0,
       };
     } catch (error) {
       return {
@@ -234,7 +240,7 @@ export class MonitoringDashboardService {
         queries: 0,
         slowQueries: 0,
         health: false,
-        responseTime: 0
+        responseTime: 0,
       };
     }
   }
@@ -249,23 +255,23 @@ export class MonitoringDashboardService {
           hitRate: 0,
           missRate: 0,
           totalEntries: 0,
-          memoryUsage: 0
+          memoryUsage: 0,
         };
       }
-      
+
       const stats = this.cacheService.getStats();
       return {
         hitRate: (await stats).hitRate || 0,
         missRate: (await stats).missRate || 0,
         totalEntries: (await stats).totalEntries || 0,
-        memoryUsage: (await stats).memoryUsage || 0
+        memoryUsage: (await stats).memoryUsage || 0,
       };
     } catch (error) {
       return {
         hitRate: 0,
         missRate: 0,
         totalEntries: 0,
-        memoryUsage: 0
+        memoryUsage: 0,
       };
     }
   }
@@ -281,14 +287,14 @@ export class MonitoringDashboardService {
         requestsPerSecond: Math.random() * 100,
         responseTime: Math.random() * 1000,
         errorCount: Math.floor(Math.random() * 10),
-        activeUsers: Math.floor(Math.random() * 1000)
+        activeUsers: Math.floor(Math.random() * 1000),
       };
     } catch (error) {
       return {
         requestsPerSecond: 0,
         responseTime: 0,
         errorCount: 0,
-        activeUsers: 0
+        activeUsers: 0,
       };
     }
   }
@@ -296,24 +302,26 @@ export class MonitoringDashboardService {
   /**
    * 获取告警信息
    */
-  async getAlerts(): Promise<Array<{
-    id: string;
-    type: string;
-    severity: string;
-    message: string;
-    timestamp: Date;
-  }>> {
+  async getAlerts(): Promise<
+    Array<{
+      id: string;
+      type: string;
+      severity: string;
+      message: string;
+      timestamp: Date;
+    }>
+  > {
     try {
       // 这里应该从实际的告警系统中获取告警信息
       // 暂时返回模拟数据
       return [
         {
-          id: 'alert_1',
-          type: 'PERFORMANCE',
-          severity: 'HIGH',
-          message: '响应时间超过阈值',
-          timestamp: new Date()
-        }
+          id: "alert_1",
+          type: "PERFORMANCE",
+          severity: "HIGH",
+          message: "响应时间超过阈值",
+          timestamp: new Date(),
+        },
       ];
     } catch (error) {
       return [];
@@ -329,16 +337,16 @@ export class MonitoringDashboardService {
       // 暂时返回模拟数据
       return [
         {
-          id: 'suggestion_1',
-          type: 'DATABASE',
-          priority: 'MEDIUM',
-          title: '优化数据库查询',
-          description: '建议添加索引以提高查询性能',
-          action: '为常用查询字段添加索引',
-          expectedBenefit: '提高查询性能30%',
-          difficulty: 'EASY',
-          timestamp: new Date()
-        }
+          id: "suggestion_1",
+          type: "DATABASE",
+          priority: "MEDIUM",
+          title: "优化数据库查询",
+          description: "建议添加索引以提高查询性能",
+          action: "为常用查询字段添加索引",
+          expectedBenefit: "提高查询性能30%",
+          difficulty: "EASY",
+          timestamp: new Date(),
+        },
       ];
     } catch (error) {
       return [];
@@ -356,33 +364,32 @@ export class MonitoringDashboardService {
       const realtime = await this.getRealtimeMetrics();
       const alerts = await this.getAlerts();
       const suggestions = await this.getOptimizationSuggestions();
-      
+
       this.dashboardData = {
         overview: {
-          status: overview.status as 'up' | 'down' | 'degraded',
+          status: overview.status as "up" | "down" | "degraded",
           uptime: overview.uptime,
           totalRequests: Math.floor(Math.random() * 10000),
           errorRate: Math.random() * 0.1,
-          responseTime: Math.random() * 1000
+          responseTime: Math.random() * 1000,
         },
         performance: {
           cpu: overview.cpu.usage,
           memory: overview.memory.usage,
           disk: Math.random() * 100,
-          network: Math.random() * 100
+          network: Math.random() * 100,
         },
         database: database as any,
         cache: cache as any,
         realtime: realtime as any,
         alerts,
-        suggestions
+        suggestions,
       };
-      
+
       // 更新图表数据
       await this.updateChartData();
-      
     } catch (error) {
-      console.error('刷新仪表板数据失败:', error);
+      console.error("刷新仪表板数据失败:", error);
     }
   }
 
@@ -393,53 +400,52 @@ export class MonitoringDashboardService {
     try {
       // 性能趋势图表
       const performanceChart: ChartData = {
-        type: 'line',
-        title: '性能趋势',
+        type: "line",
+        title: "性能趋势",
         labels: this.generateTimeLabels(10),
         data: this.generateRandomData(10),
         timeRange: {
           start: new Date(Date.now() - 10 * 60 * 1000),
-          end: new Date()
-        }
+          end: new Date(),
+        },
       };
-      
+
       // 资源使用图表
       const resourceChart: ChartData = {
-        type: 'bar',
-        title: '资源使用情况',
-        labels: ['CPU', '内存', '磁盘', '网络'],
+        type: "bar",
+        title: "资源使用情况",
+        labels: ["CPU", "内存", "磁盘", "网络"],
         data: [
           this.dashboardData?.performance.cpu || 0,
           this.dashboardData?.performance.memory || 0,
           this.dashboardData?.performance.disk || 0,
-          this.dashboardData?.performance.network || 0
+          this.dashboardData?.performance.network || 0,
         ],
         timeRange: {
           start: new Date(),
-          end: new Date()
-        }
+          end: new Date(),
+        },
       };
-      
+
       // 数据库状态图表
       const databaseChart: ChartData = {
-        type: 'gauge',
-        title: '数据库状态',
-        labels: ['连接数', '查询数', '慢查询'],
+        type: "gauge",
+        title: "数据库状态",
+        labels: ["连接数", "查询数", "慢查询"],
         data: [
           this.dashboardData?.database.connections || 0,
           this.dashboardData?.database.queries || 0,
-          this.dashboardData?.database.slowQueries || 0
+          this.dashboardData?.database.slowQueries || 0,
         ],
         timeRange: {
           start: new Date(),
-          end: new Date()
-        }
+          end: new Date(),
+        },
       };
-      
+
       this.chartData = [performanceChart, resourceChart, databaseChart];
-      
     } catch (error) {
-      console.error('更新图表数据失败:', error);
+      console.error("更新图表数据失败:", error);
     }
   }
 
@@ -449,12 +455,12 @@ export class MonitoringDashboardService {
   private generateTimeLabels(count: number): string[] {
     const labels: string[] = [];
     const interval = 60000; // 1分钟
-    
+
     for (let i = 0; i < count; i++) {
       const timestamp = new Date(Date.now() - (count - i - 1) * interval);
       labels.push(timestamp.toLocaleTimeString());
     }
-    
+
     return labels;
   }
 
@@ -463,11 +469,11 @@ export class MonitoringDashboardService {
    */
   private generateRandomData(count: number): number[] {
     const data: number[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       data.push(Math.random() * 100);
     }
-    
+
     return data;
   }
 
@@ -494,7 +500,7 @@ export class MonitoringDashboardService {
       refreshInterval: this.config.refreshInterval,
       dataRetention: this.config.dataRetention,
       maxDataPoints: this.config.maxDataPoints,
-      chartCount: this.chartData.length
+      chartCount: this.chartData.length,
     };
   }
 

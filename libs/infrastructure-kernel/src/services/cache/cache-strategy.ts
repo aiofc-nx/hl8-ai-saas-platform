@@ -5,8 +5,8 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { ICacheStrategy } from '../../interfaces/cache-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { ICacheStrategy } from "../../interfaces/cache-service.interface.js";
 
 /**
  * 缓存条目信息
@@ -24,7 +24,7 @@ interface CacheEntryInfo {
  */
 @Injectable()
 export class LRUCacheStrategy implements ICacheStrategy {
-  name = 'LRU';
+  name = "LRU";
   private accessOrder: string[] = [];
 
   selectKeysToEvict(keys: string[], maxCount: number): string[] {
@@ -34,7 +34,7 @@ export class LRUCacheStrategy implements ICacheStrategy {
       const bIndex = this.accessOrder.indexOf(b);
       return aIndex - bIndex;
     });
-    
+
     return sortedKeys.slice(0, maxCount);
   }
 
@@ -49,8 +49,8 @@ export class LRUCacheStrategy implements ICacheStrategy {
 
   getStats(): Record<string, any> {
     return {
-      strategy: 'LRU',
-      accessOrderLength: this.accessOrder.length
+      strategy: "LRU",
+      accessOrderLength: this.accessOrder.length,
     };
   }
 }
@@ -60,7 +60,7 @@ export class LRUCacheStrategy implements ICacheStrategy {
  */
 @Injectable()
 export class LFUCacheStrategy implements ICacheStrategy {
-  name = 'LFU';
+  name = "LFU";
   private accessCounts = new Map<string, number>();
 
   selectKeysToEvict(keys: string[], maxCount: number): string[] {
@@ -70,7 +70,7 @@ export class LFUCacheStrategy implements ICacheStrategy {
       const bCount = this.accessCounts.get(b) || 0;
       return aCount - bCount;
     });
-    
+
     return sortedKeys.slice(0, maxCount);
   }
 
@@ -82,8 +82,8 @@ export class LFUCacheStrategy implements ICacheStrategy {
 
   getStats(): Record<string, any> {
     return {
-      strategy: 'LFU',
-      accessCounts: Object.fromEntries(this.accessCounts)
+      strategy: "LFU",
+      accessCounts: Object.fromEntries(this.accessCounts),
     };
   }
 }
@@ -93,7 +93,7 @@ export class LFUCacheStrategy implements ICacheStrategy {
  */
 @Injectable()
 export class FIFOCacheStrategy implements ICacheStrategy {
-  name = 'FIFO';
+  name = "FIFO";
   private insertionOrder: string[] = [];
 
   selectKeysToEvict(keys: string[], maxCount: number): string[] {
@@ -103,7 +103,7 @@ export class FIFOCacheStrategy implements ICacheStrategy {
       const bIndex = this.insertionOrder.indexOf(b);
       return aIndex - bIndex;
     });
-    
+
     return sortedKeys.slice(0, maxCount);
   }
 
@@ -113,8 +113,8 @@ export class FIFOCacheStrategy implements ICacheStrategy {
 
   getStats(): Record<string, any> {
     return {
-      strategy: 'FIFO',
-      insertionOrderLength: this.insertionOrder.length
+      strategy: "FIFO",
+      insertionOrderLength: this.insertionOrder.length,
     };
   }
 }
@@ -124,35 +124,35 @@ export class FIFOCacheStrategy implements ICacheStrategy {
  */
 @Injectable()
 export class TTLCacheStrategy implements ICacheStrategy {
-  name = 'TTL';
+  name = "TTL";
   private keyTimestamps = new Map<string, number>();
   private defaultTTL = 300000; // 5分钟
 
   selectKeysToEvict(keys: string[], maxCount: number): string[] {
     const now = Date.now();
     const expiredKeys: string[] = [];
-    
+
     for (const key of keys) {
       const timestamp = this.keyTimestamps.get(key);
       if (timestamp && now - timestamp > this.defaultTTL) {
         expiredKeys.push(key);
       }
     }
-    
+
     // 如果过期键不够，按时间戳排序选择最旧的键
     if (expiredKeys.length < maxCount) {
       const sortedKeys = keys
-        .filter(key => !expiredKeys.includes(key))
+        .filter((key) => !expiredKeys.includes(key))
         .sort((a, b) => {
           const aTime = this.keyTimestamps.get(a) || 0;
           const bTime = this.keyTimestamps.get(b) || 0;
           return aTime - bTime;
         });
-      
+
       const additionalKeys = sortedKeys.slice(0, maxCount - expiredKeys.length);
       expiredKeys.push(...additionalKeys);
     }
-    
+
     return expiredKeys.slice(0, maxCount);
   }
 
@@ -163,9 +163,9 @@ export class TTLCacheStrategy implements ICacheStrategy {
 
   getStats(): Record<string, any> {
     return {
-      strategy: 'TTL',
+      strategy: "TTL",
       keyCount: this.keyTimestamps.size,
-      defaultTTL: this.defaultTTL
+      defaultTTL: this.defaultTTL,
     };
   }
 }
@@ -178,10 +178,10 @@ export class CacheStrategyFactory {
   private strategies = new Map<string, ICacheStrategy>();
 
   constructor() {
-    this.registerStrategy('LRU', new LRUCacheStrategy());
-    this.registerStrategy('LFU', new LFUCacheStrategy());
-    this.registerStrategy('FIFO', new FIFOCacheStrategy());
-    this.registerStrategy('TTL', new TTLCacheStrategy());
+    this.registerStrategy("LRU", new LRUCacheStrategy());
+    this.registerStrategy("LFU", new LFUCacheStrategy());
+    this.registerStrategy("FIFO", new FIFOCacheStrategy());
+    this.registerStrategy("TTL", new TTLCacheStrategy());
   }
 
   /**
@@ -216,13 +216,13 @@ export class CacheStrategyFactory {
 
     // 返回策略的副本
     switch (name) {
-      case 'LRU':
+      case "LRU":
         return new LRUCacheStrategy();
-      case 'LFU':
+      case "LFU":
         return new LFUCacheStrategy();
-      case 'FIFO':
+      case "FIFO":
         return new FIFOCacheStrategy();
-      case 'TTL':
+      case "TTL":
         return new TTLCacheStrategy();
       default:
         return undefined;

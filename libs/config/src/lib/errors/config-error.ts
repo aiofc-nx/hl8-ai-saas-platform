@@ -61,7 +61,7 @@ export class ConfigError extends Error {
    * 错误上下文
    * @description 错误发生时的上下文信息
    */
-  public readonly context: Record<string, any>;
+  public readonly context: Record<string, unknown>;
 
   /**
    * 原始错误
@@ -88,7 +88,7 @@ export class ConfigError extends Error {
   constructor(
     type: ConfigErrorType,
     message: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
     originalError?: Error,
   ) {
     super(message);
@@ -140,7 +140,7 @@ export class ConfigError extends Error {
    * @returns JSON格式的错误信息
    * @since 1.0.0
    */
-  public toJSON(): Record<string, any> {
+  public toJSON(): Record<string, unknown> {
     return {
       name: this.name,
       type: this.type,

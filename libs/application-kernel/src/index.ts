@@ -32,3 +32,9 @@ export type { IEventBus } from "./events/event-bus.interface.js";
 
 // 事务管理
 export type { ITransactionManager } from "./transactions/transaction-manager.interface.js";
+
+// 验证系统
+export { BaseClassValidator } from "./validation/base-class.validator.js";
+export { InterfaceComplianceValidator } from "./validation/interface-compliance.validator.js";
+export { PatternComplianceChecker } from "./validation/pattern-compliance.checker.js";
+export { PatternComplianceValidator } from "./validation/pattern-compliance.validator.js";

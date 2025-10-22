@@ -708,7 +708,7 @@ export abstract class BaseEntity<TId extends EntityId = EntityId>
    * @param targetContext - 目标隔离上下文
    * @returns 是否可以共享
    */
-  public canShareWith(targetContext: any): boolean {
+  public canShareWith(_targetContext: unknown): boolean {
     if (!this._isShared || !this._sharingLevel) {
       return false;
     }

@@ -8,3 +8,7 @@ alwaysApply: true
 ## Constitution Reference
 
 本项目遵循项目宪章规范，详见 `.specify/memory/constitution.md`
+
+## 项目配置
+
+本项目各子项目统一了typescript、eslint、jest配置，详见`.cursor/docs/global-configuration-standardization.md`

@@ -30,7 +30,7 @@ export interface DomainEvent {
   readonly aggregateId: EntityId;
   readonly version: number;
   readonly eventType: string;
-  readonly eventData: Record<string, any>;
+  readonly eventData: Record<string, unknown>;
 }
 
 /**
@@ -51,7 +51,7 @@ export abstract class AggregateRoot<
     version: number = 0,
   ) {
     super(id, tenantId, undefined, undefined, undefined, false, undefined, {
-      version
+      version,
     });
   }
 
@@ -107,10 +107,10 @@ export abstract class AggregateRoot<
    */
   protected createDomainEvent(
     eventType: string,
-    eventData: Record<string, any>,
+    eventData: Record<string, unknown>,
   ): DomainEvent {
     return {
-      eventId: new (EntityId as any)(),
+      eventId: new (EntityId as unknown as { new (): EntityId })(),
       occurredAt: new Date(),
       aggregateId: this.id,
       version: this.version + 1,
@@ -135,7 +135,7 @@ export abstract class AggregateRoot<
     for (const event of events) {
       this.handleEvent(event);
       // 更新版本号
-      (this as any)._version = event.version;
+      (this as unknown as { _version: number })._version = event.version;
     }
   }
 
@@ -155,7 +155,7 @@ export abstract class AggregateRoot<
    *
    * @returns 快照数据
    */
-  createSnapshot(): Record<string, any> {
+  createSnapshot(): Record<string, unknown> {
     this._snapshotVersion = this.version;
     return this.getSnapshotData();
   }
@@ -166,7 +166,7 @@ export abstract class AggregateRoot<
    *
    * @returns 快照数据
    */
-  protected abstract getSnapshotData(): Record<string, any>;
+  protected abstract getSnapshotData(): Record<string, unknown>;
 
   /**
    * 从快照恢复状态
@@ -175,9 +175,12 @@ export abstract class AggregateRoot<
    * @param snapshot - 快照数据
    * @param version - 快照版本
    */
-  restoreFromSnapshot(snapshot: Record<string, any>, version: number): void {
+  restoreFromSnapshot(
+    snapshot: Record<string, unknown>,
+    version: number,
+  ): void {
     this._snapshotVersion = version;
-    (this as any)._version = version;
+    (this as unknown as { _version: number })._version = version;
     this.loadFromSnapshot(snapshot);
   }
 
@@ -187,7 +190,7 @@ export abstract class AggregateRoot<
    *
    * @param snapshot - 快照数据
    */
-  protected abstract loadFromSnapshot(snapshot: Record<string, any>): void;
+  protected abstract loadFromSnapshot(snapshot: Record<string, unknown>): void;
 
   /**
    * 验证业务规则

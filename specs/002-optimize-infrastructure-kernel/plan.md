@@ -177,9 +177,9 @@ libs/infrastructure-kernel/
 
 _No violations detected - all requirements align with Constitution principles_
 
-| Requirement | Justification | Architecture Alignment |
-| ----------- | ------------- | ---------------------- |
-| Multi-database support | 支持不同业务场景的数据库需求 | Clean Architecture - Infrastructure layer |
-| Multi-tenant isolation | 企业级SAAS平台核心安全需求 | DDD - Domain layer integration |
-| Performance optimization | 生产环境性能要求 | Infrastructure layer responsibility |
-| Logging system unification | 系统一致性和可维护性 | Cross-cutting concern |
+| Requirement                | Justification                | Architecture Alignment                    |
+| -------------------------- | ---------------------------- | ----------------------------------------- |
+| Multi-database support     | 支持不同业务场景的数据库需求 | Clean Architecture - Infrastructure layer |
+| Multi-tenant isolation     | 企业级SAAS平台核心安全需求   | DDD - Domain layer integration            |
+| Performance optimization   | 生产环境性能要求             | Infrastructure layer responsibility       |
+| Logging system unification | 系统一致性和可维护性         | Cross-cutting concern                     |

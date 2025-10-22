@@ -11,7 +11,7 @@
  * @since 1.0.0
  */
 
-import { EntityId } from "../value-objects/ids/entity-id.vo.js";
+// import { EntityId } from "../value-objects/ids/entity-id.vo.js";
 
 /**
  * 业务规则验证结果
@@ -29,7 +29,7 @@ export interface BusinessRuleValidationError {
   code: string;
   message: string;
   field?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -39,19 +39,19 @@ export interface BusinessRuleValidationWarning {
   code: string;
   message: string;
   field?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
  * 业务规则验证器基类
  */
-export abstract class BusinessRuleValidator {
+export abstract class BusinessRuleValidator<Context = unknown> {
   /**
    * 验证业务规则
    * @param context - 验证上下文
    * @returns 验证结果
    */
-  abstract validate(context: any): BusinessRuleValidationResult;
+  abstract validate(_context: Context): BusinessRuleValidationResult;
 
   /**
    * 获取规则名称
@@ -78,7 +78,7 @@ export abstract class BusinessRuleValidator {
    * @param context - 验证上下文
    * @returns 是否适用
    */
-  isApplicable(context: any): boolean {
+  isApplicable(_context: Context): boolean {
     return true;
   }
 }
@@ -87,14 +87,14 @@ export abstract class BusinessRuleValidator {
  * 业务规则管理器
  * @description 管理多个业务规则的验证
  */
-export class BusinessRuleManager {
-  private validators: BusinessRuleValidator[] = [];
+export class BusinessRuleManager<Context = unknown> {
+  private validators: BusinessRuleValidator<Context>[] = [];
 
   /**
    * 注册业务规则验证器
    * @param validator - 业务规则验证器
    */
-  registerValidator(validator: BusinessRuleValidator): void {
+  registerValidator(validator: BusinessRuleValidator<Context>): void {
     this.validators.push(validator);
   }
 
@@ -103,7 +103,7 @@ export class BusinessRuleManager {
    * @param context - 验证上下文
    * @returns 验证结果
    */
-  validateAll(context: any): BusinessRuleValidationResult {
+  validateAll(context: Context): BusinessRuleValidationResult {
     const applicableValidators = this.validators
       .filter((validator) => validator.isApplicable(context))
       .sort((a, b) => a.getPriority() - b.getPriority());
@@ -118,9 +118,9 @@ export class BusinessRuleManager {
         warnings.push(...result.warnings);
       } catch (error) {
         errors.push({
-          code: 'VALIDATOR_ERROR',
-          message: `验证器 ${validator.getRuleName()} 执行失败: ${error instanceof Error ? error.message : '未知错误'}`,
-          context: { validator: validator.getRuleName() }
+          code: "VALIDATOR_ERROR",
+          message: `验证器 ${validator.getRuleName()} 执行失败: ${error instanceof Error ? error.message : "未知错误"}`,
+          context: { validator: validator.getRuleName() },
         });
       }
     }
@@ -136,7 +136,7 @@ export class BusinessRuleManager {
    * 获取所有注册的验证器
    * @returns 验证器列表
    */
-  getValidators(): BusinessRuleValidator[] {
+  getValidators(): BusinessRuleValidator<Context>[] {
     return [...this.validators];
   }
 

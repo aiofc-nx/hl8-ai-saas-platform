@@ -4,17 +4,24 @@ const config: Config = {
   preset: "ts-jest",
   testEnvironment: "node",
   extensionsToTreatAsEsm: [".ts"],
-  globals: {
-    "ts-jest": {
-      useESM: true,
-    },
-  },
   transform: {
-    "^.+\\.(ts|tsx)$": ["ts-jest", { useESM: true }],
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        useESM: true,
+        tsconfig: {
+          module: "esnext",
+        },
+      },
+    ],
   },
   moduleFileExtensions: ["ts", "js", "json"],
   roots: ["<rootDir>/src"],
-  testMatch: ["<rootDir>/src/**/*.spec.ts", "<rootDir>/src/**/*.test.ts"],
+  testMatch: [
+    "<rootDir>/src/**/*.spec.ts",
+    "<rootDir>/test/integration/**/*.spec.ts",
+    "<rootDir>/test/e2e/**/*.spec.ts",
+  ],
   collectCoverageFrom: [
     "src/**/*.ts",
     "!src/**/*.spec.ts",

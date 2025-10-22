@@ -5,8 +5,12 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IAccessControlService, AccessRule, PermissionSummary } from '../../interfaces/isolation-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type {
+  IAccessControlService,
+  AccessRule,
+  PermissionSummary,
+} from "../../interfaces/isolation-service.interface.js";
 
 /**
  * 访问控制服务
@@ -21,10 +25,7 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 验证访问权限
    */
-  async validateAccess(
-    context: any,
-    resource: any
-  ): Promise<boolean> {
+  async validateAccess(context: any, resource: any): Promise<boolean> {
     try {
       if (!context || !resource) {
         return false;
@@ -40,7 +41,7 @@ export class AccessControlService implements IAccessControlService {
       // 简化的权限检查逻辑
       return true;
     } catch (error) {
-      console.error('访问权限验证失败:', error);
+      console.error("访问权限验证失败:", error);
       return false;
     }
   }
@@ -56,12 +57,12 @@ export class AccessControlService implements IAccessControlService {
           return {
             tenantId: resource.tenantId,
             organizationId: resource.organizationId,
-            departmentId: resource.departmentId
+            departmentId: resource.departmentId,
           };
         } else if (resource.organizationId) {
           return {
             tenantId: resource.tenantId,
-            organizationId: resource.organizationId
+            organizationId: resource.organizationId,
           };
         } else {
           return { tenantId: resource.tenantId };
@@ -69,12 +70,12 @@ export class AccessControlService implements IAccessControlService {
       } else if (resource.userId) {
         return {
           userId: resource.userId,
-          tenantId: resource.tenantId
+          tenantId: resource.tenantId,
         };
       }
       return {};
     } catch (error) {
-      console.error('提取资源隔离上下文失败:', error);
+      console.error("提取资源隔离上下文失败:", error);
       return null;
     }
   }
@@ -86,18 +87,22 @@ export class AccessControlService implements IAccessControlService {
     context: any,
     resourceType: string,
     resourceId: string,
-    action: string
+    action: string,
   ): Promise<boolean> {
     try {
       // 获取适用的访问规则
       const applicableRules = this.getApplicableRules(resourceType, action);
-      
+
       // 按优先级排序规则
-      const sortedRules = applicableRules.sort((a, b) => b.priority - a.priority);
-      
+      const sortedRules = applicableRules.sort(
+        (a, b) => b.priority - a.priority,
+      );
+
       // 检查规则
       for (const rule of sortedRules) {
-        if (this.isRuleApplicable(rule, context, resourceType, resourceId, action)) {
+        if (
+          this.isRuleApplicable(rule, context, resourceType, resourceId, action)
+        ) {
           return rule.allow;
         }
       }
@@ -112,12 +117,9 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 过滤数据
    */
-  filterData<T>(
-    data: T[],
-    context: any
-  ): T[] {
+  filterData<T>(data: T[], context: any): T[] {
     try {
-      return data.filter(item => this.isDataAccessible(item, context));
+      return data.filter((item) => this.isDataAccessible(item, context));
     } catch (error) {
       return [];
     }
@@ -126,26 +128,23 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 应用隔离过滤
    */
-  applyIsolationFilter(
-    query: any,
-    context: any
-  ): any {
+  applyIsolationFilter(query: any, context: any): any {
     try {
       const filteredQuery = { ...query };
-      
+
       // 添加隔离条件
       if (context.tenantId) {
         filteredQuery.tenantId = context.tenantId;
       }
-      
+
       if (context.organizationId) {
         filteredQuery.organizationId = context.organizationId;
       }
-      
+
       if (context.departmentId) {
         filteredQuery.departmentId = context.departmentId;
       }
-      
+
       if (context.userId) {
         filteredQuery.userId = context.userId;
       }
@@ -162,12 +161,12 @@ export class AccessControlService implements IAccessControlService {
   setAccessRule(
     resourceType: string,
     action: string,
-    rule: Omit<AccessRule, 'id'>
+    rule: Omit<AccessRule, "id">,
   ): void {
     const ruleId = `rule_${++this.ruleIdCounter}`;
     const fullRule: AccessRule = {
       id: ruleId,
-      ...rule
+      ...rule,
     };
 
     const key = `${resourceType}:${action}`;
@@ -179,10 +178,7 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 获取访问规则
    */
-  getAccessRules(
-    resourceType: string,
-    action: string
-  ): AccessRule[] {
+  getAccessRules(resourceType: string, action: string): AccessRule[] {
     const key = `${resourceType}:${action}`;
     return this.accessRules.get(key) || [];
   }
@@ -190,14 +186,10 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 移除访问规则
    */
-  removeAccessRule(
-    resourceType: string,
-    action: string,
-    ruleId: string
-  ): void {
+  removeAccessRule(resourceType: string, action: string, ruleId: string): void {
     const key = `${resourceType}:${action}`;
     const existingRules = this.accessRules.get(key) || [];
-    const filteredRules = existingRules.filter(rule => rule.id !== ruleId);
+    const filteredRules = existingRules.filter((rule) => rule.id !== ruleId);
     this.accessRules.set(key, filteredRules);
   }
 
@@ -206,10 +198,10 @@ export class AccessControlService implements IAccessControlService {
    */
   async checkBatchAccess(
     context: any,
-    resources: Array<{ type: string; id: string; action: string }>
+    resources: Array<{ type: string; id: string; action: string }>,
   ): Promise<Record<string, boolean>> {
     const results: Record<string, boolean> = {};
-    
+
     for (const resource of resources) {
       const key = `${resource.type}:${resource.id}:${resource.action}`;
       try {
@@ -217,13 +209,13 @@ export class AccessControlService implements IAccessControlService {
           context,
           resource.type,
           resource.id,
-          resource.action
+          resource.action,
         );
       } catch (error) {
         results[key] = false;
       }
     }
-    
+
     return results;
   }
 
@@ -235,14 +227,14 @@ export class AccessControlService implements IAccessControlService {
       const allowedActions: string[] = [];
       const deniedActions: string[] = [];
       const resourcePermissions: Record<string, string[]> = {};
-      let permissionLevel: 'READ' | 'WRITE' | 'ADMIN' | 'OWNER' = 'READ';
+      let permissionLevel: "READ" | "WRITE" | "ADMIN" | "OWNER" = "READ";
 
       // 遍历所有规则
       for (const [key, rules] of this.accessRules.entries()) {
-        const [resourceType, action] = key.split(':');
-        
+        const [resourceType, action] = key.split(":");
+
         for (const rule of rules) {
-          if (this.isRuleApplicable(rule, context, resourceType, '', action)) {
+          if (this.isRuleApplicable(rule, context, resourceType, "", action)) {
             if (rule.allow) {
               allowedActions.push(action);
               if (!resourcePermissions[resourceType]) {
@@ -257,28 +249,28 @@ export class AccessControlService implements IAccessControlService {
       }
 
       // 确定权限级别
-      if ((context as any).sharingLevel === 'PLATFORM') {
-        permissionLevel = 'OWNER';
-      } else if ((context as any).sharingLevel === 'TENANT') {
-        permissionLevel = 'ADMIN';
-      } else if ((context as any).sharingLevel === 'ORGANIZATION') {
-        permissionLevel = 'WRITE';
+      if ((context as any).sharingLevel === "PLATFORM") {
+        permissionLevel = "OWNER";
+      } else if ((context as any).sharingLevel === "TENANT") {
+        permissionLevel = "ADMIN";
+      } else if ((context as any).sharingLevel === "ORGANIZATION") {
+        permissionLevel = "WRITE";
       } else {
-        permissionLevel = 'READ';
+        permissionLevel = "READ";
       }
 
       return {
         allowedActions,
         deniedActions,
         resourcePermissions,
-        permissionLevel
+        permissionLevel,
       };
     } catch (error) {
       return {
         allowedActions: [],
         deniedActions: [],
         resourcePermissions: {},
-        permissionLevel: 'READ'
+        permissionLevel: "READ",
       };
     }
   }
@@ -287,47 +279,50 @@ export class AccessControlService implements IAccessControlService {
    * 获取资源类型
    */
   private getResourceType(resource: any): string {
-    if (typeof resource === 'string') {
+    if (typeof resource === "string") {
       return resource;
     }
-    
-    if (resource && typeof resource === 'object') {
-      return resource.type || resource.resourceType || 'unknown';
+
+    if (resource && typeof resource === "object") {
+      return resource.type || resource.resourceType || "unknown";
     }
-    
-    return 'unknown';
+
+    return "unknown";
   }
 
   /**
    * 获取资源ID
    */
   private getResourceId(resource: any): string {
-    if (typeof resource === 'string') {
+    if (typeof resource === "string") {
       return resource;
     }
-    
-    if (resource && typeof resource === 'object') {
-      return resource.id || resource.resourceId || '';
+
+    if (resource && typeof resource === "object") {
+      return resource.id || resource.resourceId || "";
     }
-    
-    return '';
+
+    return "";
   }
 
   /**
    * 获取操作
    */
   private getAction(resource: any): string {
-    if (resource && typeof resource === 'object') {
-      return resource.action || 'read';
+    if (resource && typeof resource === "object") {
+      return resource.action || "read";
     }
-    
-    return 'read';
+
+    return "read";
   }
 
   /**
    * 获取适用的访问规则
    */
-  private getApplicableRules(resourceType: string, action: string): AccessRule[] {
+  private getApplicableRules(
+    resourceType: string,
+    action: string,
+  ): AccessRule[] {
     const key = `${resourceType}:${action}`;
     return this.accessRules.get(key) || [];
   }
@@ -340,7 +335,7 @@ export class AccessControlService implements IAccessControlService {
     context: any,
     resourceType: string,
     resourceId: string,
-    action: string
+    action: string,
   ): boolean {
     try {
       if (!rule.enabled) {
@@ -350,7 +345,16 @@ export class AccessControlService implements IAccessControlService {
       // 检查条件
       if (rule.conditions) {
         for (const [key, value] of Object.entries(rule.conditions)) {
-          if (!this.checkCondition(key, value, context, resourceType, resourceId, action)) {
+          if (
+            !this.checkCondition(
+              key,
+              value,
+              context,
+              resourceType,
+              resourceId,
+              action,
+            )
+          ) {
             return false;
           }
         }
@@ -371,21 +375,21 @@ export class AccessControlService implements IAccessControlService {
     context: any,
     resourceType: string,
     resourceId: string,
-    action: string
+    action: string,
   ): boolean {
     try {
       switch (key) {
-        case 'tenantId':
+        case "tenantId":
           return context.tenantId === value;
-        case 'organizationId':
+        case "organizationId":
           return context.organizationId === value;
-        case 'departmentId':
+        case "departmentId":
           return context.departmentId === value;
-        case 'userId':
+        case "userId":
           return context.userId === value;
-        case 'sharingLevel':
+        case "sharingLevel":
           return (context as any).sharingLevel === value;
-        case 'isShared':
+        case "isShared":
           return (context as any).isShared === value;
         default:
           return true;
@@ -402,21 +406,33 @@ export class AccessControlService implements IAccessControlService {
     context: any,
     resourceType: string,
     resourceId: string,
-    action: string
+    action: string,
   ): boolean {
     try {
       // 根据共享级别确定默认权限
       switch ((context as any).sharingLevel) {
-        case 'PLATFORM':
+        case "PLATFORM":
           return true;
-        case 'TENANT':
-          return resourceType.startsWith('tenant:');
-        case 'ORGANIZATION':
-          return resourceType.startsWith('org:') || resourceType.startsWith('tenant:');
-        case 'DEPARTMENT':
-          return resourceType.startsWith('dept:') || resourceType.startsWith('org:') || resourceType.startsWith('tenant:');
-        case 'USER':
-          return resourceType.startsWith('user:') || resourceType.startsWith('dept:') || resourceType.startsWith('org:') || resourceType.startsWith('tenant:');
+        case "TENANT":
+          return resourceType.startsWith("tenant:");
+        case "ORGANIZATION":
+          return (
+            resourceType.startsWith("org:") ||
+            resourceType.startsWith("tenant:")
+          );
+        case "DEPARTMENT":
+          return (
+            resourceType.startsWith("dept:") ||
+            resourceType.startsWith("org:") ||
+            resourceType.startsWith("tenant:")
+          );
+        case "USER":
+          return (
+            resourceType.startsWith("user:") ||
+            resourceType.startsWith("dept:") ||
+            resourceType.startsWith("org:") ||
+            resourceType.startsWith("tenant:")
+          );
         default:
           return false;
       }
@@ -430,7 +446,7 @@ export class AccessControlService implements IAccessControlService {
    */
   private isDataAccessible(data: any, context: any): boolean {
     try {
-      if (!data || typeof data !== 'object') {
+      if (!data || typeof data !== "object") {
         return false;
       }
 
@@ -440,7 +456,10 @@ export class AccessControlService implements IAccessControlService {
       }
 
       // 检查组织隔离
-      if (context.organizationId && data.organizationId !== context.organizationId) {
+      if (
+        context.organizationId &&
+        data.organizationId !== context.organizationId
+      ) {
         return false;
       }
 

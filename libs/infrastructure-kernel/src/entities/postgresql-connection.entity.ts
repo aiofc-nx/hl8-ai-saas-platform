@@ -5,32 +5,32 @@
  * @since 1.0.0
  */
 
-import { Entity, Property } from '@mikro-orm/core';
-import { DatabaseConnectionEntity } from './database-connection.entity.js';
+import { Entity, Property } from "@mikro-orm/core";
+import { DatabaseConnectionEntity } from "./database-connection.entity.js";
 
 /**
  * PostgreSQL连接实体
  */
-@Entity({ tableName: 'postgresql_connections' })
+@Entity({ tableName: "postgresql_connections" })
 export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
   /** 数据库模式 */
-  @Property({ type: 'varchar', length: 255, default: 'public' })
+  @Property({ type: "varchar", length: 255, default: "public" })
   schema!: string;
 
   /** SSL模式 */
-  @Property({ type: 'varchar', length: 50, default: 'disable' })
-  sslMode!: 'disable' | 'require' | 'verify-ca' | 'verify-full';
+  @Property({ type: "varchar", length: 50, default: "disable" })
+  sslMode!: "disable" | "require" | "verify-ca" | "verify-full";
 
   /** 最大连接数 */
-  @Property({ type: 'int', default: 100 })
+  @Property({ type: "int", default: 100 })
   maxConnections!: number;
 
   /** 空闲超时时间(秒) */
-  @Property({ type: 'int', default: 300 })
+  @Property({ type: "int", default: 300 })
   idleTimeout!: number;
 
   /** 查询超时时间(秒) */
-  @Property({ type: 'int', default: 30 })
+  @Property({ type: "int", default: 30 })
   queryTimeout!: number;
 
   /**
@@ -42,7 +42,7 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
     if (data) {
       Object.assign(this, data);
     }
-    this.type = 'POSTGRESQL';
+    this.type = "POSTGRESQL";
   }
 
   /**
@@ -53,29 +53,29 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
     const errors: string[] = [];
 
     if (!this.schema || this.schema.trim().length === 0) {
-      errors.push('数据库模式不能为空');
+      errors.push("数据库模式不能为空");
     }
 
     if (this.maxConnections <= 0) {
-      errors.push('最大连接数必须大于0');
+      errors.push("最大连接数必须大于0");
     }
 
     if (this.idleTimeout < 0) {
-      errors.push('空闲超时时间不能为负数');
+      errors.push("空闲超时时间不能为负数");
     }
 
     if (this.queryTimeout <= 0) {
-      errors.push('查询超时时间必须大于0');
+      errors.push("查询超时时间必须大于0");
     }
 
-    const validSslModes = ['disable', 'require', 'verify-ca', 'verify-full'];
+    const validSslModes = ["disable", "require", "verify-ca", "verify-full"];
     if (!validSslModes.includes(this.sslMode)) {
-      errors.push('SSL模式必须是: disable, require, verify-ca, verify-full');
+      errors.push("SSL模式必须是: disable, require, verify-ca, verify-full");
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -90,7 +90,7 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
       sslMode: this.sslMode,
       maxConnections: this.maxConnections,
       idleTimeout: this.idleTimeout,
-      queryTimeout: this.queryTimeout
+      queryTimeout: this.queryTimeout,
     };
   }
 
@@ -99,7 +99,7 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
    * @returns PostgreSQL连接字符串
    */
   getPostgreSQLConnectionString(): string {
-    const sslParam = this.ssl ? `?sslmode=${this.sslMode}` : '';
+    const sslParam = this.ssl ? `?sslmode=${this.sslMode}` : "";
     return `postgresql://${this.username}:${this.password}@${this.host}:${this.port}/${this.database}${sslParam}`;
   }
 
@@ -109,7 +109,7 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
    */
   getMikroORMConfig(): Record<string, any> {
     return {
-      type: 'postgresql',
+      type: "postgresql",
       host: this.host,
       port: this.port,
       dbName: this.database,
@@ -120,11 +120,11 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
       pool: {
         min: 1,
         max: this.maxConnections,
-        idleTimeoutMillis: this.idleTimeout * 1000
+        idleTimeoutMillis: this.idleTimeout * 1000,
       },
       options: {
-        statement_timeout: this.queryTimeout * 1000
-      }
+        statement_timeout: this.queryTimeout * 1000,
+      },
     };
   }
 }

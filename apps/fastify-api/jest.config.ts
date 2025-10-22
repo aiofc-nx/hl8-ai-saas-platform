@@ -1,10 +1,18 @@
 export default {
-  collectCoverageFrom: ["**/*.(t|j)s"],
+  collectCoverageFrom: [
+    "src/**/*.(t|j)s",
+    "!src/**/*.spec.ts",
+    "!src/**/*.test.ts",
+  ],
   coverageDirectory: "../coverage",
   moduleFileExtensions: ["js", "json", "ts"],
-  rootDir: "src",
+  rootDir: ".",
   testEnvironment: "node",
-  testRegex: ".*\\.spec\\.ts$",
+  testMatch: [
+    "src/**/*.spec.ts",
+    "test/integration/**/*.spec.ts",
+    "test/e2e/**/*.spec.ts",
+  ],
   preset: "ts-jest/presets/default-esm",
   extensionsToTreatAsEsm: [".ts"],
   transform: {

@@ -178,7 +178,7 @@
 
 ```
 Documentation Index (1) ──→ (many) Technical Plan
-Documentation Index (1) ──→ (many) Implementation Guide  
+Documentation Index (1) ──→ (many) Implementation Guide
 Documentation Index (1) ──→ (many) Architecture Diagram
 Technical Plan (1) ──→ (1) Implementation Guide
 Technical Plan (1) ──→ (many) Architecture Diagram

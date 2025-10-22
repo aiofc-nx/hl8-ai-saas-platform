@@ -72,7 +72,7 @@ export function deepFreeze<T>(obj: T): T {
 
   // 递归冻结所有属性
   Object.getOwnPropertyNames(obj).forEach((prop) => {
-    const value = (obj as any)[prop];
+    const value = (obj as Record<string, unknown>)[prop];
 
     // 如果属性是对象且未冻结，递归冻结
     if (value && typeof value === "object" && !Object.isFrozen(value)) {
@@ -183,7 +183,7 @@ export function cleanupSensitiveEnvVars(): void {
  * console.log(isFrozen(config));  // true
  * ```
  */
-export function isFrozen(obj: any, deep: boolean = true): boolean {
+export function isFrozen(obj: unknown, deep: boolean = true): boolean {
   if (!Object.isFrozen(obj)) {
     return false;
   }
@@ -239,9 +239,9 @@ export function isFrozen(obj: any, deep: boolean = true): boolean {
  * ```
  */
 export function getSafeConfigCopy(
-  obj: any,
+  obj: unknown,
   sensitiveKeys: string[] = ["password", "secret", "key", "token"],
-): any {
+): unknown {
   if (!obj || typeof obj !== "object") {
     return obj;
   }
@@ -250,10 +250,10 @@ export function getSafeConfigCopy(
     return obj.map((item) => getSafeConfigCopy(item, sensitiveKeys));
   }
 
-  const copy: any = {};
+  const copy: Record<string, unknown> = {};
 
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       // 检查是否是敏感字段
       const isSensitive = sensitiveKeys.some((sensitive) =>
         key.toLowerCase().includes(sensitive.toLowerCase()),

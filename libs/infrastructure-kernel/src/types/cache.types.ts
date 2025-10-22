@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import type { IsolationContext } from './isolation.types.js';
+import type { IsolationContext } from "./isolation.types.js";
 
 /**
  * 缓存条目接口
@@ -14,7 +14,7 @@ export interface CacheEntry {
   /** 缓存键 */
   key: string;
   /** 缓存值 */
-  value: any;
+  value: unknown;
   /** 生存时间(秒) */
   ttl: number;
   /** 创建时间 */
@@ -34,7 +34,7 @@ export interface CacheEntry {
 /**
  * 缓存策略类型
  */
-export type CacheStrategy = 'LRU' | 'LFU' | 'FIFO' | 'TTL';
+export type CacheStrategy = "LRU" | "LFU" | "FIFO" | "TTL";
 
 /**
  * 缓存配置接口
@@ -59,11 +59,11 @@ export interface CacheConfig {
  */
 export interface CacheService {
   /** 设置缓存 */
-  set(key: string, value: any, options?: CacheSetOptions): Promise<void>;
+  set(key: string, value: unknown, options?: CacheSetOptions): Promise<void>;
   /** 获取缓存 */
-  get<T = any>(key: string): Promise<T | null>;
+  get<T = unknown>(key: string): Promise<T | null>;
   /** 批量获取缓存 */
-  mget<T = any>(keys: string[]): Promise<Record<string, T | null>>;
+  mget<T = unknown>(keys: string[]): Promise<Record<string, T | null>>;
   /** 删除缓存 */
   delete(key: string): Promise<void>;
   /** 批量删除缓存 */
@@ -153,5 +153,5 @@ export interface CacheClearResult {
   /** 操作结果消息 */
   message: string;
   /** 详细信息 */
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }

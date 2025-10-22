@@ -34,12 +34,12 @@
 
 ## 📊 层次对比表
 
-| 层次 | 职责 | 依赖关系 | 技术实现 | 业务逻辑 |
-|------|------|----------|----------|----------|
-| **接口层** | 用户交互 | 依赖所有内层 | Web API、GraphQL | 无 |
-| **基础设施层** | 技术实现 | 依赖应用层+领域层 | 数据库、缓存、MQ | 无 |
-| **应用层** | 用例编排 | 依赖领域层 | 用例服务、CQRS | 业务流程 |
-| **领域层** | 核心业务 | 无外部依赖 | 实体、聚合根 | 核心业务规则 |
+| 层次           | 职责     | 依赖关系          | 技术实现         | 业务逻辑     |
+| -------------- | -------- | ----------------- | ---------------- | ------------ |
+| **接口层**     | 用户交互 | 依赖所有内层      | Web API、GraphQL | 无           |
+| **基础设施层** | 技术实现 | 依赖应用层+领域层 | 数据库、缓存、MQ | 无           |
+| **应用层**     | 用例编排 | 依赖领域层        | 用例服务、CQRS   | 业务流程     |
+| **领域层**     | 核心业务 | 无外部依赖        | 实体、聚合根     | 核心业务规则 |
 
 ## 🔄 依赖关系图
 
@@ -84,7 +84,10 @@
 ```typescript
 // 纯业务逻辑，无外部依赖
 export class IsolationContext {
-  canAccess(targetContext: IsolationContext, sharingLevel: SharingLevel): boolean {
+  canAccess(
+    targetContext: IsolationContext,
+    sharingLevel: SharingLevel,
+  ): boolean {
     // 纯业务逻辑，不依赖任何外部技术
   }
 }
@@ -98,7 +101,7 @@ export class IsolationContext {
 export class UserManagementUseCase {
   constructor(
     private readonly userRepository: IUserRepository, // 接口依赖
-    private readonly isolationContext: IsolationContext // 领域层依赖
+    private readonly isolationContext: IsolationContext, // 领域层依赖
   ) {}
 }
 ```
@@ -111,7 +114,7 @@ export class UserManagementUseCase {
 export class DatabaseUserRepository implements IUserRepository {
   constructor(
     private readonly database: DatabaseService, // 技术依赖
-    private readonly isolationContext: IsolationContext // 领域层依赖
+    private readonly isolationContext: IsolationContext, // 领域层依赖
   ) {}
 }
 ```
@@ -120,11 +123,11 @@ export class DatabaseUserRepository implements IUserRepository {
 
 ```typescript
 // 用户界面，依赖所有内层
-@Controller('users')
+@Controller("users")
 export class UserController {
   constructor(
     private readonly userUseCase: UserManagementUseCase, // 应用层依赖
-    private readonly isolationContext: IsolationContext // 领域层依赖
+    private readonly isolationContext: IsolationContext, // 领域层依赖
   ) {}
 }
 ```
@@ -133,13 +136,13 @@ export class UserController {
 
 ### **应用层 vs 基础设施层**
 
-| 方面 | 应用层 | 基础设施层 |
-|------|--------|------------|
-| **职责** | 用例编排、业务流程 | 技术实现、外部集成 |
-| **依赖** | 只依赖领域层 | 依赖应用层+领域层 |
-| **业务逻辑** | 包含业务流程 | 不包含业务逻辑 |
-| **技术实现** | 不包含技术细节 | 包含具体技术实现 |
-| **测试** | 单元测试+集成测试 | 集成测试+端到端测试 |
+| 方面         | 应用层             | 基础设施层          |
+| ------------ | ------------------ | ------------------- |
+| **职责**     | 用例编排、业务流程 | 技术实现、外部集成  |
+| **依赖**     | 只依赖领域层       | 依赖应用层+领域层   |
+| **业务逻辑** | 包含业务流程       | 不包含业务逻辑      |
+| **技术实现** | 不包含技术细节     | 包含具体技术实现    |
+| **测试**     | 单元测试+集成测试  | 集成测试+端到端测试 |
 
 ### **具体示例对比**
 
@@ -152,13 +155,13 @@ export class CreateUserUseCase {
   async execute(command: CreateUserCommand): Promise<User> {
     // 1. 验证业务规则（领域层）
     const user = User.create(command);
-    
+
     // 2. 保存到数据库（基础设施层）
     await this.userRepository.save(user);
-    
+
     // 3. 发布事件（基础设施层）
     await this.eventBus.publish(new UserCreatedEvent(user));
-    
+
     return user;
   }
 }
@@ -173,8 +176,8 @@ export class DatabaseUserRepository implements IUserRepository {
   async save(user: User): Promise<void> {
     // 具体的技术实现
     await this.database.query(
-      'INSERT INTO users (id, name, email) VALUES (?, ?, ?)',
-      [user.id, user.name, user.email]
+      "INSERT INTO users (id, name, email) VALUES (?, ?, ?)",
+      [user.id, user.name, user.email],
     );
   }
 }

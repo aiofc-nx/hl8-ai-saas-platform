@@ -12,7 +12,7 @@
 interface DatabaseConnection {
   id: string;
   name: string;
-  type: 'POSTGRESQL' | 'MONGODB';
+  type: "POSTGRESQL" | "MONGODB";
   host: string;
   port: number;
   database: string;
@@ -21,7 +21,7 @@ interface DatabaseConnection {
   ssl: boolean;
   poolSize: number;
   timeout: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'ERROR';
+  status: "ACTIVE" | "INACTIVE" | "ERROR";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,9 +37,9 @@ interface DatabaseConnection {
 
 ```typescript
 interface PostgreSQLConnection extends DatabaseConnection {
-  type: 'POSTGRESQL';
+  type: "POSTGRESQL";
   schema: string;
-  sslMode: 'disable' | 'require' | 'verify-ca' | 'verify-full';
+  sslMode: "disable" | "require" | "verify-ca" | "verify-full";
   maxConnections: number;
   idleTimeout: number;
   queryTimeout: number;
@@ -56,7 +56,7 @@ interface PostgreSQLConnection extends DatabaseConnection {
 
 ```typescript
 interface MongoDBConnection extends DatabaseConnection {
-  type: 'MONGODB';
+  type: "MONGODB";
   replicaSet: string;
   authSource: string;
   maxPoolSize: number;
@@ -123,9 +123,13 @@ interface CacheEntry {
 ```typescript
 interface TransactionContext {
   id: string;
-  isolationLevel: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
+  isolationLevel:
+    | "READ_UNCOMMITTED"
+    | "READ_COMMITTED"
+    | "REPEATABLE_READ"
+    | "SERIALIZABLE";
   timeout: number;
-  status: 'ACTIVE' | 'COMMITTED' | 'ROLLED_BACK' | 'TIMEOUT';
+  status: "ACTIVE" | "COMMITTED" | "ROLLED_BACK" | "TIMEOUT";
   startTime: Date;
   endTime?: Date;
   operations: TransactionOperation[];
@@ -147,7 +151,7 @@ interface IsolationContext {
   organizationId?: string;
   departmentId?: string;
   userId?: string;
-  sharingLevel: 'PLATFORM' | 'TENANT' | 'ORGANIZATION' | 'DEPARTMENT' | 'USER';
+  sharingLevel: "PLATFORM" | "TENANT" | "ORGANIZATION" | "DEPARTMENT" | "USER";
   isShared: boolean;
   accessRules: AccessRule[];
   createdAt: Date;
@@ -177,7 +181,7 @@ interface AuditLog {
   details: Record<string, any>;
   ipAddress: string;
   userAgent: string;
-  result: 'SUCCESS' | 'FAILURE' | 'ERROR';
+  result: "SUCCESS" | "FAILURE" | "ERROR";
 }
 ```
 
@@ -192,7 +196,7 @@ interface AuditLog {
 ```typescript
 interface PinoLogger {
   name: string;
-  level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  level: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
   serializers: Record<string, Serializer>;
   formatters: Record<string, Formatter>;
   timestamp: boolean;
@@ -236,7 +240,7 @@ interface LogContext {
 ```typescript
 interface HealthStatus {
   component: string;
-  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  status: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
   lastCheck: Date;
   responseTime: number;
   errorRate: number;
@@ -257,7 +261,7 @@ interface HealthStatus {
 interface Configuration {
   key: string;
   value: any;
-  type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'OBJECT' | 'ARRAY';
+  type: "STRING" | "NUMBER" | "BOOLEAN" | "OBJECT" | "ARRAY";
   category: string;
   description: string;
   isEncrypted: boolean;

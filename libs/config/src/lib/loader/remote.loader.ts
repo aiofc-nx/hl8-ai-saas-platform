@@ -38,7 +38,7 @@ export interface RemoteLoaderOptions {
    * @remarks
    * 使用 any 符合宪章 IX 允许场景：HTTP 响应类型未知。
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- HTTP 响应类型未知（宪章 IX 允许场景：第三方库集成）
+
   type?: "json" | "yaml" | "yml" | ((response: any) => string);
 
   /**
@@ -50,7 +50,7 @@ export interface RemoteLoaderOptions {
    * @remarks
    * 使用 any 符合宪章 IX 允许场景：HTTP 响应和配置对象结构未知。
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- HTTP 响应和配置对象结构未知（宪章 IX 允许场景：第三方库集成）
+
   mapResponse?: (response: any) => any;
 
   /**
@@ -62,7 +62,7 @@ export interface RemoteLoaderOptions {
    * @remarks
    * 使用 any 符合宪章 IX 允许场景：HTTP 响应类型未知。
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- HTTP 响应类型未知（宪章 IX 允许场景：第三方库集成）
+
   shouldRetry?: (response: any) => boolean;
 
   /**
@@ -110,7 +110,7 @@ export const remoteLoader = (
     retryInterval = CONFIG_DEFAULTS.RETRY_DELAY,
   } = options;
 
-  return async (): Promise<Record<string, any>> => {
+  return async (): Promise<Record<string, unknown>> => {
     let lastError: Error | null = null;
 
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -187,22 +187,24 @@ async function makeRequest(
  * @remarks
  * 使用 any 符合宪章 IX 允许场景：HTTP 响应数据类型未知，可能是 string 或已解析的对象。
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- HTTP 响应和配置对象类型未知（宪章 IX 允许场景：第三方库集成）
+
 function parseConfig(
-  data: any,
-  type: string | ((response: any) => string),
-): Record<string, any> {
+  data: unknown,
+  type: string | ((response: unknown) => string),
+): Record<string, unknown> {
   const configType = typeof type === "function" ? type(data) : type;
 
   switch (configType) {
     case "json":
-      return typeof data === "string" ? JSON.parse(data) : data;
+      return typeof data === "string"
+        ? JSON.parse(data)
+        : (data as Record<string, unknown>);
     case "yaml":
     case "yml":
       // 这里需要 yaml 解析器
-      return data;
+      return data as Record<string, unknown>;
     default:
-      return data;
+      return data as Record<string, unknown>;
   }
 }
 

@@ -74,12 +74,12 @@ export const directoryLoader = (
     disallowUndefinedEnvironmentVariables = true,
   } = options;
 
-  return (): Record<string, any> => {
+  return (): Record<string, unknown> => {
     if (!fs.existsSync(directory)) {
       throw new Error(`Configuration directory not found: ${directory}`);
     }
 
-    const config: Record<string, any> = {};
+    const config: Record<string, unknown> = {};
     const files = fs.readdirSync(directory);
 
     for (const file of files) {
@@ -89,8 +89,7 @@ export const directoryLoader = (
         const content = fs.readFileSync(filePath, "utf8");
         const ext = path.extname(file).toLowerCase();
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON/YAML 解析结果类型未知（宪章 IX 允许场景：第三方库集成）
-        let fileConfig: any;
+        let fileConfig: unknown;
 
         switch (ext) {
           case ".json":
@@ -132,7 +131,7 @@ export const directoryLoader = (
  * @remarks
  * 使用 any 符合宪章 IX 允许场景：配置对象结构未知，可以是任意类型。
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 配置对象结构未知（宪章 IX 允许场景：通用工具）
+
 function substituteEnvironmentVariables(
   config: any,
   disallowUndefined: boolean = true,
@@ -154,8 +153,7 @@ function substituteEnvironmentVariables(
   }
 
   if (config && typeof config === "object") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 结果对象结构与输入相同，使用 any 保持灵活性（宪章 IX 允许场景）
-    const result: any = {};
+    const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(config)) {
       result[key] = substituteEnvironmentVariables(value, disallowUndefined);
     }

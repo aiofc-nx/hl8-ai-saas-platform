@@ -98,7 +98,7 @@ pnpm dev
 ### 基本使用
 
 ```typescript
-import { InterfaceKernelModule } from '@hl8/interface-kernel';
+import { InterfaceKernelModule } from "@hl8/interface-kernel";
 
 @Module({
   imports: [InterfaceKernelModule],
@@ -110,17 +110,17 @@ export class AppModule {}
 ### REST API 控制器
 
 ```typescript
-import { Controller, Get, Post } from '@nestjs/common';
-import { RestController } from '@hl8/interface-kernel';
+import { Controller, Get, Post } from "@nestjs/common";
+import { RestController } from "@hl8/interface-kernel";
 
-@Controller('api/v1')
+@Controller("api/v1")
 export class MyController extends RestController {
-  @Get('users')
+  @Get("users")
   async getUsers() {
     // 处理用户列表请求
   }
 
-  @Post('users')
+  @Post("users")
   async createUser() {
     // 处理用户创建请求
   }
@@ -130,8 +130,8 @@ export class MyController extends RestController {
 ### GraphQL 解析器
 
 ```typescript
-import { Resolver, Query, Mutation } from '@nestjs/graphql';
-import { GraphQLService } from '@hl8/interface-kernel';
+import { Resolver, Query, Mutation } from "@nestjs/graphql";
+import { GraphQLService } from "@hl8/interface-kernel";
 
 @Resolver()
 export class UserResolver {
@@ -152,14 +152,14 @@ export class UserResolver {
 ### WebSocket 处理
 
 ```typescript
-import { WebSocketGateway, SubscribeMessage } from '@nestjs/websockets';
-import { WebSocketService } from '@hl8/interface-kernel';
+import { WebSocketGateway, SubscribeMessage } from "@nestjs/websockets";
+import { WebSocketService } from "@hl8/interface-kernel";
 
 @WebSocketGateway()
 export class ChatGateway {
   constructor(private readonly websocketService: WebSocketService) {}
 
-  @SubscribeMessage('message')
+  @SubscribeMessage("message")
   handleMessage(client: any, payload: any) {
     return this.websocketService.handleMessage(client, payload);
   }
@@ -228,41 +228,41 @@ HEALTH_CHECK_ENABLED=true
 ### 模块配置
 
 ```typescript
-import { InterfaceKernelModule } from '@hl8/interface-kernel';
+import { InterfaceKernelModule } from "@hl8/interface-kernel";
 
 @Module({
   imports: [
     InterfaceKernelModule.forRoot({
       api: {
-        prefix: '/api/v1',
-        version: '1.0.0',
+        prefix: "/api/v1",
+        version: "1.0.0",
         cors: {
-          origin: '*',
-          credentials: true
-        }
+          origin: "*",
+          credentials: true,
+        },
       },
       auth: {
         jwt: {
           secret: process.env.JWT_SECRET,
-          expiresIn: '24h',
-          issuer: 'hl8-platform',
-          audience: 'hl8-users'
-        }
+          expiresIn: "24h",
+          issuer: "hl8-platform",
+          audience: "hl8-users",
+        },
       },
       rateLimit: {
         global: {
           windowMs: 15 * 60 * 1000,
-          max: 100
-        }
+          max: 100,
+        },
       },
       monitoring: {
         enabled: true,
         metrics: true,
         healthCheck: true,
-        logging: true
-      }
-    })
-  ]
+        logging: true,
+      },
+    }),
+  ],
 })
 export class AppModule {}
 ```

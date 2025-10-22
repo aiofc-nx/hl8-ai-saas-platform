@@ -5,13 +5,13 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IIsolationManager } from '../../interfaces/isolation-service.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
-import { IsolationContextManager } from './isolation-context-manager.js';
-import { AccessControlService } from './access-control-service.js';
-import { AuditLogService } from './audit-log-service.js';
-import { SecurityMonitorService } from './security-monitor-service.js';
+import { Injectable } from "@nestjs/common";
+import type { IIsolationManager } from "../../interfaces/isolation-service.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
+import { IsolationContextManager } from "./isolation-context-manager.js";
+import { AccessControlService } from "./access-control-service.js";
+import { AuditLogService } from "./audit-log-service.js";
+import { SecurityMonitorService } from "./security-monitor-service.js";
 
 /**
  * 隔离管理器
@@ -24,7 +24,7 @@ export class IsolationManager implements IIsolationManager {
     private readonly contextManager: IsolationContextManager,
     private readonly accessControlService: AccessControlService,
     private readonly auditLogService: AuditLogService,
-    private readonly securityMonitorService: SecurityMonitorService
+    private readonly securityMonitorService: SecurityMonitorService,
   ) {
     this.registerDefaultServices();
   }
@@ -55,36 +55,37 @@ export class IsolationManager implements IIsolationManager {
    */
   async healthCheck(): Promise<Record<string, boolean>> {
     const healthChecks: Record<string, boolean> = {};
-    
+
     try {
       // 检查上下文管理器
-      healthChecks['contextManager'] = true;
-      
+      healthChecks["contextManager"] = true;
+
       // 检查访问控制服务
-      healthChecks['accessControl'] = true;
-      
+      healthChecks["accessControl"] = true;
+
       // 检查审计日志服务
-      healthChecks['auditLog'] = await this.auditLogService.healthCheck();
-      
+      healthChecks["auditLog"] = await this.auditLogService.healthCheck();
+
       // 检查安全监控服务
-      healthChecks['securityMonitor'] = await this.securityMonitorService.healthCheck();
-      
+      healthChecks["securityMonitor"] =
+        await this.securityMonitorService.healthCheck();
+
       // 检查其他注册的服务
       for (const [name, service] of this.services.entries()) {
-        if (service && typeof service.healthCheck === 'function') {
+        if (service && typeof service.healthCheck === "function") {
           healthChecks[name] = await service.healthCheck();
         } else {
           healthChecks[name] = true;
         }
       }
     } catch (error) {
-      console.error('隔离管理器健康检查失败:', error);
+      console.error("隔离管理器健康检查失败:", error);
       // 设置所有服务为不健康
       for (const key of Object.keys(healthChecks)) {
         healthChecks[key] = false;
       }
     }
-    
+
     return healthChecks;
   }
 
@@ -96,12 +97,13 @@ export class IsolationManager implements IIsolationManager {
       const contextStats = await this.contextManager.getContextStats();
       const auditStats = await this.auditLogService.getAuditStats(
         new Date(Date.now() - 24 * 60 * 60 * 1000), // 24小时前
-        new Date()
+        new Date(),
       );
-      const securityStats = await this.securityMonitorService.getSecurityEventStats(
-        new Date(Date.now() - 24 * 60 * 60 * 1000), // 24小时前
-        new Date()
-      );
+      const securityStats =
+        await this.securityMonitorService.getSecurityEventStats(
+          new Date(Date.now() - 24 * 60 * 60 * 1000), // 24小时前
+          new Date(),
+        );
 
       return {
         context: contextStats,
@@ -109,11 +111,13 @@ export class IsolationManager implements IIsolationManager {
         security: securityStats,
         services: {
           total: this.services.size,
-          registered: Array.from(this.services.keys())
-        }
+          registered: Array.from(this.services.keys()),
+        },
       };
     } catch (error) {
-      throw new Error(`获取隔离统计失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取隔离统计失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -124,9 +128,14 @@ export class IsolationManager implements IIsolationManager {
     tenantId: string,
     organizationId?: string,
     departmentId?: string,
-    userId?: string
+    userId?: string,
   ): IsolationContext {
-    return this.contextManager.createContext(tenantId, organizationId, departmentId, userId) as any;
+    return this.contextManager.createContext(
+      tenantId,
+      organizationId,
+      departmentId,
+      userId,
+    ) as any;
   }
 
   /**
@@ -146,42 +155,56 @@ export class IsolationManager implements IIsolationManager {
   /**
    * 验证访问权限
    */
-  async validateAccess(context: IsolationContext, resource: any): Promise<boolean> {
+  async validateAccess(
+    context: IsolationContext,
+    resource: any,
+  ): Promise<boolean> {
     try {
       // 监控访问尝试
-      await this.securityMonitorService.monitorAccess(context, resource, 'access');
-      
+      await this.securityMonitorService.monitorAccess(
+        context,
+        resource,
+        "access",
+      );
+
       // 检测异常访问
-      const isAnomalous = await this.securityMonitorService.detectAnomalousAccess(context, resource);
+      const isAnomalous =
+        await this.securityMonitorService.detectAnomalousAccess(
+          context,
+          resource,
+        );
       if (isAnomalous) {
         return false;
       }
-      
+
       // 验证访问权限
-      const hasAccess = await this.accessControlService.validateAccess(context as any, resource);
-      
+      const hasAccess = await this.accessControlService.validateAccess(
+        context as any,
+        resource,
+      );
+
       // 记录审计日志
       await this.auditLogService.log({
-        action: 'ACCESS_VALIDATION',
+        action: "ACCESS_VALIDATION",
         resource: this.getResourceType(resource),
         resourceId: this.getResourceId(resource),
-        userId: context.userId || 'unknown',
+        userId: context.userId || "unknown",
         tenantId: context.tenantId,
         organizationId: context.organizationId,
         departmentId: context.departmentId,
-        result: hasAccess ? 'SUCCESS' : 'FAILURE',
+        result: hasAccess ? "SUCCESS" : "FAILURE",
         details: {
           context: context,
           resource: resource,
-          hasAccess: hasAccess
+          hasAccess: hasAccess,
         },
-        ipAddress: 'unknown',
-        userAgent: 'unknown'
+        ipAddress: "unknown",
+        userAgent: "unknown",
       } as any);
-      
+
       return hasAccess;
     } catch (error) {
-      console.error('验证访问权限失败:', error);
+      console.error("验证访问权限失败:", error);
       return false;
     }
   }
@@ -190,7 +213,10 @@ export class IsolationManager implements IIsolationManager {
    * 应用隔离过滤
    */
   applyIsolationFilter(query: any, context: IsolationContext): any {
-    return this.accessControlService.applyIsolationFilter(query, context as any);
+    return this.accessControlService.applyIsolationFilter(
+      query,
+      context as any,
+    );
   }
 
   /**
@@ -207,30 +233,30 @@ export class IsolationManager implements IIsolationManager {
     action: string,
     resource: string,
     resourceId: string,
-    result: 'SUCCESS' | 'FAILURE' | 'ERROR',
-    details?: Record<string, any>
+    result: "SUCCESS" | "FAILURE" | "ERROR",
+    details?: Record<string, any>,
   ): Promise<void> {
     try {
       const context = this.getCurrentIsolationContext();
       if (!context) {
-        throw new Error('未设置隔离上下文');
+        throw new Error("未设置隔离上下文");
       }
 
       await this.auditLogService.log({
         action,
         resource,
         resourceId,
-        userId: context.userId || 'unknown',
+        userId: context.userId || "unknown",
         tenantId: context.tenantId,
         organizationId: context.organizationId,
         departmentId: context.departmentId,
         result,
         details: details || {},
-        ipAddress: 'unknown',
-        userAgent: 'unknown'
+        ipAddress: "unknown",
+        userAgent: "unknown",
       } as any);
     } catch (error) {
-      console.error('记录审计事件失败:', error);
+      console.error("记录审计事件失败:", error);
     }
   }
 
@@ -239,14 +265,14 @@ export class IsolationManager implements IIsolationManager {
    */
   async logSecurityEvent(
     type: string,
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
     description: string,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): Promise<void> {
     try {
       const context = this.getCurrentIsolationContext();
       if (!context) {
-        throw new Error('未设置隔离上下文');
+        throw new Error("未设置隔离上下文");
       }
 
       await this.securityMonitorService.recordSecurityEvent({
@@ -256,10 +282,10 @@ export class IsolationManager implements IIsolationManager {
         description,
         context,
         timestamp: new Date(),
-        details: details || {}
+        details: details || {},
       });
     } catch (error) {
-      console.error('记录安全事件失败:', error);
+      console.error("记录安全事件失败:", error);
     }
   }
 
@@ -281,54 +307,60 @@ export class IsolationManager implements IIsolationManager {
    * 获取安全事件
    */
   async getSecurityEvents(startTime: Date, endTime: Date): Promise<any> {
-    return await this.securityMonitorService.getSecurityEventStats(startTime, endTime);
+    return await this.securityMonitorService.getSecurityEventStats(
+      startTime,
+      endTime,
+    );
   }
 
   /**
    * 获取异常访问报告
    */
   async getAnomalousAccessReport(startTime: Date, endTime: Date): Promise<any> {
-    return await this.securityMonitorService.getAnomalousAccessReport(startTime, endTime);
+    return await this.securityMonitorService.getAnomalousAccessReport(
+      startTime,
+      endTime,
+    );
   }
 
   /**
    * 注册默认服务
    */
   private registerDefaultServices(): void {
-    this.registerService('contextManager', this.contextManager);
-    this.registerService('accessControl', this.accessControlService);
-    this.registerService('auditLog', this.auditLogService);
-    this.registerService('securityMonitor', this.securityMonitorService);
+    this.registerService("contextManager", this.contextManager);
+    this.registerService("accessControl", this.accessControlService);
+    this.registerService("auditLog", this.auditLogService);
+    this.registerService("securityMonitor", this.securityMonitorService);
   }
 
   /**
    * 获取资源类型
    */
   private getResourceType(resource: any): string {
-    if (typeof resource === 'string') {
+    if (typeof resource === "string") {
       return resource;
     }
-    
-    if (resource && typeof resource === 'object') {
-      return resource.type || resource.resourceType || 'unknown';
+
+    if (resource && typeof resource === "object") {
+      return resource.type || resource.resourceType || "unknown";
     }
-    
-    return 'unknown';
+
+    return "unknown";
   }
 
   /**
    * 获取资源ID
    */
   private getResourceId(resource: any): string {
-    if (typeof resource === 'string') {
+    if (typeof resource === "string") {
       return resource;
     }
-    
-    if (resource && typeof resource === 'object') {
-      return resource.id || resource.resourceId || '';
+
+    if (resource && typeof resource === "object") {
+      return resource.id || resource.resourceId || "";
     }
-    
-    return '';
+
+    return "";
   }
 
   /**

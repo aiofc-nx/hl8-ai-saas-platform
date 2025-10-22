@@ -8,7 +8,7 @@
 /**
  * 健康状态枚举
  */
-export type HealthStatus = 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+export type HealthStatus = "HEALTHY" | "DEGRADED" | "UNHEALTHY";
 
 /**
  * 健康状态接口
@@ -25,7 +25,7 @@ export interface HealthCheckResult {
   /** 错误率 */
   errorRate: number;
   /** 详细信息 */
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   /** 依赖组件状态 */
   dependencies: HealthCheckResult[];
 }
@@ -41,10 +41,7 @@ export interface HealthCheckService {
   /** 获取整体健康状态 */
   getOverallHealth(): Promise<HealthStatus>;
   /** 注册健康检查器 */
-  registerChecker(
-    component: string,
-    checker: HealthChecker
-  ): void;
+  registerChecker(component: string, checker: HealthChecker): void;
   /** 取消注册健康检查器 */
   unregisterChecker(component: string): void;
 }
@@ -160,7 +157,7 @@ export interface HealthAlert {
   /** 组件名称 */
   component: string;
   /** 告警级别 */
-  level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   /** 告警消息 */
   message: string;
   /** 触发时间 */
@@ -170,7 +167,7 @@ export interface HealthAlert {
   /** 处理时间 */
   resolvedAt?: Date;
   /** 详细信息 */
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }
 
 /**
@@ -178,7 +175,7 @@ export interface HealthAlert {
  */
 export interface HealthAlertService {
   /** 发送告警 */
-  sendAlert(alert: Omit<HealthAlert, 'id' | 'timestamp'>): Promise<void>;
+  sendAlert(alert: Omit<HealthAlert, "id" | "timestamp">): Promise<void>;
   /** 获取告警列表 */
   getAlerts(filters?: HealthAlertFilters): Promise<HealthAlert[]>;
   /** 解决告警 */
@@ -194,7 +191,7 @@ export interface HealthAlertFilters {
   /** 组件名称 */
   component?: string;
   /** 告警级别 */
-  level?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  level?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   /** 是否已处理 */
   resolved?: boolean;
   /** 开始时间 */

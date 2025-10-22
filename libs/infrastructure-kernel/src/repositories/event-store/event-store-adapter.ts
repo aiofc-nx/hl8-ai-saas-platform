@@ -5,10 +5,10 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
 
 /**
  * 领域事件接口
@@ -38,7 +38,7 @@ export class EventStoreAdapter {
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
@@ -48,20 +48,22 @@ export class EventStoreAdapter {
     try {
       // 应用隔离上下文
       const isolatedEvent = this.applyIsolationContext(event);
-      
+
       // 在事务中保存事件
       await this.databaseAdapter.transaction(async (em) => {
         const repository = em.getRepository(this.getEventEntityClass());
         await repository.persistAndFlush(isolatedEvent);
       });
-      
+
       // 更新缓存
       if (this.cacheService) {
         const cacheKey = this.generateEventCacheKey(event);
         await this.cacheService.set(cacheKey, event);
       }
     } catch (error) {
-      throw new Error(`保存事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `保存事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -75,14 +77,16 @@ export class EventStoreAdapter {
       }
 
       // 应用隔离上下文
-      const isolatedEvents = events.map(event => this.applyIsolationContext(event));
-      
+      const isolatedEvents = events.map((event) =>
+        this.applyIsolationContext(event),
+      );
+
       // 在事务中批量保存事件
       await this.databaseAdapter.transaction(async (em) => {
         const repository = em.getRepository(this.getEventEntityClass());
         await repository.persistAndFlush(isolatedEvents);
       });
-      
+
       // 更新缓存
       if (this.cacheService) {
         for (const event of events) {
@@ -91,18 +95,26 @@ export class EventStoreAdapter {
         }
       }
     } catch (error) {
-      throw new Error(`批量保存事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `批量保存事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
   /**
    * 获取聚合根的所有事件
    */
-  async getEvents(aggregateId: string, fromVersion?: number): Promise<DomainEvent[]> {
+  async getEvents(
+    aggregateId: string,
+    fromVersion?: number,
+  ): Promise<DomainEvent[]> {
     try {
       // 尝试从缓存获取
       if (this.cacheService) {
-        const cacheKey = this.generateAggregateCacheKey(aggregateId, fromVersion);
+        const cacheKey = this.generateAggregateCacheKey(
+          aggregateId,
+          fromVersion,
+        );
         const cached = await this.cacheService.get<DomainEvent[]>(cacheKey);
         if (cached) {
           return cached;
@@ -110,34 +122,41 @@ export class EventStoreAdapter {
       }
 
       // 从数据库查询
-      const repository = this.databaseAdapter.getRepository(this.getEventEntityClass());
+      const repository = this.databaseAdapter.getRepository(
+        this.getEventEntityClass(),
+      );
       const conditions: any = { aggregateId };
-      
+
       if (fromVersion !== undefined) {
         conditions.version = { $gte: fromVersion };
       }
-      
+
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
-      
-      const events = await repository.find(isolatedConditions, {
-        orderBy: { version: 'ASC' }
+
+      const events = await (repository as { find(conditions: unknown, options?: unknown): Promise<unknown[]> }).find(isolatedConditions, {
+        orderBy: { version: "ASC" },
       });
-      
+
       // 应用隔离过滤
       const filteredEvents = events
-        .map(event => this.applyIsolationFilter(event))
-        .filter(event => event !== null) as DomainEvent[];
+        .map((event) => this.applyIsolationFilter(event))
+        .filter((event) => event !== null) as DomainEvent[];
 
       // 更新缓存
       if (this.cacheService) {
-        const cacheKey = this.generateAggregateCacheKey(aggregateId, fromVersion);
+        const cacheKey = this.generateAggregateCacheKey(
+          aggregateId,
+          fromVersion,
+        );
         await this.cacheService.set(cacheKey, filteredEvents);
       }
 
       return filteredEvents;
     } catch (error) {
-      throw new Error(`获取事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -147,35 +166,39 @@ export class EventStoreAdapter {
   async getEventStream(
     aggregateId: string,
     fromVersion?: number,
-    toVersion?: number
+    toVersion?: number,
   ): Promise<DomainEvent[]> {
     try {
-      const repository = this.databaseAdapter.getRepository(this.getEventEntityClass());
+      const repository = this.databaseAdapter.getRepository(
+        this.getEventEntityClass(),
+      );
       const conditions: any = { aggregateId };
-      
+
       if (fromVersion !== undefined) {
         conditions.version = { $gte: fromVersion };
       }
-      
+
       if (toVersion !== undefined) {
         conditions.version = { ...conditions.version, $lte: toVersion };
       }
-      
+
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
-      
-      const events = await repository.find(isolatedConditions, {
-        orderBy: { version: 'ASC' }
+
+      const events = await (repository as { find(conditions: unknown, options?: unknown): Promise<unknown[]> }).find(isolatedConditions, {
+        orderBy: { version: "ASC" },
       });
-      
+
       // 应用隔离过滤
       const filteredEvents = events
-        .map(event => this.applyIsolationFilter(event))
-        .filter(event => event !== null) as DomainEvent[];
+        .map((event) => this.applyIsolationFilter(event))
+        .filter((event) => event !== null) as DomainEvent[];
 
       return filteredEvents;
     } catch (error) {
-      throw new Error(`获取事件流失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取事件流失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -184,24 +207,28 @@ export class EventStoreAdapter {
    */
   async getEventsByType(eventType: string): Promise<DomainEvent[]> {
     try {
-      const repository = this.databaseAdapter.getRepository(this.getEventEntityClass());
+      const repository = this.databaseAdapter.getRepository(
+        this.getEventEntityClass(),
+      );
       const conditions = { eventType };
-      
+
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
-      
-      const events = await repository.find(isolatedConditions, {
-        orderBy: { timestamp: 'ASC' }
+
+      const events = await (repository as { find(conditions: unknown, options?: unknown): Promise<unknown[]> }).find(isolatedConditions, {
+        orderBy: { timestamp: "ASC" },
       });
-      
+
       // 应用隔离过滤
       const filteredEvents = events
-        .map(event => this.applyIsolationFilter(event))
-        .filter(event => event !== null) as DomainEvent[];
+        .map((event) => this.applyIsolationFilter(event))
+        .filter((event) => event !== null) as DomainEvent[];
 
       return filteredEvents;
     } catch (error) {
-      throw new Error(`根据事件类型获取事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `根据事件类型获取事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -215,14 +242,16 @@ export class EventStoreAdapter {
         const repository = em.getRepository(this.getEventEntityClass());
         await repository.nativeDelete({ aggregateId });
       });
-      
+
       // 清除缓存
       if (this.cacheService) {
         const cacheKey = this.generateAggregateCacheKey(aggregateId);
         await this.cacheService.delete(cacheKey);
       }
     } catch (error) {
-      throw new Error(`删除事件失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `删除事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -231,15 +260,19 @@ export class EventStoreAdapter {
    */
   async getEventCount(aggregateId: string): Promise<number> {
     try {
-      const repository = this.databaseAdapter.getRepository(this.getEventEntityClass());
+      const repository = this.databaseAdapter.getRepository(
+        this.getEventEntityClass(),
+      );
       const conditions = { aggregateId };
-      
+
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
-      
-      return await repository.count(isolatedConditions);
+
+      return await (repository as { count(conditions: unknown): Promise<number> }).count(isolatedConditions);
     } catch (error) {
-      throw new Error(`获取事件数量失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取事件数量失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -248,19 +281,23 @@ export class EventStoreAdapter {
    */
   async getLatestEventVersion(aggregateId: string): Promise<number> {
     try {
-      const repository = this.databaseAdapter.getRepository(this.getEventEntityClass());
+      const repository = this.databaseAdapter.getRepository(
+        this.getEventEntityClass(),
+      );
       const conditions = { aggregateId };
-      
+
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
-      
-      const latestEvent = await repository.findOne(isolatedConditions, {
-        orderBy: { version: 'DESC' }
+
+      const latestEvent = await (repository as { findOne(conditions: unknown, options?: unknown): Promise<unknown> }).findOne(isolatedConditions, {
+        orderBy: { version: "DESC" },
       });
-      
+
       return latestEvent ? (latestEvent as any).version : 0;
     } catch (error) {
-      throw new Error(`获取最新事件版本失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `获取最新事件版本失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -269,8 +306,10 @@ export class EventStoreAdapter {
    */
   async eventExists(eventId: string): Promise<boolean> {
     try {
-      const repository = this.databaseAdapter.getRepository(this.getEventEntityClass());
-      const event = await repository.findOne({ id: eventId } as any);
+      const repository = this.databaseAdapter.getRepository(
+        this.getEventEntityClass(),
+      );
+      const event = await (repository as { findOne(conditions: unknown): Promise<unknown> }).findOne({ id: eventId } as any);
       return event !== null;
     } catch (error) {
       return false;
@@ -286,24 +325,25 @@ export class EventStoreAdapter {
     }
 
     const isolatedEvent = { ...event };
-    
+
     // 添加隔离字段到元数据
     if (!isolatedEvent.metadata) {
       isolatedEvent.metadata = {};
     }
-    
+
     if (this.isolationContext.tenantId) {
       isolatedEvent.metadata.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.organizationId) {
-      isolatedEvent.metadata.organizationId = this.isolationContext.organizationId;
+      isolatedEvent.metadata.organizationId =
+        this.isolationContext.organizationId;
     }
-    
+
     if (this.isolationContext.departmentId) {
       isolatedEvent.metadata.departmentId = this.isolationContext.departmentId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedEvent.metadata.userId = this.isolationContext.userId;
     }
@@ -320,24 +360,36 @@ export class EventStoreAdapter {
     }
 
     const metadata = event.metadata || {};
-    
+
     // 检查租户隔离
-    if (this.isolationContext.tenantId && metadata.tenantId !== this.isolationContext.tenantId) {
+    if (
+      this.isolationContext.tenantId &&
+      metadata.tenantId !== this.isolationContext.tenantId
+    ) {
       return null;
     }
-    
+
     // 检查组织隔离
-    if (this.isolationContext.organizationId && metadata.organizationId !== this.isolationContext.organizationId) {
+    if (
+      this.isolationContext.organizationId &&
+      metadata.organizationId !== this.isolationContext.organizationId
+    ) {
       return null;
     }
-    
+
     // 检查部门隔离
-    if (this.isolationContext.departmentId && metadata.departmentId !== this.isolationContext.departmentId) {
+    if (
+      this.isolationContext.departmentId &&
+      metadata.departmentId !== this.isolationContext.departmentId
+    ) {
       return null;
     }
-    
+
     // 检查用户隔离
-    if (this.isolationContext.userId && metadata.userId !== this.isolationContext.userId) {
+    if (
+      this.isolationContext.userId &&
+      metadata.userId !== this.isolationContext.userId
+    ) {
       return null;
     }
 
@@ -347,30 +399,34 @@ export class EventStoreAdapter {
   /**
    * 应用隔离条件
    */
-  protected applyIsolationConditions(conditions: Record<string, any>): Record<string, any> {
+  protected applyIsolationConditions(
+    conditions: Record<string, any>,
+  ): Record<string, any> {
     if (!this.isolationContext) {
       return conditions;
     }
 
     const isolatedConditions = { ...conditions };
-    
+
     // 添加隔离条件到元数据查询
     if (!isolatedConditions.metadata) {
       isolatedConditions.metadata = {};
     }
-    
+
     if (this.isolationContext.tenantId) {
       isolatedConditions.metadata.tenantId = this.isolationContext.tenantId;
     }
-    
+
     if (this.isolationContext.organizationId) {
-      isolatedConditions.metadata.organizationId = this.isolationContext.organizationId;
+      isolatedConditions.metadata.organizationId =
+        this.isolationContext.organizationId;
     }
-    
+
     if (this.isolationContext.departmentId) {
-      isolatedConditions.metadata.departmentId = this.isolationContext.departmentId;
+      isolatedConditions.metadata.departmentId =
+        this.isolationContext.departmentId;
     }
-    
+
     if (this.isolationContext.userId) {
       isolatedConditions.metadata.userId = this.isolationContext.userId;
     }
@@ -383,28 +439,31 @@ export class EventStoreAdapter {
    */
   protected generateEventCacheKey(event: DomainEvent): string {
     let cacheKey = `event:${event.id}`;
-    
+
     if (this.isolationContext) {
       cacheKey = `${this.isolationContext.tenantId}:${cacheKey}`;
     }
-    
+
     return cacheKey;
   }
 
   /**
    * 生成聚合根缓存键
    */
-  protected generateAggregateCacheKey(aggregateId: string, fromVersion?: number): string {
+  protected generateAggregateCacheKey(
+    aggregateId: string,
+    fromVersion?: number,
+  ): string {
     let cacheKey = `events:${aggregateId}`;
-    
+
     if (fromVersion !== undefined) {
       cacheKey += `:${fromVersion}`;
     }
-    
+
     if (this.isolationContext) {
       cacheKey = `${this.isolationContext.tenantId}:${cacheKey}`;
     }
-    
+
     return cacheKey;
   }
 

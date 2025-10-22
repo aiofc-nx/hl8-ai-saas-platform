@@ -126,7 +126,7 @@ export class IsolationModule {
 
                 // 存储到 CLS
                 cls.set(ISOLATION_CONTEXT_KEY, context);
-              } catch (error) {
+              } catch (_error) {
                 // 验证错误时，降级到平台级
                 cls.set(ISOLATION_CONTEXT_KEY, IsolationContext.platform());
               }

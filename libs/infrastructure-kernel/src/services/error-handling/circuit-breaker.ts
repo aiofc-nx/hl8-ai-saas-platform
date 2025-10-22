@@ -5,14 +5,14 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
 
 /**
  * 熔断器状态
  */
-export type CircuitBreakerState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+export type CircuitBreakerState = "CLOSED" | "OPEN" | "HALF_OPEN";
 
 /**
  * 熔断器配置
@@ -55,25 +55,28 @@ export interface CircuitBreakerStats {
  */
 @Injectable()
 export class CircuitBreakerService {
-  private circuits = new Map<string, {
-    state: CircuitBreakerState;
-    failureCount: number;
-    lastFailureTime: Date | null;
-    stats: CircuitBreakerStats;
-    config: CircuitBreakerConfig;
-  }>();
-  
+  private circuits = new Map<
+    string,
+    {
+      state: CircuitBreakerState;
+      failureCount: number;
+      lastFailureTime: Date | null;
+      stats: CircuitBreakerStats;
+      config: CircuitBreakerConfig;
+    }
+  >();
+
   private defaultConfig: CircuitBreakerConfig = {
     failureThreshold: 5,
     recoveryTimeout: 30000,
     requestTimeout: 5000,
     monitoringWindow: 60000,
-    minimumRequests: 10
+    minimumRequests: 10,
   };
 
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
-    private readonly loggingService?: ILoggingService
+    private readonly loggingService?: ILoggingService,
   ) {}
 
   /**
@@ -82,48 +85,51 @@ export class CircuitBreakerService {
   async execute<T>(
     circuitName: string,
     operation: () => Promise<T>,
-    config?: Partial<CircuitBreakerConfig>
+    config?: Partial<CircuitBreakerConfig>,
   ): Promise<T> {
     try {
       // 获取或创建熔断器
       const circuit = this.getOrCreateCircuit(circuitName, config);
-      
+
       // 检查熔断器状态
-      if (circuit.state === 'OPEN') {
+      if (circuit.state === "OPEN") {
         if (this.shouldAttemptRecovery(circuit)) {
-          circuit.state = 'HALF_OPEN';
+          circuit.state = "HALF_OPEN";
           circuit.lastFailureTime = null;
         } else {
           throw new Error(`熔断器 ${circuitName} 处于开启状态`);
         }
       }
-      
+
       // 执行操作
       const startTime = Date.now();
-      const result = await this.executeWithTimeout(operation, circuit.config.requestTimeout);
+      const result = await this.executeWithTimeout(
+        operation,
+        circuit.config.requestTimeout,
+      );
       const executionTime = Date.now() - startTime;
-      
+
       // 记录成功
       this.recordSuccess(circuit);
-      
+
       // 如果处于半开状态，关闭熔断器
-      if (circuit.state === 'HALF_OPEN') {
-        circuit.state = 'CLOSED';
+      if (circuit.state === "HALF_OPEN") {
+        circuit.state = "CLOSED";
         circuit.failureCount = 0;
       }
-      
+
       // 记录执行日志
-      await this.logExecution(circuitName, 'SUCCESS', executionTime);
-      
+      await this.logExecution(circuitName, "SUCCESS", executionTime);
+
       return result;
     } catch (error) {
       // 记录失败
       const circuit = this.getOrCreateCircuit(circuitName, config);
       this.recordFailure(circuit);
-      
+
       // 记录失败日志
-      await this.logExecution(circuitName, 'FAILURE', 0, error);
-      
+      await this.logExecution(circuitName, "FAILURE", 0, error);
+
       throw error;
     }
   }
@@ -149,11 +155,11 @@ export class CircuitBreakerService {
    */
   getAllCircuitStats(): Record<string, CircuitBreakerStats> {
     const stats: Record<string, CircuitBreakerStats> = {};
-    
+
     for (const [name, circuit] of this.circuits.entries()) {
       stats[name] = { ...circuit.stats };
     }
-    
+
     return stats;
   }
 
@@ -163,7 +169,7 @@ export class CircuitBreakerService {
   resetCircuit(circuitName: string): void {
     const circuit = this.circuits.get(circuitName);
     if (circuit) {
-      circuit.state = 'CLOSED';
+      circuit.state = "CLOSED";
       circuit.failureCount = 0;
       circuit.lastFailureTime = null;
       circuit.stats = this.createInitialStats();
@@ -176,7 +182,7 @@ export class CircuitBreakerService {
   closeCircuit(circuitName: string): void {
     const circuit = this.circuits.get(circuitName);
     if (circuit) {
-      circuit.state = 'CLOSED';
+      circuit.state = "CLOSED";
       circuit.failureCount = 0;
       circuit.lastFailureTime = null;
     }
@@ -188,7 +194,7 @@ export class CircuitBreakerService {
   openCircuit(circuitName: string): void {
     const circuit = this.circuits.get(circuitName);
     if (circuit) {
-      circuit.state = 'OPEN';
+      circuit.state = "OPEN";
       circuit.lastFailureTime = new Date();
     }
   }
@@ -196,7 +202,10 @@ export class CircuitBreakerService {
   /**
    * 设置熔断器配置
    */
-  setCircuitConfig(circuitName: string, config: Partial<CircuitBreakerConfig>): void {
+  setCircuitConfig(
+    circuitName: string,
+    config: Partial<CircuitBreakerConfig>,
+  ): void {
     const circuit = this.circuits.get(circuitName);
     if (circuit) {
       circuit.config = { ...circuit.config, ...config };
@@ -223,7 +232,7 @@ export class CircuitBreakerService {
    */
   private getOrCreateCircuit(
     circuitName: string,
-    config?: Partial<CircuitBreakerConfig>
+    config?: Partial<CircuitBreakerConfig>,
   ): {
     state: CircuitBreakerState;
     failureCount: number;
@@ -232,18 +241,18 @@ export class CircuitBreakerService {
     config: CircuitBreakerConfig;
   } {
     let circuit = this.circuits.get(circuitName);
-    
+
     if (!circuit) {
       circuit = {
-        state: 'CLOSED',
+        state: "CLOSED",
         failureCount: 0,
         lastFailureTime: null,
         stats: this.createInitialStats(),
-        config: { ...this.defaultConfig, ...config }
+        config: { ...this.defaultConfig, ...config },
       };
       this.circuits.set(circuitName, circuit);
     }
-    
+
     return circuit;
   }
 
@@ -257,14 +266,14 @@ export class CircuitBreakerService {
     stats: CircuitBreakerStats;
     config: CircuitBreakerConfig;
   }): boolean {
-    if (circuit.state !== 'OPEN') {
+    if (circuit.state !== "OPEN") {
       return false;
     }
-    
+
     if (!circuit.lastFailureTime) {
       return true;
     }
-    
+
     const timeSinceLastFailure = Date.now() - circuit.lastFailureTime.getTime();
     return timeSinceLastFailure >= circuit.config.recoveryTimeout;
   }
@@ -274,19 +283,19 @@ export class CircuitBreakerService {
    */
   private async executeWithTimeout<T>(
     operation: () => Promise<T>,
-    timeout: number
+    timeout: number,
   ): Promise<T> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        reject(new Error('操作超时'));
+        reject(new Error("操作超时"));
       }, timeout);
-      
+
       operation()
-        .then(result => {
+        .then((result) => {
           clearTimeout(timer);
           resolve(result);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timer);
           reject(error);
         });
@@ -305,11 +314,12 @@ export class CircuitBreakerService {
   }): void {
     circuit.stats.totalRequests++;
     circuit.stats.successfulRequests++;
-    circuit.stats.successRate = circuit.stats.successfulRequests / circuit.stats.totalRequests;
-    
+    circuit.stats.successRate =
+      circuit.stats.successfulRequests / circuit.stats.totalRequests;
+
     // 如果处于半开状态，关闭熔断器
-    if (circuit.state === 'HALF_OPEN') {
-      circuit.state = 'CLOSED';
+    if (circuit.state === "HALF_OPEN") {
+      circuit.state = "CLOSED";
       circuit.failureCount = 0;
     }
   }
@@ -328,11 +338,12 @@ export class CircuitBreakerService {
     circuit.stats.failedRequests++;
     circuit.failureCount++;
     circuit.lastFailureTime = new Date();
-    circuit.stats.successRate = circuit.stats.successfulRequests / circuit.stats.totalRequests;
-    
+    circuit.stats.successRate =
+      circuit.stats.successfulRequests / circuit.stats.totalRequests;
+
     // 检查是否应该打开熔断器
     if (this.shouldOpenCircuit(circuit)) {
-      circuit.state = 'OPEN';
+      circuit.state = "OPEN";
       circuit.stats.circuitBreaks++;
       circuit.stats.lastStateChange = new Date();
     }
@@ -352,20 +363,21 @@ export class CircuitBreakerService {
     if (circuit.stats.totalRequests < circuit.config.minimumRequests) {
       return false;
     }
-    
+
     // 检查失败阈值
     if (circuit.failureCount >= circuit.config.failureThreshold) {
       return true;
     }
-    
+
     // 检查时间窗口内的失败率
     const timeWindow = circuit.config.monitoringWindow;
     const now = Date.now();
     const windowStart = now - timeWindow;
-    
+
     // 这里应该实现更复杂的时间窗口统计
     // 暂时使用简单的失败率检查
-    const failureRate = circuit.stats.failedRequests / circuit.stats.totalRequests;
+    const failureRate =
+      circuit.stats.failedRequests / circuit.stats.totalRequests;
     return failureRate > 0.5; // 50%失败率阈值
   }
 
@@ -378,9 +390,9 @@ export class CircuitBreakerService {
       successfulRequests: 0,
       failedRequests: 0,
       circuitBreaks: 0,
-      currentState: 'CLOSED',
+      currentState: "CLOSED",
       lastStateChange: new Date(),
-      successRate: 0
+      successRate: 0,
     };
   }
 
@@ -389,37 +401,45 @@ export class CircuitBreakerService {
    */
   private async logExecution(
     circuitName: string,
-    result: 'SUCCESS' | 'FAILURE',
+    result: "SUCCESS" | "FAILURE",
     executionTime: number,
-    error?: Error
+    error?: Error,
   ): Promise<void> {
     try {
       if (this.loggingService) {
         const logContext = {
           requestId: `circuit_${circuitName}_${Date.now()}`,
-          tenantId: 'system',
-          operation: 'circuit-breaker',
-          resource: 'circuit-breaker',
+          tenantId: "system",
+          operation: "circuit-breaker",
+          resource: "circuit-breaker",
           timestamp: new Date(),
-          level: result === 'SUCCESS' ? 'info' : 'warn' as const,
-          message: `熔断器 ${circuitName}: ${result}`
+          level: result === "SUCCESS" ? "info" : ("warn" as const),
+          message: `熔断器 ${circuitName}: ${result}`,
         };
-        
-        if (result === 'SUCCESS') {
-          await this.loggingService.info(logContext as any, `熔断器 ${circuitName}: ${result}`, {
-            executionTime,
-            result
-          });
+
+        if (result === "SUCCESS") {
+          await this.loggingService.info(
+            logContext as any,
+            `熔断器 ${circuitName}: ${result}`,
+            {
+              executionTime,
+              result,
+            },
+          );
         } else {
-          await this.loggingService.warn(logContext as any, `熔断器 ${circuitName}: ${result}`, {
-            executionTime,
-            result,
-            error: error?.message
-          });
+          await this.loggingService.warn(
+            logContext as any,
+            `熔断器 ${circuitName}: ${result}`,
+            {
+              executionTime,
+              result,
+              error: error?.message,
+            },
+          );
         }
       }
     } catch (error) {
-      console.error('记录熔断器执行日志失败:', error);
+      console.error("记录熔断器执行日志失败:", error);
     }
   }
 

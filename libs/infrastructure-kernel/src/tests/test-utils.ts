@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from "@nestjs/testing";
 
 /**
  * 模拟数据库连接管理器
@@ -20,7 +20,7 @@ export class MockDatabaseConnectionManager {
         transaction: jest.fn().mockImplementation(async (callback) => {
           return await callback({});
         }),
-        close: jest.fn().mockResolvedValue(undefined)
+        close: jest.fn().mockResolvedValue(undefined),
       });
     }
     return this.connections.get(name);
@@ -32,7 +32,7 @@ export class MockDatabaseConnectionManager {
       transaction: jest.fn().mockImplementation(async (callback) => {
         return await callback({});
       }),
-      close: jest.fn().mockResolvedValue(undefined)
+      close: jest.fn().mockResolvedValue(undefined),
     };
     this.connections.set(name, connection);
     return connection;
@@ -57,24 +57,35 @@ export class MockDatabaseConnectionManager {
 export class MockIsolationContextManager {
   private currentContext: any = null;
 
-  createContext(tenantId: string, orgId?: string, deptId?: string, userId?: string) {
+  createContext(
+    tenantId: string,
+    orgId?: string,
+    deptId?: string,
+    userId?: string,
+  ) {
     const context = {
       tenantId,
       organizationId: orgId,
       departmentId: deptId,
       userId,
-      sharingLevel: userId ? 'USER' : deptId ? 'DEPARTMENT' : orgId ? 'ORGANIZATION' : 'TENANT',
+      sharingLevel: userId
+        ? "USER"
+        : deptId
+          ? "DEPARTMENT"
+          : orgId
+            ? "ORGANIZATION"
+            : "TENANT",
       isShared: false,
       accessRules: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.currentContext = context;
     return context;
   }
 
   getCurrentContext() {
-    return this.currentContext || this.createContext('default-tenant');
+    return this.currentContext || this.createContext("default-tenant");
   }
 
   setCurrentContext(context: any) {
@@ -108,16 +119,18 @@ export class MockAccessControlService {
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       departmentId: context.departmentId,
-      userId: context.userId
+      userId: context.userId,
     };
   }
 
   filterData(data: any[], context: any) {
-    return data.filter(item => 
-      item.tenantId === context.tenantId &&
-      (!context.organizationId || item.organizationId === context.organizationId) &&
-      (!context.departmentId || item.departmentId === context.departmentId) &&
-      (!context.userId || item.userId === context.userId)
+    return data.filter(
+      (item) =>
+        item.tenantId === context.tenantId &&
+        (!context.organizationId ||
+          item.organizationId === context.organizationId) &&
+        (!context.departmentId || item.departmentId === context.departmentId) &&
+        (!context.userId || item.userId === context.userId),
     );
   }
 
@@ -235,63 +248,63 @@ export class TestModuleBuilder {
 
   addMockDatabaseConnectionManager() {
     this.providers.push({
-      provide: 'IDatabaseConnectionManager',
-      useValue: new MockDatabaseConnectionManager()
+      provide: "IDatabaseConnectionManager",
+      useValue: new MockDatabaseConnectionManager(),
     });
     return this;
   }
 
   addMockIsolationContextManager() {
     this.providers.push({
-      provide: 'IsolationContextManager',
-      useValue: new MockIsolationContextManager()
+      provide: "IsolationContextManager",
+      useValue: new MockIsolationContextManager(),
     });
     return this;
   }
 
   addMockAccessControlService() {
     this.providers.push({
-      provide: 'AccessControlService',
-      useValue: new MockAccessControlService()
+      provide: "AccessControlService",
+      useValue: new MockAccessControlService(),
     });
     return this;
   }
 
   addMockAuditLogService() {
     this.providers.push({
-      provide: 'AuditLogService',
-      useValue: new MockAuditLogService()
+      provide: "AuditLogService",
+      useValue: new MockAuditLogService(),
     });
     return this;
   }
 
   addMockSecurityMonitorService() {
     this.providers.push({
-      provide: 'SecurityMonitorService',
-      useValue: new MockSecurityMonitorService()
+      provide: "SecurityMonitorService",
+      useValue: new MockSecurityMonitorService(),
     });
     return this;
   }
 
   addMockCacheService() {
     this.providers.push({
-      provide: 'CacheService',
-      useValue: new MockCacheService()
+      provide: "CacheService",
+      useValue: new MockCacheService(),
     });
     return this;
   }
 
   addMockPerformanceMonitorService() {
     this.providers.push({
-      provide: 'PerformanceMonitorService',
-      useValue: new MockPerformanceMonitorService()
+      provide: "PerformanceMonitorService",
+      useValue: new MockPerformanceMonitorService(),
     });
     return this;
   }
 
   async build(): Promise<TestingModule> {
     return await Test.createTestingModule({
-      providers: this.providers
+      providers: this.providers,
     }).compile();
   }
 }
@@ -302,42 +315,42 @@ export class TestModuleBuilder {
 export class TestDataFactory {
   static createIsolationContext(overrides: any = {}) {
     return {
-      tenantId: 'test-tenant',
-      organizationId: 'test-org',
-      departmentId: 'test-dept',
-      userId: 'test-user',
-      sharingLevel: 'USER',
+      tenantId: "test-tenant",
+      organizationId: "test-org",
+      departmentId: "test-dept",
+      userId: "test-user",
+      sharingLevel: "USER",
       isShared: false,
       accessRules: [],
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...overrides
+      ...overrides,
     };
   }
 
   static createDatabaseConfig(overrides: any = {}) {
     return {
-      name: 'test-db',
-      type: 'postgresql',
-      host: 'localhost',
+      name: "test-db",
+      type: "postgresql",
+      host: "localhost",
       port: 5432,
-      database: 'test',
-      username: 'test',
-      password: 'test',
-      ...overrides
+      database: "test",
+      username: "test",
+      password: "test",
+      ...overrides,
     };
   }
 
   static createTestData(count: number = 3) {
     return Array.from({ length: count }, (_, i) => ({
       id: `test-${i + 1}`,
-      tenantId: 'test-tenant',
-      organizationId: 'test-org',
-      departmentId: 'test-dept',
-      userId: 'test-user',
+      tenantId: "test-tenant",
+      organizationId: "test-org",
+      departmentId: "test-dept",
+      userId: "test-user",
       name: `Test Item ${i + 1}`,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }));
   }
 }
@@ -355,11 +368,11 @@ export class TestAssertions {
   }
 
   static expectHealthCheckResult(result: any) {
-    expect(typeof result).toBe('boolean');
+    expect(typeof result).toBe("boolean");
   }
 
   static expectServiceResponse(response: any) {
     expect(response).toBeDefined();
-    expect(typeof response).toBe('object');
+    expect(typeof response).toBe("object");
   }
 }

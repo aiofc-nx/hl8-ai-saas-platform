@@ -8,12 +8,12 @@
 /**
  * 数据库连接类型
  */
-export type DatabaseType = 'POSTGRESQL' | 'MONGODB';
+export type DatabaseType = "POSTGRESQL" | "MONGODB";
 
 /**
  * 数据库连接状态
  */
-export type ConnectionStatus = 'ACTIVE' | 'INACTIVE' | 'ERROR';
+export type ConnectionStatus = "ACTIVE" | "INACTIVE" | "ERROR";
 
 /**
  * 数据库连接配置接口
@@ -53,11 +53,11 @@ export interface DatabaseConnectionConfig {
  * PostgreSQL连接配置接口
  */
 export interface PostgreSQLConnectionConfig extends DatabaseConnectionConfig {
-  type: 'POSTGRESQL';
+  type: "POSTGRESQL";
   /** 数据库模式 */
   schema: string;
   /** SSL模式 */
-  sslMode: 'disable' | 'require' | 'verify-ca' | 'verify-full';
+  sslMode: "disable" | "require" | "verify-ca" | "verify-full";
   /** 最大连接数 */
   maxConnections: number;
   /** 空闲超时时间(秒) */
@@ -70,7 +70,7 @@ export interface PostgreSQLConnectionConfig extends DatabaseConnectionConfig {
  * MongoDB连接配置接口
  */
 export interface MongoDBConnectionConfig extends DatabaseConnectionConfig {
-  type: 'MONGODB';
+  type: "MONGODB";
   /** 副本集名称 */
   replicaSet: string;
   /** 认证源 */
@@ -122,7 +122,7 @@ export interface DatabaseAdapter {
   /** 断开数据库连接 */
   disconnect(): Promise<void>;
   /** 获取仓储实例 */
-  getRepository<T>(entity: any): any;
+  getRepository<T>(entity: unknown): unknown;
   /** 健康检查 */
   healthCheck(): Promise<boolean>;
   /** 获取连接状态 */
@@ -132,7 +132,7 @@ export interface DatabaseAdapter {
 /**
  * 数据库操作结果接口
  */
-export interface DatabaseOperationResult<T = any> {
+export interface DatabaseOperationResult<T = unknown> {
   /** 操作是否成功 */
   success: boolean;
   /** 返回数据 */
@@ -154,9 +154,9 @@ export interface DatabaseQueryOptions {
   /** 排序字段 */
   orderBy?: string;
   /** 排序方向 */
-  orderDirection?: 'ASC' | 'DESC';
+  orderDirection?: "ASC" | "DESC";
   /** 过滤条件 */
-  where?: Record<string, any>;
+  where?: Record<string, unknown>;
 }
 
 /**
@@ -164,7 +164,11 @@ export interface DatabaseQueryOptions {
  */
 export interface DatabaseTransactionOptions {
   /** 隔离级别 */
-  isolationLevel?: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
+  isolationLevel?:
+    | "READ_UNCOMMITTED"
+    | "READ_COMMITTED"
+    | "REPEATABLE_READ"
+    | "SERIALIZABLE";
   /** 超时时间(毫秒) */
   timeout?: number;
   /** 是否只读 */

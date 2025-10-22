@@ -5,15 +5,16 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import * as os from "os";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
+import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
 
 /**
  * 指标类型
  */
-export type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
+export type MetricType = "counter" | "gauge" | "histogram" | "summary";
 
 /**
  * 指标标签
@@ -71,13 +72,13 @@ export class MetricsCollectorService {
   private config = {
     maxMetrics: 10000,
     aggregationInterval: 60000, // 1分钟
-    retentionPeriod: 24 * 60 * 60 * 1000 // 24小时
+    retentionPeriod: 24 * 60 * 60 * 1000, // 24小时
   };
 
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
-    private readonly loggingService?: ILoggingService
+    private readonly loggingService?: ILoggingService,
   ) {
     this.registerDefaultCollectors();
   }
@@ -85,7 +86,10 @@ export class MetricsCollectorService {
   /**
    * 注册指标收集器
    */
-  registerCollector(name: string, collector: () => Promise<MetricValue[]>): void {
+  registerCollector(
+    name: string,
+    collector: () => Promise<MetricValue[]>,
+  ): void {
     this.collectors.set(name, collector);
   }
 
@@ -102,7 +106,7 @@ export class MetricsCollectorService {
   async collectMetrics(): Promise<MetricValue[]> {
     try {
       const allMetrics: MetricValue[] = [];
-      
+
       // 执行所有收集器
       for (const [name, collector] of this.collectors.entries()) {
         try {
@@ -115,41 +119,45 @@ export class MetricsCollectorService {
 
       // 存储指标
       this.metrics.push(...allMetrics);
-      
+
       // 清理过期指标
       this.cleanupExpiredMetrics();
-      
+
       // 限制指标数量
       this.limitMetricsCount();
 
       return allMetrics;
     } catch (error) {
-      throw new Error(`收集指标失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `收集指标失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
   /**
    * 获取指标
    */
-  getMetrics(
-    name?: string,
-    startTime?: Date,
-    endTime?: Date
-  ): MetricValue[] {
+  getMetrics(name?: string, startTime?: Date, endTime?: Date): MetricValue[] {
     let filteredMetrics = [...this.metrics];
-    
+
     if (name) {
-      filteredMetrics = filteredMetrics.filter(metric => metric.name === name);
+      filteredMetrics = filteredMetrics.filter(
+        (metric) => metric.name === name,
+      );
     }
-    
+
     if (startTime) {
-      filteredMetrics = filteredMetrics.filter(metric => metric.timestamp >= startTime);
+      filteredMetrics = filteredMetrics.filter(
+        (metric) => metric.timestamp >= startTime,
+      );
     }
-    
+
     if (endTime) {
-      filteredMetrics = filteredMetrics.filter(metric => metric.timestamp <= endTime);
+      filteredMetrics = filteredMetrics.filter(
+        (metric) => metric.timestamp <= endTime,
+      );
     }
-    
+
     return filteredMetrics;
   }
 
@@ -159,16 +167,16 @@ export class MetricsCollectorService {
   getMetricAggregation(
     name: string,
     startTime?: Date,
-    endTime?: Date
+    endTime?: Date,
   ): MetricAggregation | null {
     try {
       const metrics = this.getMetrics(name, startTime, endTime);
-      
+
       if (metrics.length === 0) {
         return null;
       }
 
-      const values = metrics.map(m => m.value);
+      const values = metrics.map((m) => m.value);
       const sum = values.reduce((acc, val) => acc + val, 0);
       const average = sum / values.length;
       const min = Math.min(...values);
@@ -178,7 +186,7 @@ export class MetricsCollectorService {
       const sortedValues = values.sort((a, b) => a - b);
       const percentiles: Record<number, number> = {};
       const percentilesToCalculate = [50, 90, 95, 99];
-      
+
       for (const percentile of percentilesToCalculate) {
         const index = Math.ceil((percentile / 100) * sortedValues.length) - 1;
         percentiles[percentile] = sortedValues[index];
@@ -191,7 +199,7 @@ export class MetricsCollectorService {
         average,
         min,
         max,
-        percentiles
+        percentiles,
       };
     } catch (error) {
       return null;
@@ -203,18 +211,18 @@ export class MetricsCollectorService {
    */
   getAllMetricAggregations(
     startTime?: Date,
-    endTime?: Date
+    endTime?: Date,
   ): Record<string, MetricAggregation> {
     const aggregations: Record<string, MetricAggregation> = {};
-    const metricNames = new Set(this.metrics.map(m => m.name));
-    
+    const metricNames = new Set(this.metrics.map((m) => m.name));
+
     for (const name of metricNames) {
       const aggregation = this.getMetricAggregation(name, startTime, endTime);
       if (aggregation) {
         aggregations[name] = aggregation;
       }
     }
-    
+
     return aggregations;
   }
 
@@ -222,18 +230,18 @@ export class MetricsCollectorService {
    * 导出指标
    */
   exportMetrics(
-    format: 'json' | 'prometheus',
+    format: "json" | "prometheus",
     startTime?: Date,
-    endTime?: Date
+    endTime?: Date,
   ): string {
     const metrics = this.getMetrics(undefined, startTime, endTime);
-    
-    if (format === 'json') {
+
+    if (format === "json") {
       return JSON.stringify(metrics, null, 2);
-    } else if (format === 'prometheus') {
+    } else if (format === "prometheus") {
       return this.convertToPrometheusFormat(metrics);
     }
-    
+
     throw new Error(`不支持的导出格式: ${format}`);
   }
 
@@ -256,14 +264,14 @@ export class MetricsCollectorService {
    */
   getMetricsStats(): Record<string, any> {
     const totalMetrics = this.metrics.length;
-    const metricNames = new Set(this.metrics.map(m => m.name));
+    const metricNames = new Set(this.metrics.map((m) => m.name));
     const collectors = Array.from(this.collectors.keys());
-    
+
     return {
       totalMetrics,
       uniqueMetricNames: metricNames.size,
       registeredCollectors: collectors.length,
-      config: this.config
+      config: this.config,
     };
   }
 
@@ -272,24 +280,24 @@ export class MetricsCollectorService {
    */
   private registerDefaultCollectors(): void {
     // 数据库指标收集器
-    this.registerCollector('database', async () => {
+    this.registerCollector("database", async () => {
       try {
         const connectionInfo = await this.databaseAdapter.getConnectionInfo();
         return [
           {
-            name: 'database_connections',
-            type: 'gauge' as MetricType,
+            name: "database_connections",
+            type: "gauge" as MetricType,
             value: connectionInfo.connections || 0,
             timestamp: new Date(),
-            description: '数据库连接数'
+            description: "数据库连接数",
           },
           {
-            name: 'database_health',
-            type: 'gauge' as MetricType,
+            name: "database_health",
+            type: "gauge" as MetricType,
             value: connectionInfo.healthy ? 1 : 0,
             timestamp: new Date(),
-            description: '数据库健康状态'
-          }
+            description: "数据库健康状态",
+          },
         ];
       } catch (error) {
         return [];
@@ -298,31 +306,31 @@ export class MetricsCollectorService {
 
     // 缓存指标收集器
     if (this.cacheService) {
-      this.registerCollector('cache', async () => {
+      this.registerCollector("cache", async () => {
         try {
           const stats = this.cacheService.getStats();
           return [
             {
-              name: 'cache_hit_rate',
-              type: 'gauge' as MetricType,
+              name: "cache_hit_rate",
+              type: "gauge" as MetricType,
               value: (await stats).hitRate || 0,
               timestamp: new Date(),
-              description: '缓存命中率'
+              description: "缓存命中率",
             },
             {
-              name: 'cache_miss_rate',
-              type: 'gauge' as MetricType,
+              name: "cache_miss_rate",
+              type: "gauge" as MetricType,
               value: (await stats).missRate || 0,
               timestamp: new Date(),
-              description: '缓存未命中率'
+              description: "缓存未命中率",
             },
             {
-              name: 'cache_total_entries',
-              type: 'gauge' as MetricType,
+              name: "cache_total_entries",
+              type: "gauge" as MetricType,
               value: (await stats).totalEntries || 0,
               timestamp: new Date(),
-              description: '缓存总条目数'
-            }
+              description: "缓存总条目数",
+            },
           ];
         } catch (error) {
           return [];
@@ -331,40 +339,40 @@ export class MetricsCollectorService {
     }
 
     // 内存指标收集器
-    this.registerCollector('memory', async () => {
+    this.registerCollector("memory", async () => {
       try {
         const memUsage = process.memoryUsage();
-        const totalMem = require('os').totalmem();
-        
+        const totalMem = os.totalmem();
+
         return [
           {
-            name: 'memory_heap_used',
-            type: 'gauge' as MetricType,
+            name: "memory_heap_used",
+            type: "gauge" as MetricType,
             value: memUsage.heapUsed,
             timestamp: new Date(),
-            description: '堆内存使用量'
+            description: "堆内存使用量",
           },
           {
-            name: 'memory_heap_total',
-            type: 'gauge' as MetricType,
+            name: "memory_heap_total",
+            type: "gauge" as MetricType,
             value: memUsage.heapTotal,
             timestamp: new Date(),
-            description: '堆内存总量'
+            description: "堆内存总量",
           },
           {
-            name: 'memory_external',
-            type: 'gauge' as MetricType,
+            name: "memory_external",
+            type: "gauge" as MetricType,
             value: memUsage.external,
             timestamp: new Date(),
-            description: '外部内存使用量'
+            description: "外部内存使用量",
           },
           {
-            name: 'memory_usage_ratio',
-            type: 'gauge' as MetricType,
+            name: "memory_usage_ratio",
+            type: "gauge" as MetricType,
             value: memUsage.heapUsed / totalMem,
             timestamp: new Date(),
-            description: '内存使用率'
-          }
+            description: "内存使用率",
+          },
         ];
       } catch (error) {
         return [];
@@ -372,33 +380,33 @@ export class MetricsCollectorService {
     });
 
     // 进程指标收集器
-    this.registerCollector('process', async () => {
+    this.registerCollector("process", async () => {
       try {
         const uptime = process.uptime();
         const cpuUsage = process.cpuUsage();
-        
+
         return [
           {
-            name: 'process_uptime',
-            type: 'gauge' as MetricType,
+            name: "process_uptime",
+            type: "gauge" as MetricType,
             value: uptime,
             timestamp: new Date(),
-            description: '进程运行时间'
+            description: "进程运行时间",
           },
           {
-            name: 'process_cpu_user',
-            type: 'gauge' as MetricType,
+            name: "process_cpu_user",
+            type: "gauge" as MetricType,
             value: cpuUsage.user,
             timestamp: new Date(),
-            description: '用户CPU时间'
+            description: "用户CPU时间",
           },
           {
-            name: 'process_cpu_system',
-            type: 'gauge' as MetricType,
+            name: "process_cpu_system",
+            type: "gauge" as MetricType,
             value: cpuUsage.system,
             timestamp: new Date(),
-            description: '系统CPU时间'
-          }
+            description: "系统CPU时间",
+          },
         ];
       } catch (error) {
         return [];
@@ -411,7 +419,9 @@ export class MetricsCollectorService {
    */
   private cleanupExpiredMetrics(): void {
     const cutoffTime = new Date(Date.now() - this.config.retentionPeriod);
-    this.metrics = this.metrics.filter(metric => metric.timestamp > cutoffTime);
+    this.metrics = this.metrics.filter(
+      (metric) => metric.timestamp > cutoffTime,
+    );
   }
 
   /**
@@ -428,20 +438,21 @@ export class MetricsCollectorService {
    */
   private convertToPrometheusFormat(metrics: MetricValue[]): string {
     const lines: string[] = [];
-    
+
     for (const metric of metrics) {
-      const labels = metric.labels ? 
-        metric.labels.map(l => `${l.name}="${l.value}"`).join(',') : '';
-      
-      const labelStr = labels ? `{${labels}}` : '';
+      const labels = metric.labels
+        ? metric.labels.map((l) => `${l.name}="${l.value}"`).join(",")
+        : "";
+
+      const labelStr = labels ? `{${labels}}` : "";
       const timestamp = metric.timestamp.getTime();
-      
-      lines.push(`# HELP ${metric.name} ${metric.description || ''}`);
+
+      lines.push(`# HELP ${metric.name} ${metric.description || ""}`);
       lines.push(`# TYPE ${metric.name} ${metric.type}`);
       lines.push(`${metric.name}${labelStr} ${metric.value} ${timestamp}`);
     }
-    
-    return lines.join('\n');
+
+    return lines.join("\n");
   }
 
   /**

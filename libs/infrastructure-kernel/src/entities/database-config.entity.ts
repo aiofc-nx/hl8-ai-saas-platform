@@ -5,59 +5,65 @@
  * @since 1.0.0
  */
 
-import { Entity, PrimaryKey, Property, Collection, OneToMany } from '@mikro-orm/core';
-import { DatabaseConnectionEntity } from './database-connection.entity.js';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  Collection,
+  OneToMany,
+} from "@mikro-orm/core";
+import { DatabaseConnectionEntity } from "./database-connection.entity.js";
 
 /**
  * 数据库配置实体
  */
-@Entity({ tableName: 'database_configs' })
+@Entity({ tableName: "database_configs" })
 export class DatabaseConfigEntity {
   /** 配置ID */
-  @PrimaryKey({ type: 'uuid' })
+  @PrimaryKey({ type: "uuid" })
   id!: string;
 
   /** 配置名称 */
-  @Property({ type: 'varchar', length: 255 })
+  @Property({ type: "varchar", length: 255 })
   name!: string;
 
   /** 主连接ID */
-  @Property({ type: 'uuid' })
+  @Property({ type: "uuid" })
   primaryConnection!: string;
 
   /** 备用连接ID列表 */
-  @Property({ type: 'json', default: '[]' })
+  @Property({ type: "json", default: "[]" })
   secondaryConnections!: string[];
 
   /** 默认连接ID */
-  @Property({ type: 'uuid' })
+  @Property({ type: "uuid" })
   defaultConnection!: string;
 
   /** 是否自动切换 */
-  @Property({ type: 'boolean', default: false })
+  @Property({ type: "boolean", default: false })
   autoSwitch!: boolean;
 
   /** 健康检查间隔(秒) */
-  @Property({ type: 'int', default: 30 })
+  @Property({ type: "int", default: 30 })
   healthCheckInterval!: number;
 
   /** 重试次数 */
-  @Property({ type: 'int', default: 3 })
+  @Property({ type: "int", default: 3 })
   retryAttempts!: number;
 
   /** 重试延迟(毫秒) */
-  @Property({ type: 'int', default: 1000 })
+  @Property({ type: "int", default: 1000 })
   retryDelay!: number;
 
   /** 创建时间 */
-  @Property({ type: 'datetime', defaultRaw: 'CURRENT_TIMESTAMP' })
+  @Property({ type: "datetime", defaultRaw: "CURRENT_TIMESTAMP" })
   createdAt!: Date;
 
   /** 更新时间 */
-  @Property({ 
-    type: 'datetime', 
-    defaultRaw: 'CURRENT_TIMESTAMP',
-    onUpdate: () => new Date()
+  @Property({
+    type: "datetime",
+    defaultRaw: "CURRENT_TIMESTAMP",
+    onUpdate: () => new Date(),
   })
   updatedAt!: Date;
 
@@ -79,43 +85,45 @@ export class DatabaseConfigEntity {
     const errors: string[] = [];
 
     if (!this.name || this.name.trim().length === 0) {
-      errors.push('配置名称不能为空');
+      errors.push("配置名称不能为空");
     }
 
     if (!this.primaryConnection) {
-      errors.push('主连接ID不能为空');
+      errors.push("主连接ID不能为空");
     }
 
     if (!this.defaultConnection) {
-      errors.push('默认连接ID不能为空');
+      errors.push("默认连接ID不能为空");
     }
 
     if (this.healthCheckInterval <= 0) {
-      errors.push('健康检查间隔必须大于0');
+      errors.push("健康检查间隔必须大于0");
     }
 
     if (this.retryAttempts < 0) {
-      errors.push('重试次数不能为负数');
+      errors.push("重试次数不能为负数");
     }
 
     if (this.retryDelay < 0) {
-      errors.push('重试延迟不能为负数');
+      errors.push("重试延迟不能为负数");
     }
 
     // 检查备用连接是否包含主连接
     if (this.secondaryConnections.includes(this.primaryConnection)) {
-      errors.push('备用连接不能包含主连接');
+      errors.push("备用连接不能包含主连接");
     }
 
     // 检查默认连接是否在主连接或备用连接中
-    if (this.defaultConnection !== this.primaryConnection && 
-        !this.secondaryConnections.includes(this.defaultConnection)) {
-      errors.push('默认连接必须是主连接或备用连接之一');
+    if (
+      this.defaultConnection !== this.primaryConnection &&
+      !this.secondaryConnections.includes(this.defaultConnection)
+    ) {
+      errors.push("默认连接必须是主连接或备用连接之一");
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -156,8 +164,10 @@ export class DatabaseConfigEntity {
    * @returns 是否在配置中
    */
   hasConnection(connectionId: string): boolean {
-    return this.primaryConnection === connectionId || 
-           this.secondaryConnections.includes(connectionId);
+    return (
+      this.primaryConnection === connectionId ||
+      this.secondaryConnections.includes(connectionId)
+    );
   }
 
   /**
@@ -169,7 +179,7 @@ export class DatabaseConfigEntity {
       this.defaultConnection = connectionId;
       this.updatedAt = new Date();
     } else {
-      throw new Error('连接ID不在配置中');
+      throw new Error("连接ID不在配置中");
     }
   }
 
@@ -188,7 +198,7 @@ export class DatabaseConfigEntity {
       healthCheckInterval: this.healthCheckInterval,
       retryAttempts: this.retryAttempts,
       retryDelay: this.retryDelay,
-      totalConnections: this.getAllConnectionIds().length
+      totalConnections: this.getAllConnectionIds().length,
     };
   }
 

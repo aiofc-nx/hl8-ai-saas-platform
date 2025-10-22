@@ -5,9 +5,9 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
-import type { IsolationContext } from '../../types/isolation.types.js';
+import { Injectable } from "@nestjs/common";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
 
 /**
  * 预热配置
@@ -40,7 +40,7 @@ export interface WarmingTask {
   /** 优先级 */
   priority: number;
   /** 状态 */
-  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
   /** 创建时间 */
   createdAt: Date;
   /** 开始时间 */
@@ -63,12 +63,12 @@ export class CacheWarmingService {
     interval: 300000, // 5分钟
     batchSize: 100,
     timeout: 30000,
-    retryAttempts: 3
+    retryAttempts: 3,
   };
 
   constructor(
     private readonly cacheService: ICacheService,
-    private readonly isolationContext?: IsolationContext
+    private readonly isolationContext?: IsolationContext,
   ) {}
 
   /**
@@ -81,17 +81,19 @@ export class CacheWarmingService {
   /**
    * 添加预热任务
    */
-  addWarmingTask(task: Omit<WarmingTask, 'id' | 'status' | 'createdAt'>): string {
+  addWarmingTask(
+    task: Omit<WarmingTask, "id" | "status" | "createdAt">,
+  ): string {
     const taskId = this.generateTaskId();
     const warmingTask: WarmingTask = {
       id: taskId,
-      status: 'PENDING',
+      status: "PENDING",
       createdAt: new Date(),
-      ...task
+      ...task,
     };
 
     this.warmingTasks.set(taskId, warmingTask);
-    
+
     // 如果启用预热，立即执行
     if (this.config.enabled) {
       this.executeWarmingTask(taskId);
@@ -109,30 +111,33 @@ export class CacheWarmingService {
       throw new Error(`预热任务 ${taskId} 不存在`);
     }
 
-    if (task.status === 'RUNNING') {
+    if (task.status === "RUNNING") {
       return;
     }
 
-    task.status = 'RUNNING';
+    task.status = "RUNNING";
     task.startedAt = new Date();
     this.warmingTasks.set(taskId, task);
 
     try {
       // 加载数据
-      const data = await this.loadDataWithTimeout(task.dataLoader, this.config.timeout);
-      
+      const data = await this.loadDataWithTimeout(
+        task.dataLoader,
+        this.config.timeout,
+      );
+
       // 批量设置缓存
       await this.setCacheInBatches(task.keys, data);
-      
-      task.status = 'COMPLETED';
+
+      task.status = "COMPLETED";
       task.completedAt = new Date();
       this.warmingTasks.set(taskId, task);
     } catch (error) {
-      task.status = 'FAILED';
-      task.error = error instanceof Error ? error.message : '预热任务失败';
+      task.status = "FAILED";
+      task.error = error instanceof Error ? error.message : "预热任务失败";
       task.completedAt = new Date();
       this.warmingTasks.set(taskId, task);
-      
+
       // 重试机制
       if (this.config.retryAttempts > 0) {
         setTimeout(() => {
@@ -145,12 +150,17 @@ export class CacheWarmingService {
   /**
    * 批量预热
    */
-  async warmupBatch(keys: string[], dataLoader: () => Promise<Record<string, any>>): Promise<void> {
+  async warmupBatch(
+    keys: string[],
+    dataLoader: () => Promise<Record<string, any>>,
+  ): Promise<void> {
     try {
       const data = await dataLoader();
       await this.setCacheInBatches(keys, data);
     } catch (error) {
-      throw new Error(`批量预热失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `批量预热失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -159,7 +169,7 @@ export class CacheWarmingService {
    */
   async warmupAll(): Promise<void> {
     const tasks = Array.from(this.warmingTasks.values())
-      .filter(task => task.status === 'PENDING')
+      .filter((task) => task.status === "PENDING")
       .sort((a, b) => b.priority - a.priority);
 
     for (const task of tasks) {
@@ -191,10 +201,10 @@ export class CacheWarmingService {
   getWarmingStats(): Record<string, any> {
     const tasks = Array.from(this.warmingTasks.values());
     const total = tasks.length;
-    const completed = tasks.filter(t => t.status === 'COMPLETED').length;
-    const failed = tasks.filter(t => t.status === 'FAILED').length;
-    const running = tasks.filter(t => t.status === 'RUNNING').length;
-    const pending = tasks.filter(t => t.status === 'PENDING').length;
+    const completed = tasks.filter((t) => t.status === "COMPLETED").length;
+    const failed = tasks.filter((t) => t.status === "FAILED").length;
+    const running = tasks.filter((t) => t.status === "RUNNING").length;
+    const pending = tasks.filter((t) => t.status === "PENDING").length;
 
     return {
       total,
@@ -202,7 +212,7 @@ export class CacheWarmingService {
       failed,
       running,
       pending,
-      successRate: total > 0 ? completed / total : 0
+      successRate: total > 0 ? completed / total : 0,
     };
   }
 
@@ -211,7 +221,7 @@ export class CacheWarmingService {
    */
   removeWarmingTask(taskId: string): void {
     this.warmingTasks.delete(taskId);
-    
+
     // 清除定时器
     const timer = this.warmingTimers.get(taskId);
     if (timer) {
@@ -225,7 +235,7 @@ export class CacheWarmingService {
    */
   clearAllWarmingTasks(): void {
     this.warmingTasks.clear();
-    
+
     // 清除所有定时器
     for (const timer of this.warmingTimers.values()) {
       clearTimeout(timer);
@@ -245,21 +255,21 @@ export class CacheWarmingService {
       try {
         await this.warmupAll();
       } catch (error) {
-        console.error('定期预热失败:', error);
+        console.error("定期预热失败:", error);
       }
     }, this.config.interval);
 
-    this.warmingTimers.set('periodic', timer);
+    this.warmingTimers.set("periodic", timer);
   }
 
   /**
    * 停止定期预热
    */
   stopPeriodicWarming(): void {
-    const timer = this.warmingTimers.get('periodic');
+    const timer = this.warmingTimers.get("periodic");
     if (timer) {
       clearInterval(timer);
-      this.warmingTimers.delete('periodic');
+      this.warmingTimers.delete("periodic");
     }
   }
 
@@ -268,19 +278,19 @@ export class CacheWarmingService {
    */
   private async loadDataWithTimeout(
     dataLoader: () => Promise<Record<string, any>>,
-    timeout: number
+    timeout: number,
   ): Promise<Record<string, any>> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        reject(new Error('数据加载超时'));
+        reject(new Error("数据加载超时"));
       }, timeout);
 
       dataLoader()
-        .then(data => {
+        .then((data) => {
           clearTimeout(timer);
           resolve(data);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timer);
           reject(error);
         });
@@ -292,18 +302,18 @@ export class CacheWarmingService {
    */
   private async setCacheInBatches(
     keys: string[],
-    data: Record<string, any>
+    data: Record<string, any>,
   ): Promise<void> {
     const batches = this.chunkArray(keys, this.config.batchSize);
-    
+
     for (const batch of batches) {
-      const batchPromises = batch.map(async key => {
+      const batchPromises = batch.map(async (key) => {
         const value = data[key];
         if (value !== undefined) {
           await this.cacheService.set(key, value);
         }
       });
-      
+
       await Promise.all(batchPromises);
     }
   }
@@ -313,12 +323,12 @@ export class CacheWarmingService {
    */
   private async retryWarmingTask(taskId: string): Promise<void> {
     const task = this.warmingTasks.get(taskId);
-    if (!task || task.status !== 'FAILED') {
+    if (!task || task.status !== "FAILED") {
       return;
     }
 
     // 重置任务状态
-    task.status = 'PENDING';
+    task.status = "PENDING";
     task.startedAt = undefined;
     task.completedAt = undefined;
     task.error = undefined;

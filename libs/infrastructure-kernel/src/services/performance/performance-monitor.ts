@@ -5,11 +5,12 @@
  * @since 1.0.0
  */
 
-import { Injectable } from '@nestjs/common';
-import type { IHealthCheckService } from '../../interfaces/health-service.interface.js';
-import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
+import { Injectable } from "@nestjs/common";
+import * as os from "os";
+import type { IHealthCheckService } from "../../interfaces/health-service.interface.js";
+import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
+import type { ICacheService } from "../../interfaces/cache-service.interface.js";
+import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
 
 /**
  * 性能指标
@@ -66,7 +67,7 @@ export interface PerformanceAlert {
   /** 阈值 */
   threshold: number;
   /** 严重级别 */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   /** 时间戳 */
   timestamp: Date;
   /** 描述 */
@@ -87,7 +88,7 @@ export class PerformanceMonitorService {
     maxMemoryUsage: 0.8,
     maxCpuUsage: 0.8,
     maxDatabaseConnections: 100,
-    minCacheHitRate: 0.8
+    minCacheHitRate: 0.8,
   };
   private monitoringInterval?: NodeJS.Timeout;
   private isMonitoring = false;
@@ -96,7 +97,7 @@ export class PerformanceMonitorService {
     private readonly databaseAdapter: IDatabaseAdapter,
     private readonly cacheService?: ICacheService,
     private readonly loggingService?: ILoggingService,
-    private readonly healthCheckService?: IHealthCheckService
+    private readonly healthCheckService?: IHealthCheckService,
   ) {}
 
   /**
@@ -112,7 +113,7 @@ export class PerformanceMonitorService {
       try {
         await this.collectMetrics();
       } catch (error) {
-        console.error('收集性能指标失败:', error);
+        console.error("收集性能指标失败:", error);
       }
     }, interval);
   }
@@ -134,7 +135,7 @@ export class PerformanceMonitorService {
   async collectMetrics(): Promise<PerformanceMetrics> {
     try {
       const startTime = Date.now();
-      
+
       // 收集各种性能指标
       const responseTime = await this.measureResponseTime();
       const throughput = await this.calculateThroughput();
@@ -152,12 +153,12 @@ export class PerformanceMonitorService {
         cpuUsage,
         databaseConnections,
         cacheHitRate,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // 存储指标
       this.metrics.push(metrics);
-      
+
       // 限制指标历史记录大小
       if (this.metrics.length > 1000) {
         this.metrics = this.metrics.slice(-1000);
@@ -171,7 +172,9 @@ export class PerformanceMonitorService {
 
       return metrics;
     } catch (error) {
-      throw new Error(`收集性能指标失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(
+        `收集性能指标失败: ${error instanceof Error ? error.message : "未知错误"}`,
+      );
     }
   }
 
@@ -200,12 +203,24 @@ export class PerformanceMonitorService {
     }
 
     const latest = this.metrics[this.metrics.length - 1];
-    const avgResponseTime = this.metrics.reduce((sum, m) => sum + m.responseTime, 0) / this.metrics.length;
-    const avgThroughput = this.metrics.reduce((sum, m) => sum + m.throughput, 0) / this.metrics.length;
-    const avgErrorRate = this.metrics.reduce((sum, m) => sum + m.errorRate, 0) / this.metrics.length;
-    const avgMemoryUsage = this.metrics.reduce((sum, m) => sum + m.memoryUsage, 0) / this.metrics.length;
-    const avgCpuUsage = this.metrics.reduce((sum, m) => sum + m.cpuUsage, 0) / this.metrics.length;
-    const avgCacheHitRate = this.metrics.reduce((sum, m) => sum + m.cacheHitRate, 0) / this.metrics.length;
+    const avgResponseTime =
+      this.metrics.reduce((sum, m) => sum + m.responseTime, 0) /
+      this.metrics.length;
+    const avgThroughput =
+      this.metrics.reduce((sum, m) => sum + m.throughput, 0) /
+      this.metrics.length;
+    const avgErrorRate =
+      this.metrics.reduce((sum, m) => sum + m.errorRate, 0) /
+      this.metrics.length;
+    const avgMemoryUsage =
+      this.metrics.reduce((sum, m) => sum + m.memoryUsage, 0) /
+      this.metrics.length;
+    const avgCpuUsage =
+      this.metrics.reduce((sum, m) => sum + m.cpuUsage, 0) /
+      this.metrics.length;
+    const avgCacheHitRate =
+      this.metrics.reduce((sum, m) => sum + m.cacheHitRate, 0) /
+      this.metrics.length;
 
     return {
       current: latest,
@@ -215,11 +230,11 @@ export class PerformanceMonitorService {
         errorRate: avgErrorRate,
         memoryUsage: avgMemoryUsage,
         cpuUsage: avgCpuUsage,
-        cacheHitRate: avgCacheHitRate
+        cacheHitRate: avgCacheHitRate,
       },
       thresholds: this.thresholds,
       alerts: this.alerts.length,
-      monitoring: this.isMonitoring
+      monitoring: this.isMonitoring,
     };
   }
 
@@ -296,7 +311,7 @@ export class PerformanceMonitorService {
   private async getMemoryUsage(): Promise<number> {
     try {
       const memUsage = process.memoryUsage();
-      const totalMem = require('os').totalmem();
+      const totalMem = os.totalmem();
       return memUsage.heapUsed / totalMem;
     } catch (error) {
       return 0;
@@ -336,7 +351,7 @@ export class PerformanceMonitorService {
       if (!this.cacheService) {
         return 1;
       }
-      
+
       const stats = this.cacheService.getStats();
       return (await stats).hitRate || 1;
     } catch (error) {
@@ -351,40 +366,77 @@ export class PerformanceMonitorService {
     try {
       // 检查响应时间
       if (metrics.responseTime > this.thresholds.maxResponseTime) {
-        await this.createAlert('responseTime', metrics.responseTime, this.thresholds.maxResponseTime, 'HIGH');
+        await this.createAlert(
+          "responseTime",
+          metrics.responseTime,
+          this.thresholds.maxResponseTime,
+          "HIGH",
+        );
       }
 
       // 检查吞吐量
       if (metrics.throughput < this.thresholds.minThroughput) {
-        await this.createAlert('throughput', metrics.throughput, this.thresholds.minThroughput, 'MEDIUM');
+        await this.createAlert(
+          "throughput",
+          metrics.throughput,
+          this.thresholds.minThroughput,
+          "MEDIUM",
+        );
       }
 
       // 检查错误率
       if (metrics.errorRate > this.thresholds.maxErrorRate) {
-        await this.createAlert('errorRate', metrics.errorRate, this.thresholds.maxErrorRate, 'HIGH');
+        await this.createAlert(
+          "errorRate",
+          metrics.errorRate,
+          this.thresholds.maxErrorRate,
+          "HIGH",
+        );
       }
 
       // 检查内存使用率
       if (metrics.memoryUsage > this.thresholds.maxMemoryUsage) {
-        await this.createAlert('memoryUsage', metrics.memoryUsage, this.thresholds.maxMemoryUsage, 'CRITICAL');
+        await this.createAlert(
+          "memoryUsage",
+          metrics.memoryUsage,
+          this.thresholds.maxMemoryUsage,
+          "CRITICAL",
+        );
       }
 
       // 检查CPU使用率
       if (metrics.cpuUsage > this.thresholds.maxCpuUsage) {
-        await this.createAlert('cpuUsage', metrics.cpuUsage, this.thresholds.maxCpuUsage, 'CRITICAL');
+        await this.createAlert(
+          "cpuUsage",
+          metrics.cpuUsage,
+          this.thresholds.maxCpuUsage,
+          "CRITICAL",
+        );
       }
 
       // 检查数据库连接数
-      if (metrics.databaseConnections > this.thresholds.maxDatabaseConnections) {
-        await this.createAlert('databaseConnections', metrics.databaseConnections, this.thresholds.maxDatabaseConnections, 'HIGH');
+      if (
+        metrics.databaseConnections > this.thresholds.maxDatabaseConnections
+      ) {
+        await this.createAlert(
+          "databaseConnections",
+          metrics.databaseConnections,
+          this.thresholds.maxDatabaseConnections,
+          "HIGH",
+        );
       }
 
       // 检查缓存命中率
       if (metrics.cacheHitRate < this.thresholds.minCacheHitRate) {
-        await this.createAlert('cacheHitRate', metrics.cacheHitRate, this.thresholds.minCacheHitRate, 'MEDIUM');
+        await this.createAlert(
+          "cacheHitRate",
+          metrics.cacheHitRate,
+          this.thresholds.minCacheHitRate,
+          "MEDIUM",
+        );
       }
     } catch (error) {
-      console.error('检查阈值失败:', error);
+      console.error("检查阈值失败:", error);
     }
   }
 
@@ -395,7 +447,7 @@ export class PerformanceMonitorService {
     metric: string,
     currentValue: number,
     threshold: number,
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
   ): Promise<void> {
     try {
       const alert: PerformanceAlert = {
@@ -405,11 +457,11 @@ export class PerformanceMonitorService {
         threshold,
         severity,
         timestamp: new Date(),
-        description: `${metric} 超出阈值: ${currentValue} > ${threshold}`
+        description: `${metric} 超出阈值: ${currentValue} > ${threshold}`,
       };
 
       this.alerts.push(alert);
-      
+
       // 限制告警历史记录大小
       if (this.alerts.length > 100) {
         this.alerts = this.alerts.slice(-100);
@@ -418,30 +470,32 @@ export class PerformanceMonitorService {
       // 记录告警日志
       await this.logPerformanceAlert(alert);
     } catch (error) {
-      console.error('创建告警失败:', error);
+      console.error("创建告警失败:", error);
     }
   }
 
   /**
    * 记录性能指标日志
    */
-  private async logPerformanceMetrics(metrics: PerformanceMetrics): Promise<void> {
+  private async logPerformanceMetrics(
+    metrics: PerformanceMetrics,
+  ): Promise<void> {
     try {
       if (this.loggingService) {
         const logContext = {
           requestId: `performance_${Date.now()}`,
-          tenantId: 'system',
-          operation: 'performance-monitor',
-          resource: 'performance-monitor',
+          tenantId: "system",
+          operation: "performance-monitor",
+          resource: "performance-monitor",
           timestamp: new Date(),
-          level: 'info' as const,
-          message: '性能指标收集'
+          level: "info" as const,
+          message: "性能指标收集",
         };
-        
-        await this.loggingService.info(logContext, '性能指标收集', metrics);
+
+        await this.loggingService.info(logContext, "性能指标收集", metrics as unknown as Record<string, unknown>);
       }
     } catch (error) {
-      console.error('记录性能指标日志失败:', error);
+      console.error("记录性能指标日志失败:", error);
     }
   }
 
@@ -453,18 +507,22 @@ export class PerformanceMonitorService {
       if (this.loggingService) {
         const logContext = {
           requestId: `performance_alert_${alert.id}`,
-          tenantId: 'system',
-          operation: 'performance-alert',
-          resource: 'performance-monitor',
+          tenantId: "system",
+          operation: "performance-alert",
+          resource: "performance-monitor",
           timestamp: new Date(),
-          level: 'warn' as const,
-          message: `性能告警: ${alert.metric}`
+          level: "warn" as const,
+          message: `性能告警: ${alert.metric}`,
         };
-        
-        await this.loggingService.warn(logContext, `性能告警: ${alert.metric}`, alert);
+
+        await this.loggingService.warn(
+          logContext,
+          `性能告警: ${alert.metric}`,
+          alert as unknown as Record<string, unknown>,
+        );
       }
     } catch (error) {
-      console.error('记录性能告警日志失败:', error);
+      console.error("记录性能告警日志失败:", error);
     }
   }
 

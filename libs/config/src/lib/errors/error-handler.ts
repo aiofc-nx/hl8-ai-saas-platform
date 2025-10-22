@@ -108,7 +108,7 @@ export class ErrorHandler {
     error: Error,
     filePath: string,
     expectedFormat: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.FILE_FORMAT_ERROR,
@@ -129,7 +129,7 @@ export class ErrorHandler {
    */
   public static handleFileNotFoundError(
     filePath: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.FILE_NOT_FOUND,
@@ -149,7 +149,7 @@ export class ErrorHandler {
    */
   public static handleDirectoryNotFoundError(
     directoryPath: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.DIRECTORY_NOT_FOUND,
@@ -171,7 +171,7 @@ export class ErrorHandler {
   public static handleNetworkError(
     error: Error,
     url: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.NETWORK_ERROR,
@@ -191,8 +191,8 @@ export class ErrorHandler {
    * @since 1.0.0
    */
   public static handleValidationError(
-    validationErrors: any[],
-    context: Record<string, any> = {},
+    validationErrors: unknown[],
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.VALIDATION_ERROR,
@@ -212,7 +212,7 @@ export class ErrorHandler {
    */
   public static handleEnvVarError(
     variableName: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.ENV_VAR_ERROR,
@@ -234,7 +234,7 @@ export class ErrorHandler {
   public static handleVariableExpansionError(
     error: Error,
     variableName: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.VARIABLE_EXPANSION_ERROR,
@@ -257,7 +257,7 @@ export class ErrorHandler {
   public static handleParseError(
     error: Error,
     content: string,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.PARSE_ERROR,
@@ -278,7 +278,7 @@ export class ErrorHandler {
    */
   public static handleUnknownError(
     error: Error,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
   ): ConfigError {
     return new ConfigError(
       ConfigErrorType.UNKNOWN_ERROR,
@@ -302,7 +302,7 @@ export class ErrorHandler {
   public static async safeExecute<T>(
     fn: () => Promise<T> | T,
     errorType: ConfigErrorType,
-    context: Record<string, any> = {},
+    context: Record<string, unknown> = {},
     options: Partial<ErrorHandlerOptions> = {},
   ): Promise<T | ConfigError> {
     const opts = { ...this.defaultOptions, ...options };
