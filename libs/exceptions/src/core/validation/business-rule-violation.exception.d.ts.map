@@ -1,0 +1,1 @@
+{"version":3,"file":"business-rule-violation.exception.d.ts","sourceRoot":"","sources":["business-rule-violation.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,mBAAmB,EAAE,MAAM,2BAA2B,CAAC;AAqBhE,qBAAa,8BAA+B,SAAQ,mBAAmB;gBASnE,QAAQ,EAAE,MAAM,EAChB,SAAS,EAAE,MAAM,EACjB,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAWjC"}

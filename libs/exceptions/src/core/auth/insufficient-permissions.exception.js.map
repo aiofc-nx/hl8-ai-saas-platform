@@ -1,0 +1,1 @@
+{"version":3,"file":"insufficient-permissions.exception.js","sourceRoot":"","sources":["insufficient-permissions.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,qBAAqB,CAAC;AAsBpD,MAAM,OAAO,gCAAiC,SAAQ,aAAa;IAOjE,YAAY,MAAc,EAAE,IAA8B;QACxD,KAAK,CACH,+BAA+B,EAC/B,MAAM,EACN,MAAM,EACN,GAAG,EACH,IAAI,EACJ,2DAA2D,CAC5D,CAAC;IACJ,CAAC;CACF"}

@@ -33,7 +33,7 @@ export interface QueryHandler<
    * 验证查询
    *
    * @param query - 要验证的查询
-   * @throws 如果查询无效则抛出异常
+   * @throws {ApplicationLayerException} 如果查询无效则抛出应用层异常
    */
   validateQuery(query: TQuery): void;
 

@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-department-hierarchy.exception.d.ts","sourceRoot":"","sources":["invalid-department-hierarchy.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,mBAAmB,EAAE,MAAM,2BAA2B,CAAC;AAqBhE,qBAAa,mCAAoC,SAAQ,mBAAmB;gBAO9D,MAAM,EAAE,MAAM,EAAE,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAU3D"}

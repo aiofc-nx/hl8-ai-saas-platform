@@ -41,6 +41,10 @@
       "types": "./dist/core/layers/index.d.ts",
       "import": "./dist/core/layers/index.js"
     },
+    "./core/validation": {
+      "types": "./dist/core/validation/index.d.ts",
+      "import": "./dist/core/validation/index.js"
+    },
     "./core/domain": {
       "types": "./dist/core/domain/index.d.ts",
       "import": "./dist/core/domain/index.js"

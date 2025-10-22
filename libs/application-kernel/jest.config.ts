@@ -3,12 +3,12 @@ import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest",
   testEnvironment: "node",
-  roots: ["<rootDir>/src", "<rootDir>/tests"],
+  roots: ["<rootDir>/src", "<rootDir>/test"],
   testMatch: [
     "<rootDir>/src/**/*.spec.ts",
     "<rootDir>/src/**/*.test.ts",
-    "<rootDir>/tests/**/*.spec.ts",
-    "<rootDir>/tests/**/*.test.ts",
+    "<rootDir>/test/**/*.spec.ts",
+    "<rootDir>/test/**/*.test.ts",
   ],
   collectCoverageFrom: [
     "src/**/*.ts",
@@ -37,13 +37,15 @@ const config: Config = {
           allowImportingTsExtensions: false,
           noEmit: true,
         },
+        useESM: true,
       },
     ],
   },
-  moduleNameMapper: {
-    "^@hl8/application-kernel$": "<rootDir>/src/index.ts",
-    "^@hl8/domain-kernel$": "<rootDir>/../domain-kernel/src/index.ts",
-  },
+        moduleNameMapper: {
+          "^@hl8/application-kernel$": "<rootDir>/src/index.ts",
+          "^@hl8/domain-kernel$": "<rootDir>/../domain-kernel/src/index.ts",
+          "^@hl8/exceptions$": "<rootDir>/../exceptions/src/index.ts",
+        },
   transformIgnorePatterns: ["node_modules/(?!(.*\\.mjs$))"],
 };
 

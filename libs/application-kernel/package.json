@@ -21,7 +21,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@hl8/domain-kernel": "workspace:*"
+    "@hl8/domain-kernel": "workspace:*",
+    "@hl8/exceptions": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

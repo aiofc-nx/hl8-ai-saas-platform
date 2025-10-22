@@ -33,7 +33,7 @@ export interface CommandHandler<
    * 验证命令
    *
    * @param command - 要验证的命令
-   * @throws 如果命令无效则抛出异常
+   * @throws {ApplicationLayerException} 如果命令无效则抛出应用层异常
    */
   validateCommand(command: TCommand): void;
 

@@ -1,0 +1,1 @@
+{"version":3,"file":"constraint-violation.exception.d.ts","sourceRoot":"","sources":["constraint-violation.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,mBAAmB,EAAE,MAAM,2BAA2B,CAAC;AAsBhE,qBAAa,4BAA6B,SAAQ,mBAAmB;gBASjE,cAAc,EAAE,MAAM,EACtB,SAAS,EAAE,MAAM,EACjB,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAWjC"}

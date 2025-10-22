@@ -1,0 +1,1 @@
+{"version":3,"file":"unauthorized.exception.js","sourceRoot":"","sources":["unauthorized.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,qBAAqB,CAAC;AAqBpD,MAAM,OAAO,qBAAsB,SAAQ,aAAa;IAOtD,YAAY,MAAc,EAAE,IAA8B;QACxD,KAAK,CACH,mBAAmB,EACnB,OAAO,EACP,MAAM,EACN,GAAG,EACH,IAAI,EACJ,+CAA+C,CAChD,CAAC;IACJ,CAAC;CACF"}

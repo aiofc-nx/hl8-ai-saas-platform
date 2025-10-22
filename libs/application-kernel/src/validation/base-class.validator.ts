@@ -6,10 +6,11 @@
  *
  * @since 1.0.0
  */
-import { BaseCommand } from "../cqrs/commands/base-command.js";
-import { BaseQuery } from "../cqrs/queries/base-query.js";
-import { BaseUseCase } from "../use-cases/base-use-case.js";
-import { BaseCommandUseCase } from "../use-cases/base-command-use-case.js";
+import { BaseCommand } from "../cqrs/commands/base-command";
+import { BaseQuery } from "../cqrs/queries/base-query";
+import { BaseUseCase } from "../use-cases/base-use-case";
+import { BaseCommandUseCase } from "../use-cases/base-command-use-case";
+import { GeneralBadRequestException } from "@hl8/exceptions";
 
 /**
  * 基础类验证结果
@@ -49,22 +50,56 @@ export class BaseClassValidator {
 
     // 检查是否继承自 BaseCommand
     if (!this.isSubclassOf(commandClass, BaseCommand)) {
-      errors.push(`命令类 ${commandClass.name} 必须继承自 BaseCommand`);
+      const errorMessage = `命令类 ${commandClass.name} 必须继承自 BaseCommand`;
+      errors.push(errorMessage);
       suggestions.push(`将 ${commandClass.name} 改为继承自 BaseCommand`);
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        errorMessage,
+        `将 ${commandClass.name} 改为继承自 BaseCommand`,
+        {
+          className: commandClass.name,
+          expectedBaseClass: "BaseCommand",
+          suggestion: `将 ${commandClass.name} 改为继承自 BaseCommand`,
+        }
+      );
     }
 
     // 检查构造函数
     if (!this.hasValidCommandConstructor(commandClass)) {
-      errors.push(`命令类 ${commandClass.name} 构造函数不符合规范`);
+      const errorMessage = `命令类 ${commandClass.name} 构造函数不符合规范`;
+      errors.push(errorMessage);
       suggestions.push(
         `确保构造函数调用 super() 并传递 commandName 和 description`,
+      );
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        errorMessage,
+        `确保构造函数调用 super() 并传递 commandName 和 description`,
+        {
+          className: commandClass.name,
+          suggestion: `确保构造函数调用 super() 并传递 commandName 和 description`,
+        }
       );
     }
 
     // 检查属性
     if (!this.hasValidCommandProperties(commandClass)) {
-      errors.push(`命令类 ${commandClass.name} 属性不符合规范`);
+      const errorMessage = `命令类 ${commandClass.name} 属性不符合规范`;
+      errors.push(errorMessage);
       suggestions.push(`确保所有属性都是 readonly 并且类型正确`);
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        "commandProperties",
+        errorMessage,
+        {
+          className: commandClass.name,
+          suggestion: `确保所有属性都是 readonly 并且类型正确`,
+        }
+      );
     }
 
     return {
@@ -86,22 +121,56 @@ export class BaseClassValidator {
 
     // 检查是否继承自 BaseQuery
     if (!this.isSubclassOf(queryClass, BaseQuery)) {
-      errors.push(`查询类 ${queryClass.name} 必须继承自 BaseQuery`);
+      const errorMessage = `查询类 ${queryClass.name} 必须继承自 BaseQuery`;
+      errors.push(errorMessage);
       suggestions.push(`将 ${queryClass.name} 改为继承自 BaseQuery`);
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        "queryClass",
+        errorMessage,
+        {
+          className: queryClass.name,
+          expectedBaseClass: "BaseQuery",
+          suggestion: `将 ${queryClass.name} 改为继承自 BaseQuery`,
+        }
+      );
     }
 
     // 检查构造函数
     if (!this.hasValidQueryConstructor(queryClass)) {
-      errors.push(`查询类 ${queryClass.name} 构造函数不符合规范`);
+      const errorMessage = `查询类 ${queryClass.name} 构造函数不符合规范`;
+      errors.push(errorMessage);
       suggestions.push(
         `确保构造函数调用 super() 并传递 queryName 和 description`,
+      );
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        "queryConstructor",
+        errorMessage,
+        {
+          className: queryClass.name,
+          suggestion: `确保构造函数调用 super() 并传递 queryName 和 description`,
+        }
       );
     }
 
     // 检查属性
     if (!this.hasValidQueryProperties(queryClass)) {
-      errors.push(`查询类 ${queryClass.name} 属性不符合规范`);
+      const errorMessage = `查询类 ${queryClass.name} 属性不符合规范`;
+      errors.push(errorMessage);
       suggestions.push(`确保所有属性都是 readonly 并且类型正确`);
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        "queryProperties",
+        errorMessage,
+        {
+          className: queryClass.name,
+          suggestion: `确保所有属性都是 readonly 并且类型正确`,
+        }
+      );
     }
 
     return {
@@ -126,24 +195,56 @@ export class BaseClassValidator {
       !this.isSubclassOf(useCaseClass, BaseUseCase) &&
       !this.isSubclassOf(useCaseClass, BaseCommandUseCase)
     ) {
-      errors.push(
-        `用例类 ${useCaseClass.name} 必须继承自 BaseUseCase 或 BaseCommandUseCase`,
-      );
+      const errorMessage = `用例类 ${useCaseClass.name} 必须继承自 BaseUseCase 或 BaseCommandUseCase`;
+      errors.push(errorMessage);
       suggestions.push(
         `将 ${useCaseClass.name} 改为继承自 BaseUseCase 或 BaseCommandUseCase`,
+      );
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        "useCaseClass",
+        errorMessage,
+        {
+          className: useCaseClass.name,
+          expectedBaseClass: "BaseUseCase 或 BaseCommandUseCase",
+          suggestion: `将 ${useCaseClass.name} 改为继承自 BaseUseCase 或 BaseCommandUseCase`,
+        }
       );
     }
 
     // 检查构造函数
     if (!this.hasValidUseCaseConstructor(useCaseClass)) {
-      errors.push(`用例类 ${useCaseClass.name} 构造函数不符合规范`);
+      const errorMessage = `用例类 ${useCaseClass.name} 构造函数不符合规范`;
+      errors.push(errorMessage);
       suggestions.push(`确保构造函数调用 super() 并传递必要的参数`);
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        "useCaseConstructor",
+        errorMessage,
+        {
+          className: useCaseClass.name,
+          suggestion: `确保构造函数调用 super() 并传递必要的参数`,
+        }
+      );
     }
 
     // 检查必需方法
     if (!this.hasRequiredUseCaseMethods(useCaseClass)) {
-      errors.push(`用例类 ${useCaseClass.name} 缺少必需的方法`);
+      const errorMessage = `用例类 ${useCaseClass.name} 缺少必需的方法`;
+      errors.push(errorMessage);
       suggestions.push(`实现 executeUseCase 或 executeCommand 方法`);
+      
+      // 抛出验证异常
+      throw new GeneralBadRequestException(
+        "useCaseMethods",
+        errorMessage,
+        {
+          className: useCaseClass.name,
+          suggestion: `实现 executeUseCase 或 executeCommand 方法`,
+        }
+      );
     }
 
     return {

@@ -1,0 +1,1 @@
+{"version":3,"file":"department-not-found.exception.d.ts","sourceRoot":"","sources":["department-not-found.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,mBAAmB,EAAE,MAAM,2BAA2B,CAAC;AAoBhE,qBAAa,2BAA4B,SAAQ,mBAAmB;gBAOtD,YAAY,EAAE,MAAM,EAAE,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAUjE"}
