@@ -20,7 +20,17 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@hl8/exceptions": "workspace:*"
+  },
+  "peerDependencies": {
+    "@hl8/exceptions": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@hl8/exceptions": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",

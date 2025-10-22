@@ -6,43 +6,44 @@
  */
 
 import { BaseValueObject } from "../value-objects/base-value-object.js";
-import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
+import { DomainValidationException } from "/home/arligle/hl8/hl8-ai-saas-platform/libs/exceptions/dist/core/domain/index.js";
 
 /**
  * 邮箱值对象
  * @description 不可变的邮箱地址值对象
  */
 export class Email extends BaseValueObject {
-  private constructor(private readonly value: string) {
+  private readonly value: string;
+
+  private constructor(value: string) {
     super();
+    this.value = value;
+    // 在设置属性后进行验证
+    this.validate();
   }
 
   /**
    * 验证邮箱格式
-   * @throws {IsolationValidationError} 当邮箱格式无效时
+   * @throws {DomainValidationException} 当邮箱格式无效时
    */
   protected validate(): void {
     if (!this.value || this.value.trim().length === 0) {
-      throw new IsolationValidationError(
-        "邮箱不能为空",
-        "INVALID_EMAIL_EMPTY",
-        { value: this.value },
-      );
+      throw new DomainValidationException("email", "邮箱不能为空", {
+        value: this.value,
+      });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.value)) {
-      throw new IsolationValidationError(
-        "邮箱格式不正确",
-        "INVALID_EMAIL_FORMAT",
-        { value: this.value },
-      );
+      throw new DomainValidationException("email", "邮箱格式不正确", {
+        value: this.value,
+      });
     }
 
     if (this.value.length > 254) {
-      throw new IsolationValidationError(
+      throw new DomainValidationException(
+        "email",
         "邮箱长度不能超过254个字符",
-        "INVALID_EMAIL_LENGTH",
         { value: this.value },
       );
     }

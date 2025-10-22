@@ -18,7 +18,7 @@ import { TenantId } from "../value-objects/ids/tenant-id.vo.js";
 import { Email } from "./email.vo.js";
 import { Username } from "./username.vo.js";
 import { UserStatus, UserStatusTransition } from "./user-status.enum.js";
-import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
+import { DomainValidationException } from "/home/arligle/hl8/hl8-ai-saas-platform/libs/exceptions/dist/core/domain/index.js";
 
 /**
  * 用户实体
@@ -104,7 +104,7 @@ export class User extends BaseEntity<UserId> {
    * 激活用户
    * @description 将用户状态从待激活转换为已激活
    *
-   * @throws {IsolationValidationError} 当用户状态不允许激活时
+   * @throws {DomainValidationException} 当用户状态不允许激活时
    *
    * @example
    * ```typescript
@@ -114,9 +114,9 @@ export class User extends BaseEntity<UserId> {
   activate(): void {
     // 验证业务规则
     if (this._status !== UserStatus.PENDING) {
-      throw new IsolationValidationError(
+      throw new DomainValidationException(
+        "userStatus",
         "只有待激活状态的用户才能激活",
-        "USER_NOT_PENDING",
         {
           currentStatus: this._status,
           userId: this.id.getValue(),
@@ -134,14 +134,14 @@ export class User extends BaseEntity<UserId> {
    * 禁用用户
    * @description 将用户状态设置为已禁用
    *
-   * @throws {IsolationValidationError} 当用户状态不允许禁用时
+   * @throws {DomainValidationException} 当用户状态不允许禁用时
    */
   disable(): void {
     // 验证业务规则
     if (this._status === UserStatus.DELETED) {
-      throw new IsolationValidationError(
+      throw new DomainValidationException(
+        "userStatus",
         "已删除的用户不能禁用",
-        "USER_ALREADY_DELETED",
         {
           currentStatus: this._status,
           userId: this.id.getValue(),
@@ -158,14 +158,14 @@ export class User extends BaseEntity<UserId> {
    * 启用用户
    * @description 将用户状态从已禁用转换为已激活
    *
-   * @throws {IsolationValidationError} 当用户状态不允许启用时
+   * @throws {DomainValidationException} 当用户状态不允许启用时
    */
   enable(): void {
     // 验证业务规则
     if (this._status !== UserStatus.DISABLED) {
-      throw new IsolationValidationError(
+      throw new DomainValidationException(
+        "userStatus",
         "只有已禁用状态的用户才能启用",
-        "USER_NOT_DISABLED",
         {
           currentStatus: this._status,
           userId: this.id.getValue(),
@@ -182,24 +182,20 @@ export class User extends BaseEntity<UserId> {
    * 删除用户
    * @description 将用户状态设置为已删除
    *
-   * @throws {IsolationValidationError} 当用户状态不允许删除时
+   * @throws {DomainValidationException} 当用户状态不允许删除时
    */
   delete(): void {
     // 验证业务规则
     if (this._status === UserStatus.DELETED) {
-      throw new IsolationValidationError(
-        "用户已经被删除",
-        "USER_ALREADY_DELETED",
-        {
-          currentStatus: this._status,
-          userId: this.id.getValue(),
-        },
-      );
+      throw new DomainValidationException("userStatus", "用户已经被删除", {
+        currentStatus: this._status,
+        userId: this.id.getValue(),
+      });
     }
 
     // 执行业务逻辑
     this._status = UserStatus.DELETED;
-    this.updateTimestamp();
+    this.markAsDeleted(); // 调用 BaseEntity 的 markAsDeleted 方法
   }
 
   /**
@@ -207,14 +203,14 @@ export class User extends BaseEntity<UserId> {
    * @description 更新用户的邮箱地址
    *
    * @param newEmail - 新邮箱
-   * @throws {IsolationValidationError} 当用户状态不允许更新时
+   * @throws {DomainValidationException} 当用户状态不允许更新时
    */
   updateEmail(newEmail: Email): void {
     // 验证业务规则
     if (this._status === UserStatus.DELETED) {
-      throw new IsolationValidationError(
+      throw new DomainValidationException(
+        "userStatus",
         "已删除的用户不能更新邮箱",
-        "USER_DELETED_CANNOT_UPDATE",
         {
           currentStatus: this._status,
           userId: this.id.getValue(),
@@ -232,14 +228,14 @@ export class User extends BaseEntity<UserId> {
    * @description 更新用户的用户名
    *
    * @param newUsername - 新用户名
-   * @throws {IsolationValidationError} 当用户状态不允许更新时
+   * @throws {DomainValidationException} 当用户状态不允许更新时
    */
   updateUsername(newUsername: Username): void {
     // 验证业务规则
     if (this._status === UserStatus.DELETED) {
-      throw new IsolationValidationError(
+      throw new DomainValidationException(
+        "userStatus",
         "已删除的用户不能更新用户名",
-        "USER_DELETED_CANNOT_UPDATE",
         {
           currentStatus: this._status,
           userId: this.id.getValue(),

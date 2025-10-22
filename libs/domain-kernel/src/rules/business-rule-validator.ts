@@ -12,6 +12,7 @@
  */
 
 // import { EntityId } from "../value-objects/ids/entity-id.vo.js";
+import { DomainBusinessRuleViolationException } from "/home/arligle/hl8/hl8-ai-saas-platform/libs/exceptions/dist/core/domain/index.js";
 
 /**
  * 业务规则验证结果
@@ -81,6 +82,43 @@ export abstract class BusinessRuleValidator<Context = unknown> {
   isApplicable(_context: Context): boolean {
     return true;
   }
+
+  /**
+   * 验证并抛出异常
+   * @param context 验证上下文
+   * @throws {BusinessRuleViolationException} 当验证失败时抛出异常
+   */
+  validateAndThrow(context: Context): void {
+    const result = this.validate(context);
+    if (!result.isValid) {
+      const firstError = result.errors[0];
+      throw new DomainBusinessRuleViolationException(
+        firstError.code,
+        firstError.message,
+        firstError.context,
+      );
+    }
+  }
+
+  /**
+   * 验证并返回异常（不抛出）
+   * @param context 验证上下文
+   * @returns 异常或 null
+   */
+  validateAndReturnException(
+    context: Context,
+  ): DomainBusinessRuleViolationException | null {
+    const result = this.validate(context);
+    if (!result.isValid) {
+      const firstError = result.errors[0];
+      return new DomainBusinessRuleViolationException(
+        firstError.code,
+        firstError.message,
+        firstError.context,
+      );
+    }
+    return null;
+  }
 }
 
 /**
@@ -145,6 +183,42 @@ export class BusinessRuleManager<Context = unknown> {
    */
   clearValidators(): void {
     this.validators = [];
+  }
+
+  /**
+   * 验证所有规则并抛出异常
+   * @param context 验证上下文
+   * @throws {BusinessRuleViolationException} 当验证失败时抛出异常
+   */
+  validateAllAndThrow(context: Context): void {
+    const result = this.validateAll(context);
+    if (!result.isValid) {
+      const firstError = result.errors[0];
+      throw new DomainBusinessRuleViolationException(
+        firstError.code,
+        firstError.message,
+        firstError.context,
+      );
+    }
+  }
+
+  /**
+   * 验证所有规则并返回异常数组
+   * @param context 验证上下文
+   * @returns 异常数组
+   */
+  validateAllAndReturnExceptions(
+    context: Context,
+  ): DomainBusinessRuleViolationException[] {
+    const result = this.validateAll(context);
+    return result.errors.map(
+      (error) =>
+        new DomainBusinessRuleViolationException(
+          error.code,
+          error.message,
+          error.context,
+        ),
+    );
   }
 }
 
