@@ -41,6 +41,10 @@
       "types": "./dist/core/layers/index.d.ts",
       "import": "./dist/core/layers/index.js"
     },
+    "./core/domain": {
+      "types": "./dist/core/domain/index.d.ts",
+      "import": "./dist/core/domain/index.js"
+    },
     "./filters": {
       "types": "./dist/filters/index.d.ts",
       "import": "./dist/filters/index.js"

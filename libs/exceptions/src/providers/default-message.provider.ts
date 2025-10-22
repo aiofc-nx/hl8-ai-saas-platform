@@ -124,6 +124,28 @@ export class DefaultMessageProvider implements ExceptionMessageProvider {
         detail: "租户上下文信息无效",
       },
 
+      // 数据隔离异常
+      TENANT_DATA_ISOLATION_FAILED: {
+        title: "租户数据隔离失败",
+        detail: "租户数据隔离验证失败: {{reason}}",
+      },
+      ORGANIZATION_ISOLATION_VIOLATION: {
+        title: "组织隔离违规",
+        detail: "违反了组织级别的数据隔离规则: {{reason}}",
+      },
+      DEPARTMENT_ISOLATION_VIOLATION: {
+        title: "部门隔离违规",
+        detail: "违反了部门级别的数据隔离规则: {{reason}}",
+      },
+      TENANT_CONTEXT_VIOLATION: {
+        title: "租户上下文违规",
+        detail: "租户上下文验证失败: {{reason}}",
+      },
+      TENANT_PERMISSION_VIOLATION: {
+        title: "租户权限违规",
+        detail: "租户权限验证失败: {{reason}}",
+      },
+
       // 数据验证异常
       VALIDATION_FAILED: {
         title: "数据验证失败",

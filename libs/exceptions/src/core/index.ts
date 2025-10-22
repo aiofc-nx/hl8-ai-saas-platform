@@ -29,6 +29,9 @@ export * from "./general-bad-request.exception.js";
 export * from "./general-internal-server.exception.js";
 export * from "./general-not-found.exception.js";
 
+// 领域层异常导出
+export * from "./domain/index.js";
+
 // 异常类别导出
 export * from "./auth/index.js";
 export * from "./user/index.js";
