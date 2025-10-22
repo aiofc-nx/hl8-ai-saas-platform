@@ -7,10 +7,10 @@
 
 // 类型定义
 export * from './types/database.types.js';
-export * from './types/cache.types.js';
-export * from './types/isolation.types.js';
+// export * from './types/cache.types.js'; // 注释掉以避免重复导出
+// export * from './types/isolation.types.js'; // 注释掉以避免重复导出
 export * from './types/logging.types.js';
-export * from './types/health.types.js';
+// export * from './types/health.types.js'; // 注释掉以避免重复导出
 
 // 接口定义
 export * from './interfaces/database-adapter.interface.js';
@@ -32,7 +32,7 @@ export * from './adapters/database/database-factory.js';
 
 export * from './repositories/base/base-repository-adapter.js';
 export * from './repositories/aggregate/aggregate-repository-adapter.js';
-export * from './repositories/event-store/event-store-adapter.js';
+// export * from './repositories/event-store/event-store-adapter.js'; // 注释掉以避免重复导出
 export * from './repositories/read-model/read-model-repository-adapter.js';
 
 export * from './services/database/database-service.js';

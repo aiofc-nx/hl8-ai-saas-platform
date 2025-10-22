@@ -6,9 +6,9 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 import type { PerformanceMetrics } from './performance-monitor.js';
 import type { MetricValue } from './metrics-collector.js';
 import type { OptimizationSuggestion } from './performance-optimizer.js';
@@ -255,10 +255,10 @@ export class MonitoringDashboardService {
       
       const stats = this.cacheService.getStats();
       return {
-        hitRate: stats.hitRate || 0,
-        missRate: stats.missRate || 0,
-        totalEntries: stats.totalEntries || 0,
-        memoryUsage: stats.memoryUsage || 0
+        hitRate: (await stats).hitRate || 0,
+        missRate: (await stats).missRate || 0,
+        totalEntries: (await stats).totalEntries || 0,
+        memoryUsage: (await stats).memoryUsage || 0
       };
     } catch (error) {
       return {
@@ -371,9 +371,9 @@ export class MonitoringDashboardService {
           disk: Math.random() * 100,
           network: Math.random() * 100
         },
-        database,
-        cache,
-        realtime,
+        database: database as any,
+        cache: cache as any,
+        realtime: realtime as any,
         alerts,
         suggestions
       };

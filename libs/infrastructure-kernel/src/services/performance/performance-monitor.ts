@@ -6,10 +6,10 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IHealthCheckService } from '../interfaces/health-service.interface.js';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { IHealthCheckService } from '../../interfaces/health-service.interface.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 
 /**
  * 性能指标
@@ -338,7 +338,7 @@ export class PerformanceMonitorService {
       }
       
       const stats = this.cacheService.getStats();
-      return stats.hitRate || 1;
+      return (await stats).hitRate || 1;
     } catch (error) {
       return 1;
     }

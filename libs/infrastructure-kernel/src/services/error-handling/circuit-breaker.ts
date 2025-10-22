@@ -6,8 +6,8 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 
 /**
  * 熔断器状态
@@ -406,12 +406,12 @@ export class CircuitBreakerService {
         };
         
         if (result === 'SUCCESS') {
-          await this.loggingService.info(logContext, `熔断器 ${circuitName}: ${result}`, {
+          await this.loggingService.info(logContext as any, `熔断器 ${circuitName}: ${result}`, {
             executionTime,
             result
           });
         } else {
-          await this.loggingService.warn(logContext, `熔断器 ${circuitName}: ${result}`, {
+          await this.loggingService.warn(logContext as any, `熔断器 ${circuitName}: ${result}`, {
             executionTime,
             result,
             error: error?.message

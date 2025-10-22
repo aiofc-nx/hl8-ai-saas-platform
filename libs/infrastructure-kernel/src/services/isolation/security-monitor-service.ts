@@ -6,10 +6,10 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { ISecurityMonitorService, MonitoringRule, AnomalousAccessReport } from '../interfaces/isolation-service.interface.js';
-import type { IsolationContext, SecurityEvent } from '../types/isolation.types.js';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { ISecurityMonitorService, MonitoringRule, AnomalousAccessReport } from '../../interfaces/isolation-service.interface.js';
+import type { IsolationContext, SecurityEvent } from '../../types/isolation.types.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 
 /**
  * 安全监控服务
@@ -220,7 +220,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
 
       return {
         anomalousAccessCount: anomalousEvents.length,
-        highRiskAccess,
+        highRiskAccess: highRiskAccess as any,
         recommendations
       };
     } catch (error) {

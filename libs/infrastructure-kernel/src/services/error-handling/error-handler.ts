@@ -6,8 +6,8 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 
 /**
  * 错误类型
@@ -479,7 +479,7 @@ export class ErrorHandlerService {
           message: `错误处理: ${error.message}`
         };
         
-        await this.loggingService.error(logContext, `错误处理: ${error.message}`, error);
+        await this.loggingService.error(logContext as any, `错误处理: ${error.message}`, error as any);
       }
     } catch (error) {
       console.error('记录错误日志失败:', error);

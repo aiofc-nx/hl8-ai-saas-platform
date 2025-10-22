@@ -19,19 +19,23 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@hl8/domain-kernel": "workspace:*",
     "@hl8/application-kernel": "workspace:*",
     "@hl8/database": "workspace:*",
+    "@hl8/domain-kernel": "workspace:*",
     "@hl8/nestjs-fastify": "workspace:*",
     "@mikro-orm/core": "^6.4.2",
-    "@mikro-orm/postgresql": "^6.4.2",
     "@mikro-orm/mongodb": "^6.4.2",
-    "pg": "^8.11.3",
+    "@mikro-orm/postgresql": "^6.4.2",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/jwt": "^11.0.1",
     "mongodb": "^6.3.0",
-    "redis": "^4.6.12",
-    "pino": "^8.17.2"
+    "pg": "^8.11.3",
+    "pino": "^8.17.2",
+    "redis": "^4.6.12"
   },
   "devDependencies": {
+    "@nestjs/testing": "^11.1.6",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/jest": "^29.5.12",

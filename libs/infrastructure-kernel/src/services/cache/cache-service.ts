@@ -71,7 +71,7 @@ export class CacheService implements ICacheService {
       this.cacheTimestamps.set(isolatedKey, Date.now());
 
       // 更新统计信息
-      this.updateCacheStats(startTime);
+      await this.updateCacheStats(startTime);
 
       // 应用TTL
       if (options?.ttl || this.config.defaultTtl) {
@@ -112,11 +112,11 @@ export class CacheService implements ICacheService {
         : value;
 
       // 更新统计信息
-      this.updateCacheStats(startTime, true);
+      await this.updateCacheStats(startTime, true);
 
       return deserializedValue;
     } catch (error) {
-      this.updateCacheStats(startTime, false);
+      await this.updateCacheStats(startTime, false);
       return null;
     }
   }
@@ -268,8 +268,8 @@ export class CacheService implements ICacheService {
   /**
    * 获取缓存统计信息
    */
-  getStats(): CacheStats {
-    return { ...this.cacheStats };
+  getStats(): Promise<CacheStats> {
+    return Promise.resolve({ ...this.cacheStats });
   }
 
   /**
@@ -358,20 +358,20 @@ export class CacheService implements ICacheService {
   /**
    * 获取缓存大小
    */
-  getSize(): number {
-    return this.cache.size;
+  getSize(): Promise<number> {
+    return Promise.resolve(this.cache.size);
   }
 
   /**
    * 获取内存使用情况
    */
-  getMemoryUsage(): number {
+  getMemoryUsage(): Promise<number> {
     // 简单的内存使用估算
     let totalSize = 0;
     for (const [key, value] of this.cache.entries()) {
       totalSize += key.length + (typeof value === 'string' ? value.length : JSON.stringify(value).length);
     }
-    return totalSize;
+    return Promise.resolve(totalSize);
   }
 
   /**
@@ -423,7 +423,7 @@ export class CacheService implements ICacheService {
   /**
    * 更新缓存统计信息
    */
-  private updateCacheStats(startTime: number, hit: boolean = true): void {
+  private async updateCacheStats(startTime: number, hit: boolean = true): Promise<void> {
     const responseTime = Date.now() - startTime;
     
     // 更新命中率
@@ -442,7 +442,7 @@ export class CacheService implements ICacheService {
     this.cacheStats.totalEntries = this.cache.size;
     
     // 更新内存使用
-    this.cacheStats.memoryUsage = this.getMemoryUsage();
+    this.cacheStats.memoryUsage = await this.getMemoryUsage();
   }
 
   /**

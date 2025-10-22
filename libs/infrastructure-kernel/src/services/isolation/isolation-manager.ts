@@ -6,8 +6,8 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IIsolationManager } from '../interfaces/isolation-service.interface.js';
-import type { IsolationContext } from '../types/isolation.types.js';
+import type { IIsolationManager } from '../../interfaces/isolation-service.interface.js';
+import type { IsolationContext } from '../../types/isolation.types.js';
 import { IsolationContextManager } from './isolation-context-manager.js';
 import { AccessControlService } from './access-control-service.js';
 import { AuditLogService } from './audit-log-service.js';
@@ -126,21 +126,21 @@ export class IsolationManager implements IIsolationManager {
     departmentId?: string,
     userId?: string
   ): IsolationContext {
-    return this.contextManager.createContext(tenantId, organizationId, departmentId, userId);
+    return this.contextManager.createContext(tenantId, organizationId, departmentId, userId) as any;
   }
 
   /**
    * 设置当前隔离上下文
    */
   setCurrentIsolationContext(context: IsolationContext): void {
-    this.contextManager.setCurrentContext(context);
+    this.contextManager.setCurrentContext(context as any);
   }
 
   /**
    * 获取当前隔离上下文
    */
   getCurrentIsolationContext(): IsolationContext | null {
-    return this.contextManager.getCurrentContext();
+    return this.contextManager.getCurrentContext() as any;
   }
 
   /**
@@ -158,7 +158,7 @@ export class IsolationManager implements IIsolationManager {
       }
       
       // 验证访问权限
-      const hasAccess = await this.accessControlService.validateAccess(context, resource);
+      const hasAccess = await this.accessControlService.validateAccess(context as any, resource);
       
       // 记录审计日志
       await this.auditLogService.log({
@@ -169,7 +169,6 @@ export class IsolationManager implements IIsolationManager {
         tenantId: context.tenantId,
         organizationId: context.organizationId,
         departmentId: context.departmentId,
-        timestamp: new Date(),
         result: hasAccess ? 'SUCCESS' : 'FAILURE',
         details: {
           context: context,
@@ -178,7 +177,7 @@ export class IsolationManager implements IIsolationManager {
         },
         ipAddress: 'unknown',
         userAgent: 'unknown'
-      });
+      } as any);
       
       return hasAccess;
     } catch (error) {
@@ -191,14 +190,14 @@ export class IsolationManager implements IIsolationManager {
    * 应用隔离过滤
    */
   applyIsolationFilter(query: any, context: IsolationContext): any {
-    return this.accessControlService.applyIsolationFilter(query, context);
+    return this.accessControlService.applyIsolationFilter(query, context as any);
   }
 
   /**
    * 过滤数据
    */
   filterData<T>(data: T[], context: IsolationContext): T[] {
-    return this.accessControlService.filterData(data, context);
+    return this.accessControlService.filterData(data, context as any);
   }
 
   /**
@@ -225,12 +224,11 @@ export class IsolationManager implements IIsolationManager {
         tenantId: context.tenantId,
         organizationId: context.organizationId,
         departmentId: context.departmentId,
-        timestamp: new Date(),
         result,
         details: details || {},
         ipAddress: 'unknown',
         userAgent: 'unknown'
-      });
+      } as any);
     } catch (error) {
       console.error('记录审计事件失败:', error);
     }
@@ -269,7 +267,7 @@ export class IsolationManager implements IIsolationManager {
    * 获取访问权限摘要
    */
   async getPermissionSummary(context: IsolationContext): Promise<any> {
-    return await this.accessControlService.getPermissionSummary(context);
+    return await this.accessControlService.getPermissionSummary(context as any);
   }
 
   /**

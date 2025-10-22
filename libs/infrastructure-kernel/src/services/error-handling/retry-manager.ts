@@ -6,8 +6,8 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 
 /**
  * 重试策略

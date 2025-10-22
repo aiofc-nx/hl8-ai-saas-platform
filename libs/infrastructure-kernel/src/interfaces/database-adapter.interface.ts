@@ -167,3 +167,6 @@ export interface IDatabaseFactory {
   /** 获取支持的数据库类型 */
   getSupportedTypes(): string[];
 }
+
+// 重新导出类型
+export type { DatabaseOperationResult, DatabaseQueryOptions, DatabaseTransactionOptions } from '../types/database.types.js';

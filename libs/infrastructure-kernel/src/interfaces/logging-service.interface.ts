@@ -139,3 +139,6 @@ export interface ILoggingManager {
   /** 关闭所有服务 */
   closeAll(): Promise<void>;
 }
+
+// 重新导出类型
+export type { LogContext, LogLevel, LoggingConfig, LogQueryFilters, LogStats } from '../types/logging.types.js';

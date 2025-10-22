@@ -6,9 +6,9 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import type { IDatabaseAdapter } from '../interfaces/database-adapter.interface.js';
-import type { ICacheService } from '../interfaces/cache-service.interface.js';
-import type { ILoggingService } from '../interfaces/logging-service.interface.js';
+import type { IDatabaseAdapter } from '../../interfaces/database-adapter.interface.js';
+import type { ICacheService } from '../../interfaces/cache-service.interface.js';
+import type { ILoggingService } from '../../interfaces/logging-service.interface.js';
 import type { PerformanceMetrics } from './performance-monitor.js';
 
 /**
@@ -227,13 +227,13 @@ export class PerformanceOptimizerService {
       const stats = this.cacheService.getStats();
       
       // 检查缓存命中率
-      if (stats.hitRate < this.config.performanceThresholds.cacheHitRate) {
+      if ((await stats).hitRate < this.config.performanceThresholds.cacheHitRate) {
         suggestions.push({
           id: this.generateSuggestionId(),
           type: 'CACHE',
           priority: 'HIGH',
           title: '缓存命中率过低',
-          description: `当前命中率: ${(stats.hitRate * 100).toFixed(2)}%`,
+          description: `当前命中率: ${((await stats).hitRate * 100).toFixed(2)}%`,
           action: '优化缓存策略，增加缓存预热',
           expectedBenefit: '提高缓存命中率，减少数据库访问',
           difficulty: 'MEDIUM',
@@ -242,13 +242,13 @@ export class PerformanceOptimizerService {
       }
       
       // 检查缓存大小
-      if (stats.totalEntries > 10000) {
+      if ((await stats).totalEntries > 10000) {
         suggestions.push({
           id: this.generateSuggestionId(),
           type: 'CACHE',
           priority: 'MEDIUM',
           title: '缓存条目过多',
-          description: `当前条目数: ${stats.totalEntries}`,
+          description: `当前条目数: ${(await stats).totalEntries}`,
           action: '清理过期缓存，优化缓存策略',
           expectedBenefit: '减少内存使用，提高缓存效率',
           difficulty: 'EASY',

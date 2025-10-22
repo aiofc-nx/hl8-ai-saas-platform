@@ -62,7 +62,6 @@ import { RequestIdStrategy } from "../utils/request-id.generator.js";
 export interface EnterpriseFastifyAdapterOptions {
   /** Fastify 实例选项 */
   fastifyOptions?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Fastify logger 配置可以是布尔值或 Pino 配置对象（宪章 IX 允许场景：第三方库集成）
     logger?: boolean | any;
     trustProxy?: boolean;
     bodyLimit?: number;
@@ -249,7 +248,7 @@ export class EnterpriseFastifyAdapter extends FastifyAdapter {
       maxAge: 86400, // 24 hours
     };
 
-    await instance.register(fastifyCors, {
+    await instance.register(fastifyCors as any, {
       ...defaultCorsOptions,
       ...this.adapterOptions.corsOptions,
     });
@@ -278,13 +277,11 @@ export class EnterpriseFastifyAdapter extends FastifyAdapter {
    */
   private registerPerformanceMonitoring(instance: FastifyInstance): void {
     // 请求开始时记录时间
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Fastify request 对象需要扩展属性（宪章 IX 允许场景：第三方库集成）
     instance.addHook("onRequest", async (request: any) => {
       request.startTime = Date.now();
     });
 
     // 响应结束时计算耗时
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Fastify request 对象需要扩展属性（宪章 IX 允许场景：第三方库集成）
     instance.addHook(
       "onResponse",
       async (request: any, reply: FastifyReply) => {
@@ -360,7 +357,7 @@ export class EnterpriseFastifyAdapter extends FastifyAdapter {
 
     instance.addHook(
       "onError",
-      async (request: FastifyRequest, reply: FastifyReply, error: Error) => {
+      async (request: FastifyRequest, _reply: FastifyReply, _error: Error) => {
         const route = `${request.method}:${request.url}`;
         let state = this.circuitBreakerState.get(route);
 

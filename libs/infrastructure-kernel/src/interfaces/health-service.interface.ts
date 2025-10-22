@@ -162,3 +162,6 @@ export interface HealthSummary {
   /** 平均响应时间 */
   averageResponseTime: number;
 }
+
+// 重新导出类型
+export type { HealthCheckResult } from '../types/health.types.js';
