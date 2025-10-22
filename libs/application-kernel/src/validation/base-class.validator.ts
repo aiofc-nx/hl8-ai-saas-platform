@@ -13,6 +13,19 @@ import { BaseCommandUseCase } from "../use-cases/base-command-use-case.js";
 import { GeneralBadRequestException } from "@hl8/exceptions";
 
 /**
+ * 类构造函数类型定义
+ * 用于验证类的构造函数签名
+ * 使用 unknown 替代 any 以确保类型安全
+ */
+type ClassConstructor = new (...args: unknown[]) => unknown;
+
+/**
+ * 抽象类构造函数类型定义
+ * 用于验证抽象类的构造函数签名
+ */
+type AbstractClassConstructor = abstract new (...args: unknown[]) => unknown;
+
+/**
  * 基础类验证结果
  */
 export interface BaseClassValidationResult {
@@ -44,16 +57,23 @@ export class BaseClassValidator {
    * @param commandClass - 命令类
    * @returns 验证结果
    */
-  static validateCommandClass(commandClass: any): BaseClassValidationResult {
+  static validateCommandClass(
+    commandClass: ClassConstructor,
+  ): BaseClassValidationResult {
     const errors: string[] = [];
     const suggestions: string[] = [];
 
     // 检查是否继承自 BaseCommand
-    if (!this.isSubclassOf(commandClass, BaseCommand)) {
+    if (
+      !this.isSubclassOf(
+        commandClass,
+        BaseCommand as unknown as ClassConstructor,
+      )
+    ) {
       const errorMessage = `命令类 ${commandClass.name} 必须继承自 BaseCommand`;
       errors.push(errorMessage);
       suggestions.push(`将 ${commandClass.name} 改为继承自 BaseCommand`);
-      
+
       // 抛出验证异常
       throw new GeneralBadRequestException(
         errorMessage,
@@ -62,7 +82,7 @@ export class BaseClassValidator {
           className: commandClass.name,
           expectedBaseClass: "BaseCommand",
           suggestion: `将 ${commandClass.name} 改为继承自 BaseCommand`,
-        }
+        },
       );
     }
 
@@ -73,7 +93,7 @@ export class BaseClassValidator {
       suggestions.push(
         `确保构造函数调用 super() 并传递 commandName 和 description`,
       );
-      
+
       // 抛出验证异常
       throw new GeneralBadRequestException(
         errorMessage,
@@ -81,7 +101,7 @@ export class BaseClassValidator {
         {
           className: commandClass.name,
           suggestion: `确保构造函数调用 super() 并传递 commandName 和 description`,
-        }
+        },
       );
     }
 
@@ -90,16 +110,12 @@ export class BaseClassValidator {
       const errorMessage = `命令类 ${commandClass.name} 属性不符合规范`;
       errors.push(errorMessage);
       suggestions.push(`确保所有属性都是 readonly 并且类型正确`);
-      
+
       // 抛出验证异常
-      throw new GeneralBadRequestException(
-        "commandProperties",
-        errorMessage,
-        {
-          className: commandClass.name,
-          suggestion: `确保所有属性都是 readonly 并且类型正确`,
-        }
-      );
+      throw new GeneralBadRequestException("commandProperties", errorMessage, {
+        className: commandClass.name,
+        suggestion: `确保所有属性都是 readonly 并且类型正确`,
+      });
     }
 
     return {
@@ -115,26 +131,26 @@ export class BaseClassValidator {
    * @param queryClass - 查询类
    * @returns 验证结果
    */
-  static validateQueryClass(queryClass: any): BaseClassValidationResult {
+  static validateQueryClass(
+    queryClass: ClassConstructor,
+  ): BaseClassValidationResult {
     const errors: string[] = [];
     const suggestions: string[] = [];
 
     // 检查是否继承自 BaseQuery
-    if (!this.isSubclassOf(queryClass, BaseQuery)) {
+    if (
+      !this.isSubclassOf(queryClass, BaseQuery as unknown as ClassConstructor)
+    ) {
       const errorMessage = `查询类 ${queryClass.name} 必须继承自 BaseQuery`;
       errors.push(errorMessage);
       suggestions.push(`将 ${queryClass.name} 改为继承自 BaseQuery`);
-      
+
       // 抛出验证异常
-      throw new GeneralBadRequestException(
-        "queryClass",
-        errorMessage,
-        {
-          className: queryClass.name,
-          expectedBaseClass: "BaseQuery",
-          suggestion: `将 ${queryClass.name} 改为继承自 BaseQuery`,
-        }
-      );
+      throw new GeneralBadRequestException("queryClass", errorMessage, {
+        className: queryClass.name,
+        expectedBaseClass: "BaseQuery",
+        suggestion: `将 ${queryClass.name} 改为继承自 BaseQuery`,
+      });
     }
 
     // 检查构造函数
@@ -144,16 +160,12 @@ export class BaseClassValidator {
       suggestions.push(
         `确保构造函数调用 super() 并传递 queryName 和 description`,
       );
-      
+
       // 抛出验证异常
-      throw new GeneralBadRequestException(
-        "queryConstructor",
-        errorMessage,
-        {
-          className: queryClass.name,
-          suggestion: `确保构造函数调用 super() 并传递 queryName 和 description`,
-        }
-      );
+      throw new GeneralBadRequestException("queryConstructor", errorMessage, {
+        className: queryClass.name,
+        suggestion: `确保构造函数调用 super() 并传递 queryName 和 description`,
+      });
     }
 
     // 检查属性
@@ -161,16 +173,12 @@ export class BaseClassValidator {
       const errorMessage = `查询类 ${queryClass.name} 属性不符合规范`;
       errors.push(errorMessage);
       suggestions.push(`确保所有属性都是 readonly 并且类型正确`);
-      
+
       // 抛出验证异常
-      throw new GeneralBadRequestException(
-        "queryProperties",
-        errorMessage,
-        {
-          className: queryClass.name,
-          suggestion: `确保所有属性都是 readonly 并且类型正确`,
-        }
-      );
+      throw new GeneralBadRequestException("queryProperties", errorMessage, {
+        className: queryClass.name,
+        suggestion: `确保所有属性都是 readonly 并且类型正确`,
+      });
     }
 
     return {
@@ -186,31 +194,35 @@ export class BaseClassValidator {
    * @param useCaseClass - 用例类
    * @returns 验证结果
    */
-  static validateUseCaseClass(useCaseClass: any): BaseClassValidationResult {
+  static validateUseCaseClass(
+    useCaseClass: ClassConstructor,
+  ): BaseClassValidationResult {
     const errors: string[] = [];
     const suggestions: string[] = [];
 
     // 检查是否继承自 BaseUseCase 或 BaseCommandUseCase
     if (
-      !this.isSubclassOf(useCaseClass, BaseUseCase) &&
-      !this.isSubclassOf(useCaseClass, BaseCommandUseCase)
+      !this.isSubclassOf(
+        useCaseClass,
+        BaseUseCase as unknown as ClassConstructor,
+      ) &&
+      !this.isSubclassOf(
+        useCaseClass,
+        BaseCommandUseCase as unknown as ClassConstructor,
+      )
     ) {
       const errorMessage = `用例类 ${useCaseClass.name} 必须继承自 BaseUseCase 或 BaseCommandUseCase`;
       errors.push(errorMessage);
       suggestions.push(
         `将 ${useCaseClass.name} 改为继承自 BaseUseCase 或 BaseCommandUseCase`,
       );
-      
+
       // 抛出验证异常
-      throw new GeneralBadRequestException(
-        "useCaseClass",
-        errorMessage,
-        {
-          className: useCaseClass.name,
-          expectedBaseClass: "BaseUseCase 或 BaseCommandUseCase",
-          suggestion: `将 ${useCaseClass.name} 改为继承自 BaseUseCase 或 BaseCommandUseCase`,
-        }
-      );
+      throw new GeneralBadRequestException("useCaseClass", errorMessage, {
+        className: useCaseClass.name,
+        expectedBaseClass: "BaseUseCase 或 BaseCommandUseCase",
+        suggestion: `将 ${useCaseClass.name} 改为继承自 BaseUseCase 或 BaseCommandUseCase`,
+      });
     }
 
     // 检查构造函数
@@ -218,16 +230,12 @@ export class BaseClassValidator {
       const errorMessage = `用例类 ${useCaseClass.name} 构造函数不符合规范`;
       errors.push(errorMessage);
       suggestions.push(`确保构造函数调用 super() 并传递必要的参数`);
-      
+
       // 抛出验证异常
-      throw new GeneralBadRequestException(
-        "useCaseConstructor",
-        errorMessage,
-        {
-          className: useCaseClass.name,
-          suggestion: `确保构造函数调用 super() 并传递必要的参数`,
-        }
-      );
+      throw new GeneralBadRequestException("useCaseConstructor", errorMessage, {
+        className: useCaseClass.name,
+        suggestion: `确保构造函数调用 super() 并传递必要的参数`,
+      });
     }
 
     // 检查必需方法
@@ -235,16 +243,12 @@ export class BaseClassValidator {
       const errorMessage = `用例类 ${useCaseClass.name} 缺少必需的方法`;
       errors.push(errorMessage);
       suggestions.push(`实现 executeUseCase 或 executeCommand 方法`);
-      
+
       // 抛出验证异常
-      throw new GeneralBadRequestException(
-        "useCaseMethods",
-        errorMessage,
-        {
-          className: useCaseClass.name,
-          suggestion: `实现 executeUseCase 或 executeCommand 方法`,
-        }
-      );
+      throw new GeneralBadRequestException("useCaseMethods", errorMessage, {
+        className: useCaseClass.name,
+        suggestion: `实现 executeUseCase 或 executeCommand 方法`,
+      });
     }
 
     return {
@@ -257,14 +261,24 @@ export class BaseClassValidator {
   /**
    * 检查是否为子类
    */
-  private static isSubclassOf(child: any, parent: any): boolean {
-    return child.prototype instanceof parent;
+  private static isSubclassOf(
+    child: ClassConstructor,
+    parent: ClassConstructor,
+  ): boolean {
+    // 使用类型断言来避免复杂的类型定义问题
+    // 这里我们知道 parent 是抽象类，但 TypeScript 类型系统无法准确表达
+    return (
+      child.prototype instanceof
+      (parent as unknown as new (...args: unknown[]) => unknown)
+    );
   }
 
   /**
    * 检查命令构造函数是否有效
    */
-  private static hasValidCommandConstructor(commandClass: any): boolean {
+  private static hasValidCommandConstructor(
+    commandClass: ClassConstructor,
+  ): boolean {
     const constructor = commandClass.toString();
     return (
       constructor.includes("super(") &&
@@ -276,7 +290,9 @@ export class BaseClassValidator {
   /**
    * 检查查询构造函数是否有效
    */
-  private static hasValidQueryConstructor(queryClass: any): boolean {
+  private static hasValidQueryConstructor(
+    queryClass: ClassConstructor,
+  ): boolean {
     const constructor = queryClass.toString();
     return (
       constructor.includes("super(") &&
@@ -288,7 +304,9 @@ export class BaseClassValidator {
   /**
    * 检查用例构造函数是否有效
    */
-  private static hasValidUseCaseConstructor(useCaseClass: any): boolean {
+  private static hasValidUseCaseConstructor(
+    useCaseClass: ClassConstructor,
+  ): boolean {
     const constructor = useCaseClass.toString();
     return constructor.includes("super(");
   }
@@ -296,7 +314,9 @@ export class BaseClassValidator {
   /**
    * 检查命令属性是否有效
    */
-  private static hasValidCommandProperties(_commandClass: any): boolean {
+  private static hasValidCommandProperties(
+    _commandClass: ClassConstructor,
+  ): boolean {
     // 这里简化实现，实际应该检查属性定义
     return true;
   }
@@ -304,7 +324,9 @@ export class BaseClassValidator {
   /**
    * 检查查询属性是否有效
    */
-  private static hasValidQueryProperties(_queryClass: any): boolean {
+  private static hasValidQueryProperties(
+    _queryClass: ClassConstructor,
+  ): boolean {
     // 这里简化实现，实际应该检查属性定义
     return true;
   }
@@ -312,7 +334,9 @@ export class BaseClassValidator {
   /**
    * 检查用例必需方法
    */
-  private static hasRequiredUseCaseMethods(useCaseClass: any): boolean {
+  private static hasRequiredUseCaseMethods(
+    useCaseClass: ClassConstructor,
+  ): boolean {
     const prototype = useCaseClass.prototype;
     return (
       typeof prototype.executeUseCase === "function" ||
