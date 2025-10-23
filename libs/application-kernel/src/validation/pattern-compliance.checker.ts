@@ -177,7 +177,7 @@ export class PatternComplianceChecker {
   /**
    * 加载模块
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   // 必须使用 any 类型：动态导入的模块可以是任意类型，无法预先确定具体的模块结构
   // 这是模式合规性检查的核心需求，用于动态加载和验证模块
   private static async loadModule(_modulePath: string): Promise<any> {
@@ -268,7 +268,7 @@ export class PatternComplianceChecker {
    * @param module - 要检查的模块
    * @returns 检查结果
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   // 必须使用 any 类型：需要检查任意类型的模块，无法预先确定具体的模块结构
   // 这是模式合规性检查的核心需求，用于验证模块是否符合设计模式
   static checkModule(module: any): PatternComplianceResult {
@@ -282,7 +282,6 @@ export class PatternComplianceChecker {
    * @returns 检查结果数组
    */
   static checkModules(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     // 必须使用 any 类型：需要检查任意类型的模块，无法预先确定具体的模块结构
     // 这是模式合规性检查的核心需求，用于批量验证模块是否符合设计模式
     modules: Array<{ name: string; module: any }>,
