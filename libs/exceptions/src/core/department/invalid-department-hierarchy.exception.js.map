@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-department-hierarchy.exception.js","sourceRoot":"","sources":["invalid-department-hierarchy.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,mBAAmB,EAAE,MAAM,2BAA2B,CAAC;AAqBhE,MAAM,OAAO,mCAAoC,SAAQ,mBAAmB;IAO1E,YAAY,MAAc,EAAE,IAA8B;QACxD,KAAK,CACH,8BAA8B,EAC9B,SAAS,EACT,MAAM,EACN,GAAG,EACH,IAAI,EACJ,0DAA0D,CAC3D,CAAC;IACJ,CAAC;CACF"}

@@ -33,7 +33,7 @@ export interface RetryConfig {
   /** 是否启用重试 */
   enabled: boolean;
   /** 重试条件 */
-  retryCondition?: (error: Error) => boolean;
+  retryCondition?: (_error: Error) => boolean;
 }
 
 /**
@@ -45,7 +45,7 @@ export interface RetryResult<T> {
   /** 返回数据 */
   data?: T;
   /** 错误信息 */
-  error?: Error;
+  _error?: Error;
   /** 重试次数 */
   attempts: number;
   /** 总执行时间 */
@@ -54,7 +54,7 @@ export interface RetryResult<T> {
   retryHistory: Array<{
     attempt: number;
     timestamp: Date;
-    error?: Error;
+    _error?: Error;
     delay: number;
   }>;
 }
@@ -109,10 +109,10 @@ export class RetryManagerService {
           totalTime: Date.now() - startTime,
           retryHistory: [],
         };
-      } catch (error) {
+      } catch (_error) {
         return {
           success: false,
-          error: error as Error,
+          _error: _error as Error,
           attempts: 1,
           totalTime: Date.now() - startTime,
           retryHistory: [],
@@ -123,14 +123,14 @@ export class RetryManagerService {
     const retryHistory: Array<{
       attempt: number;
       timestamp: Date;
-      error?: Error;
+      _error?: Error;
       delay: number;
     }> = [];
 
     let lastError: Error | undefined;
 
     for (let attempt = 1; attempt <= retryConfig.maxAttempts; attempt++) {
-      const attemptStartTime = Date.now();
+      const _attemptStartTime = Date.now();
 
       try {
         const data = await fn();
@@ -145,11 +145,11 @@ export class RetryManagerService {
           totalTime: Date.now() - startTime,
           retryHistory,
         };
-      } catch (error) {
-        lastError = error as Error;
+      } catch (_error) {
+        lastError = _error as Error;
 
         // 检查是否应该重试
-        if (!this.shouldRetry(error as Error, attempt, retryConfig)) {
+        if (!this.shouldRetry(_error as Error, attempt, retryConfig)) {
           break;
         }
 
@@ -160,12 +160,12 @@ export class RetryManagerService {
         retryHistory.push({
           attempt,
           timestamp: new Date(),
-          error: error as Error,
+          _error: _error as Error,
           delay,
         });
 
         // 记录重试日志
-        await this.logRetryAttempt(operation, attempt, error as Error, delay);
+        await this.logRetryAttempt(operation, attempt, _error as Error, delay);
 
         // 等待延迟时间
         if (attempt < retryConfig.maxAttempts) {
@@ -183,7 +183,7 @@ export class RetryManagerService {
 
     return {
       success: false,
-      error: lastError,
+      _error: lastError,
       attempts: retryConfig.maxAttempts,
       totalTime: Date.now() - startTime,
       retryHistory,
@@ -233,7 +233,7 @@ export class RetryManagerService {
   /**
    * 获取重试统计
    */
-  getRetryStats(): Record<string, any> {
+  getRetryStats(): Record<string, unknown> {
     const total = this.retryHistory.length;
     const successful = this.retryHistory.filter((h) => h.success).length;
     const failed = total - successful;
@@ -284,12 +284,12 @@ export class RetryManagerService {
    * 检查是否应该重试
    */
   private shouldRetry(
-    error: Error,
+    _error: Error,
     attempt: number,
     config: RetryConfig,
   ): boolean {
     // 检查重试条件
-    if (config.retryCondition && !config.retryCondition(error)) {
+    if (config.retryCondition && !config.retryCondition(_error)) {
       return false;
     }
 
@@ -299,7 +299,7 @@ export class RetryManagerService {
     }
 
     // 检查错误类型
-    const message = error.message.toLowerCase();
+    const message = _error.message.toLowerCase();
 
     // 网络错误通常可以重试
     if (message.includes("timeout") || message.includes("connection")) {
@@ -402,7 +402,7 @@ export class RetryManagerService {
   private async logRetryAttempt(
     operation: string,
     attempt: number,
-    error: Error,
+    _error: Error,
     delay: number,
   ): Promise<void> {
     try {
@@ -423,13 +423,13 @@ export class RetryManagerService {
           {
             operation,
             attempt,
-            error: error.message,
+            _error: _error.message,
             delay,
           },
         );
       }
-    } catch (error) {
-      console.error("记录重试尝试日志失败:", error);
+    } catch (_error) {
+      console.error("记录重试尝试日志失败:", _error);
     }
   }
 
@@ -439,7 +439,7 @@ export class RetryManagerService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

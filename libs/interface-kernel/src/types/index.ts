@@ -25,7 +25,7 @@ export interface InterfaceFastifyRequest extends FastifyRequest {
  */
 export interface InterfaceFastifyReply extends FastifyReply {
   // 可以添加自定义响应方法
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -80,7 +80,7 @@ export enum SharingLevel {
 /**
  * API 响应接口
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: ApiError;
@@ -93,7 +93,7 @@ export interface ApiResponse<T = any> {
 export interface ApiError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: string;
   path?: string;
 }
@@ -139,7 +139,7 @@ export interface RateLimitConfig {
  */
 export interface AuthStrategy {
   name: string;
-  validate(payload: any): Promise<UserContext | null>;
+  validate(payload: Record<string, unknown>): Promise<UserContext | null>;
 }
 
 /**
@@ -148,7 +148,7 @@ export interface AuthStrategy {
 export interface AuthorizationRule {
   resource: string;
   action: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   roles?: string[];
   permissions?: string[];
 }
@@ -163,7 +163,7 @@ export interface ValidationRule {
   min?: number;
   max?: number;
   pattern?: RegExp;
-  custom?: (value: any) => boolean;
+  custom?: (value: unknown) => boolean;
   message?: string;
 }
 
@@ -196,7 +196,7 @@ export interface ServiceHealth {
   status: "healthy" | "unhealthy" | "degraded";
   responseTime?: number;
   lastCheck: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -204,7 +204,7 @@ export interface ServiceHealth {
  */
 export interface WebSocketEvent {
   event: string;
-  data: any;
+  data: unknown;
   timestamp: string;
   userId?: string;
   tenantId?: string;
@@ -244,7 +244,7 @@ export interface WebSocketConnection {
  */
 export interface MiddlewareConfig {
   enabled: boolean;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 /**

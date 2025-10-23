@@ -105,5 +105,8 @@ export { Email } from "./examples/email.vo.js";
 export { Username } from "./examples/username.vo.js";
 export { User } from "./examples/user.entity.js";
 
+// 领域异常（从 libs/exceptions 导入）
+export * from "/home/arligle/hl8/hl8-ai-saas-platform/libs/exceptions/dist/core/domain/index.js";
+
 // 领域错误
 // 注意：IsolationValidationError 已移动到 isolation 目录

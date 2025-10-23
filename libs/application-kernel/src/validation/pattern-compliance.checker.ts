@@ -177,6 +177,9 @@ export class PatternComplianceChecker {
   /**
    * 加载模块
    */
+
+  // 必须使用 any 类型：动态导入的模块可以是任意类型，无法预先确定具体的模块结构
+  // 这是模式合规性检查的核心需求，用于动态加载和验证模块
   private static async loadModule(_modulePath: string): Promise<any> {
     // 这里简化实现，实际应该使用动态导入
     // 在实际实现中，应该使用 import() 动态加载模块
@@ -265,6 +268,9 @@ export class PatternComplianceChecker {
    * @param module - 要检查的模块
    * @returns 检查结果
    */
+
+  // 必须使用 any 类型：需要检查任意类型的模块，无法预先确定具体的模块结构
+  // 这是模式合规性检查的核心需求，用于验证模块是否符合设计模式
   static checkModule(module: any): PatternComplianceResult {
     return PatternComplianceValidator.validateModule(module);
   }
@@ -276,6 +282,8 @@ export class PatternComplianceChecker {
    * @returns 检查结果数组
    */
   static checkModules(
+    // 必须使用 any 类型：需要检查任意类型的模块，无法预先确定具体的模块结构
+    // 这是模式合规性检查的核心需求，用于批量验证模块是否符合设计模式
     modules: Array<{ name: string; module: any }>,
   ): Array<{ name: string; result: PatternComplianceResult }> {
     return modules.map(({ name, module }) => ({

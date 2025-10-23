@@ -1,0 +1,1 @@
+{"version":3,"file":"general-bad-request.exception.d.ts","sourceRoot":"","sources":["general-bad-request.exception.ts"],"names":[],"mappings":"AAoEA,OAAO,EAAE,qBAAqB,EAAE,MAAM,8BAA8B,CAAC;AAOrE,qBAAa,0BAA2B,SAAQ,qBAAqB;gBAiBvD,KAAK,EAAE,MAAM,EAAE,MAAM,EAAE,MAAM,EAAE,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAG1E"}

@@ -21,13 +21,13 @@ export interface DomainEvent {
   /** 聚合根ID */
   aggregateId: string;
   /** 事件数据 */
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   /** 事件版本 */
   version: number;
   /** 时间戳 */
   timestamp: Date;
   /** 元数据 */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -37,9 +37,9 @@ export interface EventHandleResult {
   /** 是否成功 */
   success: boolean;
   /** 处理数据 */
-  data?: any;
+  data?: unknown;
   /** 错误信息 */
-  error?: string;
+  _error?: string;
   /** 处理时间(毫秒) */
   processingTime: number;
   /** 事件ID */
@@ -124,11 +124,11 @@ export class EventHandlerService {
       await this.logEventProcessing(event, result);
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       const processingTime = Date.now() - startTime;
       const result: EventHandleResult = {
         success: false,
-        error: error instanceof Error ? error.message : "事件处理失败",
+        _error: _error instanceof Error ? _error.message : "事件处理失败",
         processingTime,
         eventId: event.id,
       };
@@ -150,10 +150,10 @@ export class EventHandlerService {
       try {
         const result = await this.handleEvent(event);
         results.push(result);
-      } catch (error) {
+      } catch (_error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : "事件处理失败",
+          _error: _error instanceof Error ? _error.message : "事件处理失败",
           processingTime: 0,
           eventId: event.id,
         });
@@ -177,9 +177,9 @@ export class EventHandlerService {
       if (!this.isProcessing) {
         this.processEventQueue();
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `队列事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `队列事件失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -201,8 +201,8 @@ export class EventHandlerService {
           await this.handleEvent(event);
         }
       }
-    } catch (error) {
-      console.error("处理事件队列失败:", error);
+    } catch (_error) {
+      console.error("处理事件队列失败:", _error);
     } finally {
       this.isProcessing = false;
     }
@@ -211,7 +211,7 @@ export class EventHandlerService {
   /**
    * 获取事件队列状态
    */
-  getQueueStatus(): Record<string, any> {
+  getQueueStatus(): Record<string, unknown> {
     return {
       queueLength: this.eventQueue.length,
       isProcessing: this.isProcessing,
@@ -222,7 +222,7 @@ export class EventHandlerService {
   /**
    * 获取处理统计信息
    */
-  getProcessingStats(): Record<string, any> {
+  getProcessingStats(): Record<string, unknown> {
     return {
       ...this.processingStats,
       successRate:
@@ -342,8 +342,8 @@ export class EventHandlerService {
 
       // 这里应该记录到日志系统
       console.log("事件处理日志:", logData);
-    } catch (error) {
-      console.error("记录事件处理日志失败:", error);
+    } catch (_error) {
+      console.error("记录事件处理日志失败:", _error);
     }
   }
 
@@ -353,7 +353,7 @@ export class EventHandlerService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

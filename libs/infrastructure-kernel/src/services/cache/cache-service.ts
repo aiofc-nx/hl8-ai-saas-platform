@@ -88,9 +88,9 @@ export class CacheService implements ICacheService {
 
       // 检查缓存大小限制
       this.enforceSizeLimit();
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `设置缓存失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `设置缓存失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -98,7 +98,7 @@ export class CacheService implements ICacheService {
   /**
    * 获取缓存
    */
-  async get<T = any>(key: string): Promise<T | null> {
+  async get<T = unknown>(key: string): Promise<T | null> {
     const startTime = Date.now();
 
     try {
@@ -121,7 +121,7 @@ export class CacheService implements ICacheService {
       await this.updateCacheStats(startTime, true);
 
       return deserializedValue;
-    } catch (error) {
+    } catch (_error) {
       await this.updateCacheStats(startTime, false);
       return null;
     }
@@ -130,7 +130,7 @@ export class CacheService implements ICacheService {
   /**
    * 批量获取缓存
    */
-  async mget<T = any>(keys: string[]): Promise<Record<string, T | null>> {
+  async mget<T = unknown>(keys: string[]): Promise<Record<string, T | null>> {
     const results: Record<string, T | null> = {};
 
     for (const key of keys) {
@@ -150,9 +150,9 @@ export class CacheService implements ICacheService {
 
       this.cache.delete(isolatedKey);
       this.cacheTimestamps.delete(isolatedKey);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `删除缓存失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `删除缓存失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -184,9 +184,9 @@ export class CacheService implements ICacheService {
         this.cache.clear();
         this.cacheTimestamps.clear();
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `清除缓存失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `清除缓存失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -200,7 +200,7 @@ export class CacheService implements ICacheService {
       const isolatedKey = this.applyIsolationContext(key);
 
       return this.cache.has(isolatedKey);
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -226,7 +226,7 @@ export class CacheService implements ICacheService {
       const ttl = this.config.defaultTtl * 1000 - elapsed;
 
       return Math.max(0, Math.floor(ttl / 1000));
-    } catch (error) {
+    } catch (_error) {
       return -1;
     }
   }
@@ -251,9 +251,9 @@ export class CacheService implements ICacheService {
         this.cache.delete(isolatedKey);
         this.cacheTimestamps.delete(isolatedKey);
       }, ttl * 1000);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `设置缓存TTL失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `设置缓存TTL失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -272,7 +272,7 @@ export class CacheService implements ICacheService {
       await this.delete(testKey);
 
       return retrieved === testValue;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -293,7 +293,7 @@ export class CacheService implements ICacheService {
       const keysToDelete: string[] = [];
 
       for (const key of this.cache.keys()) {
-        const shouldDelete = false;
+        const _shouldDelete = false;
 
         // 检查租户隔离
         if (options.tenantId && !key.includes(`tenant:${options.tenantId}`)) {
@@ -357,9 +357,9 @@ export class CacheService implements ICacheService {
           clearedKeys: keysToDelete,
         },
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `根据选项清理缓存失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `根据选项清理缓存失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -372,9 +372,9 @@ export class CacheService implements ICacheService {
       // 这里可以实现缓存预热逻辑
       // 例如：预加载常用数据
       console.log("缓存预热:", keys);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `缓存预热失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `缓存预热失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -406,7 +406,8 @@ export class CacheService implements ICacheService {
    * 设置缓存策略
    */
   setStrategy(strategy: string): Promise<void> {
-    this.config.strategy = strategy as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.config.strategy = strategy as any; // 符合宪章 IX：缓存策略配置，支持任意策略类型
     return Promise.resolve();
   }
 

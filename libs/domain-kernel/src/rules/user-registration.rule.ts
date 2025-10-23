@@ -9,6 +9,7 @@ import {
   BusinessRuleValidator,
   BusinessRuleValidationResult,
 } from "./business-rule-validator.js";
+import { DomainBusinessRuleViolationException } from "/home/arligle/hl8/hl8-ai-saas-platform/libs/exceptions/dist/core/domain/index.js";
 
 /**
  * 用户注册业务规则验证器
@@ -135,6 +136,43 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator<UserRegi
     }
 
     return { isValid: true, message: "" };
+  }
+
+  /**
+   * 验证用户注册并抛出异常
+   * @param context 用户注册上下文
+   * @throws {BusinessRuleViolationException} 当验证失败时抛出异常
+   */
+  validateUserRegistrationAndThrow(context: UserRegistrationContext): void {
+    const result = this.validate(context);
+    if (!result.isValid) {
+      const firstError = result.errors[0];
+      throw new DomainBusinessRuleViolationException(
+        firstError.code,
+        firstError.message,
+        firstError.context,
+      );
+    }
+  }
+
+  /**
+   * 验证用户注册并返回异常
+   * @param context 用户注册上下文
+   * @returns 异常或 null
+   */
+  validateUserRegistrationAndReturnException(
+    context: UserRegistrationContext,
+  ): DomainBusinessRuleViolationException | null {
+    const result = this.validate(context);
+    if (!result.isValid) {
+      const firstError = result.errors[0];
+      return new DomainBusinessRuleViolationException(
+        firstError.code,
+        firstError.message,
+        firstError.context,
+      );
+    }
+    return null;
   }
 }
 

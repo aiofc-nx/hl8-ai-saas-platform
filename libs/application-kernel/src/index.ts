@@ -38,3 +38,6 @@ export { BaseClassValidator } from "./validation/base-class.validator.js";
 export { InterfaceComplianceValidator } from "./validation/interface-compliance.validator.js";
 export { PatternComplianceChecker } from "./validation/pattern-compliance.checker.js";
 export { PatternComplianceValidator } from "./validation/pattern-compliance.validator.js";
+
+// 异常系统
+export { GeneralBadRequestException } from "@hl8/exceptions";

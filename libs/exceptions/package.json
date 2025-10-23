@@ -1,6 +1,6 @@
 {
   "name": "@hl8/exceptions",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "统一的异常处理模块，遵循 RFC7807 标准",
   "keywords": [
     "nestjs",
@@ -24,6 +24,30 @@
     "./core": {
       "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.js"
+    },
+    "./core/auth": {
+      "types": "./dist/core/auth/index.d.ts",
+      "import": "./dist/core/auth/index.js"
+    },
+    "./core/user": {
+      "types": "./dist/core/user/index.d.ts",
+      "import": "./dist/core/user/index.js"
+    },
+    "./core/tenant": {
+      "types": "./dist/core/tenant/index.d.ts",
+      "import": "./dist/core/tenant/index.js"
+    },
+    "./core/layers": {
+      "types": "./dist/core/layers/index.d.ts",
+      "import": "./dist/core/layers/index.js"
+    },
+    "./core/validation": {
+      "types": "./dist/core/validation/index.d.ts",
+      "import": "./dist/core/validation/index.js"
+    },
+    "./core/domain": {
+      "types": "./dist/core/domain/index.d.ts",
+      "import": "./dist/core/domain/index.js"
     },
     "./filters": {
       "types": "./dist/filters/index.d.ts",

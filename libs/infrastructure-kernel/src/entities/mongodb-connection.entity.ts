@@ -90,7 +90,7 @@ export class MongoDBConnectionEntity extends DatabaseConnectionEntity {
    * 获取MongoDB连接配置
    * @returns MongoDB连接配置
    */
-  getMongoDBConfig(): Record<string, any> {
+  getMongoDBConfig(): Record<string, unknown> {
     return {
       ...this.getConnectionConfig(),
       replicaSet: this.replicaSet,
@@ -132,7 +132,7 @@ export class MongoDBConnectionEntity extends DatabaseConnectionEntity {
    * 获取MikroORM配置
    * @returns MikroORM配置对象
    */
-  getMikroORMConfig(): Record<string, any> {
+  getMikroORMConfig(): Record<string, unknown> {
     return {
       type: "mongo",
       clientUrl: this.getMongoDBConnectionString(),
@@ -161,7 +161,7 @@ export class MongoDBConnectionEntity extends DatabaseConnectionEntity {
    * 获取副本集配置
    * @returns 副本集配置
    */
-  getReplicaSetConfig(): Record<string, any> | null {
+  getReplicaSetConfig(): Record<string, unknown> | null {
     if (!this.isReplicaSet()) {
       return null;
     }

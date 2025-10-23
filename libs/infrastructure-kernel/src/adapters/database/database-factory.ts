@@ -62,13 +62,17 @@ export class DatabaseFactory implements IDatabaseFactory {
    */
   async createAdapter(
     type: string,
-    config: any,
+    config: Record<string, unknown>,
   ): Promise<IPostgreSQLAdapter | IMongoDBAdapter> {
     switch (type.toUpperCase()) {
       case "POSTGRESQL":
-        return this.createPostgreSQLAdapter(config);
+        return this.createPostgreSQLAdapter(
+          config as unknown as PostgreSQLConnectionEntity,
+        );
       case "MONGODB":
-        return this.createMongoDBAdapter(config);
+        return this.createMongoDBAdapter(
+          config as unknown as MongoDBConnectionEntity,
+        );
       default:
         throw new Error(`不支持的数据库类型: ${type}`);
     }
@@ -79,7 +83,7 @@ export class DatabaseFactory implements IDatabaseFactory {
    */
   validateConfig(
     type: string,
-    config: any,
+    config: Record<string, unknown>,
   ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
@@ -97,7 +101,8 @@ export class DatabaseFactory implements IDatabaseFactory {
       errors.push("主机地址不能为空");
     }
 
-    if (!config.port || config.port <= 0 || config.port > 65535) {
+    const port = config.port as number;
+    if (!port || port <= 0 || port > 65535) {
       errors.push("端口号必须在1-65535范围内");
     }
 
@@ -115,25 +120,30 @@ export class DatabaseFactory implements IDatabaseFactory {
 
     // 类型特定验证
     switch (type.toUpperCase()) {
-      case "POSTGRESQL":
+      case "POSTGRESQL": {
         if (!config.schema) {
           errors.push("PostgreSQL模式不能为空");
         }
-        if (config.maxConnections && config.maxConnections <= 0) {
+        const maxConnections = config.maxConnections as number;
+        if (maxConnections && maxConnections <= 0) {
           errors.push("PostgreSQL最大连接数必须大于0");
         }
         break;
-      case "MONGODB":
+      }
+      case "MONGODB": {
         if (!config.authSource) {
           errors.push("MongoDB认证源不能为空");
         }
-        if (config.maxPoolSize && config.maxPoolSize <= 0) {
+        const maxPoolSize = config.maxPoolSize as number;
+        if (maxPoolSize && maxPoolSize <= 0) {
           errors.push("MongoDB最大连接池大小必须大于0");
         }
-        if (config.minPoolSize && config.minPoolSize < 0) {
+        const minPoolSize = config.minPoolSize as number;
+        if (minPoolSize && minPoolSize < 0) {
           errors.push("MongoDB最小连接池大小不能为负数");
         }
         break;
+      }
       default:
         errors.push(`不支持的数据库类型: ${type}`);
     }
@@ -147,7 +157,7 @@ export class DatabaseFactory implements IDatabaseFactory {
   /**
    * 创建默认配置
    */
-  createDefaultConfig(type: string): any {
+  createDefaultConfig(type: string): Record<string, unknown> {
     const baseConfig = {
       host: "localhost",
       port: type.toUpperCase() === "POSTGRESQL" ? 5432 : 27017,
@@ -188,7 +198,7 @@ export class DatabaseFactory implements IDatabaseFactory {
   /**
    * 获取数据库信息
    */
-  getDatabaseInfo(type: string): Record<string, any> {
+  getDatabaseInfo(type: string): Record<string, unknown> {
     switch (type.toUpperCase()) {
       case "POSTGRESQL":
         return {

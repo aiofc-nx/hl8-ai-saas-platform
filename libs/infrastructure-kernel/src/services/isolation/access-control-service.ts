@@ -25,7 +25,7 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 验证访问权限
    */
-  async validateAccess(context: any, resource: any): Promise<boolean> {
+  async validateAccess(context: unknown, resource: unknown): Promise<boolean> {
     try {
       if (!context || !resource) {
         return false;
@@ -40,8 +40,8 @@ export class AccessControlService implements IAccessControlService {
 
       // 简化的权限检查逻辑
       return true;
-    } catch (error) {
-      console.error("访问权限验证失败:", error);
+    } catch (_error) {
+      console.error("访问权限验证失败:", _error);
       return false;
     }
   }
@@ -49,33 +49,35 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 提取资源的隔离上下文
    */
-  private extractResourceContext(resource: any): any | null {
+  private extractResourceContext(resource: unknown): unknown | null {
     try {
+      const resourceObj = resource as Record<string, unknown>;
+
       // 从资源中提取隔离信息
-      if (resource.tenantId) {
-        if (resource.departmentId && resource.organizationId) {
+      if (resourceObj.tenantId) {
+        if (resourceObj.departmentId && resourceObj.organizationId) {
           return {
-            tenantId: resource.tenantId,
-            organizationId: resource.organizationId,
-            departmentId: resource.departmentId,
+            tenantId: resourceObj.tenantId,
+            organizationId: resourceObj.organizationId,
+            departmentId: resourceObj.departmentId,
           };
-        } else if (resource.organizationId) {
+        } else if (resourceObj.organizationId) {
           return {
-            tenantId: resource.tenantId,
-            organizationId: resource.organizationId,
+            tenantId: resourceObj.tenantId,
+            organizationId: resourceObj.organizationId,
           };
         } else {
-          return { tenantId: resource.tenantId };
+          return { tenantId: resourceObj.tenantId };
         }
-      } else if (resource.userId) {
+      } else if (resourceObj.userId) {
         return {
-          userId: resource.userId,
-          tenantId: resource.tenantId,
+          userId: resourceObj.userId,
+          tenantId: resourceObj.tenantId,
         };
       }
       return {};
-    } catch (error) {
-      console.error("提取资源隔离上下文失败:", error);
+    } catch (_error) {
+      console.error("提取资源隔离上下文失败:", _error);
       return null;
     }
   }
@@ -84,7 +86,7 @@ export class AccessControlService implements IAccessControlService {
    * 检查资源访问权限
    */
   async checkResourceAccess(
-    context: any,
+    context: unknown,
     resourceType: string,
     resourceId: string,
     action: string,
@@ -109,7 +111,7 @@ export class AccessControlService implements IAccessControlService {
 
       // 默认权限检查
       return this.checkDefaultAccess(context, resourceType, resourceId, action);
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -117,10 +119,10 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 过滤数据
    */
-  filterData<T>(data: T[], context: any): T[] {
+  filterData<T>(data: T[], context: unknown): T[] {
     try {
       return data.filter((item) => this.isDataAccessible(item, context));
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -128,29 +130,31 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 应用隔离过滤
    */
-  applyIsolationFilter(query: any, context: any): any {
+  applyIsolationFilter(query: unknown, context: unknown): unknown {
     try {
-      const filteredQuery = { ...query };
+      const queryObj = query as Record<string, unknown>;
+      const contextObj = context as Record<string, unknown>;
+      const filteredQuery = { ...queryObj };
 
       // 添加隔离条件
-      if (context.tenantId) {
-        filteredQuery.tenantId = context.tenantId;
+      if (contextObj.tenantId) {
+        filteredQuery.tenantId = contextObj.tenantId;
       }
 
-      if (context.organizationId) {
-        filteredQuery.organizationId = context.organizationId;
+      if (contextObj.organizationId) {
+        filteredQuery.organizationId = contextObj.organizationId;
       }
 
-      if (context.departmentId) {
-        filteredQuery.departmentId = context.departmentId;
+      if (contextObj.departmentId) {
+        filteredQuery.departmentId = contextObj.departmentId;
       }
 
-      if (context.userId) {
-        filteredQuery.userId = context.userId;
+      if (contextObj.userId) {
+        filteredQuery.userId = contextObj.userId;
       }
 
       return filteredQuery;
-    } catch (error) {
+    } catch (_error) {
       return query;
     }
   }
@@ -197,7 +201,7 @@ export class AccessControlService implements IAccessControlService {
    * 检查批量访问权限
    */
   async checkBatchAccess(
-    context: any,
+    context: unknown,
     resources: Array<{ type: string; id: string; action: string }>,
   ): Promise<Record<string, boolean>> {
     const results: Record<string, boolean> = {};
@@ -211,7 +215,7 @@ export class AccessControlService implements IAccessControlService {
           resource.id,
           resource.action,
         );
-      } catch (error) {
+      } catch (_error) {
         results[key] = false;
       }
     }
@@ -222,7 +226,7 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 获取权限摘要
    */
-  async getPermissionSummary(context: any): Promise<PermissionSummary> {
+  async getPermissionSummary(context: unknown): Promise<PermissionSummary> {
     try {
       const allowedActions: string[] = [];
       const deniedActions: string[] = [];
@@ -265,7 +269,7 @@ export class AccessControlService implements IAccessControlService {
         resourcePermissions,
         permissionLevel,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         allowedActions: [],
         deniedActions: [],
@@ -278,13 +282,18 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 获取资源类型
    */
-  private getResourceType(resource: any): string {
+  private getResourceType(resource: unknown): string {
     if (typeof resource === "string") {
       return resource;
     }
 
     if (resource && typeof resource === "object") {
-      return resource.type || resource.resourceType || "unknown";
+      const resourceObj = resource as Record<string, unknown>;
+      return (
+        (resourceObj.type as string) ||
+        (resourceObj.resourceType as string) ||
+        "unknown"
+      );
     }
 
     return "unknown";
@@ -293,13 +302,16 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 获取资源ID
    */
-  private getResourceId(resource: any): string {
+  private getResourceId(resource: unknown): string {
     if (typeof resource === "string") {
       return resource;
     }
 
     if (resource && typeof resource === "object") {
-      return resource.id || resource.resourceId || "";
+      const resourceObj = resource as Record<string, unknown>;
+      return (
+        (resourceObj.id as string) || (resourceObj.resourceId as string) || ""
+      );
     }
 
     return "";
@@ -308,9 +320,10 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 获取操作
    */
-  private getAction(resource: any): string {
+  private getAction(resource: unknown): string {
     if (resource && typeof resource === "object") {
-      return resource.action || "read";
+      const resourceObj = resource as Record<string, unknown>;
+      return (resourceObj.action as string) || "read";
     }
 
     return "read";
@@ -332,7 +345,7 @@ export class AccessControlService implements IAccessControlService {
    */
   private isRuleApplicable(
     rule: AccessRule,
-    context: any,
+    context: unknown,
     resourceType: string,
     resourceId: string,
     action: string,
@@ -361,7 +374,7 @@ export class AccessControlService implements IAccessControlService {
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -371,30 +384,32 @@ export class AccessControlService implements IAccessControlService {
    */
   private checkCondition(
     key: string,
-    value: any,
-    context: any,
-    resourceType: string,
-    resourceId: string,
-    action: string,
+    value: unknown,
+    context: unknown,
+    _resourceType: string,
+    _resourceId: string,
+    _action: string,
   ): boolean {
     try {
+      const contextObj = context as Record<string, unknown>;
+
       switch (key) {
         case "tenantId":
-          return context.tenantId === value;
+          return contextObj.tenantId === value;
         case "organizationId":
-          return context.organizationId === value;
+          return contextObj.organizationId === value;
         case "departmentId":
-          return context.departmentId === value;
+          return contextObj.departmentId === value;
         case "userId":
-          return context.userId === value;
+          return contextObj.userId === value;
         case "sharingLevel":
-          return (context as any).sharingLevel === value;
+          return contextObj.sharingLevel === value;
         case "isShared":
-          return (context as any).isShared === value;
+          return contextObj.isShared === value;
         default:
           return true;
       }
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -403,10 +418,10 @@ export class AccessControlService implements IAccessControlService {
    * 检查默认访问权限
    */
   private checkDefaultAccess(
-    context: any,
-    resourceType: string,
-    resourceId: string,
-    action: string,
+    context: unknown,
+    _resourceType: string,
+    _resourceId: string,
+    _action: string,
   ): boolean {
     try {
       // 根据共享级别确定默认权限
@@ -414,29 +429,29 @@ export class AccessControlService implements IAccessControlService {
         case "PLATFORM":
           return true;
         case "TENANT":
-          return resourceType.startsWith("tenant:");
+          return _resourceType.startsWith("tenant:");
         case "ORGANIZATION":
           return (
-            resourceType.startsWith("org:") ||
-            resourceType.startsWith("tenant:")
+            _resourceType.startsWith("org:") ||
+            _resourceType.startsWith("tenant:")
           );
         case "DEPARTMENT":
           return (
-            resourceType.startsWith("dept:") ||
-            resourceType.startsWith("org:") ||
-            resourceType.startsWith("tenant:")
+            _resourceType.startsWith("dept:") ||
+            _resourceType.startsWith("org:") ||
+            _resourceType.startsWith("tenant:")
           );
         case "USER":
           return (
-            resourceType.startsWith("user:") ||
-            resourceType.startsWith("dept:") ||
-            resourceType.startsWith("org:") ||
-            resourceType.startsWith("tenant:")
+            _resourceType.startsWith("user:") ||
+            _resourceType.startsWith("dept:") ||
+            _resourceType.startsWith("org:") ||
+            _resourceType.startsWith("tenant:")
           );
         default:
           return false;
       }
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -444,37 +459,43 @@ export class AccessControlService implements IAccessControlService {
   /**
    * 检查数据是否可访问
    */
-  private isDataAccessible(data: any, context: any): boolean {
+  private isDataAccessible(data: unknown, context: unknown): boolean {
     try {
       if (!data || typeof data !== "object") {
         return false;
       }
 
+      const contextObj = context as Record<string, unknown>;
+      const dataObj = data as Record<string, unknown>;
+
       // 检查租户隔离
-      if (context.tenantId && data.tenantId !== context.tenantId) {
+      if (contextObj.tenantId && dataObj.tenantId !== contextObj.tenantId) {
         return false;
       }
 
       // 检查组织隔离
       if (
-        context.organizationId &&
-        data.organizationId !== context.organizationId
+        contextObj.organizationId &&
+        dataObj.organizationId !== contextObj.organizationId
       ) {
         return false;
       }
 
       // 检查部门隔离
-      if (context.departmentId && data.departmentId !== context.departmentId) {
+      if (
+        contextObj.departmentId &&
+        dataObj.departmentId !== contextObj.departmentId
+      ) {
         return false;
       }
 
       // 检查用户隔离
-      if (context.userId && data.userId !== context.userId) {
+      if (contextObj.userId && dataObj.userId !== contextObj.userId) {
         return false;
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

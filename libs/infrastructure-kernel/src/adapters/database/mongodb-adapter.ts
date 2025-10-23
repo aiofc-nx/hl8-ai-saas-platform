@@ -17,9 +17,23 @@ import type { MongoDBConnectionEntity } from "../../entities/mongodb-connection.
 /**
  * MongoDB数据库适配器
  */
+interface DatabaseConnection {
+  execute: (
+    sql: string,
+    params?: unknown[],
+  ) => Promise<{
+    affectedRows?: number;
+    data?: unknown[];
+    connections?: unknown;
+    network?: unknown;
+    opcounters?: unknown;
+  }>;
+  close: () => Promise<void>;
+}
+
 export class MongoDBAdapter implements IMongoDBAdapter {
   private orm?: MikroORM;
-  private connection?: any;
+  private connection?: DatabaseConnection;
   private isConnected = false;
 
   constructor(private readonly config: MongoDBConnectionEntity) {}
@@ -42,10 +56,10 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       this.connection = this.orm.em.getConnection();
       this.isConnected = true;
-    } catch (error) {
+    } catch (_error) {
       this.isConnected = false;
       throw new Error(
-        `MongoDB连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `MongoDB连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -61,9 +75,9 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         this.connection = undefined;
         this.isConnected = false;
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `MongoDB断开连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `MongoDB断开连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -71,7 +85,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 获取仓储实例
    */
-  getRepository<T>(entity: any): any {
+  getRepository<T>(entity: new () => T): unknown {
     if (!this.orm) {
       throw new Error("数据库未连接");
     }
@@ -89,7 +103,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       await this.connection.execute("ping");
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -104,9 +118,9 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 执行查询
    */
-  async query<T = any>(
+  async query<T = unknown>(
     sql: string,
-    params?: any[],
+    params?: unknown[],
   ): Promise<DatabaseOperationResult<T[]>> {
     const startTime = Date.now();
 
@@ -121,14 +135,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       return {
         success: true,
-        data: result,
+        data: result.data as T[],
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "查询执行失败",
+        _error: _error instanceof Error ? _error.message : "查询执行失败",
         executionTime,
       };
     }
@@ -138,8 +152,8 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    * 执行事务
    */
   async transaction<T>(
-    callback: (trx: any) => Promise<T>,
-    options?: DatabaseTransactionOptions,
+    callback: (trx: unknown) => Promise<T>,
+    _options?: DatabaseTransactionOptions,
   ): Promise<DatabaseOperationResult<T>> {
     const startTime = Date.now();
 
@@ -156,14 +170,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       return {
         success: true,
-        data: result,
+        data: result as T,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "事务执行失败",
+        _error: _error instanceof Error ? _error.message : "事务执行失败",
         executionTime,
       };
     }
@@ -175,7 +189,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   async batchInsert<T>(
     table: string,
     data: T[],
-    options?: DatabaseQueryOptions,
+    _options?: DatabaseQueryOptions,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
 
@@ -203,11 +217,11 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         data: result.affectedRows || data.length,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "批量插入失败",
+        _error: _error instanceof Error ? _error.message : "批量插入失败",
         executionTime,
       };
     }
@@ -219,7 +233,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   async batchUpdate<T>(
     table: string,
     data: T[],
-    where: Record<string, any>,
+    where: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
 
@@ -252,11 +266,11 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         data: totalAffected,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "批量更新失败",
+        _error: _error instanceof Error ? _error.message : "批量更新失败",
         executionTime,
       };
     }
@@ -267,7 +281,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async batchDelete(
     table: string,
-    where: Record<string, any>,
+    where: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
 
@@ -287,11 +301,11 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         data: result.affectedRows || 0,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "批量删除失败",
+        _error: _error instanceof Error ? _error.message : "批量删除失败",
         executionTime,
       };
     }
@@ -300,7 +314,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 获取连接信息
    */
-  async getConnectionInfo(): Promise<Record<string, any>> {
+  async getConnectionInfo(): Promise<Record<string, unknown>> {
     return {
       type: "MongoDB",
       host: this.config.host,
@@ -319,7 +333,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 获取性能统计
    */
-  async getPerformanceStats(): Promise<Record<string, any>> {
+  async getPerformanceStats(): Promise<Record<string, unknown>> {
     try {
       if (!this.connection) {
         return {};
@@ -332,9 +346,9 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         opcounters: stats.opcounters || {},
         isConnected: this.isConnected,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
-        error: error instanceof Error ? error.message : "获取统计信息失败",
+        _error: _error instanceof Error ? _error.message : "获取统计信息失败",
         isConnected: this.isConnected,
       };
     }
@@ -343,10 +357,10 @@ export class MongoDBAdapter implements IMongoDBAdapter {
   /**
    * 执行MongoDB特定查询
    */
-  async executeMongoDBQuery<T = any>(
+  async executeMongoDBQuery<T = unknown>(
     collection: string,
-    query: any,
-    options?: any,
+    query: Record<string, unknown>,
+    _options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<T[]>> {
     const startTime = Date.now();
 
@@ -363,14 +377,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       return {
         success: true,
-        data: result,
+        data: result.data as T[],
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "MongoDB查询失败",
+        _error: _error instanceof Error ? _error.message : "MongoDB查询失败",
         executionTime,
       };
     }
@@ -381,7 +395,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async createCollection(
     name: string,
-    options?: any,
+    _options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<void>> {
     const startTime = Date.now();
 
@@ -397,11 +411,11 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         success: true,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "创建集合失败",
+        _error: _error instanceof Error ? _error.message : "创建集合失败",
         executionTime,
       };
     }
@@ -425,11 +439,11 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         success: true,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "删除集合失败",
+        _error: _error instanceof Error ? _error.message : "删除集合失败",
         executionTime,
       };
     }
@@ -440,8 +454,8 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async createIndex(
     collection: string,
-    keys: Record<string, any>,
-    options?: any,
+    keys: Record<string, unknown>,
+    _options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<string>> {
     const startTime = Date.now();
 
@@ -451,8 +465,8 @@ export class MongoDBAdapter implements IMongoDBAdapter {
       }
 
       const indexName =
-        options?.name || `idx_${collection}_${Object.keys(keys).join("_")}`;
-      const unique = options?.unique ? "UNIQUE " : "";
+        _options?.name || `idx_${collection}_${Object.keys(keys).join("_")}`;
+      const unique = _options?.unique ? "UNIQUE " : "";
       const keysStr = Object.entries(keys)
         .map(([key, value]) => `${key}:${value}`)
         .join(", ");
@@ -465,14 +479,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       return {
         success: true,
-        data: indexName,
+        data: indexName as string,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "创建索引失败",
+        _error: _error instanceof Error ? _error.message : "创建索引失败",
         executionTime,
       };
     }
@@ -500,11 +514,11 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         success: true,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "删除索引失败",
+        _error: _error instanceof Error ? _error.message : "删除索引失败",
         executionTime,
       };
     }
@@ -515,7 +529,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async getCollectionInfo(
     collection: string,
-  ): Promise<DatabaseOperationResult<any>> {
+  ): Promise<DatabaseOperationResult<unknown>> {
     const startTime = Date.now();
 
     try {
@@ -531,11 +545,11 @@ export class MongoDBAdapter implements IMongoDBAdapter {
         data: result,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "获取集合信息失败",
+        _error: _error instanceof Error ? _error.message : "获取集合信息失败",
         executionTime,
       };
     }
@@ -546,7 +560,7 @@ export class MongoDBAdapter implements IMongoDBAdapter {
    */
   async getIndexInfo(
     collection: string,
-  ): Promise<DatabaseOperationResult<any[]>> {
+  ): Promise<DatabaseOperationResult<unknown[]>> {
     const startTime = Date.now();
 
     try {
@@ -561,14 +575,14 @@ export class MongoDBAdapter implements IMongoDBAdapter {
 
       return {
         success: true,
-        data: result,
+        data: result.data as unknown[],
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "获取索引信息失败",
+        _error: _error instanceof Error ? _error.message : "获取索引信息失败",
         executionTime,
       };
     }

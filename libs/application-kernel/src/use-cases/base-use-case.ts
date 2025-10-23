@@ -7,6 +7,7 @@
  * @since 1.0.0
  */
 import { IUseCaseContext } from "../context/use-case-context.interface.js";
+import { GeneralBadRequestException } from "@hl8/exceptions";
 
 /**
  * 基础用例抽象类
@@ -98,7 +99,15 @@ export abstract class BaseUseCase<TRequest, TResponse> {
    */
   protected validateRequest(request: TRequest): void {
     if (!request) {
-      throw new Error("请求对象不能为空");
+      throw new GeneralBadRequestException(
+        "应用层请求验证失败",
+        "请求对象不能为空",
+        {
+          useCaseName: this.useCaseName,
+          useCaseVersion: this.useCaseVersion,
+          requestType: typeof request,
+        },
+      );
     }
   }
 
@@ -118,6 +127,23 @@ export abstract class BaseUseCase<TRequest, TResponse> {
     // 在实际实现中，应该检查用户是否具有所需权限
     // 为了简化，这里只是示例
     console.log(`验证权限: ${this.requiredPermissions.join(", ")}`);
+
+    // 如果权限验证失败，应该抛出异常
+    // 这里提供一个示例，实际实现需要根据具体的权限验证逻辑
+    // if (!await this.checkPermissions(context)) {
+    //   throw new ApplicationLayerException(
+    //     "APPLICATION_PERMISSION_DENIED",
+    //     "应用层权限验证失败",
+    //     `缺少所需权限: ${this.requiredPermissions.join(', ')}`,
+    //     403,
+    //     {
+    //       useCaseName: this.useCaseName,
+    //       requiredPermissions: this.requiredPermissions,
+    //       userId: context.userId,
+    //       tenantId: context.tenantId,
+    //     }
+    //   );
+    // }
   }
 
   /**

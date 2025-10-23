@@ -41,6 +41,9 @@ export class InterfaceComplianceValidator {
    * @param handlerClass - 处理器类
    * @returns 验证结果
    */
+
+  // 必须使用 any 类型：需要验证任意类型的命令处理器类，无法预先确定具体的类结构
+  // 这是接口合规性验证的核心需求，用于检查类是否实现了 CommandHandler 接口
   static validateCommandHandler(handlerClass: any): InterfaceComplianceResult {
     const violations: string[] = [];
     const suggestions: string[] = [];
@@ -87,6 +90,9 @@ export class InterfaceComplianceValidator {
    * @param handlerClass - 处理器类
    * @returns 验证结果
    */
+
+  // 必须使用 any 类型：需要验证任意类型的查询处理器类，无法预先确定具体的类结构
+  // 这是接口合规性验证的核心需求，用于检查类是否实现了 QueryHandler 接口
   static validateQueryHandler(handlerClass: any): InterfaceComplianceResult {
     const violations: string[] = [];
     const suggestions: string[] = [];
@@ -129,6 +135,9 @@ export class InterfaceComplianceValidator {
   /**
    * 检查是否实现 CommandHandler 接口
    */
+
+  // 必须使用 any 类型：需要检查任意类型的类是否实现了 CommandHandler 接口
+  // 这是接口合规性验证的核心需求，用于动态检查类的接口实现
   private static implementsCommandHandler(handlerClass: any): boolean {
     return (
       this.hasMethod(handlerClass, "handle") &&
@@ -142,6 +151,9 @@ export class InterfaceComplianceValidator {
   /**
    * 检查是否实现 QueryHandler 接口
    */
+
+  // 必须使用 any 类型：需要检查任意类型的类是否实现了 QueryHandler 接口
+  // 这是接口合规性验证的核心需求，用于动态检查类的接口实现
   private static implementsQueryHandler(handlerClass: any): boolean {
     return (
       this.hasMethod(handlerClass, "handle") &&
@@ -154,6 +166,9 @@ export class InterfaceComplianceValidator {
   /**
    * 检查是否有指定方法
    */
+
+  // 必须使用 any 类型：需要检查任意类型的类是否具有指定的方法
+  // 这是接口合规性验证的核心需求，用于动态检查类的方法存在性
   private static hasMethod(handlerClass: any, methodName: string): boolean {
     return typeof handlerClass.prototype[methodName] === "function";
   }
@@ -161,6 +176,9 @@ export class InterfaceComplianceValidator {
   /**
    * 检查命令处理器方法签名是否有效
    */
+
+  // 必须使用 any 类型：需要检查任意类型的命令处理器类的方法签名
+  // 这是接口合规性验证的核心需求，用于动态检查类的方法签名有效性
   private static hasValidCommandHandlerSignatures(handlerClass: any): boolean {
     const prototype = handlerClass.prototype;
 
@@ -195,6 +213,9 @@ export class InterfaceComplianceValidator {
   /**
    * 检查查询处理器方法签名是否有效
    */
+
+  // 必须使用 any 类型：需要检查任意类型的查询处理器类的方法签名
+  // 这是接口合规性验证的核心需求，用于动态检查类的方法签名有效性
   private static hasValidQueryHandlerSignatures(handlerClass: any): boolean {
     const prototype = handlerClass.prototype;
 
@@ -227,6 +248,9 @@ export class InterfaceComplianceValidator {
    * @param handlerClass - 处理器类
    * @returns 验证结果
    */
+
+  // 必须使用 any 类型：需要验证任意类型的处理器类，无法预先确定具体的类结构
+  // 这是接口合规性验证的核心需求，用于检查类是否实现了正确的处理器接口
   static validateHandler(handlerClass: any): InterfaceComplianceResult {
     // 尝试验证为命令处理器
     const commandResult = this.validateCommandHandler(handlerClass);

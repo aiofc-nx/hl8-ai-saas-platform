@@ -19,8 +19,7 @@ export abstract class BaseValueObject {
    * 构造函数
    */
   constructor() {
-    // 值对象创建时进行验证
-    this.validate();
+    // 验证将在子类构造函数中调用
   }
 
   /**

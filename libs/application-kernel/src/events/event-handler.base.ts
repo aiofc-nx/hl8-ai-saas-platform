@@ -7,6 +7,7 @@
  * @since 1.0.0
  */
 import { DomainEvent } from "./domain-event.interface.js";
+import { GeneralBadRequestException } from "@hl8/exceptions";
 
 /**
  * 事件处理选项
@@ -139,7 +140,15 @@ export abstract class BaseEventHandler {
 
       // 检查是否支持该事件类型
       if (!this.canHandle(event)) {
-        throw new Error(`不支持的事件类型: ${event.eventType}`);
+        throw new GeneralBadRequestException(
+          "应用层不支持的事件类型",
+          `不支持的事件类型: ${event.eventType}`,
+          {
+            eventType: event.eventType,
+            eventId: event.eventId,
+            handlerName: this.handlerName,
+          },
+        );
       }
 
       // 处理事件
@@ -257,7 +266,12 @@ export abstract class BaseEventHandler {
       }
     }
 
-    throw lastError || new Error("事件处理失败");
+    throw (
+      lastError ||
+      new GeneralBadRequestException("应用层事件处理失败", "事件处理失败", {
+        handlerName: this.handlerName,
+      })
+    );
   }
 
   /**
@@ -267,27 +281,59 @@ export abstract class BaseEventHandler {
    */
   protected validateEvent(event: DomainEvent): void {
     if (!event.eventId) {
-      throw new Error("事件ID不能为空");
+      throw new GeneralBadRequestException(
+        "应用层事件ID验证失败",
+        "事件ID不能为空",
+        { eventType: event.eventType },
+      );
     }
 
     if (!event.eventType || event.eventType.trim() === "") {
-      throw new Error("事件类型不能为空");
+      throw new GeneralBadRequestException(
+        "应用层事件类型验证失败",
+        "事件类型不能为空",
+        { eventId: event.eventId },
+      );
     }
 
     if (!event.occurredAt || !(event.occurredAt instanceof Date)) {
-      throw new Error("事件发生时间必须是有效的日期对象");
+      throw new GeneralBadRequestException(
+        "应用层事件时间验证失败",
+        "事件发生时间必须是有效的日期对象",
+        { eventId: event.eventId, eventType: event.eventType },
+      );
     }
 
     if (!event.aggregateId) {
-      throw new Error("聚合根ID不能为空");
+      throw new GeneralBadRequestException(
+        "应用层聚合根ID验证失败",
+        "聚合根ID不能为空",
+        { eventId: event.eventId, eventType: event.eventType },
+      );
     }
 
     if (typeof event.version !== "number" || event.version < 0) {
-      throw new Error("事件版本必须是大于等于0的数字");
+      throw new GeneralBadRequestException(
+        "应用层事件版本验证失败",
+        "事件版本必须是大于等于0的数字",
+        {
+          eventId: event.eventId,
+          eventType: event.eventType,
+          eventVersion: event.version,
+        },
+      );
     }
 
     if (!event.eventData || typeof event.eventData !== "object") {
-      throw new Error("事件数据必须是对象");
+      throw new GeneralBadRequestException(
+        "应用层事件数据验证失败",
+        "事件数据必须是对象",
+        {
+          eventId: event.eventId,
+          eventType: event.eventType,
+          dataType: typeof event.eventData,
+        },
+      );
     }
   }
 

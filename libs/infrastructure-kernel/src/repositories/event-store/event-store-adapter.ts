@@ -21,13 +21,13 @@ export interface DomainEvent {
   /** 事件类型 */
   eventType: string;
   /** 事件数据 */
-  eventData: Record<string, any>;
+  eventData: Record<string, unknown>;
   /** 事件版本 */
   version: number;
   /** 时间戳 */
   timestamp: Date;
   /** 元数据 */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -51,7 +51,14 @@ export class EventStoreAdapter {
 
       // 在事务中保存事件
       await this.databaseAdapter.transaction(async (em) => {
-        const repository = em.getRepository(this.getEventEntityClass());
+        const entityManager = em as {
+          getRepository: (entity: new () => DomainEvent) => {
+            persistAndFlush: (entity: DomainEvent) => Promise<void>;
+          };
+        };
+        const repository = entityManager.getRepository(
+          this.getEventEntityClass(),
+        );
         await repository.persistAndFlush(isolatedEvent);
       });
 
@@ -60,9 +67,9 @@ export class EventStoreAdapter {
         const cacheKey = this.generateEventCacheKey(event);
         await this.cacheService.set(cacheKey, event);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `保存事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `保存事件失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -83,8 +90,17 @@ export class EventStoreAdapter {
 
       // 在事务中批量保存事件
       await this.databaseAdapter.transaction(async (em) => {
-        const repository = em.getRepository(this.getEventEntityClass());
-        await repository.persistAndFlush(isolatedEvents);
+        const entityManager = em as {
+          getRepository: (entity: new () => DomainEvent) => {
+            persistAndFlush: (entity: DomainEvent) => Promise<void>;
+          };
+        };
+        const repository = entityManager.getRepository(
+          this.getEventEntityClass(),
+        );
+        for (const event of isolatedEvents) {
+          await repository.persistAndFlush(event);
+        }
       });
 
       // 更新缓存
@@ -94,9 +110,9 @@ export class EventStoreAdapter {
           await this.cacheService.set(cacheKey, event);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `批量保存事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `批量保存事件失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -125,7 +141,7 @@ export class EventStoreAdapter {
       const repository = this.databaseAdapter.getRepository(
         this.getEventEntityClass(),
       );
-      const conditions: any = { aggregateId };
+      const conditions: Record<string, unknown> = { aggregateId };
 
       if (fromVersion !== undefined) {
         conditions.version = { $gte: fromVersion };
@@ -134,13 +150,17 @@ export class EventStoreAdapter {
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
 
-      const events = await (repository as { find(conditions: unknown, options?: unknown): Promise<unknown[]> }).find(isolatedConditions, {
+      const events = await (
+        repository as {
+          find(conditions: unknown, options?: unknown): Promise<unknown[]>;
+        }
+      ).find(isolatedConditions, {
         orderBy: { version: "ASC" },
       });
 
       // 应用隔离过滤
       const filteredEvents = events
-        .map((event) => this.applyIsolationFilter(event))
+        .map((event) => this.applyIsolationFilter(event as DomainEvent))
         .filter((event) => event !== null) as DomainEvent[];
 
       // 更新缓存
@@ -153,9 +173,9 @@ export class EventStoreAdapter {
       }
 
       return filteredEvents;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取事件失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -172,32 +192,39 @@ export class EventStoreAdapter {
       const repository = this.databaseAdapter.getRepository(
         this.getEventEntityClass(),
       );
-      const conditions: any = { aggregateId };
+      const conditions: Record<string, unknown> = { aggregateId };
 
       if (fromVersion !== undefined) {
         conditions.version = { $gte: fromVersion };
       }
 
       if (toVersion !== undefined) {
-        conditions.version = { ...conditions.version, $lte: toVersion };
+        conditions.version = {
+          ...(conditions.version as Record<string, unknown>),
+          $lte: toVersion,
+        };
       }
 
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
 
-      const events = await (repository as { find(conditions: unknown, options?: unknown): Promise<unknown[]> }).find(isolatedConditions, {
+      const events = await (
+        repository as {
+          find(conditions: unknown, options?: unknown): Promise<unknown[]>;
+        }
+      ).find(isolatedConditions, {
         orderBy: { version: "ASC" },
       });
 
       // 应用隔离过滤
       const filteredEvents = events
-        .map((event) => this.applyIsolationFilter(event))
+        .map((event) => this.applyIsolationFilter(event as DomainEvent))
         .filter((event) => event !== null) as DomainEvent[];
 
       return filteredEvents;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取事件流失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取事件流失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -215,19 +242,23 @@ export class EventStoreAdapter {
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
 
-      const events = await (repository as { find(conditions: unknown, options?: unknown): Promise<unknown[]> }).find(isolatedConditions, {
+      const events = await (
+        repository as {
+          find(conditions: unknown, options?: unknown): Promise<unknown[]>;
+        }
+      ).find(isolatedConditions, {
         orderBy: { timestamp: "ASC" },
       });
 
       // 应用隔离过滤
       const filteredEvents = events
-        .map((event) => this.applyIsolationFilter(event))
+        .map((event) => this.applyIsolationFilter(event as DomainEvent))
         .filter((event) => event !== null) as DomainEvent[];
 
       return filteredEvents;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `根据事件类型获取事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `根据事件类型获取事件失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -239,7 +270,17 @@ export class EventStoreAdapter {
     try {
       // 在事务中删除事件
       await this.databaseAdapter.transaction(async (em) => {
-        const repository = em.getRepository(this.getEventEntityClass());
+        const entityManager = em as {
+          getRepository: (entity: new () => DomainEvent) => {
+            persistAndFlush: (entity: DomainEvent) => Promise<void>;
+            nativeDelete: (
+              conditions: Record<string, unknown>,
+            ) => Promise<void>;
+          };
+        };
+        const repository = entityManager.getRepository(
+          this.getEventEntityClass(),
+        );
         await repository.nativeDelete({ aggregateId });
       });
 
@@ -248,9 +289,9 @@ export class EventStoreAdapter {
         const cacheKey = this.generateAggregateCacheKey(aggregateId);
         await this.cacheService.delete(cacheKey);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `删除事件失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `删除事件失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -268,10 +309,12 @@ export class EventStoreAdapter {
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
 
-      return await (repository as { count(conditions: unknown): Promise<number> }).count(isolatedConditions);
-    } catch (error) {
+      return await (
+        repository as { count(conditions: unknown): Promise<number> }
+      ).count(isolatedConditions);
+    } catch (_error) {
       throw new Error(
-        `获取事件数量失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取事件数量失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -289,14 +332,18 @@ export class EventStoreAdapter {
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
 
-      const latestEvent = await (repository as { findOne(conditions: unknown, options?: unknown): Promise<unknown> }).findOne(isolatedConditions, {
+      const latestEvent = await (
+        repository as {
+          findOne(conditions: unknown, options?: unknown): Promise<unknown>;
+        }
+      ).findOne(isolatedConditions, {
         orderBy: { version: "DESC" },
       });
 
-      return latestEvent ? (latestEvent as any).version : 0;
-    } catch (error) {
+      return latestEvent ? (latestEvent as { version: number }).version : 0;
+    } catch (_error) {
       throw new Error(
-        `获取最新事件版本失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取最新事件版本失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -309,9 +356,11 @@ export class EventStoreAdapter {
       const repository = this.databaseAdapter.getRepository(
         this.getEventEntityClass(),
       );
-      const event = await (repository as { findOne(conditions: unknown): Promise<unknown> }).findOne({ id: eventId } as any);
+      const event = await (
+        repository as { findOne(conditions: unknown): Promise<unknown> }
+      ).findOne({ id: eventId } as Record<string, unknown>);
       return event !== null;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -354,7 +403,7 @@ export class EventStoreAdapter {
   /**
    * 应用隔离过滤
    */
-  protected applyIsolationFilter(event: any): DomainEvent | null {
+  protected applyIsolationFilter(event: DomainEvent): DomainEvent | null {
     if (!this.isolationContext) {
       return event;
     }
@@ -400,8 +449,8 @@ export class EventStoreAdapter {
    * 应用隔离条件
    */
   protected applyIsolationConditions(
-    conditions: Record<string, any>,
-  ): Record<string, any> {
+    conditions: Record<string, unknown>,
+  ): Record<string, unknown> {
     if (!this.isolationContext) {
       return conditions;
     }
@@ -413,22 +462,22 @@ export class EventStoreAdapter {
       isolatedConditions.metadata = {};
     }
 
+    const metadata = isolatedConditions.metadata as Record<string, unknown>;
+
     if (this.isolationContext.tenantId) {
-      isolatedConditions.metadata.tenantId = this.isolationContext.tenantId;
+      metadata.tenantId = this.isolationContext.tenantId;
     }
 
     if (this.isolationContext.organizationId) {
-      isolatedConditions.metadata.organizationId =
-        this.isolationContext.organizationId;
+      metadata.organizationId = this.isolationContext.organizationId;
     }
 
     if (this.isolationContext.departmentId) {
-      isolatedConditions.metadata.departmentId =
-        this.isolationContext.departmentId;
+      metadata.departmentId = this.isolationContext.departmentId;
     }
 
     if (this.isolationContext.userId) {
-      isolatedConditions.metadata.userId = this.isolationContext.userId;
+      metadata.userId = this.isolationContext.userId;
     }
 
     return isolatedConditions;
@@ -470,10 +519,18 @@ export class EventStoreAdapter {
   /**
    * 获取事件实体类
    */
-  protected getEventEntityClass(): any {
+  protected getEventEntityClass(): new () => DomainEvent {
     // 这里应该返回事件实体类
     // 暂时返回一个占位符
-    return class EventEntity {};
+    return class EventEntity implements DomainEvent {
+      id = "";
+      aggregateId = "";
+      eventType = "";
+      eventData = {};
+      metadata = {};
+      version = 0;
+      timestamp = new Date();
+    };
   }
 
   /**
@@ -482,7 +539,7 @@ export class EventStoreAdapter {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

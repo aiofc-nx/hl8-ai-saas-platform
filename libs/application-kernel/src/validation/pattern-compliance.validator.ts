@@ -45,6 +45,9 @@ export class PatternComplianceValidator {
    * @param module - 要验证的模块
    * @returns 验证结果
    */
+
+  // 必须使用 any 类型：需要验证任意类型的模块，无法预先确定具体的模块结构
+  // 这是模式合规性验证的核心需求，用于检查模块是否符合设计模式
   static validateModule(module: any): PatternComplianceResult {
     const violations: string[] = [];
     const suggestions: string[] = [];
@@ -71,6 +74,9 @@ export class PatternComplianceValidator {
   /**
    * 验证命令类
    */
+
+  // 必须使用 any 类型：需要验证任意类型的模块中的命令类，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于检查命令类是否符合设计模式
   private static validateCommands(
     module: any,
     violations: string[],
@@ -95,6 +101,9 @@ export class PatternComplianceValidator {
   /**
    * 验证查询类
    */
+
+  // 必须使用 any 类型：需要验证任意类型的模块中的查询类，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于检查查询类是否符合设计模式
   private static validateQueries(
     module: any,
     violations: string[],
@@ -119,6 +128,9 @@ export class PatternComplianceValidator {
   /**
    * 验证用例类
    */
+
+  // 必须使用 any 类型：需要验证任意类型的模块中的用例类，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于检查用例类是否符合设计模式
   private static validateUseCases(
     module: any,
     violations: string[],
@@ -144,6 +156,9 @@ export class PatternComplianceValidator {
   /**
    * 验证处理器
    */
+
+  // 必须使用 any 类型：需要验证任意类型的模块中的处理器类，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于检查处理器类是否符合设计模式
   private static validateHandlers(
     module: any,
     violations: string[],
@@ -169,7 +184,12 @@ export class PatternComplianceValidator {
   /**
    * 查找匹配模式的类
    */
+
+  // 必须使用 any 类型：需要查找任意类型的模块中匹配模式的类，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于动态查找和验证类
   private static findClassesByPattern(module: any, pattern: RegExp): any[] {
+    // 必须使用 any 类型：需要存储任意类型的类引用，无法预先确定具体的类结构
+    // 这是模式合规性验证的核心需求，用于收集匹配的类
     const classes: any[] = [];
 
     for (const key in module) {
@@ -190,6 +210,9 @@ export class PatternComplianceValidator {
   /**
    * 检查是否为子类
    */
+
+  // 必须使用 any 类型：需要检查任意类型的类是否继承自指定的父类，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于动态检查类的继承关系
   private static isSubclassOf(child: any, parent: any): boolean {
     return child.prototype instanceof parent;
   }
@@ -205,6 +228,9 @@ export class PatternComplianceValidator {
   /**
    * 检查命令构造函数是否有效
    */
+
+  // 必须使用 any 类型：需要检查任意类型的命令类构造函数，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于动态检查类的构造函数有效性
   private static hasValidCommandConstructor(commandClass: any): boolean {
     // 检查构造函数参数数量（至少应该有 commandName 和 description）
     const constructor = commandClass.toString();

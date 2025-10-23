@@ -1,0 +1,1 @@
+{"version":3,"file":"cross-tenant-access.exception.d.ts","sourceRoot":"","sources":["cross-tenant-access.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,uBAAuB,CAAC;AAsBxD,qBAAa,0BAA2B,SAAQ,eAAe;gBAS3D,eAAe,EAAE,MAAM,EACvB,cAAc,EAAE,MAAM,EACtB,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAWjC"}

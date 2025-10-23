@@ -41,7 +41,9 @@ export class AccessControlService {
     requiredLevel: IsolationLevel,
   ): boolean {
     const userLevel =
-      (userContext as any).getIsolationLevel?.() || IsolationLevel.USER;
+      (
+        userContext as { getIsolationLevel?: () => IsolationLevel }
+      ).getIsolationLevel?.() || IsolationLevel.USER;
     // 用户隔离级别应该大于等于所需隔离级别
     // 例如：用户级用户 >= 租户级要求 = true
     return this.compareIsolationLevels(userLevel, requiredLevel) >= 0;
@@ -79,30 +81,38 @@ export class AccessControlService {
     userContext: IsolationContext,
     resourceContext: IsolationContext,
   ): boolean {
+    const resourceContextTyped = resourceContext as {
+      getIsolationLevel?: () => IsolationLevel;
+      isTenantLevel?: () => boolean;
+      isOrganizationLevel?: () => boolean;
+      isDepartmentLevel?: () => boolean;
+      isUserLevel?: () => boolean;
+    };
+
     // 平台级资源对所有用户可见
     if (
-      (resourceContext as any).getIsolationLevel?.() === IsolationLevel.PLATFORM
+      resourceContextTyped.getIsolationLevel?.() === IsolationLevel.PLATFORM
     ) {
       return true;
     }
 
     // 租户级资源检查
-    if ((resourceContext as any).isTenantLevel?.()) {
+    if (resourceContextTyped.isTenantLevel?.()) {
       return this.checkTenantAccess(userContext, resourceContext);
     }
 
     // 组织级资源检查
-    if ((resourceContext as any).isOrganizationLevel?.()) {
+    if (resourceContextTyped.isOrganizationLevel?.()) {
       return this.checkOrganizationAccess(userContext, resourceContext);
     }
 
     // 部门级资源检查
-    if ((resourceContext as any).isDepartmentLevel?.()) {
+    if (resourceContextTyped.isDepartmentLevel?.()) {
       return this.checkDepartmentAccess(userContext, resourceContext);
     }
 
     // 用户级资源检查
-    if ((resourceContext as any).isUserLevel?.()) {
+    if (resourceContextTyped.isUserLevel?.()) {
       return this.checkUserAccess(userContext, resourceContext);
     }
 

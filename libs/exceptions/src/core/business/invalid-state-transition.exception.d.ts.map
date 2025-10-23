@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-state-transition.exception.d.ts","sourceRoot":"","sources":["invalid-state-transition.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,iBAAiB,EAAE,MAAM,yBAAyB,CAAC;AAsB5D,qBAAa,+BAAgC,SAAQ,iBAAiB;gBAUlE,MAAM,EAAE,MAAM,EACd,YAAY,EAAE,MAAM,EACpB,WAAW,EAAE,MAAM,EACnB,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAWjC"}

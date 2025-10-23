@@ -31,7 +31,7 @@ export interface IIsolationContextManager extends IsolationContextManager {
   ): Promise<boolean>;
 
   /** 获取上下文统计 */
-  getContextStats(): Promise<Record<string, any>>;
+  getContextStats(): Promise<Record<string, unknown>>;
 }
 
 /**
@@ -70,7 +70,7 @@ export interface AccessRule {
   /** 是否允许 */
   allow: boolean;
   /** 条件 */
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   /** 优先级 */
   priority: number;
   /** 是否启用 */
@@ -103,7 +103,10 @@ export interface IAuditLogService extends AuditLogService {
   ): Promise<void>;
 
   /** 获取审计统计 */
-  getAuditStats(startTime: Date, endTime: Date): Promise<Record<string, any>>;
+  getAuditStats(
+    startTime: Date,
+    endTime: Date,
+  ): Promise<Record<string, unknown>>;
 
   /** 导出审计日志 */
   exportAuditLogs(
@@ -148,7 +151,7 @@ export interface ISecurityMonitorService extends SecurityMonitor {
   getSecurityEventStats(
     startTime: Date,
     endTime: Date,
-  ): Promise<Record<string, any>>;
+  ): Promise<Record<string, unknown>>;
 
   /** 获取异常访问报告 */
   getAnomalousAccessReport(
@@ -199,19 +202,19 @@ export interface AnomalousAccessReport {
  */
 export interface IIsolationManager {
   /** 注册隔离服务 */
-  registerService(name: string, service: any): void;
+  registerService(name: string, service: unknown): void;
 
   /** 获取隔离服务 */
-  getService(name: string): any;
+  getService(name: string): unknown;
 
   /** 获取所有服务 */
-  getAllServices(): Record<string, any>;
+  getAllServices(): Record<string, unknown>;
 
   /** 健康检查 */
   healthCheck(): Promise<Record<string, boolean>>;
 
   /** 获取隔离统计 */
-  getIsolationStats(): Promise<Record<string, any>>;
+  getIsolationStats(): Promise<Record<string, unknown>>;
 }
 
 // 重新导出类型 - 注释掉以避免冲突

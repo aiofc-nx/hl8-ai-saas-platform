@@ -77,7 +77,7 @@ export interface ReplayProgress {
 /**
  * 重放结果
  */
-export interface ReplayResult {
+export interface ReplayResult<T = Record<string, unknown>> {
   /**
    * 是否成功
    */
@@ -106,7 +106,7 @@ export interface ReplayResult {
   /**
    * 最终状态
    */
-  finalState?: any;
+  finalState?: T;
 }
 
 /**
@@ -129,7 +129,7 @@ export class EventReplayUtils {
     eventHandler: (state: T, event: DomainEvent) => Promise<T>,
     initialState: T,
     options: ReplayOptions = {},
-  ): Promise<ReplayResult> {
+  ): Promise<ReplayResult<T>> {
     const startTime = Date.now();
     const {
       parallel = false,
@@ -365,7 +365,7 @@ export class EventReplayUtils {
     initialState: T,
     targetVersion: number,
     options: ReplayOptions = {},
-  ): Promise<ReplayResult> {
+  ): Promise<ReplayResult<T>> {
     // 过滤到目标版本的事件
     const filteredEvents = events.filter(
       (event) => event.version <= targetVersion,
@@ -397,7 +397,7 @@ export class EventReplayUtils {
     startTime: Date,
     endTime: Date,
     options: ReplayOptions = {},
-  ): Promise<ReplayResult> {
+  ): Promise<ReplayResult<T>> {
     // 过滤时间范围内的事件
     const filteredEvents = events.filter(
       (event) => event.occurredAt >= startTime && event.occurredAt <= endTime,
@@ -427,7 +427,7 @@ export class EventReplayUtils {
     initialState: T,
     aggregateId: EntityId,
     options: ReplayOptions = {},
-  ): Promise<ReplayResult> {
+  ): Promise<ReplayResult<T>> {
     // 过滤指定聚合根的事件
     const filteredEvents = events.filter((event) =>
       event.aggregateId.equals(aggregateId),

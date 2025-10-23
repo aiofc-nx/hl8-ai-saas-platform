@@ -46,10 +46,10 @@ export interface IHealthCheckService extends HealthCheckService {
  */
 export interface IHealthMonitorService extends HealthMonitor {
   /** 获取监控配置 */
-  getConfig(): Record<string, any>;
+  getConfig(): Record<string, unknown>;
 
   /** 设置监控配置 */
-  setConfig(config: Record<string, any>): void;
+  setConfig(config: Record<string, unknown>): void;
 
   /** 获取历史数据 */
   getHistory(
@@ -62,7 +62,7 @@ export interface IHealthMonitorService extends HealthMonitor {
   getTrendAnalysis(
     component: string,
     period: "hour" | "day" | "week" | "month",
-  ): Promise<Record<string, any>>;
+  ): Promise<Record<string, unknown>>;
 }
 
 /**
@@ -79,7 +79,10 @@ export interface IHealthAlertService extends HealthAlertService {
   testAlert(component: string, rule: AlertRule): Promise<boolean>;
 
   /** 获取告警统计 */
-  getAlertStats(startTime: Date, endTime: Date): Promise<Record<string, any>>;
+  getAlertStats(
+    startTime: Date,
+    endTime: Date,
+  ): Promise<Record<string, unknown>>;
 }
 
 /**
@@ -107,10 +110,10 @@ export interface AlertRule {
  */
 export interface IHealthChecker extends HealthChecker {
   /** 获取检查器配置 */
-  getConfig(): Record<string, any>;
+  getConfig(): Record<string, unknown>;
 
   /** 设置检查器配置 */
-  setConfig(config: Record<string, any>): void;
+  setConfig(config: Record<string, unknown>): void;
 
   /** 获取检查历史 */
   getCheckHistory(): HealthCheckResult[];

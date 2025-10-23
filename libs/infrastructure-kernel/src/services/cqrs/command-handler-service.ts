@@ -19,7 +19,7 @@ export interface Command {
   /** 命令类型 */
   type: string;
   /** 命令数据 */
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   /** 时间戳 */
   timestamp: Date;
   /** 用户ID */
@@ -35,9 +35,9 @@ export interface CommandResult {
   /** 是否成功 */
   success: boolean;
   /** 返回数据 */
-  data?: any;
+  data?: unknown;
   /** 错误信息 */
-  error?: string;
+  _error?: string;
   /** 执行时间(毫秒) */
   executionTime: number;
   /** 命令ID */
@@ -111,11 +111,11 @@ export class CommandHandlerService {
       await this.logCommandExecution(command, result);
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "命令处理失败",
+        _error: _error instanceof Error ? _error.message : "命令处理失败",
         executionTime,
         commandId: command.id,
       };
@@ -132,10 +132,10 @@ export class CommandHandlerService {
       try {
         const result = await this.handleCommand(command);
         results.push(result);
-      } catch (error) {
+      } catch (_error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : "命令处理失败",
+          _error: _error instanceof Error ? _error.message : "命令处理失败",
           executionTime: 0,
           commandId: command.id,
         });
@@ -159,9 +159,9 @@ export class CommandHandlerService {
       if (!this.isProcessing) {
         this.processCommandQueue();
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `队列命令失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `队列命令失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -183,8 +183,8 @@ export class CommandHandlerService {
           await this.handleCommand(command);
         }
       }
-    } catch (error) {
-      console.error("处理命令队列失败:", error);
+    } catch (_error) {
+      console.error("处理命令队列失败:", _error);
     } finally {
       this.isProcessing = false;
     }
@@ -193,7 +193,7 @@ export class CommandHandlerService {
   /**
    * 获取命令队列状态
    */
-  getQueueStatus(): Record<string, any> {
+  getQueueStatus(): Record<string, unknown> {
     return {
       queueLength: this.commandQueue.length,
       isProcessing: this.isProcessing,
@@ -263,8 +263,8 @@ export class CommandHandlerService {
 
       // 这里应该记录到日志系统
       console.log("命令执行日志:", logData);
-    } catch (error) {
-      console.error("记录命令执行日志失败:", error);
+    } catch (_error) {
+      console.error("记录命令执行日志失败:", _error);
     }
   }
 
@@ -274,7 +274,7 @@ export class CommandHandlerService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

@@ -42,7 +42,7 @@ export interface ILoggingService extends LoggingService {
  */
 export interface IPinoLoggingService extends ILoggingService {
   /** 获取Pino实例 */
-  getPinoInstance(): any;
+  getPinoInstance(): unknown;
 
   /** 设置日志级别 */
   setLevel(level: LogLevel): void;
@@ -51,13 +51,13 @@ export interface IPinoLoggingService extends ILoggingService {
   getLevel(): LogLevel;
 
   /** 添加序列化器 */
-  addSerializer(name: string, serializer: any): void;
+  addSerializer(name: string, serializer: unknown): void;
 
   /** 移除序列化器 */
   removeSerializer(name: string): void;
 
   /** 添加格式化器 */
-  addFormatter(name: string, formatter: any): void;
+  addFormatter(name: string, formatter: unknown): void;
 
   /** 移除格式化器 */
   removeFormatter(name: string): void;
@@ -81,7 +81,7 @@ export interface IStructuredLoggingService extends ILoggingService {
     context: LogContext,
     operation: string,
     duration: number,
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
   ): Promise<void>;
 
   /** 记录审计日志 */
@@ -90,14 +90,14 @@ export interface IStructuredLoggingService extends ILoggingService {
     action: string,
     resource: string,
     result: "SUCCESS" | "FAILURE" | "ERROR",
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
   ): Promise<void>;
 
   /** 记录业务日志 */
   logBusiness(
     context: LogContext,
     event: string,
-    data?: Record<string, any>,
+    data?: Record<string, unknown>,
   ): Promise<void>;
 }
 
@@ -109,7 +109,7 @@ export interface ILoggingAdapter {
   initialize(): Promise<void>;
 
   /** 记录日志 */
-  log(level: LogLevel, message: string, data?: Record<string, any>): void;
+  log(level: LogLevel, message: string, data?: Record<string, unknown>): void;
 
   /** 关闭适配器 */
   close(): Promise<void>;
@@ -118,7 +118,7 @@ export interface ILoggingAdapter {
   healthCheck(): Promise<boolean>;
 
   /** 获取适配器信息 */
-  getInfo(): Record<string, any>;
+  getInfo(): Record<string, unknown>;
 }
 
 /**

@@ -7,6 +7,48 @@ import { Logger } from "@nestjs/common";
 import type { ApiResponse } from "../types/index.js";
 
 /**
+ * 错误上下文接口
+ * @description 定义错误上下文的结构
+ */
+interface ErrorContext {
+  userId?: string;
+  action?: string;
+  resource?: string;
+  timestamp?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * 错误对象接口
+ * @description 定义错误对象的基础结构
+ */
+interface ErrorObject {
+  message: string;
+  stack?: string;
+  name?: string;
+  code?: string | number;
+  errors?: string[];
+  field?: string;
+  value?: unknown;
+  reason?: string;
+  token?: string;
+  resource?: string;
+  action?: string;
+  requiredPermissions?: string[];
+  id?: string;
+  limit?: number;
+  remaining?: number;
+  resetTime?: number;
+  timeout?: number;
+  operation?: string;
+  table?: string;
+  constraint?: string;
+  url?: string;
+  method?: string;
+  statusCode?: number;
+}
+
+/**
  * 错误处理工具类
  * @description 提供统一的错误处理功能
  */
@@ -20,7 +62,7 @@ export class ErrorHandler {
    * @param context 错误上下文
    * @returns 标准化的错误响应
    */
-  static handleError(error: any, context?: any): ApiResponse {
+  static handleError(error: ErrorObject, context?: ErrorContext): ApiResponse {
     try {
       this.logger.error(`Error occurred: ${error.message}`, error.stack);
 
@@ -91,7 +133,7 @@ export class ErrorHandler {
    * @param error 验证错误
    * @returns 验证错误响应
    */
-  private static handleValidationError(error: any): ApiResponse {
+  private static handleValidationError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -118,7 +160,7 @@ export class ErrorHandler {
    * @param error 认证错误
    * @returns 认证错误响应
    */
-  private static handleUnauthorizedError(error: any): ApiResponse {
+  private static handleUnauthorizedError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -144,7 +186,7 @@ export class ErrorHandler {
    * @param error 授权错误
    * @returns 授权错误响应
    */
-  private static handleForbiddenError(error: any): ApiResponse {
+  private static handleForbiddenError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -171,7 +213,7 @@ export class ErrorHandler {
    * @param error 未找到错误
    * @returns 未找到错误响应
    */
-  private static handleNotFoundError(error: any): ApiResponse {
+  private static handleNotFoundError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -197,7 +239,7 @@ export class ErrorHandler {
    * @param error 速率限制错误
    * @returns 速率限制错误响应
    */
-  private static handleRateLimitError(error: any): ApiResponse {
+  private static handleRateLimitError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -224,7 +266,7 @@ export class ErrorHandler {
    * @param error 超时错误
    * @returns 超时错误响应
    */
-  private static handleTimeoutError(error: any): ApiResponse {
+  private static handleTimeoutError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -250,7 +292,7 @@ export class ErrorHandler {
    * @param error 数据库错误
    * @returns 数据库错误响应
    */
-  private static handleDatabaseError(error: any): ApiResponse {
+  private static handleDatabaseError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -277,7 +319,7 @@ export class ErrorHandler {
    * @param error 网络错误
    * @returns 网络错误响应
    */
-  private static handleNetworkError(error: any): ApiResponse {
+  private static handleNetworkError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -304,7 +346,7 @@ export class ErrorHandler {
    * @param error 内部错误
    * @returns 内部错误响应
    */
-  private static handleInternalError(error: any): ApiResponse {
+  private static handleInternalError(error: ErrorObject): ApiResponse {
     return {
       success: false,
       error: {
@@ -339,7 +381,7 @@ export class ErrorHandler {
    * @param error 错误对象
    * @param context 错误上下文
    */
-  static logError(error: any, context?: any): void {
+  static logError(error: ErrorObject, context?: ErrorContext): void {
     if (!error) {
       this.logger.error("Error: Unknown error");
       return;
@@ -361,7 +403,7 @@ export class ErrorHandler {
    * @param error 错误对象
    * @returns 是否可重试
    */
-  static isRetryableError(error: any): boolean {
+  static isRetryableError(error: ErrorObject): boolean {
     if (!error) {
       return false;
     }
@@ -390,7 +432,9 @@ export class ErrorHandler {
    * @param error 错误对象
    * @returns 错误严重程度
    */
-  static getErrorSeverity(error: any): "low" | "medium" | "high" | "critical" {
+  static getErrorSeverity(
+    error: ErrorObject,
+  ): "low" | "medium" | "high" | "critical" {
     if (!error) {
       return "critical";
     }

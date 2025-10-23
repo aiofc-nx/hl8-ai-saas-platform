@@ -83,7 +83,7 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
    * 获取PostgreSQL连接配置
    * @returns PostgreSQL连接配置
    */
-  getPostgreSQLConfig(): Record<string, any> {
+  getPostgreSQLConfig(): Record<string, unknown> {
     return {
       ...this.getConnectionConfig(),
       schema: this.schema,
@@ -107,7 +107,7 @@ export class PostgreSQLConnectionEntity extends DatabaseConnectionEntity {
    * 获取MikroORM配置
    * @returns MikroORM配置对象
    */
-  getMikroORMConfig(): Record<string, any> {
+  getMikroORMConfig(): Record<string, unknown> {
     return {
       type: "postgresql",
       host: this.host,

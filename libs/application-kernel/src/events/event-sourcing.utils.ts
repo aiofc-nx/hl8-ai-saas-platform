@@ -81,6 +81,9 @@ export interface ISnapshot {
   /**
    * 快照数据
    */
+
+  // 必须使用 any 类型：快照数据可以是任意结构，由具体的聚合根类型决定
+  // 这是事件溯源模式的核心需求，无法预先定义所有可能的聚合根数据结构
   data: Record<string, any>;
 
   /**
@@ -189,6 +192,9 @@ export class EventSourcingUtils {
   static createSnapshot(
     aggregateId: EntityId,
     version: number,
+
+    // 必须使用 any 类型：快照数据可以是任意结构，由具体的聚合根类型决定
+    // 这是事件溯源模式的核心需求，无法预先定义所有可能的聚合根数据结构
     data: Record<string, any>,
   ): ISnapshot {
     return {

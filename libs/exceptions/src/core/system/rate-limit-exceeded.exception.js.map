@@ -1,0 +1,1 @@
+{"version":3,"file":"rate-limit-exceeded.exception.js","sourceRoot":"","sources":["rate-limit-exceeded.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,uBAAuB,CAAC;AAsBxD,MAAM,OAAO,0BAA2B,SAAQ,eAAe;IAO7D,YAAY,MAAc,EAAE,IAA8B;QACxD,KAAK,CACH,4BAA4B,EAC5B,QAAQ,EACR,MAAM,EACN,GAAG,EACH,IAAI,EACJ,wDAAwD,CACzD,CAAC;IACJ,CAAC;CACF"}

@@ -3,7 +3,11 @@
  * @description 提供用户授权功能，包括权限检查、角色验证、资源访问控制等
  */
 
-import { Injectable, Logger, ForbiddenException } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
+import {
+  GeneralBadRequestException,
+  GeneralInternalServerException,
+} from "@hl8/exceptions";
 import type {
   UserContext,
   AuthorizationRule,
@@ -89,12 +93,48 @@ export class AuthorizationService {
       }
 
       this.logger.debug("User does not have required permission");
-      return false;
+
+      // 根据上下文抛出具体的异常
+      if (context && user.tenantId !== context.tenantId) {
+        throw new GeneralBadRequestException(
+          "跨租户访问被拒绝",
+          "用户尝试访问其他租户的数据",
+        );
+      }
+
+      if (
+        context &&
+        context.organizationId &&
+        user.organizationId !== context.organizationId
+      ) {
+        throw new GeneralBadRequestException(
+          "组织数据隔离违规",
+          "用户尝试访问其他组织的数据",
+        );
+      }
+
+      throw new GeneralBadRequestException(
+        "权限不足",
+        "用户没有执行此操作的权限",
+      );
     } catch (error) {
       this.logger.error(
         `Permission check failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      return false;
+
+      // 如果是标准异常，直接抛出
+      if (
+        error instanceof GeneralBadRequestException ||
+        error instanceof GeneralInternalServerException
+      ) {
+        throw error;
+      }
+
+      // 其他错误转换为权限不足异常
+      throw new GeneralBadRequestException(
+        "权限检查失败",
+        "权限验证过程中发生错误",
+      );
     }
   }
 
@@ -314,7 +354,7 @@ export class AuthorizationService {
   private async checkResourceOwnership(
     user: UserContext,
     resourceId: string,
-    resourceType: string,
+    _resourceType: string,
   ): Promise<boolean> {
     try {
       // 这里应该调用应用层服务检查资源所有权
@@ -337,9 +377,9 @@ export class AuthorizationService {
    * @returns 是否有共享访问权限
    */
   private async checkSharedAccess(
-    user: UserContext,
-    resourceId: string,
-    resourceType: string,
+    _user: UserContext,
+    _resourceId: string,
+    _resourceType: string,
   ): Promise<boolean> {
     try {
       // 这里应该调用应用层服务检查共享访问权限

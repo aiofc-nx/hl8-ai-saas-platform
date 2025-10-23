@@ -122,7 +122,7 @@ export interface DatabaseAdapter {
   /** 断开数据库连接 */
   disconnect(): Promise<void>;
   /** 获取仓储实例 */
-  getRepository<T>(entity: unknown): unknown;
+  getRepository(entity: unknown): unknown;
   /** 健康检查 */
   healthCheck(): Promise<boolean>;
   /** 获取连接状态 */
@@ -138,7 +138,7 @@ export interface DatabaseOperationResult<T = unknown> {
   /** 返回数据 */
   data?: T;
   /** 错误信息 */
-  error?: string;
+  _error?: string;
   /** 执行时间(毫秒) */
   executionTime: number;
 }

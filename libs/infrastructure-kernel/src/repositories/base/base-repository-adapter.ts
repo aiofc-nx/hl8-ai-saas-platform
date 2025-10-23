@@ -30,17 +30,22 @@ export class BaseRepositoryAdapter<T> {
       const isolatedEntity = this.applyIsolationContext(entity);
 
       // 执行数据库保存操作
-      const repository = this.databaseAdapter.getRepository(entity.constructor as any);
-      await (repository as { persistAndFlush(entity: unknown): Promise<void> }).persistAndFlush(isolatedEntity);
+
+      const repository = this.databaseAdapter.getRepository(
+        entity.constructor as new () => T,
+      );
+      await (
+        repository as { persistAndFlush(entity: unknown): Promise<void> }
+      ).persistAndFlush(isolatedEntity);
 
       // 更新缓存
       if (this.cacheService) {
         const cacheKey = this.generateCacheKey(entity);
         await this.cacheService.set(cacheKey, entity);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `保存实体失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `保存实体失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -63,7 +68,12 @@ export class BaseRepositoryAdapter<T> {
       const repository = this.databaseAdapter.getRepository(
         this.getEntityClass(),
       );
-      const entity = await (repository as { findOne(conditions: unknown): Promise<unknown> }).findOne({ id } as any);
+
+      const entity = await (
+        repository as {
+          findOne(conditions: Record<string, unknown>): Promise<unknown>;
+        }
+      ).findOne({ id } as Record<string, unknown>);
 
       if (entity) {
         // 应用隔离过滤
@@ -79,9 +89,9 @@ export class BaseRepositoryAdapter<T> {
       }
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `查找实体失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `查找实体失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -94,7 +104,9 @@ export class BaseRepositoryAdapter<T> {
       const repository = this.databaseAdapter.getRepository(
         this.getEntityClass(),
       );
-      const entities = await (repository as { findAll(): Promise<unknown[]> }).findAll();
+      const entities = await (
+        repository as { findAll(): Promise<unknown[]> }
+      ).findAll();
 
       // 应用隔离过滤
       const filteredEntities = entities
@@ -102,9 +114,9 @@ export class BaseRepositoryAdapter<T> {
         .filter((entity) => entity !== null) as T[];
 
       return filteredEntities;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `查找所有实体失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `查找所有实体失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -112,7 +124,7 @@ export class BaseRepositoryAdapter<T> {
   /**
    * 根据条件查找实体
    */
-  async findBy(conditions: Record<string, any>): Promise<T[]> {
+  async findBy(conditions: Record<string, unknown>): Promise<T[]> {
     try {
       // 应用隔离条件
       const isolatedConditions = this.applyIsolationConditions(conditions);
@@ -120,7 +132,9 @@ export class BaseRepositoryAdapter<T> {
       const repository = this.databaseAdapter.getRepository(
         this.getEntityClass(),
       );
-      const entities = await (repository as { find(conditions: unknown): Promise<unknown[]> }).find(isolatedConditions);
+      const entities = await (
+        repository as { find(conditions: unknown): Promise<unknown[]> }
+      ).find(isolatedConditions);
 
       // 应用隔离过滤
       const filteredEntities = entities
@@ -128,9 +142,9 @@ export class BaseRepositoryAdapter<T> {
         .filter((entity) => entity !== null) as T[];
 
       return filteredEntities;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `根据条件查找实体失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `根据条件查找实体失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -143,16 +157,18 @@ export class BaseRepositoryAdapter<T> {
       const repository = this.databaseAdapter.getRepository(
         this.getEntityClass(),
       );
-      await (repository as { removeAndFlush(entity: unknown): Promise<void> }).removeAndFlush(entity);
+      await (
+        repository as { removeAndFlush(entity: unknown): Promise<void> }
+      ).removeAndFlush(entity);
 
       // 清除缓存
       if (this.cacheService) {
         const cacheKey = this.generateCacheKey(entity);
         await this.cacheService.delete(cacheKey);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `删除实体失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `删除实体失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -165,10 +181,16 @@ export class BaseRepositoryAdapter<T> {
       const repository = this.databaseAdapter.getRepository(
         this.getEntityClass(),
       );
-      const entity = await (repository as { findOne(conditions: unknown): Promise<unknown> }).findOne({ id } as any);
+      const entity = await (
+        repository as {
+          findOne(conditions: Record<string, unknown>): Promise<unknown>;
+        }
+      ).findOne({ id } as Record<string, unknown>);
 
       if (entity) {
-        await (repository as { removeAndFlush(entity: unknown): Promise<void> }).removeAndFlush(entity);
+        await (
+          repository as { removeAndFlush(entity: unknown): Promise<void> }
+        ).removeAndFlush(entity);
 
         // 清除缓存
         if (this.cacheService) {
@@ -176,9 +198,9 @@ export class BaseRepositoryAdapter<T> {
           await this.cacheService.delete(cacheKey);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `根据ID删除实体失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `根据ID删除实体失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -190,7 +212,7 @@ export class BaseRepositoryAdapter<T> {
     try {
       const entity = await this.findById(id);
       return entity !== null;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -198,7 +220,7 @@ export class BaseRepositoryAdapter<T> {
   /**
    * 获取实体数量
    */
-  async count(conditions?: Record<string, any>): Promise<number> {
+  async count(conditions?: Record<string, unknown>): Promise<number> {
     try {
       const repository = this.databaseAdapter.getRepository(
         this.getEntityClass(),
@@ -206,13 +228,15 @@ export class BaseRepositoryAdapter<T> {
 
       if (conditions) {
         const isolatedConditions = this.applyIsolationConditions(conditions);
-        return await (repository as { count(conditions: unknown): Promise<number> }).count(isolatedConditions);
+        return await (
+          repository as { count(conditions: unknown): Promise<number> }
+        ).count(isolatedConditions);
       }
 
       return await (repository as { count(): Promise<number> }).count();
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取实体数量失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取实体数量失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -226,7 +250,12 @@ export class BaseRepositoryAdapter<T> {
     }
 
     // 添加隔离字段
-    const isolatedEntity = { ...entity } as any;
+    const isolatedEntity = { ...entity } as T & {
+      tenantId?: string;
+      organizationId?: string;
+      departmentId?: string;
+      userId?: string;
+    };
 
     if (this.isolationContext.tenantId) {
       isolatedEntity.tenantId = this.isolationContext.tenantId;
@@ -255,12 +284,17 @@ export class BaseRepositoryAdapter<T> {
       return entity;
     }
 
-    const entityAny = entity as any;
+    const entityWithIsolation = entity as T & {
+      tenantId?: string;
+      organizationId?: string;
+      departmentId?: string;
+      userId?: string;
+    };
 
     // 检查租户隔离
     if (
       this.isolationContext.tenantId &&
-      entityAny.tenantId !== this.isolationContext.tenantId
+      entityWithIsolation.tenantId !== this.isolationContext.tenantId
     ) {
       return null;
     }
@@ -268,7 +302,8 @@ export class BaseRepositoryAdapter<T> {
     // 检查组织隔离
     if (
       this.isolationContext.organizationId &&
-      entityAny.organizationId !== this.isolationContext.organizationId
+      entityWithIsolation.organizationId !==
+        this.isolationContext.organizationId
     ) {
       return null;
     }
@@ -276,7 +311,7 @@ export class BaseRepositoryAdapter<T> {
     // 检查部门隔离
     if (
       this.isolationContext.departmentId &&
-      entityAny.departmentId !== this.isolationContext.departmentId
+      entityWithIsolation.departmentId !== this.isolationContext.departmentId
     ) {
       return null;
     }
@@ -284,7 +319,7 @@ export class BaseRepositoryAdapter<T> {
     // 检查用户隔离
     if (
       this.isolationContext.userId &&
-      entityAny.userId !== this.isolationContext.userId
+      entityWithIsolation.userId !== this.isolationContext.userId
     ) {
       return null;
     }
@@ -296,8 +331,8 @@ export class BaseRepositoryAdapter<T> {
    * 应用隔离条件
    */
   protected applyIsolationConditions(
-    conditions: Record<string, any>,
-  ): Record<string, any> {
+    conditions: Record<string, unknown>,
+  ): Record<string, unknown> {
     if (!this.isolationContext) {
       return conditions;
     }
@@ -327,8 +362,8 @@ export class BaseRepositoryAdapter<T> {
    * 生成缓存键
    */
   protected generateCacheKey(entity: T): string {
-    const entityAny = entity as any;
-    const id = entityAny.id || entityAny._id;
+    const entityWithId = entity as T & { id?: string; _id?: string };
+    const id = entityWithId.id || entityWithId._id;
     const entityName = this.getEntityClass().name;
 
     let cacheKey = `${entityName}:${id}`;
@@ -353,7 +388,7 @@ export class BaseRepositoryAdapter<T> {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

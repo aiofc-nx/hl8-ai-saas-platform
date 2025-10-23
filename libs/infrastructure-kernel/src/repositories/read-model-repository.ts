@@ -11,7 +11,7 @@ import { BaseQuery } from "@hl8/application-kernel";
  */
 export interface ReadModelRepository<
   TQuery extends BaseQuery = BaseQuery,
-  TResult = any,
+  TResult = unknown,
 > {
   /**
    * 执行查询

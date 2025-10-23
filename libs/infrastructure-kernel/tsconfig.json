@@ -8,6 +8,6 @@
     "rootDir": "./src",
     "outDir": "./dist"
   },
-  "include": ["src", "src/**/*.spec.ts", "src/**/*.test.ts"],
-  "exclude": ["node_modules", "test", "dist"]
+  "include": ["src", "src/**/*.spec.ts", "src/**/*.test.ts", "test", "test/**/*.spec.ts", "test/**/*.test.ts"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -5,14 +5,7 @@
  * @since 1.0.0
  */
 
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  Collection,
-  OneToMany,
-} from "@mikro-orm/core";
-import { DatabaseConnectionEntity } from "./database-connection.entity.js";
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 
 /**
  * 数据库配置实体
@@ -187,7 +180,7 @@ export class DatabaseConfigEntity {
    * 获取配置摘要
    * @returns 配置摘要
    */
-  getConfigSummary(): Record<string, any> {
+  getConfigSummary(): Record<string, unknown> {
     return {
       id: this.id,
       name: this.name,

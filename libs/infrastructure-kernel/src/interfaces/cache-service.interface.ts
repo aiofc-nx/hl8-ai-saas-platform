@@ -43,22 +43,29 @@ export interface ICacheService extends CacheService {
  */
 export interface IRedisCacheService extends ICacheService {
   /** 执行Redis命令 */
-  executeCommand(command: string, ...args: any[]): Promise<any>;
+  executeCommand(command: string, ...args: unknown[]): Promise<unknown>;
 
   /** 发布消息 */
-  publish(channel: string, message: any): Promise<number>;
+  publish(channel: string, message: unknown): Promise<number>;
 
   /** 订阅消息 */
-  subscribe(channel: string, callback: (message: any) => void): Promise<void>;
+  subscribe(
+    channel: string,
+    callback: (message: unknown) => void,
+  ): Promise<void>;
 
   /** 取消订阅 */
   unsubscribe(channel: string): Promise<void>;
 
   /** 获取Redis信息 */
-  getRedisInfo(): Promise<Record<string, any>>;
+  getRedisInfo(): Promise<Record<string, unknown>>;
 
   /** 执行Lua脚本 */
-  executeScript(script: string, keys: string[], args: any[]): Promise<any>;
+  executeScript(
+    script: string,
+    keys: string[],
+    args: unknown[],
+  ): Promise<unknown>;
 }
 
 /**
@@ -95,7 +102,7 @@ export interface ICacheStrategy {
   updateAccess(key: string, timestamp: Date): void;
 
   /** 获取策略统计 */
-  getStats(): Record<string, any>;
+  getStats(): Record<string, unknown>;
 }
 
 /**

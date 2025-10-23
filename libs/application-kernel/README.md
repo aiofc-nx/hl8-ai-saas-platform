@@ -11,18 +11,19 @@
 - **📡 事件驱动**: 支持领域事件和集成事件
 - **💾 事务管理**: 完整的事务生命周期管理
 - **🔍 验证框架**: 全面的数据验证和安全检查
+- **⚠️ 统一异常处理**: 集成 `@hl8/exceptions` 提供 RFC7807 标准异常
 - **🔧 框架无关**: 支持 NestJS、Express 等框架
 
 ## 📦 安装
 
 ```bash
-npm install @hl8/application-kernel @hl8/domain-kernel
+npm install @hl8/application-kernel @hl8/domain-kernel @hl8/exceptions
 ```
 
 ## 🚀 快速开始
 
 ```typescript
-import { BaseCommand, BaseQuery, BaseUseCase } from "@hl8/application-kernel";
+import { BaseCommand, BaseQuery, BaseUseCase, GeneralBadRequestException } from "@hl8/application-kernel";
 import { IsolationContext, TenantId } from "@hl8/domain-kernel";
 
 // 创建命令
@@ -53,6 +54,22 @@ export class CreateUserUseCase extends BaseUseCase {
     return "user-" + Date.now();
   }
 }
+
+// 异常处理示例
+export class ValidateUserUseCase extends BaseUseCase {
+  async execute(command: CreateUserCommand): Promise<void> {
+    // 参数验证
+    if (!command.email || !command.email.includes('@')) {
+      throw new GeneralBadRequestException(
+        "邮箱格式错误",
+        "邮箱地址格式不正确",
+        { email: command.email, expectedFormat: 'user@example.com' }
+      );
+    }
+    
+    // 业务逻辑...
+  }
+}
 ```
 
 ## 📚 文档
@@ -61,6 +78,7 @@ export class CreateUserUseCase extends BaseUseCase {
 - **[开发指南](./docs/APPLICATION_LAYER_DEVELOPMENT_GUIDE.md)** - 完整的开发指南
 - **[API 参考](./docs/API_REFERENCE.md)** - 详细的API文档
 - **[验证架构](./docs/VALIDATION_ARCHITECTURE.md)** - 验证分层设计指南
+- **[异常集成](./docs/EXCEPTION_INTEGRATION.md)** - 异常系统集成说明
 
 ## 🏗️ 架构
 

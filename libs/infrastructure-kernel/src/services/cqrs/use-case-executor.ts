@@ -21,9 +21,9 @@ export interface UseCase {
   /** 用例类型 */
   type: "COMMAND" | "QUERY";
   /** 输入数据 */
-  input: Record<string, any>;
+  input: Record<string, unknown>;
   /** 输出数据 */
-  output?: any;
+  output?: unknown;
   /** 时间戳 */
   timestamp: Date;
   /** 用户ID */
@@ -35,13 +35,13 @@ export interface UseCase {
 /**
  * 用例执行结果
  */
-export interface UseCaseResult<T = any> {
+export interface UseCaseResult<T = unknown> {
   /** 是否成功 */
   success: boolean;
   /** 返回数据 */
   data?: T;
   /** 错误信息 */
-  error?: string;
+  _error?: string;
   /** 执行时间(毫秒) */
   executionTime: number;
   /** 用例ID */
@@ -63,7 +63,7 @@ export interface UseCaseStep {
   /** 执行时间(毫秒) */
   executionTime: number;
   /** 错误信息 */
-  error?: string;
+  _error?: string;
 }
 
 /**
@@ -71,7 +71,7 @@ export interface UseCaseStep {
  */
 export interface UseCaseExecutor<
   TUseCase extends UseCase = UseCase,
-  TResult = any,
+  TResult = unknown,
 > {
   /** 执行用例 */
   execute(useCase: TUseCase): Promise<UseCaseResult<TResult>>;
@@ -106,7 +106,9 @@ export class UseCaseExecutorService {
   /**
    * 执行用例
    */
-  async executeUseCase<T = any>(useCase: UseCase): Promise<UseCaseResult<T>> {
+  async executeUseCase<T = unknown>(
+    useCase: UseCase,
+  ): Promise<UseCaseResult<T>> {
     const startTime = Date.now();
     const steps: UseCaseStep[] = [];
 
@@ -159,12 +161,12 @@ export class UseCaseExecutorService {
       // 记录用例执行日志
       await this.logUseCaseExecution(useCase, result);
 
-      return result;
-    } catch (error) {
+      return result as UseCaseResult<T>;
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       const result: UseCaseResult<T> = {
         success: false,
-        error: error instanceof Error ? error.message : "用例执行失败",
+        _error: _error instanceof Error ? _error.message : "用例执行失败",
         executionTime,
         useCaseId: useCase.id,
         steps,
@@ -187,10 +189,10 @@ export class UseCaseExecutorService {
       try {
         const result = await this.executeUseCase(useCase);
         results.push(result);
-      } catch (error) {
+      } catch (_error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : "用例执行失败",
+          _error: _error instanceof Error ? _error.message : "用例执行失败",
           executionTime: 0,
           useCaseId: useCase.id,
         });
@@ -211,7 +213,7 @@ export class UseCaseExecutorService {
   /**
    * 获取执行统计信息
    */
-  getExecutionStats(): Record<string, any> {
+  getExecutionStats(): Record<string, unknown> {
     const total = this.executionHistory.length;
     const successful = this.executionHistory.filter((r) => r.success).length;
     const failed = total - successful;
@@ -329,8 +331,8 @@ export class UseCaseExecutorService {
 
       // 这里应该记录到日志系统
       console.log("用例执行日志:", logData);
-    } catch (error) {
-      console.error("记录用例执行日志失败:", error);
+    } catch (_error) {
+      console.error("记录用例执行日志失败:", _error);
     }
   }
 
@@ -340,7 +342,7 @@ export class UseCaseExecutorService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

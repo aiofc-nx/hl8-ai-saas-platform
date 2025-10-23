@@ -228,6 +228,8 @@ export class TransactionBoundaryValidator {
     // 检查事务管理器方法
     const requiredMethods = ["begin", "commit", "rollback", "isActive"];
     for (const method of requiredMethods) {
+      // 必须使用 any 类型：需要动态访问事务管理器的方法，无法预先确定具体的方法签名
+      // 这是事务管理器验证的核心需求，用于检查必需的方法是否存在
       if (typeof (transactionManager as any)[method] !== "function") {
         errors.push(`事务管理器缺少必需方法: ${method}`);
         suggestions.push(`实现 ${method} 方法`);

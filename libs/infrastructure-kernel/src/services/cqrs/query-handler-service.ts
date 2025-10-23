@@ -20,9 +20,9 @@ export interface Query {
   /** 查询类型 */
   type: string;
   /** 查询参数 */
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   /** 过滤条件 */
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   /** 排序字段 */
   orderBy?: string;
   /** 排序方向 */
@@ -42,7 +42,7 @@ export interface Query {
 /**
  * 查询结果
  */
-export interface QueryResult<T = any> {
+export interface QueryResult<T = unknown> {
   /** 是否成功 */
   success: boolean;
   /** 返回数据 */
@@ -54,7 +54,7 @@ export interface QueryResult<T = any> {
   /** 页大小 */
   pageSize?: number;
   /** 错误信息 */
-  error?: string;
+  _error?: string;
   /** 执行时间(毫秒) */
   executionTime: number;
   /** 查询ID */
@@ -64,7 +64,7 @@ export interface QueryResult<T = any> {
 /**
  * 查询处理器接口
  */
-export interface QueryHandler<TQuery extends Query = Query, TResult = any> {
+export interface QueryHandler<TQuery extends Query = Query, TResult = unknown> {
   /** 处理查询 */
   handle(query: TQuery): Promise<QueryResult<TResult>>;
   /** 验证查询 */
@@ -79,7 +79,7 @@ export interface QueryHandler<TQuery extends Query = Query, TResult = any> {
 @Injectable()
 export class QueryHandlerService {
   private handlers = new Map<string, QueryHandler>();
-  private queryCache = new Map<string, any>();
+  private queryCache = new Map<string, unknown>();
   private cacheConfig = {
     enabled: true,
     ttl: 300000, // 5分钟
@@ -102,7 +102,7 @@ export class QueryHandlerService {
   /**
    * 处理查询
    */
-  async handleQuery<T = any>(query: Query): Promise<QueryResult<T>> {
+  async handleQuery<T = unknown>(query: Query): Promise<QueryResult<T>> {
     const startTime = Date.now();
 
     try {
@@ -118,7 +118,7 @@ export class QueryHandlerService {
             ...cached,
             executionTime: Date.now() - startTime,
             queryId: query.id,
-          };
+          } as QueryResult<T>;
         }
       }
 
@@ -149,12 +149,12 @@ export class QueryHandlerService {
       // 记录查询执行日志
       await this.logQueryExecution(query, result);
 
-      return result;
-    } catch (error) {
+      return result as QueryResult<T>;
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "查询处理失败",
+        _error: _error instanceof Error ? _error.message : "查询处理失败",
         executionTime,
         queryId: query.id,
       };
@@ -171,10 +171,10 @@ export class QueryHandlerService {
       try {
         const result = await this.handleQuery(query);
         results.push(result);
-      } catch (error) {
+      } catch (_error) {
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : "查询处理失败",
+          _error: _error instanceof Error ? _error.message : "查询处理失败",
           executionTime: 0,
           queryId: query.id,
         });
@@ -201,7 +201,7 @@ export class QueryHandlerService {
   /**
    * 获取缓存统计信息
    */
-  getCacheStats(): Record<string, any> {
+  getCacheStats(): Record<string, unknown> {
     return {
       cacheSize: this.queryCache.size,
       maxSize: this.cacheConfig.maxSize,
@@ -297,9 +297,11 @@ export class QueryHandlerService {
     try {
       // 首先检查内存缓存
       if (this.queryCache.has(cacheKey)) {
-        const cached = this.queryCache.get(cacheKey);
+        const cached = this.queryCache.get(cacheKey) as
+          | { timestamp: number; result: unknown }
+          | undefined;
         if (cached && Date.now() - cached.timestamp < this.cacheConfig.ttl) {
-          return cached.result;
+          return cached.result as QueryResult;
         } else {
           this.queryCache.delete(cacheKey);
         }
@@ -314,7 +316,7 @@ export class QueryHandlerService {
       }
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -345,8 +347,8 @@ export class QueryHandlerService {
           ttl: this.cacheConfig.ttl / 1000, // 转换为秒
         });
       }
-    } catch (error) {
-      console.error("缓存查询结果失败:", error);
+    } catch (_error) {
+      console.error("缓存查询结果失败:", _error);
     }
   }
 
@@ -370,8 +372,8 @@ export class QueryHandlerService {
 
       // 这里应该记录到日志系统
       console.log("查询执行日志:", logData);
-    } catch (error) {
-      console.error("记录查询执行日志失败:", error);
+    } catch (_error) {
+      console.error("记录查询执行日志失败:", _error);
     }
   }
 
@@ -381,7 +383,7 @@ export class QueryHandlerService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

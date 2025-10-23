@@ -17,14 +17,38 @@ import {
   HttpStatus,
   Logger,
 } from "@nestjs/common";
-import type { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyReply } from "fastify";
 import { ApiGatewayService } from "../services/api-gateway.service.js";
 import { AuthenticationService } from "../services/authentication.service.js";
 import { AuthorizationService } from "../services/authorization.service.js";
 import { ValidationService } from "../services/validation.service.js";
 import { RateLimitService } from "../services/rate-limit.service.js";
 import { MonitoringService } from "../services/monitoring.service.js";
-import type { ApiResponse, InterfaceFastifyRequest } from "../types/index.js";
+import type {
+  InterfaceFastifyRequest,
+  ValidationRule,
+} from "../types/index.js";
+
+/**
+ * REST API 请求体接口
+ * @description 定义 REST API 请求体的基础结构
+ */
+interface RestRequestBody {
+  [key: string]: unknown;
+}
+
+/**
+ * 验证规则接口
+ * @description 定义验证规则的结构
+ */
+interface RestValidationRule {
+  field: string;
+  type: string;
+  required?: boolean;
+  min?: number;
+  max?: number;
+  pattern?: string;
+}
 
 /**
  * REST API 控制器
@@ -61,7 +85,7 @@ export class RestController {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Handling GET request: ${(request as any).url}`);
+      this.logger.debug(`Handling GET request: ${request.url}`);
 
       // 1. 速率限制检查
       const rateLimitResult = await this.rateLimitService.checkRateLimit(
@@ -86,7 +110,7 @@ export class RestController {
         try {
           const user = await this.authenticationService.verifyToken(token);
           request.user = user;
-        } catch (error) {
+        } catch (_error) {
           reply.status(HttpStatus.UNAUTHORIZED).send({
             success: false,
             error: {
@@ -166,10 +190,10 @@ export class RestController {
 
       // 7. 发送响应
       reply.status(HttpStatus.OK).send(response);
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(
-        `GET request failed: ${error instanceof Error ? error.message : String(error)}`,
-        error instanceof Error ? error.stack : undefined,
+        `GET request failed: ${_error instanceof Error ? _error.message : String(_error)}`,
+        _error instanceof Error ? _error.stack : undefined,
       );
 
       const responseTime = Date.now() - startTime;
@@ -179,7 +203,7 @@ export class RestController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
       this.monitoringService.recordErrorMetrics(
-        error instanceof Error ? error : new Error(String(error)),
+        _error instanceof Error ? _error : new Error(String(_error)),
         { method: "GET", path },
       );
 
@@ -207,12 +231,12 @@ export class RestController {
     @Req() request: InterfaceFastifyRequest,
     @Res() reply: FastifyReply,
     @Param("*") path: string,
-    @Body() body: any,
+    @Body() _body: RestRequestBody,
   ): Promise<void> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Handling POST request: ${(request as any).url}`);
+      this.logger.debug(`Handling POST request: ${request.url}`);
 
       // 1. 速率限制检查
       const rateLimitResult = await this.rateLimitService.checkRateLimit(
@@ -237,7 +261,7 @@ export class RestController {
         try {
           const user = await this.authenticationService.verifyToken(token);
           request.user = user;
-        } catch (error) {
+        } catch (_error) {
           reply.status(HttpStatus.UNAUTHORIZED).send({
             success: false,
             error: {
@@ -275,7 +299,7 @@ export class RestController {
       // 4. 请求体验证
       const bodyValidation = await this.validationService.validateRequestBody(
         request,
-        this.getValidationRulesForPath(path),
+        this.convertValidationRules(this.getValidationRulesForPath(path)),
       );
 
       if (!bodyValidation.isValid) {
@@ -307,10 +331,10 @@ export class RestController {
 
       // 7. 发送响应
       reply.status(HttpStatus.CREATED).send(response);
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(
-        `POST request failed: ${error instanceof Error ? error.message : String(error)}`,
-        error instanceof Error ? error.stack : undefined,
+        `POST request failed: ${_error instanceof Error ? _error.message : String(_error)}`,
+        _error instanceof Error ? _error.stack : undefined,
       );
 
       const responseTime = Date.now() - startTime;
@@ -320,7 +344,7 @@ export class RestController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
       this.monitoringService.recordErrorMetrics(
-        error instanceof Error ? error : new Error(String(error)),
+        _error instanceof Error ? _error : new Error(String(_error)),
         {
           method: "POST",
           path,
@@ -351,12 +375,12 @@ export class RestController {
     @Req() request: InterfaceFastifyRequest,
     @Res() reply: FastifyReply,
     @Param("*") path: string,
-    @Body() body: any,
+    @Body() _body: RestRequestBody,
   ): Promise<void> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Handling PUT request: ${(request as any).url}`);
+      this.logger.debug(`Handling PUT request: ${request.url}`);
 
       // 1. 速率限制检查
       const rateLimitResult = await this.rateLimitService.checkRateLimit(
@@ -392,7 +416,7 @@ export class RestController {
       try {
         const user = await this.authenticationService.verifyToken(token);
         request.user = user;
-      } catch (error) {
+      } catch (_error) {
         reply.status(HttpStatus.UNAUTHORIZED).send({
           success: false,
           error: {
@@ -427,7 +451,7 @@ export class RestController {
       // 4. 请求体验证
       const bodyValidation = await this.validationService.validateRequestBody(
         request,
-        this.getValidationRulesForPath(path),
+        this.convertValidationRules(this.getValidationRulesForPath(path)),
       );
 
       if (!bodyValidation.isValid) {
@@ -459,10 +483,10 @@ export class RestController {
 
       // 7. 发送响应
       reply.status(HttpStatus.OK).send(response);
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(
-        `PUT request failed: ${error instanceof Error ? error.message : String(error)}`,
-        error instanceof Error ? error.stack : undefined,
+        `PUT request failed: ${_error instanceof Error ? _error.message : String(_error)}`,
+        _error instanceof Error ? _error.stack : undefined,
       );
 
       const responseTime = Date.now() - startTime;
@@ -472,7 +496,7 @@ export class RestController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
       this.monitoringService.recordErrorMetrics(
-        error instanceof Error ? error : new Error(String(error)),
+        _error instanceof Error ? _error : new Error(String(_error)),
         { method: "PUT", path },
       );
 
@@ -503,7 +527,7 @@ export class RestController {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Handling DELETE request: ${(request as any).url}`);
+      this.logger.debug(`Handling DELETE request: ${request.url}`);
 
       // 1. 速率限制检查
       const rateLimitResult = await this.rateLimitService.checkRateLimit(
@@ -539,7 +563,7 @@ export class RestController {
       try {
         const user = await this.authenticationService.verifyToken(token);
         request.user = user;
-      } catch (error) {
+      } catch (_error) {
         reply.status(HttpStatus.UNAUTHORIZED).send({
           success: false,
           error: {
@@ -587,10 +611,10 @@ export class RestController {
 
       // 6. 发送响应
       reply.status(HttpStatus.OK).send(response);
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(
-        `DELETE request failed: ${error instanceof Error ? error.message : String(error)}`,
-        error instanceof Error ? error.stack : undefined,
+        `DELETE request failed: ${_error instanceof Error ? _error.message : String(_error)}`,
+        _error instanceof Error ? _error.stack : undefined,
       );
 
       const responseTime = Date.now() - startTime;
@@ -600,7 +624,7 @@ export class RestController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
       this.monitoringService.recordErrorMetrics(
-        error instanceof Error ? error : new Error(String(error)),
+        _error instanceof Error ? _error : new Error(String(_error)),
         {
           method: "DELETE",
           path,
@@ -631,12 +655,12 @@ export class RestController {
     @Req() request: InterfaceFastifyRequest,
     @Res() reply: FastifyReply,
     @Param("*") path: string,
-    @Body() body: any,
+    @Body() _body: RestRequestBody,
   ): Promise<void> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Handling PATCH request: ${(request as any).url}`);
+      this.logger.debug(`Handling PATCH request: ${request.url}`);
 
       // 1. 速率限制检查
       const rateLimitResult = await this.rateLimitService.checkRateLimit(
@@ -672,7 +696,7 @@ export class RestController {
       try {
         const user = await this.authenticationService.verifyToken(token);
         request.user = user;
-      } catch (error) {
+      } catch (_error) {
         reply.status(HttpStatus.UNAUTHORIZED).send({
           success: false,
           error: {
@@ -707,7 +731,7 @@ export class RestController {
       // 4. 请求体验证
       const bodyValidation = await this.validationService.validateRequestBody(
         request,
-        this.getValidationRulesForPath(path),
+        this.convertValidationRules(this.getValidationRulesForPath(path)),
       );
 
       if (!bodyValidation.isValid) {
@@ -739,10 +763,10 @@ export class RestController {
 
       // 7. 发送响应
       reply.status(HttpStatus.OK).send(response);
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(
-        `PATCH request failed: ${error instanceof Error ? error.message : String(error)}`,
-        error instanceof Error ? error.stack : undefined,
+        `PATCH request failed: ${_error instanceof Error ? _error.message : String(_error)}`,
+        _error instanceof Error ? _error.stack : undefined,
       );
 
       const responseTime = Date.now() - startTime;
@@ -752,7 +776,7 @@ export class RestController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
       this.monitoringService.recordErrorMetrics(
-        error instanceof Error ? error : new Error(String(error)),
+        _error instanceof Error ? _error : new Error(String(_error)),
         {
           method: "PATCH",
           path,
@@ -787,9 +811,29 @@ export class RestController {
    * @param path 请求路径
    * @returns 验证规则列表
    */
-  private getValidationRulesForPath(path: string): any[] {
+  private getValidationRulesForPath(_path: string): RestValidationRule[] {
     // 根据路径返回相应的验证规则
     // 这里应该根据实际业务需求配置
     return [];
+  }
+
+  /**
+   * 转换验证规则
+   * @description 将 RestValidationRule 转换为 ValidationRule
+   * @param rules REST 验证规则
+   * @returns 标准验证规则
+   */
+  private convertValidationRules(
+    rules: RestValidationRule[],
+  ): ValidationRule[] {
+    return rules.map((rule) => ({
+      field: rule.field,
+      type: rule.type,
+      required: rule.required,
+      min: rule.min,
+      max: rule.max,
+      pattern: rule.pattern ? new RegExp(rule.pattern) : undefined,
+      message: undefined,
+    }));
   }
 }

@@ -9,17 +9,20 @@ import { User } from "./user.entity.js";
 import { Email } from "./email.vo.js";
 import { Username } from "./username.vo.js";
 import { UserStatus, UserStatusTransition } from "./user-status.enum.js";
-import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
+import { DomainValidationException } from "/home/arligle/hl8/hl8-ai-saas-platform/libs/exceptions/dist/core/domain/index.js";
+import { TenantId } from "../value-objects/ids/tenant-id.vo.js";
 
 describe("User", () => {
   let user: User;
   let email: Email;
   let username: Username;
+  let tenantId: TenantId;
 
   beforeEach(() => {
+    tenantId = TenantId.create("550e8400-e29b-41d4-a716-446655440000");
     email = Email.create("test@example.com");
     username = Username.create("testuser");
-    user = User.create(email, username);
+    user = User.create(tenantId, email, username);
   });
 
   describe("用户创建", () => {
@@ -33,6 +36,7 @@ describe("User", () => {
     it("应该能够从现有数据重建用户", () => {
       const existingUser = User.fromExisting(
         user.id,
+        user.tenantId,
         email,
         username,
         UserStatus.ACTIVE,
@@ -60,7 +64,7 @@ describe("User", () => {
     it("应该能够重复激活已激活的用户", () => {
       user.activate();
 
-      expect(() => user.activate()).toThrow(IsolationValidationError);
+      expect(() => user.activate()).toThrow(DomainValidationException);
     });
 
     it("应该能够激活已禁用的用户", () => {
@@ -93,7 +97,7 @@ describe("User", () => {
     it("应该能够禁用已删除的用户", () => {
       user.delete();
 
-      expect(() => user.disable()).toThrow(IsolationValidationError);
+      expect(() => user.disable()).toThrow(DomainValidationException);
     });
   });
 
@@ -113,13 +117,13 @@ describe("User", () => {
     it("应该能够重复启用已启用的用户", () => {
       user.enable();
 
-      expect(() => user.enable()).not.toThrow();
+      expect(() => user.enable()).toThrow(DomainValidationException);
     });
 
     it("应该能够启用已删除的用户", () => {
       user.delete();
 
-      expect(() => user.enable()).toThrow(IsolationValidationError);
+      expect(() => user.enable()).toThrow(DomainValidationException);
     });
   });
 
@@ -128,13 +132,13 @@ describe("User", () => {
       user.delete();
 
       expect(user.getStatus()).toBe(UserStatus.DELETED);
-      expect(user.isDeleted()).toBe(true);
+      expect(user.isDeleted).toBe(true);
     });
 
     it("应该能够重复删除已删除的用户", () => {
       user.delete();
 
-      expect(() => user.delete()).toThrow(IsolationValidationError);
+      expect(() => user.delete()).toThrow(DomainValidationException);
     });
   });
 
@@ -158,7 +162,7 @@ describe("User", () => {
       const newEmail = Email.create("new@example.com");
 
       expect(() => user.updateEmail(newEmail)).toThrow(
-        IsolationValidationError,
+        DomainValidationException,
       );
     });
 
@@ -167,7 +171,7 @@ describe("User", () => {
       const newUsername = Username.create("newuser");
 
       expect(() => user.updateUsername(newUsername)).toThrow(
-        IsolationValidationError,
+        DomainValidationException,
       );
     });
   });
@@ -195,17 +199,17 @@ describe("User", () => {
     it("应该正确检查用户状态", () => {
       expect(user.isActive()).toBe(false);
       expect(user.isActivated()).toBe(false);
-      expect(user.isDeleted()).toBe(false);
+      expect(user.isDeleted).toBe(false);
 
       user.activate();
       expect(user.isActive()).toBe(true);
       expect(user.isActivated()).toBe(true);
-      expect(user.isDeleted()).toBe(false);
+      expect(user.isDeleted).toBe(false);
 
       user.delete();
       expect(user.isActive()).toBe(false);
       expect(user.isActivated()).toBe(false);
-      expect(user.isDeleted()).toBe(true);
+      expect(user.isDeleted).toBe(true);
     });
   });
 

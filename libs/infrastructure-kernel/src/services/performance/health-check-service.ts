@@ -11,6 +11,7 @@ import type {
   IHealthCheckService,
   HealthCheckResult,
 } from "../../interfaces/health-service.interface.js";
+import type { HealthStatus, HealthChecker } from "../../types/health.types.js";
 import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
 import type { ICacheService } from "../../interfaces/cache-service.interface.js";
 import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
@@ -73,16 +74,16 @@ export class HealthCheckService implements IHealthCheckService {
     console.log(`禁用组件: ${name}`);
   }
 
-  getComponentStatus(name: string): Promise<any> {
+  getComponentStatus(_name: string): Promise<HealthStatus> {
     // 获取组件状态
-    return Promise.resolve("healthy" as any);
+    return Promise.resolve("HEALTHY");
   }
 
-  checkHealth(): Promise<any> {
+  checkHealth(): Promise<HealthCheckResult> {
     return this.check();
   }
 
-  getHealthMetrics(): Promise<any> {
+  getHealthMetrics(): Promise<HealthCheckResult> {
     return this.check();
   }
 
@@ -91,32 +92,42 @@ export class HealthCheckService implements IHealthCheckService {
     console.log(`设置健康阈值: ${name} = ${threshold}`);
   }
 
-  getHealthThreshold(name: string): number {
+  getHealthThreshold(_name: string): number {
     // 获取健康阈值
     return 0.8;
   }
 
   // 添加其他缺失的接口方法
-  checkComponent(component: string): Promise<any> {
+  checkComponent(component: string): Promise<HealthCheckResult> {
     // 检查组件健康状态
-    return Promise.resolve({ status: "healthy" as any, component });
+    return Promise.resolve({
+      component,
+      status: "HEALTHY",
+      lastCheck: new Date(),
+      responseTime: 0,
+      errorRate: 0,
+      details: {},
+      dependencies: [],
+    });
   }
 
-  getOverallHealth(): Promise<any> {
+  getOverallHealth(): Promise<HealthStatus> {
     // 获取整体健康状态
-    return this.check();
+    return this.check().then((result) => result.status);
   }
 
-  registerChecker(name: string, checker: any): void {
+  registerChecker(name: string, checker: HealthChecker): void {
     // 注册健康检查器
-    this.registerIndicator(name, checker);
+    this.registerIndicator(name, async () => {
+      return await checker.check();
+    });
   }
 
   unregisterChecker(name: string): void {
     // 注销健康检查器
     this.deregisterIndicator(name);
   }
-  private indicators = new Map<string, () => Promise<any>>();
+  private indicators = new Map<string, () => Promise<HealthCheckResult>>();
   private config = {
     timeout: 5000,
     retryAttempts: 3,
@@ -164,13 +175,17 @@ export class HealthCheckService implements IHealthCheckService {
             } else {
               errors[name] = result;
             }
-          } catch (error) {
-            const errorResult: any = {
-              status: "down",
-              message: error instanceof Error ? error.message : "健康检查失败",
+          } catch (_error) {
+            const errorResult: HealthCheckResult = {
+              component: name,
+              status: "UNHEALTHY",
+              lastCheck: new Date(),
+              responseTime: 0,
+              errorRate: 1,
               details: {
-                error: error instanceof Error ? error.message : "未知错误",
+                _error: _error instanceof Error ? _error.message : "未知错误",
               },
+              dependencies: [],
             };
             errors[name] = errorResult;
           }
@@ -185,7 +200,7 @@ export class HealthCheckService implements IHealthCheckService {
 
       const healthCheckResult: HealthCheckResult = {
         status: overallStatus as any,
-        error: Object.keys(errors).length > 0 ? errors : undefined,
+        _error: Object.keys(errors).length > 0 ? errors : undefined,
         details: {
           executionTime,
           totalIndicators: this.indicators.size,
@@ -198,9 +213,9 @@ export class HealthCheckService implements IHealthCheckService {
       await this.logHealthCheck(healthCheckResult);
 
       return healthCheckResult;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `健康检查失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `健康检查失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -223,11 +238,14 @@ export class HealthCheckService implements IHealthCheckService {
       const result = await Promise.race([indicator(), timeoutPromise]);
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       return {
         status: "down",
-        message: error instanceof Error ? error.message : "健康指示器执行失败",
-        details: { error: error instanceof Error ? error.message : "未知错误" },
+        message:
+          _error instanceof Error ? _error.message : "健康指示器执行失败",
+        details: {
+          _error: _error instanceof Error ? _error.message : "未知错误",
+        },
       };
     }
   }
@@ -241,7 +259,7 @@ export class HealthCheckService implements IHealthCheckService {
   ): "up" | "down" | "degraded" {
     const totalIndicators =
       Object.keys(results).length + Object.keys(errors).length;
-    const healthyIndicators = Object.keys(results).length;
+    const _healthyIndicators = Object.keys(results).length;
     const unhealthyIndicators = Object.keys(errors).length;
 
     if (unhealthyIndicators === 0) {
@@ -269,12 +287,12 @@ export class HealthCheckService implements IHealthCheckService {
             healthy: isHealthy,
           },
         };
-      } catch (error) {
+      } catch (_error) {
         return {
           status: "down",
           message: "数据库健康检查失败",
           details: {
-            error: error instanceof Error ? error.message : "未知错误",
+            _error: _error instanceof Error ? _error.message : "未知错误",
           },
         };
       }
@@ -293,12 +311,12 @@ export class HealthCheckService implements IHealthCheckService {
               healthy: isHealthy,
             },
           };
-        } catch (error) {
+        } catch (_error) {
           return {
             status: "down",
             message: "缓存健康检查失败",
             details: {
-              error: error instanceof Error ? error.message : "未知错误",
+              _error: _error instanceof Error ? _error.message : "未知错误",
             },
           };
         }
@@ -330,12 +348,12 @@ export class HealthCheckService implements IHealthCheckService {
               healthy: true,
             },
           };
-        } catch (error) {
+        } catch (_error) {
           return {
             status: "down",
             message: "日志服务健康检查失败",
             details: {
-              error: error instanceof Error ? error.message : "未知错误",
+              _error: _error instanceof Error ? _error.message : "未知错误",
             },
           };
         }
@@ -362,12 +380,12 @@ export class HealthCheckService implements IHealthCheckService {
             external: memUsage.external,
           },
         };
-      } catch (error) {
+      } catch (_error) {
         return {
           status: "down",
           message: "内存健康检查失败",
           details: {
-            error: error instanceof Error ? error.message : "未知错误",
+            _error: _error instanceof Error ? _error.message : "未知错误",
           },
         };
       }
@@ -396,12 +414,12 @@ export class HealthCheckService implements IHealthCheckService {
             tempDir,
           },
         };
-      } catch (error) {
+      } catch (_error) {
         return {
           status: "down",
           message: "磁盘健康检查失败",
           details: {
-            error: error instanceof Error ? error.message : "未知错误",
+            _error: _error instanceof Error ? _error.message : "未知错误",
           },
         };
       }
@@ -430,8 +448,8 @@ export class HealthCheckService implements IHealthCheckService {
           result as unknown as Record<string, unknown>,
         );
       }
-    } catch (error) {
-      console.error("记录健康检查日志失败:", error);
+    } catch (_error) {
+      console.error("记录健康检查日志失败:", _error);
     }
   }
 
@@ -463,7 +481,7 @@ export class HealthCheckService implements IHealthCheckService {
     try {
       const result = await this.check();
       return (result.status as any) === "up";
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

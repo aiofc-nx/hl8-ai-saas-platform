@@ -62,8 +62,13 @@ export * from "./services/performance/monitoring-dashboard.js";
 
 // 错误处理
 export * from "./services/error-handling/error-handler.js";
+export * from "./services/error-handling/enhanced-error-handler.service.js";
 export * from "./services/error-handling/circuit-breaker.js";
 export * from "./services/error-handling/retry-manager.js";
+
+// 异常系统集成
+export * from "./exceptions/infrastructure-exception.mapping.js";
+export * from "./utils/exception-handler.utils.js";
 
 // 集成服务
 export * from "./integration/application-kernel-integration.js";

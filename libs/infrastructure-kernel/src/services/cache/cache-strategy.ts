@@ -11,9 +11,9 @@ import type { ICacheStrategy } from "../../interfaces/cache-service.interface.js
 /**
  * 缓存条目信息
  */
-interface CacheEntryInfo {
+interface _CacheEntryInfo {
   key: string;
-  value: any;
+  value: unknown;
   timestamp: number;
   accessCount: number;
   lastAccessed: number;
@@ -38,7 +38,7 @@ export class LRUCacheStrategy implements ICacheStrategy {
     return sortedKeys.slice(0, maxCount);
   }
 
-  updateAccess(key: string, timestamp: Date): void {
+  updateAccess(key: string, _timestamp: Date): void {
     // 更新访问顺序
     const index = this.accessOrder.indexOf(key);
     if (index > -1) {
@@ -47,7 +47,7 @@ export class LRUCacheStrategy implements ICacheStrategy {
     this.accessOrder.push(key);
   }
 
-  getStats(): Record<string, any> {
+  getStats(): Record<string, unknown> {
     return {
       strategy: "LRU",
       accessOrderLength: this.accessOrder.length,
@@ -74,13 +74,13 @@ export class LFUCacheStrategy implements ICacheStrategy {
     return sortedKeys.slice(0, maxCount);
   }
 
-  updateAccess(key: string, timestamp: Date): void {
+  updateAccess(key: string, _timestamp: Date): void {
     // 更新访问次数
     const currentCount = this.accessCounts.get(key) || 0;
     this.accessCounts.set(key, currentCount + 1);
   }
 
-  getStats(): Record<string, any> {
+  getStats(): Record<string, unknown> {
     return {
       strategy: "LFU",
       accessCounts: Object.fromEntries(this.accessCounts),
@@ -107,11 +107,11 @@ export class FIFOCacheStrategy implements ICacheStrategy {
     return sortedKeys.slice(0, maxCount);
   }
 
-  updateAccess(key: string, timestamp: Date): void {
+  updateAccess(_key: string, _timestamp: Date): void {
     // FIFO策略不需要更新访问信息
   }
 
-  getStats(): Record<string, any> {
+  getStats(): Record<string, unknown> {
     return {
       strategy: "FIFO",
       insertionOrderLength: this.insertionOrder.length,
@@ -161,7 +161,7 @@ export class TTLCacheStrategy implements ICacheStrategy {
     this.keyTimestamps.set(key, timestamp.getTime());
   }
 
-  getStats(): Record<string, any> {
+  getStats(): Record<string, unknown> {
     return {
       strategy: "TTL",
       keyCount: this.keyTimestamps.size,

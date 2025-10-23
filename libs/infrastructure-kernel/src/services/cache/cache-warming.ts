@@ -36,7 +36,7 @@ export interface WarmingTask {
   /** 预热键列表 */
   keys: string[];
   /** 数据加载器 */
-  dataLoader: () => Promise<Record<string, any>>;
+  dataLoader: () => Promise<Record<string, unknown>>;
   /** 优先级 */
   priority: number;
   /** 状态 */
@@ -48,7 +48,7 @@ export interface WarmingTask {
   /** 完成时间 */
   completedAt?: Date;
   /** 错误信息 */
-  error?: string;
+  _error?: string;
 }
 
 /**
@@ -132,9 +132,9 @@ export class CacheWarmingService {
       task.status = "COMPLETED";
       task.completedAt = new Date();
       this.warmingTasks.set(taskId, task);
-    } catch (error) {
+    } catch (_error) {
       task.status = "FAILED";
-      task.error = error instanceof Error ? error.message : "预热任务失败";
+      task._error = _error instanceof Error ? _error.message : "预热任务失败";
       task.completedAt = new Date();
       this.warmingTasks.set(taskId, task);
 
@@ -152,14 +152,14 @@ export class CacheWarmingService {
    */
   async warmupBatch(
     keys: string[],
-    dataLoader: () => Promise<Record<string, any>>,
+    dataLoader: () => Promise<Record<string, unknown>>,
   ): Promise<void> {
     try {
       const data = await dataLoader();
       await this.setCacheInBatches(keys, data);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `批量预热失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `批量预热失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -175,8 +175,8 @@ export class CacheWarmingService {
     for (const task of tasks) {
       try {
         await this.executeWarmingTask(task.id);
-      } catch (error) {
-        console.error(`预热任务 ${task.id} 失败:`, error);
+      } catch (_error) {
+        console.error(`预热任务 ${task.id} 失败:`, _error);
       }
     }
   }
@@ -198,7 +198,7 @@ export class CacheWarmingService {
   /**
    * 获取预热统计信息
    */
-  getWarmingStats(): Record<string, any> {
+  getWarmingStats(): Record<string, unknown> {
     const tasks = Array.from(this.warmingTasks.values());
     const total = tasks.length;
     const completed = tasks.filter((t) => t.status === "COMPLETED").length;
@@ -254,8 +254,8 @@ export class CacheWarmingService {
     const timer = setInterval(async () => {
       try {
         await this.warmupAll();
-      } catch (error) {
-        console.error("定期预热失败:", error);
+      } catch (_error) {
+        console.error("定期预热失败:", _error);
       }
     }, this.config.interval);
 
@@ -277,9 +277,9 @@ export class CacheWarmingService {
    * 加载数据（带超时）
    */
   private async loadDataWithTimeout(
-    dataLoader: () => Promise<Record<string, any>>,
+    dataLoader: () => Promise<Record<string, unknown>>,
     timeout: number,
-  ): Promise<Record<string, any>> {
+  ): Promise<Record<string, unknown>> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error("数据加载超时"));
@@ -290,9 +290,9 @@ export class CacheWarmingService {
           clearTimeout(timer);
           resolve(data);
         })
-        .catch((error) => {
+        .catch((_error) => {
           clearTimeout(timer);
-          reject(error);
+          reject(_error);
         });
     });
   }
@@ -302,7 +302,7 @@ export class CacheWarmingService {
    */
   private async setCacheInBatches(
     keys: string[],
-    data: Record<string, any>,
+    data: Record<string, unknown>,
   ): Promise<void> {
     const batches = this.chunkArray(keys, this.config.batchSize);
 
@@ -331,7 +331,7 @@ export class CacheWarmingService {
     task.status = "PENDING";
     task.startedAt = undefined;
     task.completedAt = undefined;
-    task.error = undefined;
+    task._error = undefined;
     this.warmingTasks.set(taskId, task);
 
     // 重新执行
@@ -362,7 +362,7 @@ export class CacheWarmingService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.cacheService.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

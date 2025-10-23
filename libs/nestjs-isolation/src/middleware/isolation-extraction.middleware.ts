@@ -75,8 +75,8 @@ export class IsolationExtractionMiddleware implements NestMiddleware {
       // 验证错误时，降级到平台级
       if (error instanceof IsolationValidationError) {
         this.logger.warn(
-          `Invalid isolation identifier: ${error.message}, falling back to PLATFORM level`,
-          { code: error.code, context: error.context },
+          `Invalid isolation identifier: ${error.detail}, falling back to PLATFORM level`,
+          { code: error.errorCode, context: error.data },
         );
         this.contextService.setIsolationContext(IsolationContext.platform());
         next();

@@ -1,0 +1,1 @@
+{"version":3,"file":"unauthorized-department.exception.d.ts","sourceRoot":"","sources":["unauthorized-department.exception.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,mBAAmB,EAAE,MAAM,2BAA2B,CAAC;AAqBhE,qBAAa,+BAAgC,SAAQ,mBAAmB;gBASpE,MAAM,EAAE,MAAM,EACd,YAAY,EAAE,MAAM,EACpB,IAAI,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAWjC"}

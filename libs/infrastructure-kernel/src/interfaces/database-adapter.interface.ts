@@ -11,20 +11,23 @@ import type {
   DatabaseQueryOptions,
   DatabaseTransactionOptions,
 } from "../types/database.types.js";
+import type { DatabaseConnectionEntity } from "../entities/database-connection.entity.js";
+import type { PostgreSQLConnectionEntity } from "../entities/postgresql-connection.entity.js";
+import type { MongoDBConnectionEntity } from "../entities/mongodb-connection.entity.js";
 
 /**
  * 数据库适配器接口
  */
 export interface IDatabaseAdapter extends DatabaseAdapter {
   /** 执行查询 */
-  query<T = any>(
+  query<T = unknown>(
     sql: string,
-    params?: any[],
+    params?: unknown[],
   ): Promise<DatabaseOperationResult<T[]>>;
 
   /** 执行事务 */
   transaction<T>(
-    callback: (trx: any) => Promise<T>,
+    callback: (trx: unknown) => Promise<T>,
     options?: DatabaseTransactionOptions,
   ): Promise<DatabaseOperationResult<T>>;
 
@@ -39,20 +42,20 @@ export interface IDatabaseAdapter extends DatabaseAdapter {
   batchUpdate<T>(
     table: string,
     data: T[],
-    where: Record<string, any>,
+    where: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<number>>;
 
   /** 批量删除 */
   batchDelete(
     table: string,
-    where: Record<string, any>,
+    where: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<number>>;
 
   /** 获取连接信息 */
-  getConnectionInfo(): Promise<Record<string, any>>;
+  getConnectionInfo(): Promise<Record<string, unknown>>;
 
   /** 获取性能统计 */
-  getPerformanceStats(): Promise<Record<string, any>>;
+  getPerformanceStats(): Promise<Record<string, unknown>>;
 }
 
 /**
@@ -60,16 +63,16 @@ export interface IDatabaseAdapter extends DatabaseAdapter {
  */
 export interface IPostgreSQLAdapter extends IDatabaseAdapter {
   /** 执行PostgreSQL特定查询 */
-  executePostgreSQLQuery<T = any>(
+  executePostgreSQLQuery<T = unknown>(
     sql: string,
-    params?: any[],
+    params?: unknown[],
   ): Promise<DatabaseOperationResult<T[]>>;
 
   /** 创建索引 */
   createIndex(
     table: string,
     columns: string[],
-    options?: Record<string, any>,
+    options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<void>>;
 
   /** 删除索引 */
@@ -79,10 +82,10 @@ export interface IPostgreSQLAdapter extends IDatabaseAdapter {
   ): Promise<DatabaseOperationResult<void>>;
 
   /** 获取表信息 */
-  getTableInfo(table: string): Promise<DatabaseOperationResult<any>>;
+  getTableInfo(table: string): Promise<DatabaseOperationResult<unknown>>;
 
   /** 获取索引信息 */
-  getIndexInfo(table: string): Promise<DatabaseOperationResult<any[]>>;
+  getIndexInfo(table: string): Promise<DatabaseOperationResult<unknown[]>>;
 }
 
 /**
@@ -90,16 +93,16 @@ export interface IPostgreSQLAdapter extends IDatabaseAdapter {
  */
 export interface IMongoDBAdapter extends IDatabaseAdapter {
   /** 执行MongoDB特定查询 */
-  executeMongoDBQuery<T = any>(
+  executeMongoDBQuery<T = unknown>(
     collection: string,
-    query: any,
-    options?: any,
+    query: Record<string, unknown>,
+    options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<T[]>>;
 
   /** 创建集合 */
   createCollection(
     name: string,
-    options?: any,
+    options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<void>>;
 
   /** 删除集合 */
@@ -108,8 +111,8 @@ export interface IMongoDBAdapter extends IDatabaseAdapter {
   /** 创建索引 */
   createIndex(
     collection: string,
-    keys: Record<string, any>,
-    options?: any,
+    keys: Record<string, unknown>,
+    options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<string>>;
 
   /** 删除索引 */
@@ -119,10 +122,12 @@ export interface IMongoDBAdapter extends IDatabaseAdapter {
   ): Promise<DatabaseOperationResult<void>>;
 
   /** 获取集合信息 */
-  getCollectionInfo(collection: string): Promise<DatabaseOperationResult<any>>;
+  getCollectionInfo(
+    collection: string,
+  ): Promise<DatabaseOperationResult<unknown>>;
 
   /** 获取索引信息 */
-  getIndexInfo(collection: string): Promise<DatabaseOperationResult<any[]>>;
+  getIndexInfo(collection: string): Promise<DatabaseOperationResult<unknown[]>>;
 }
 
 /**
@@ -133,7 +138,10 @@ export interface IDatabaseConnectionManager {
   getConnection(name: string): Promise<IDatabaseAdapter>;
 
   /** 创建连接 */
-  createConnection(name: string, config: any): Promise<IDatabaseAdapter>;
+  createConnection(
+    name: string,
+    config: DatabaseConnectionEntity,
+  ): Promise<IDatabaseAdapter>;
 
   /** 关闭连接 */
   closeConnection(name: string): Promise<void>;
@@ -156,10 +164,14 @@ export interface IDatabaseConnectionManager {
  */
 export interface IDatabaseFactory {
   /** 创建PostgreSQL适配器 */
-  createPostgreSQLAdapter(config: any): Promise<IPostgreSQLAdapter>;
+  createPostgreSQLAdapter(
+    config: PostgreSQLConnectionEntity,
+  ): Promise<IPostgreSQLAdapter>;
 
   /** 创建MongoDB适配器 */
-  createMongoDBAdapter(config: any): Promise<IMongoDBAdapter>;
+  createMongoDBAdapter(
+    config: MongoDBConnectionEntity,
+  ): Promise<IMongoDBAdapter>;
 
   /** 创建连接管理器 */
   createConnectionManager(): IDatabaseConnectionManager;

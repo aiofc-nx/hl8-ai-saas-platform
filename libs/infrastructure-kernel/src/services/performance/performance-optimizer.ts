@@ -103,8 +103,8 @@ export class PerformanceOptimizerService {
     this.optimizationTimer = setInterval(async () => {
       try {
         await this.performOptimization();
-      } catch (error) {
-        console.error("自动优化失败:", error);
+      } catch (_error) {
+        console.error("自动优化失败:", _error);
       }
     }, this.config.optimizationInterval);
   }
@@ -163,9 +163,9 @@ export class PerformanceOptimizerService {
       await this.logOptimization(suggestions);
 
       return suggestions;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `执行性能优化失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `执行性能优化失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -182,7 +182,7 @@ export class PerformanceOptimizerService {
       const connectionInfo = await this.databaseAdapter.getConnectionInfo();
 
       // 检查连接数
-      if (connectionInfo.connections > 50) {
+      if ((connectionInfo.connections as number) > 50) {
         suggestions.push({
           id: this.generateSuggestionId(),
           type: "DATABASE",
@@ -197,7 +197,7 @@ export class PerformanceOptimizerService {
       }
 
       // 检查查询性能
-      if (connectionInfo.slowQueries > 10) {
+      if ((connectionInfo.slowQueries as number) > 10) {
         suggestions.push({
           id: this.generateSuggestionId(),
           type: "QUERY",
@@ -210,8 +210,8 @@ export class PerformanceOptimizerService {
           timestamp: new Date(),
         });
       }
-    } catch (error) {
-      console.error("分析数据库性能失败:", error);
+    } catch (_error) {
+      console.error("分析数据库性能失败:", _error);
     }
 
     return suggestions;
@@ -261,8 +261,8 @@ export class PerformanceOptimizerService {
           timestamp: new Date(),
         });
       }
-    } catch (error) {
-      console.error("分析缓存性能失败:", error);
+    } catch (_error) {
+      console.error("分析缓存性能失败:", _error);
     }
 
     return suggestions;
@@ -309,8 +309,8 @@ export class PerformanceOptimizerService {
           timestamp: new Date(),
         });
       }
-    } catch (error) {
-      console.error("分析内存性能失败:", error);
+    } catch (_error) {
+      console.error("分析内存性能失败:", _error);
     }
 
     return suggestions;
@@ -327,8 +327,8 @@ export class PerformanceOptimizerService {
     try {
       // 这里可以实现连接性能分析逻辑
       // 例如：检查连接池使用率、连接超时等
-    } catch (error) {
-      console.error("分析连接性能失败:", error);
+    } catch (_error) {
+      console.error("分析连接性能失败:", _error);
     }
 
     return suggestions;
@@ -431,8 +431,8 @@ export class PerformanceOptimizerService {
       await this.logSuggestionApplication(suggestion);
 
       return true;
-    } catch (error) {
-      console.error("应用优化建议失败:", error);
+    } catch (_error) {
+      console.error("应用优化建议失败:", _error);
       return false;
     }
   }
@@ -518,8 +518,8 @@ export class PerformanceOptimizerService {
           },
         );
       }
-    } catch (error) {
-      console.error("记录优化日志失败:", error);
+    } catch (_error) {
+      console.error("记录优化日志失败:", _error);
     }
   }
 
@@ -547,8 +547,8 @@ export class PerformanceOptimizerService {
           suggestion as unknown as Record<string, unknown>,
         );
       }
-    } catch (error) {
-      console.error("记录建议应用日志失败:", error);
+    } catch (_error) {
+      console.error("记录建议应用日志失败:", _error);
     }
   }
 
@@ -565,7 +565,7 @@ export class PerformanceOptimizerService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

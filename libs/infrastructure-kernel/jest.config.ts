@@ -16,11 +16,12 @@ const config: Config = {
     ],
   },
   moduleFileExtensions: ["ts", "js", "json"],
-  roots: ["<rootDir>/src"],
+  roots: ["<rootDir>/src", "<rootDir>/test"],
   testMatch: [
     "<rootDir>/src/**/*.spec.ts",
-    "<rootDir>/test/integration/**/*.spec.ts",
-    "<rootDir>/test/e2e/**/*.spec.ts",
+    "<rootDir>/src/**/*.test.ts",
+    "<rootDir>/test/**/*.spec.ts",
+    "<rootDir>/test/**/*.test.ts",
   ],
   collectCoverageFrom: [
     "src/**/*.ts",

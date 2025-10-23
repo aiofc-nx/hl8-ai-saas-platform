@@ -3,10 +3,45 @@
  * @description 提供系统健康检查接口
  */
 
-import { Controller, Get, HttpStatus, Logger } from "@nestjs/common";
+import { Controller, Get, Logger } from "@nestjs/common";
 import { HealthCheckService } from "../services/health-check.service.js";
 import { MonitoringService } from "../services/monitoring.service.js";
 import type { HealthCheckResult } from "../types/index.js";
+
+/**
+ * 系统指标接口
+ * @description 定义系统指标的结构
+ */
+interface SystemMetrics {
+  cpu?: {
+    usage: number;
+    cores: number;
+  };
+  memory?: {
+    used: number;
+    total: number;
+    free: number;
+  };
+  disk?: {
+    used: number;
+    total: number;
+    free: number;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * 系统信息接口
+ * @description 定义系统信息的结构
+ */
+interface SystemInfo {
+  platform?: string;
+  arch?: string;
+  nodeVersion?: string;
+  uptime?: number;
+  timestamp?: string;
+  [key: string]: unknown;
+}
 
 /**
  * 健康检查控制器
@@ -65,8 +100,8 @@ export class HealthController {
   @Get("detailed")
   async getDetailedHealth(): Promise<{
     health: HealthCheckResult;
-    metrics: any;
-    systemInfo: any;
+    metrics: SystemMetrics;
+    systemInfo: SystemInfo;
   }> {
     try {
       this.logger.debug("Performing detailed health check");
@@ -77,7 +112,7 @@ export class HealthController {
 
       return {
         health,
-        metrics,
+        metrics: metrics as unknown as SystemMetrics,
         systemInfo,
       };
     } catch (error) {
@@ -148,7 +183,9 @@ export class HealthController {
    * @returns 服务健康状态
    */
   @Get("service/:serviceName")
-  async getServiceHealth(serviceName: string): Promise<any> {
+  async getServiceHealth(
+    serviceName: string,
+  ): Promise<{ status: string; details?: Record<string, unknown> }> {
     try {
       this.logger.debug(`Checking health for service: ${serviceName}`);
       return await this.healthCheckService.checkServiceHealth(serviceName);
@@ -158,10 +195,10 @@ export class HealthController {
       );
 
       return {
-        name: serviceName,
         status: "unhealthy",
-        lastCheck: new Date().toISOString(),
         details: {
+          name: serviceName,
+          lastCheck: new Date().toISOString(),
           error: error instanceof Error ? error.message : String(error),
         },
       };

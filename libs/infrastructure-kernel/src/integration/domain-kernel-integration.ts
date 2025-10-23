@@ -87,13 +87,13 @@ export class DomainKernelIntegrationService {
 
       // 记录集成初始化日志
       await this.logIntegrationEvent("INITIALIZED", "领域层集成初始化成功");
-    } catch (error) {
+    } catch (_error) {
       await this.logIntegrationEvent(
         "INITIALIZATION_FAILED",
-        `领域层集成初始化失败: ${error}`,
+        `领域层集成初始化失败: ${_error}`,
       );
       throw new Error(
-        `领域层集成初始化失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `领域层集成初始化失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -106,9 +106,9 @@ export class DomainKernelIntegrationService {
       return await this.connectionManager.getConnection(
         this.config.databaseConnection,
       );
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取数据库连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取数据库连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -159,12 +159,12 @@ export class DomainKernelIntegrationService {
       );
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       await this.logIntegrationEvent(
         "OPERATION_FAILED",
-        `领域层操作执行失败: ${error}`,
+        `领域层操作执行失败: ${_error}`,
       );
-      throw error;
+      throw _error;
     }
   }
 
@@ -197,9 +197,9 @@ export class DomainKernelIntegrationService {
       }
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `执行聚合根操作失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `执行聚合根操作失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -222,9 +222,9 @@ export class DomainKernelIntegrationService {
       return await database.transaction(async (trx: any) => {
         return await operation(trx);
       });
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `执行事件溯源操作失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `执行事件溯源操作失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -247,9 +247,9 @@ export class DomainKernelIntegrationService {
       const result = await operation(database);
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `执行领域事件操作失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `执行领域事件操作失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -267,9 +267,9 @@ export class DomainKernelIntegrationService {
       if (!isHealthy) {
         throw new Error("数据库连接不健康");
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `数据库连接验证失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `数据库连接验证失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -287,9 +287,9 @@ export class DomainKernelIntegrationService {
       if (!isHealthy) {
         throw new Error("缓存服务不健康");
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `缓存服务验证失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `缓存服务验证失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -316,9 +316,9 @@ export class DomainKernelIntegrationService {
         },
         "日志服务验证测试",
       );
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `日志服务验证失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `日志服务验证失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -344,8 +344,8 @@ export class DomainKernelIntegrationService {
 
         await this.loggingService.info(logContext, message);
       }
-    } catch (error) {
-      console.error("记录集成事件失败:", error);
+    } catch (_error) {
+      console.error("记录集成事件失败:", _error);
     }
   }
 
@@ -374,8 +374,8 @@ export class DomainKernelIntegrationService {
           eventData,
         );
       }
-    } catch (error) {
-      console.error("记录领域事件失败:", error);
+    } catch (_error) {
+      console.error("记录领域事件失败:", _error);
     }
   }
 
@@ -418,7 +418,7 @@ export class DomainKernelIntegrationService {
       }
 
       return dbHealthy && cacheHealthy;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

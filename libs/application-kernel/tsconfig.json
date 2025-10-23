@@ -5,8 +5,11 @@
     "esModuleInterop": true,
     "incremental": false,
     "baseUrl": ".",
-    "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "paths": {
+      "@hl8/exceptions": ["../exceptions/src/index.ts"],
+      "@hl8/exceptions/*": ["../exceptions/src/*"]
+    }
   },
   "include": ["src", "src/**/*.spec.ts", "src/**/*.test.ts"],
   "exclude": ["node_modules", "test", "dist"]
