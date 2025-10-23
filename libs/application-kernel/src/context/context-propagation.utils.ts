@@ -240,6 +240,9 @@ export class ContextPropagationUtils {
   static async propagateToEvent<T>(
     parentContext: IUseCaseContext,
     eventType: string,
+
+    // 必须使用 any 类型：事件数据可以是任意结构，由具体的事件类型决定
+    // 这是事件驱动架构的核心需求，无法预先定义所有可能的事件数据结构
     eventData: any,
     options: ContextPropagationOptions = {},
   ): Promise<T> {

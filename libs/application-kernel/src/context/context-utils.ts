@@ -28,7 +28,7 @@ export class ContextUtils {
     tenant?: { id: string; name: string },
     user?: { id: string; username: string },
     requestId?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): IUseCaseContext {
     return {
       tenant,

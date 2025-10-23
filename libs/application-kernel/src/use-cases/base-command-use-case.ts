@@ -113,6 +113,8 @@ export abstract class BaseCommandUseCase<
 
     const events = aggregateRoot.getUncommittedEvents();
     if (events.length > 0) {
+      // 必须使用 any 类型：事件总线需要处理任意类型的事件，无法预先确定具体的事件类型
+      // 这是事件驱动架构的核心需求，用于发布聚合根产生的未提交事件
       await this.eventBus.publishAll(events as any[]);
       aggregateRoot.markEventsAsCommitted();
     }

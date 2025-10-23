@@ -106,7 +106,7 @@ export abstract class BaseUseCase<TRequest, TResponse> {
           useCaseName: this.useCaseName,
           useCaseVersion: this.useCaseVersion,
           requestType: typeof request,
-        }
+        },
       );
     }
   }
@@ -117,7 +117,7 @@ export abstract class BaseUseCase<TRequest, TResponse> {
    * @param context - 用例执行上下文
    */
   protected async validatePermissions(
-    context: IUseCaseContext,
+    _context: IUseCaseContext,
   ): Promise<void> {
     if (this.requiredPermissions.length === 0) {
       return;
@@ -127,7 +127,7 @@ export abstract class BaseUseCase<TRequest, TResponse> {
     // 在实际实现中，应该检查用户是否具有所需权限
     // 为了简化，这里只是示例
     console.log(`验证权限: ${this.requiredPermissions.join(", ")}`);
-    
+
     // 如果权限验证失败，应该抛出异常
     // 这里提供一个示例，实际实现需要根据具体的权限验证逻辑
     // if (!await this.checkPermissions(context)) {

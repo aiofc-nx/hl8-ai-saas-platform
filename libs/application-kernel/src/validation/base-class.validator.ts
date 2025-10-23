@@ -22,7 +22,9 @@ type ClassConstructor = new (...args: unknown[]) => unknown;
 /**
  * 抽象类构造函数类型定义
  * 用于验证抽象类的构造函数签名
+ * 注意：此类型目前未被使用，但保留以备将来扩展
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type AbstractClassConstructor = abstract new (...args: unknown[]) => unknown;
 
 /**

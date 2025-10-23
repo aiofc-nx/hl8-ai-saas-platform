@@ -270,10 +270,11 @@ export class EventPublisher {
       }
     }
 
-    throw lastError || new GeneralBadRequestException(
-      "应用层事件发布失败",
-      "事件发布失败",
-      { eventCount: 1 }
+    throw (
+      lastError ||
+      new GeneralBadRequestException("应用层事件发布失败", "事件发布失败", {
+        eventCount: 1,
+      })
     );
   }
 
@@ -306,10 +307,13 @@ export class EventPublisher {
       }
     }
 
-    throw lastError || new GeneralBadRequestException(
-      "应用层批量事件发布失败",
-      "批量事件发布失败",
-      { eventCount: events.length }
+    throw (
+      lastError ||
+      new GeneralBadRequestException(
+        "应用层批量事件发布失败",
+        "批量事件发布失败",
+        { eventCount: events.length },
+      )
     );
   }
 
@@ -323,7 +327,7 @@ export class EventPublisher {
       throw new GeneralBadRequestException(
         "应用层事件ID验证失败",
         "事件ID不能为空",
-        { eventType: event.eventType }
+        { eventType: event.eventType },
       );
     }
 
@@ -331,7 +335,7 @@ export class EventPublisher {
       throw new GeneralBadRequestException(
         "应用层事件类型验证失败",
         "事件类型不能为空",
-        { eventId: event.eventId }
+        { eventId: event.eventId },
       );
     }
 
@@ -339,7 +343,7 @@ export class EventPublisher {
       throw new GeneralBadRequestException(
         "应用层事件时间验证失败",
         "事件发生时间必须是有效的日期对象",
-        { eventId: event.eventId, eventType: event.eventType }
+        { eventId: event.eventId, eventType: event.eventType },
       );
     }
 
@@ -347,7 +351,7 @@ export class EventPublisher {
       throw new GeneralBadRequestException(
         "应用层聚合根ID验证失败",
         "聚合根ID不能为空",
-        { eventId: event.eventId, eventType: event.eventType }
+        { eventId: event.eventId, eventType: event.eventType },
       );
     }
 
@@ -355,7 +359,11 @@ export class EventPublisher {
       throw new GeneralBadRequestException(
         "应用层事件版本验证失败",
         "事件版本必须是大于等于0的数字",
-        { eventId: event.eventId, eventType: event.eventType, eventVersion: event.version }
+        {
+          eventId: event.eventId,
+          eventType: event.eventType,
+          eventVersion: event.version,
+        },
       );
     }
 
@@ -363,7 +371,11 @@ export class EventPublisher {
       throw new GeneralBadRequestException(
         "应用层事件数据验证失败",
         "事件数据必须是对象",
-        { eventId: event.eventId, eventType: event.eventType, dataType: typeof event.eventData }
+        {
+          eventId: event.eventId,
+          eventType: event.eventType,
+          dataType: typeof event.eventData,
+        },
       );
     }
   }

@@ -47,13 +47,13 @@ export class ContextCleanupUtils {
    * @returns 清理后的元数据
    */
   private static cleanupMetadata(
-    metadata?: Record<string, any>,
-  ): Record<string, any> | undefined {
+    metadata?: Record<string, unknown>,
+  ): Record<string, unknown> | undefined {
     if (!metadata) {
       return undefined;
     }
 
-    const cleaned: Record<string, any> = {};
+    const cleaned: Record<string, unknown> = {};
     const sensitiveKeys = [
       "password",
       "token",
@@ -72,7 +72,7 @@ export class ContextCleanupUtils {
       if (isSensitive) {
         cleaned[key] = "[REDACTED]";
       } else if (typeof value === "object" && value !== null) {
-        cleaned[key] = this.cleanupMetadata(value);
+        cleaned[key] = this.cleanupMetadata(value as Record<string, unknown>);
       } else {
         cleaned[key] = value;
       }
@@ -164,7 +164,12 @@ export class ContextCleanupUtils {
    * @param visited - 已访问的对象集合
    */
   private static cleanupCircularReferences(
+    // 必须使用 any 类型：需要处理任意类型的对象结构，包括嵌套对象、数组等
+    // 这是循环引用检测算法的核心需求，无法用具体类型替代
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     obj: any,
+    // 必须使用 any 类型：Set 需要存储任意类型的对象引用用于循环检测
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     visited: Set<any> = new Set(),
   ): void {
     if (obj === null || typeof obj !== "object") {

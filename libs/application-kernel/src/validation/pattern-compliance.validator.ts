@@ -45,6 +45,9 @@ export class PatternComplianceValidator {
    * @param module - 要验证的模块
    * @returns 验证结果
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // 必须使用 any 类型：需要验证任意类型的模块，无法预先确定具体的模块结构
+  // 这是模式合规性验证的核心需求，用于检查模块是否符合设计模式
   static validateModule(module: any): PatternComplianceResult {
     const violations: string[] = [];
     const suggestions: string[] = [];
@@ -71,6 +74,9 @@ export class PatternComplianceValidator {
   /**
    * 验证命令类
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // 必须使用 any 类型：需要验证任意类型的模块中的命令类，无法预先确定具体的类结构
+  // 这是模式合规性验证的核心需求，用于检查命令类是否符合设计模式
   private static validateCommands(
     module: any,
     violations: string[],

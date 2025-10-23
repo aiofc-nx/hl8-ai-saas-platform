@@ -43,5 +43,8 @@ export interface DomainEvent {
   /**
    * 事件数据载荷
    */
+
+  // 必须使用 any 类型：事件数据载荷可以是任意结构，由具体的事件类型决定
+  // 这是事件驱动架构的核心需求，无法预先定义所有可能的事件数据结构
   readonly eventData: Record<string, any>;
 }
