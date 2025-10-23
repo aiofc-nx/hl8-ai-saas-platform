@@ -30,7 +30,7 @@ export class InfrastructureKernelService
   implements OnModuleInit, OnModuleDestroy
 {
   private _isInitialized = false;
-  private services = new Map<string, any>();
+  private services = new Map<string, unknown>();
 
   constructor(
     private readonly databaseService: DatabaseService,
@@ -59,9 +59,9 @@ export class InfrastructureKernelService
     try {
       await this.initialize();
       this._isInitialized = true;
-    } catch (error) {
-      console.error("基础设施层kernel初始化失败:", error);
-      throw error;
+    } catch (_error) {
+      console.error("基础设施层kernel初始化失败:", _error);
+      throw _error;
     }
   }
 
@@ -71,8 +71,8 @@ export class InfrastructureKernelService
   async onModuleDestroy(): Promise<void> {
     try {
       await this.shutdown();
-    } catch (error) {
-      console.error("基础设施层kernel关闭失败:", error);
+    } catch (_error) {
+      console.error("基础设施层kernel关闭失败:", _error);
     }
   }
 
@@ -124,9 +124,9 @@ export class InfrastructureKernelService
       await this.domainKernelIntegration.initialize();
 
       console.log("基础设施层kernel初始化完成");
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `基础设施层kernel初始化失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `基础设施层kernel初始化失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -158,8 +158,8 @@ export class InfrastructureKernelService
       // await this.isolationManager.shutdown();
 
       console.log("基础设施层kernel关闭完成");
-    } catch (error) {
-      console.error("基础设施层kernel关闭失败:", error);
+    } catch (_error) {
+      console.error("基础设施层kernel关闭失败:", _error);
     }
   }
 
@@ -173,7 +173,7 @@ export class InfrastructureKernelService
   /**
    * 获取所有服务
    */
-  getAllServices(): Record<string, any> {
+  getAllServices(): Record<string, unknown> {
     return Object.fromEntries(this.services);
   }
 
@@ -185,19 +185,32 @@ export class InfrastructureKernelService
 
     try {
       // 检查数据库服务
+      const dbHealth = await this.databaseService.healthCheck();
       healthChecks["database"] =
-        (await this.databaseService.healthCheck()) as any;
+        typeof dbHealth === "boolean"
+          ? dbHealth
+          : Object.values(dbHealth).every((status) => status === true);
 
       // 检查连接池服务
+      const poolHealth = await this.connectionPoolService.healthCheck();
       healthChecks["connectionPool"] =
-        (await this.connectionPoolService.healthCheck()) as any;
+        typeof poolHealth === "boolean"
+          ? poolHealth
+          : Object.values(poolHealth).every((status) => status === true);
 
       // 检查缓存服务
-      healthChecks["cache"] = (await this.cacheService.healthCheck()) as any;
+      const cacheHealth = await this.cacheService.healthCheck();
+      healthChecks["cache"] =
+        typeof cacheHealth === "boolean"
+          ? cacheHealth
+          : Object.values(cacheHealth).every((status) => status === true);
 
       // 检查隔离管理器
+      const isolationHealth = await this.isolationManager.healthCheck();
       healthChecks["isolation"] =
-        (await this.isolationManager.healthCheck()) as any;
+        typeof isolationHealth === "boolean"
+          ? isolationHealth
+          : Object.values(isolationHealth).every((status) => status === true);
 
       // 检查性能监控
       healthChecks["performanceMonitor"] =
@@ -234,8 +247,8 @@ export class InfrastructureKernelService
       // 检查领域层集成
       healthChecks["domainKernelIntegration"] =
         await this.domainKernelIntegration.healthCheck();
-    } catch (error) {
-      console.error("健康检查失败:", error);
+    } catch (_error) {
+      console.error("健康检查失败:", _error);
       // 设置所有服务为不健康
       for (const key of Object.keys(healthChecks)) {
         healthChecks[key] = false;
@@ -248,7 +261,7 @@ export class InfrastructureKernelService
   /**
    * 获取系统状态
    */
-  async getSystemStatus(): Promise<Record<string, any>> {
+  async getSystemStatus(): Promise<Record<string, unknown>> {
     try {
       const healthChecks = await this.healthCheck();
       const performanceStats = this.performanceMonitor.getPerformanceStats();
@@ -263,9 +276,9 @@ export class InfrastructureKernelService
         errors: errorStats,
         services: this.getAllServices(),
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取系统状态失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取系统状态失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }

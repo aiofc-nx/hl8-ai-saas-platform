@@ -6,12 +6,43 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ApolloServer } from "apollo-server-fastify";
 import { buildSchema } from "graphql";
+import { GeneralBadRequestException } from "@hl8/exceptions";
 import { AuthenticationService } from "./authentication.service.js";
 import { AuthorizationService } from "./authorization.service.js";
 import { ValidationService } from "./validation.service.js";
 import { RateLimitService } from "./rate-limit.service.js";
 import { MonitoringService } from "./monitoring.service.js";
-import type { GraphQLContext, UserContext } from "../types/index.js";
+import type {
+  GraphQLContext,
+  UserContext,
+  InterfaceFastifyRequest,
+  InterfaceFastifyReply,
+} from "../types/index.js";
+
+/**
+ * GraphQL 请求上下文接口
+ * @description 定义 GraphQL 请求的上下文结构
+ */
+interface GraphQLRequestContext {
+  req: InterfaceFastifyRequest;
+  reply: InterfaceFastifyReply;
+}
+
+/**
+ * GraphQL 解析器参数接口
+ * @description 定义 GraphQL 解析器的标准参数结构
+ */
+interface GraphQLResolverArgs {
+  [key: string]: unknown;
+}
+
+/**
+ * GraphQL 解析器父对象接口
+ * @description 定义 GraphQL 解析器的父对象结构
+ */
+interface GraphQLResolverParent {
+  [key: string]: unknown;
+}
 
 /**
  * GraphQL 服务
@@ -243,7 +274,9 @@ export class GraphQLService {
    * @param request 请求对象
    * @returns GraphQL 上下文
    */
-  private async createContext(request: any): Promise<GraphQLContext> {
+  private async createContext(
+    request: GraphQLRequestContext,
+  ): Promise<GraphQLContext> {
     try {
       const { req, reply } = request;
 
@@ -279,16 +312,20 @@ export class GraphQLService {
    * @description 处理 GraphQL 请求开始事件
    * @param requestContext 请求上下文
    */
-  private async requestDidStart(requestContext: any): Promise<any> {
+  private async requestDidStart(
+    _requestContext: GraphQLRequestContext,
+  ): Promise<{
+    willSendResponse: (responseContext: GraphQLRequestContext) => Promise<void>;
+  }> {
     const startTime = Date.now();
 
     return {
-      willSendResponse: async (requestContext: any) => {
+      willSendResponse: async (responseContext: GraphQLRequestContext) => {
         const responseTime = Date.now() - startTime;
 
         // 记录请求指标
         this.monitoringService.recordRequestMetrics(
-          requestContext.request.http,
+          responseContext.req,
           responseTime,
           200,
         );
@@ -316,23 +353,26 @@ export class GraphQLService {
    * @returns 用户列表
    */
   private async getUsers(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any[]> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown>[]> {
     try {
       this.logger.debug("Getting users list");
 
       // 检查权限
-      if (context.user) {
+      if (_context.user) {
         const hasPermission = await this.authorizationService.checkPermission(
-          context.user,
+          _context.user,
           "users",
           "read",
         );
 
         if (!hasPermission) {
-          throw new Error("Insufficient permissions");
+          throw new GeneralBadRequestException(
+            "权限不足",
+            "用户没有执行此操作的权限",
+          );
         }
       }
 
@@ -369,30 +409,33 @@ export class GraphQLService {
    * @returns 用户信息
    */
   private async getUser(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     try {
-      this.logger.debug(`Getting user: ${args.id}`);
+      this.logger.debug(`Getting user: ${_args.id}`);
 
       // 检查权限
-      if (context.user) {
+      if (_context.user) {
         const hasPermission = await this.authorizationService.checkPermission(
-          context.user,
+          _context.user,
           "users",
           "read",
         );
 
         if (!hasPermission) {
-          throw new Error("Insufficient permissions");
+          throw new GeneralBadRequestException(
+            "权限不足",
+            "用户没有执行此操作的权限",
+          );
         }
       }
 
       // 这里应该调用应用层服务获取用户信息
       // 暂时返回模拟数据
       return {
-        id: args.id,
+        id: _args.id,
         email: "user@hl8.com",
         name: "User Name",
         roles: ["user"],
@@ -420,23 +463,26 @@ export class GraphQLService {
    * @returns 租户列表
    */
   private async getTenants(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any[]> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown>[]> {
     try {
       this.logger.debug("Getting tenants list");
 
       // 检查权限
-      if (context.user) {
+      if (_context.user) {
         const hasPermission = await this.authorizationService.checkPermission(
-          context.user,
+          _context.user,
           "tenants",
           "read",
         );
 
         if (!hasPermission) {
-          throw new Error("Insufficient permissions");
+          throw new GeneralBadRequestException(
+            "权限不足",
+            "用户没有执行此操作的权限",
+          );
         }
       }
 
@@ -470,30 +516,33 @@ export class GraphQLService {
    * @returns 租户信息
    */
   private async getTenant(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     try {
-      this.logger.debug(`Getting tenant: ${args.id}`);
+      this.logger.debug(`Getting tenant: ${_args.id}`);
 
       // 检查权限
-      if (context.user) {
+      if (_context.user) {
         const hasPermission = await this.authorizationService.checkPermission(
-          context.user,
+          _context.user,
           "tenants",
           "read",
         );
 
         if (!hasPermission) {
-          throw new Error("Insufficient permissions");
+          throw new GeneralBadRequestException(
+            "权限不足",
+            "用户没有执行此操作的权限",
+          );
         }
       }
 
       // 这里应该调用应用层服务获取租户信息
       // 暂时返回模拟数据
       return {
-        id: args.id,
+        id: _args.id,
         name: "Default Tenant",
         domain: "default.hl8.com",
         type: "ENTERPRISE",
@@ -511,34 +560,34 @@ export class GraphQLService {
 
   // 其他查询解析器...
   private async getOrganizations(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any[]> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown>[]> {
     return [];
   }
 
   private async getOrganization(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
   private async getDepartments(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any[]> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown>[]> {
     return [];
   }
 
   private async getDepartment(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
@@ -553,47 +602,54 @@ export class GraphQLService {
    * @returns 创建的用户
    */
   private async createUser(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     try {
       this.logger.debug("Creating user");
 
       // 检查权限
-      if (context.user) {
+      if (_context.user) {
         const hasPermission = await this.authorizationService.checkPermission(
-          context.user,
+          _context.user,
           "users",
           "create",
         );
 
         if (!hasPermission) {
-          throw new Error("Insufficient permissions");
+          throw new GeneralBadRequestException(
+            "权限不足",
+            "用户没有执行此操作的权限",
+          );
         }
       }
 
       // 验证输入数据
       const validation = await this.validationService.validateRequestData(
-        { body: args.input } as any,
+        { body: _args.input } as InterfaceFastifyRequest,
         "userCreate",
       );
 
       if (!validation.isValid) {
-        throw new Error(`Validation failed: ${validation.errors?.join(", ")}`);
+        throw new GeneralBadRequestException(
+          "数据验证失败",
+          `验证失败: ${validation.errors?.join(", ")}`,
+        );
       }
 
       // 这里应该调用应用层服务创建用户
       // 暂时返回模拟数据
+      const input = _args.input as Record<string, unknown>;
       return {
         id: "new-user-id",
-        email: args.input.email,
-        name: args.input.name,
+        email: input.email as string,
+        name: input.name as string,
         roles: ["user"],
         permissions: ["read"],
-        tenantId: args.input.tenantId,
-        organizationId: args.input.organizationId,
-        departmentId: args.input.departmentId,
+        tenantId: input.tenantId as string,
+        organizationId: input.organizationId as string,
+        departmentId: input.departmentId as string,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -614,47 +670,54 @@ export class GraphQLService {
    * @returns 更新的用户
    */
   private async updateUser(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     try {
-      this.logger.debug(`Updating user: ${args.id}`);
+      this.logger.debug(`Updating user: ${_args.id}`);
 
       // 检查权限
-      if (context.user) {
+      if (_context.user) {
         const hasPermission = await this.authorizationService.checkPermission(
-          context.user,
+          _context.user,
           "users",
           "update",
         );
 
         if (!hasPermission) {
-          throw new Error("Insufficient permissions");
+          throw new GeneralBadRequestException(
+            "权限不足",
+            "用户没有执行此操作的权限",
+          );
         }
       }
 
       // 验证输入数据
       const validation = await this.validationService.validateRequestData(
-        { body: args.input } as any,
+        { body: _args.input } as InterfaceFastifyRequest,
         "userUpdate",
       );
 
       if (!validation.isValid) {
-        throw new Error(`Validation failed: ${validation.errors?.join(", ")}`);
+        throw new GeneralBadRequestException(
+          "数据验证失败",
+          `验证失败: ${validation.errors?.join(", ")}`,
+        );
       }
 
       // 这里应该调用应用层服务更新用户
       // 暂时返回模拟数据
+      const input = _args.input as Record<string, unknown>;
       return {
-        id: args.id,
-        email: args.input.email || "user@hl8.com",
-        name: args.input.name || "User Name",
+        id: _args.id as string,
+        email: (input.email as string) || "user@hl8.com",
+        name: (input.name as string) || "User Name",
         roles: ["user"],
         permissions: ["read"],
         tenantId: "default",
-        organizationId: args.input.organizationId,
-        departmentId: args.input.departmentId,
+        organizationId: input.organizationId as string,
+        departmentId: input.departmentId as string,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -675,23 +738,26 @@ export class GraphQLService {
    * @returns 删除结果
    */
   private async deleteUser(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
   ): Promise<boolean> {
     try {
-      this.logger.debug(`Deleting user: ${args.id}`);
+      this.logger.debug(`Deleting user: ${_args.id}`);
 
       // 检查权限
-      if (context.user) {
+      if (_context.user) {
         const hasPermission = await this.authorizationService.checkPermission(
-          context.user,
+          _context.user,
           "users",
           "delete",
         );
 
         if (!hasPermission) {
-          throw new Error("Insufficient permissions");
+          throw new GeneralBadRequestException(
+            "权限不足",
+            "用户没有执行此操作的权限",
+          );
         }
       }
 
@@ -708,73 +774,73 @@ export class GraphQLService {
 
   // 其他变更解析器...
   private async createTenant(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
   private async updateTenant(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
   private async deleteTenant(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
   ): Promise<boolean> {
     return false;
   }
 
   private async createOrganization(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
   private async updateOrganization(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
   private async deleteOrganization(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
   ): Promise<boolean> {
     return false;
   }
 
   private async createDepartment(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
   private async updateDepartment(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
-  ): Promise<any> {
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
+  ): Promise<Record<string, unknown> | null> {
     return null;
   }
 
   private async deleteDepartment(
-    parent: any,
-    args: any,
-    context: GraphQLContext,
+    _parent: GraphQLResolverParent,
+    _args: GraphQLResolverArgs,
+    _context: GraphQLContext,
   ): Promise<boolean> {
     return false;
   }

@@ -10,10 +10,24 @@ import { AuthorizationService } from "./authorization.service.js";
 import { RateLimitService } from "./rate-limit.service.js";
 import { MonitoringService } from "./monitoring.service.js";
 import type {
+  InterfaceFastifyRequest,
   WebSocketEvent,
   WebSocketConnection,
   UserContext,
 } from "../types/index.js";
+
+/**
+ * WebSocket 事件数据接口
+ * @description 定义 WebSocket 事件数据的结构
+ */
+interface WebSocketEventData {
+  room?: string;
+  message?: string;
+  type?: string;
+  title?: string;
+  status?: string;
+  [key: string]: unknown;
+}
 
 /**
  * WebSocket 服务
@@ -40,7 +54,7 @@ export class WebSocketService {
    * @description 初始化 Socket.IO 服务器
    * @param server HTTP 服务器实例
    */
-  initializeWebSocketServer(server: any): void {
+  initializeWebSocketServer(server: unknown): void {
     try {
       this.io = new Server(server, {
         cors: {
@@ -196,14 +210,16 @@ export class WebSocketService {
   private async handleMessage(
     socket: Socket,
     connection: WebSocketConnection,
-    data: any,
+    data: WebSocketEventData,
   ): Promise<void> {
     try {
       this.logger.debug(`Handling WebSocket message: ${data.event}`);
 
       // 1. 速率限制检查
       const rateLimitResult = await this.rateLimitService.checkRateLimit(
-        { headers: { "x-user-id": connection.userId } } as any,
+        {
+          headers: { "x-user-id": connection.userId },
+        } as unknown as InterfaceFastifyRequest,
         "websocket",
       );
 
@@ -214,7 +230,7 @@ export class WebSocketService {
 
       // 2. 验证消息格式
       const event: WebSocketEvent = {
-        event: data.event,
+        event: data.event as string,
         data: data.data,
         timestamp: new Date().toISOString(),
         userId: connection.userId,
@@ -244,7 +260,7 @@ export class WebSocketService {
   private async handleJoinRoom(
     socket: Socket,
     connection: WebSocketConnection,
-    data: any,
+    data: WebSocketEventData,
   ): Promise<void> {
     try {
       const roomName = data.room;
@@ -296,7 +312,7 @@ export class WebSocketService {
   private async handleLeaveRoom(
     socket: Socket,
     connection: WebSocketConnection,
-    data: any,
+    data: WebSocketEventData,
   ): Promise<void> {
     try {
       const roomName = data.room;
@@ -336,7 +352,7 @@ export class WebSocketService {
   private async handlePing(
     socket: Socket,
     connection: WebSocketConnection,
-    data: any,
+    _data: WebSocketEventData,
   ): Promise<void> {
     try {
       // 更新活动时间
@@ -402,7 +418,7 @@ export class WebSocketService {
   private async handleError(
     socket: Socket,
     connection: WebSocketConnection,
-    error: any,
+    error: Error,
   ): Promise<void> {
     try {
       this.logger.error(
@@ -469,7 +485,7 @@ export class WebSocketService {
     event: WebSocketEvent,
   ): Promise<void> {
     try {
-      const { room, message } = event.data;
+      const { room, message } = event.data as WebSocketEventData;
 
       // 检查用户是否在房间中
       if (!connection.rooms.includes(room)) {
@@ -508,7 +524,7 @@ export class WebSocketService {
     event: WebSocketEvent,
   ): Promise<void> {
     try {
-      const { type, title, message } = event.data;
+      const { type, title, message } = event.data as WebSocketEventData;
 
       // 发送通知
       socket.emit("notification", {
@@ -538,7 +554,7 @@ export class WebSocketService {
     event: WebSocketEvent,
   ): Promise<void> {
     try {
-      const { status } = event.data;
+      const { status } = event.data as WebSocketEventData;
 
       // 更新用户状态
       socket.emit("status-updated", {
@@ -602,7 +618,7 @@ export class WebSocketService {
    * @param event 事件名称
    * @param data 消息数据
    */
-  broadcastToRoom(room: string, event: string, data: any): void {
+  broadcastToRoom(room: string, event: string, data: unknown): void {
     try {
       this.io.to(room).emit(event, data);
       this.logger.debug(`Broadcasted message to room: ${room}`);
@@ -620,7 +636,7 @@ export class WebSocketService {
    * @param event 事件名称
    * @param data 消息数据
    */
-  sendToUser(userId: string, event: string, data: any): void {
+  sendToUser(userId: string, event: string, data: unknown): void {
     try {
       const userRoom = `user:${userId}`;
       this.io.to(userRoom).emit(event, data);

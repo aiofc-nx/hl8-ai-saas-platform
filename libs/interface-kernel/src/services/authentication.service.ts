@@ -3,10 +3,11 @@
  * @description 提供用户认证功能，包括JWT令牌验证、用户身份验证等
  */
 
-import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
+import { GeneralBadRequestException } from "@hl8/exceptions";
 import type { UserContext, InterfaceFastifyRequest } from "../types/index.js";
 import { IsolationLevel } from "../types/index.js";
 
@@ -34,42 +35,55 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
    * @param payload JWT 载荷
    * @returns 用户上下文
    */
-  async validate(payload: any): Promise<UserContext> {
+  async validate(payload: Record<string, unknown>): Promise<UserContext> {
     this.logger.debug(`Validating JWT token for user: ${payload.sub}`);
 
     try {
       // 验证令牌基本结构
       if (!payload.sub || !payload.email) {
-        throw new UnauthorizedException("Invalid token payload");
+        throw new GeneralBadRequestException(
+          "令牌载荷无效",
+          "JWT令牌缺少必要的用户标识信息",
+        );
       }
 
       // 验证令牌过期时间
       const now = Math.floor(Date.now() / 1000);
-      if (payload.exp && payload.exp < now) {
-        throw new UnauthorizedException("Token has expired");
+      if (payload.exp && typeof payload.exp === "number" && payload.exp < now) {
+        throw new GeneralBadRequestException(
+          "令牌已过期",
+          "JWT令牌已超过有效期",
+        );
       }
 
       // 验证令牌签发者
       if (payload.iss !== (process.env["JWT_ISSUER"] || "hl8-platform")) {
-        throw new UnauthorizedException("Invalid token issuer");
+        throw new GeneralBadRequestException(
+          "令牌签发者无效",
+          "JWT令牌的签发者与系统配置不匹配",
+        );
       }
 
       // 验证令牌受众
       if (payload.aud !== (process.env["JWT_AUDIENCE"] || "hl8-users")) {
-        throw new UnauthorizedException("Invalid token audience");
+        throw new GeneralBadRequestException(
+          "令牌受众无效",
+          "JWT令牌的受众与系统配置不匹配",
+        );
       }
 
       // 构建用户上下文
       const userContext: UserContext = {
-        id: payload.sub,
-        email: payload.email,
-        name: payload.name || payload.email,
-        roles: payload.roles || [],
-        permissions: payload.permissions || [],
-        tenantId: payload.tenantId || "default",
-        organizationId: payload.organizationId,
-        departmentId: payload.departmentId,
-        isolationLevel: payload.isolationLevel || "user",
+        id: payload.sub as string,
+        email: payload.email as string,
+        name: (payload.name as string) || (payload.email as string),
+        roles: (payload.roles as string[]) || [],
+        permissions: (payload.permissions as string[]) || [],
+        tenantId: (payload.tenantId as string) || "default",
+        organizationId: payload.organizationId as string,
+        departmentId: payload.departmentId as string,
+        isolationLevel:
+          (payload.isolationLevel as IsolationLevel) || IsolationLevel.USER,
       };
 
       this.logger.debug(`User authenticated: ${userContext.email}`);
@@ -86,18 +100,33 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
         errorMessage.includes("jwt expired") ||
         errorMessage.includes("Token has expired")
       ) {
-        throw new UnauthorizedException("Token has expired");
+        throw new GeneralBadRequestException(
+          "令牌已过期",
+          "JWT令牌已超过有效期",
+        );
       } else if (errorMessage.includes("issuer")) {
-        throw new UnauthorizedException("Invalid token issuer");
+        throw new GeneralBadRequestException(
+          "令牌签发者无效",
+          "JWT令牌的签发者与系统配置不匹配",
+        );
       } else if (errorMessage.includes("audience")) {
-        throw new UnauthorizedException("Invalid token audience");
+        throw new GeneralBadRequestException(
+          "令牌受众无效",
+          "JWT令牌的受众与系统配置不匹配",
+        );
       } else if (
         errorMessage.includes("jwt malformed") ||
         errorMessage.includes("Invalid token payload")
       ) {
-        throw new UnauthorizedException("Invalid token payload");
+        throw new GeneralBadRequestException(
+          "令牌格式无效",
+          "JWT令牌格式不正确",
+        );
       } else {
-        throw new UnauthorizedException("Invalid token");
+        throw new GeneralBadRequestException(
+          "认证失败",
+          "用户认证过程中发生错误",
+        );
       }
     }
   }
@@ -188,7 +217,10 @@ export class AuthenticationService {
       this.logger.error(
         `Token generation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      throw new Error("Failed to generate token");
+      throw new GeneralBadRequestException(
+        "令牌生成失败",
+        "JWT令牌生成过程中发生错误",
+      );
     }
   }
 
@@ -233,18 +265,33 @@ export class AuthenticationService {
         errorMessage.includes("jwt expired") ||
         errorMessage.includes("Token has expired")
       ) {
-        throw new UnauthorizedException("Token has expired");
+        throw new GeneralBadRequestException(
+          "令牌已过期",
+          "JWT令牌已超过有效期",
+        );
       } else if (errorMessage.includes("issuer")) {
-        throw new UnauthorizedException("Invalid token issuer");
+        throw new GeneralBadRequestException(
+          "令牌签发者无效",
+          "JWT令牌的签发者与系统配置不匹配",
+        );
       } else if (errorMessage.includes("audience")) {
-        throw new UnauthorizedException("Invalid token audience");
+        throw new GeneralBadRequestException(
+          "令牌受众无效",
+          "JWT令牌的受众与系统配置不匹配",
+        );
       } else if (
         errorMessage.includes("jwt malformed") ||
         errorMessage.includes("Invalid token payload")
       ) {
-        throw new UnauthorizedException("Invalid token payload");
+        throw new GeneralBadRequestException(
+          "令牌格式无效",
+          "JWT令牌格式不正确",
+        );
       } else {
-        throw new UnauthorizedException("Invalid token");
+        throw new GeneralBadRequestException(
+          "认证失败",
+          "用户认证过程中发生错误",
+        );
       }
     }
   }
@@ -263,7 +310,10 @@ export class AuthenticationService {
       this.logger.error(
         `Token refresh failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      throw new Error("Failed to refresh token");
+      throw new GeneralBadRequestException(
+        "令牌刷新失败",
+        "JWT令牌刷新过程中发生错误",
+      );
     }
   }
 
@@ -272,7 +322,7 @@ export class AuthenticationService {
    * @description 将 JWT 令牌加入黑名单
    * @param token JWT 令牌
    */
-  async revokeToken(token: string): Promise<void> {
+  async revokeToken(_token: string): Promise<void> {
     try {
       this.logger.debug("Revoking JWT token");
 
@@ -283,7 +333,10 @@ export class AuthenticationService {
       this.logger.error(
         `Token revocation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      throw new Error("Failed to revoke token");
+      throw new GeneralBadRequestException(
+        "令牌撤销失败",
+        "JWT令牌撤销过程中发生错误",
+      );
     }
   }
 
@@ -293,8 +346,8 @@ export class AuthenticationService {
    * @param request 请求对象
    * @returns JWT 令牌或 null
    */
-  extractTokenFromRequest(request: InterfaceFastifyRequest): string | null {
-    const authHeader = (request as any).headers?.authorization;
+  extractTokenFromRequest(_request: InterfaceFastifyRequest): string | null {
+    const authHeader = _request.headers?.authorization;
 
     if (!authHeader) {
       return null;
@@ -314,7 +367,7 @@ export class AuthenticationService {
    * @param token JWT 令牌
    * @returns 是否在黑名单中
    */
-  async isTokenBlacklisted(token: string): Promise<boolean> {
+  async isTokenBlacklisted(_token: string): Promise<boolean> {
     try {
       // 这里应该检查令牌是否在黑名单中
       // 可以使用 Redis 或其他存储来检查

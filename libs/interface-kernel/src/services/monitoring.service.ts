@@ -116,7 +116,7 @@ export class MonitoringService {
    * @param error 错误对象
    * @param context 错误上下文
    */
-  recordErrorMetrics(error: Error, context?: any): void {
+  recordErrorMetrics(error: Error, context?: Record<string, unknown>): void {
     try {
       this.logger.debug(
         `Recording error metrics: ${error instanceof Error ? error.message : String(error)}`,

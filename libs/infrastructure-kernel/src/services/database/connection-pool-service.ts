@@ -118,9 +118,9 @@ export class ConnectionPoolService {
       }
 
       await Promise.all(promises);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `预热连接池失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `预热连接池失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -149,9 +149,9 @@ export class ConnectionPoolService {
           await this.closeIdleConnection(connectionName);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `清理空闲连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `清理空闲连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -187,7 +187,7 @@ export class ConnectionPoolService {
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -226,9 +226,9 @@ export class ConnectionPoolService {
       // 更新配置
       config.maxConnections = newSize;
       this.poolConfigs.set(connectionName, config);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `调整连接池大小失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `调整连接池大小失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -282,13 +282,13 @@ export class ConnectionPoolService {
       stats.idleConnections++;
 
       this.poolStats.set(connectionName, stats);
-    } catch (error) {
+    } catch (_error) {
       const stats = this.poolStats.get(connectionName);
       if (stats) {
         stats.connectionErrors++;
         this.poolStats.set(connectionName, stats);
       }
-      throw error;
+      throw _error;
     }
   }
 
@@ -317,13 +317,13 @@ export class ConnectionPoolService {
       stats.idleConnections--;
 
       this.poolStats.set(connectionName, stats);
-    } catch (error) {
+    } catch (_error) {
       const stats = this.poolStats.get(connectionName);
       if (stats) {
         stats.connectionErrors++;
         this.poolStats.set(connectionName, stats);
       }
-      throw error;
+      throw _error;
     }
   }
 
@@ -355,8 +355,8 @@ export class ConnectionPoolService {
       try {
         await this.validatePoolHealth(connectionName);
         await this.cleanupIdleConnections(connectionName);
-      } catch (error) {
-        console.error(`连接池验证失败: ${error}`);
+      } catch (_error) {
+        console.error(`连接池验证失败: ${_error}`);
       }
     }, config.validationInterval);
 
@@ -389,9 +389,9 @@ export class ConnectionPoolService {
         stats.idleConnections = 0;
         this.poolStats.set(connectionName, stats);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `关闭连接池失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `关闭连接池失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -405,16 +405,16 @@ export class ConnectionPoolService {
         async (connectionName) => {
           try {
             await this.closePool(connectionName);
-          } catch (error) {
-            console.error(`关闭连接池 ${connectionName} 失败:`, error);
+          } catch (_error) {
+            console.error(`关闭连接池 ${connectionName} 失败:`, _error);
           }
         },
       );
 
       await Promise.all(closePromises);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `关闭所有连接池失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `关闭所有连接池失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -430,7 +430,7 @@ export class ConnectionPoolService {
         try {
           const isHealthy = await this.validatePoolHealth(connectionName);
           healthChecks[connectionName] = isHealthy;
-        } catch (error) {
+        } catch (_error) {
           healthChecks[connectionName] = false;
         }
       },

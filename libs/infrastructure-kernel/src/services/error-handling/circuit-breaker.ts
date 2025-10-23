@@ -8,6 +8,7 @@
 import { Injectable } from "@nestjs/common";
 import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
 import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
+import type { LogContext } from "../../types/logging.types.js";
 
 /**
  * 熔断器状态
@@ -122,15 +123,15 @@ export class CircuitBreakerService {
       await this.logExecution(circuitName, "SUCCESS", executionTime);
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       // 记录失败
       const circuit = this.getOrCreateCircuit(circuitName, config);
       this.recordFailure(circuit);
 
       // 记录失败日志
-      await this.logExecution(circuitName, "FAILURE", 0, error);
+      await this.logExecution(circuitName, "FAILURE", 0, _error);
 
-      throw error;
+      throw _error;
     }
   }
 
@@ -295,9 +296,9 @@ export class CircuitBreakerService {
           clearTimeout(timer);
           resolve(result);
         })
-        .catch((error) => {
+        .catch((_error) => {
           clearTimeout(timer);
-          reject(error);
+          reject(_error);
         });
     });
   }
@@ -372,7 +373,7 @@ export class CircuitBreakerService {
     // 检查时间窗口内的失败率
     const timeWindow = circuit.config.monitoringWindow;
     const now = Date.now();
-    const windowStart = now - timeWindow;
+    const _windowStart = now - timeWindow;
 
     // 这里应该实现更复杂的时间窗口统计
     // 暂时使用简单的失败率检查
@@ -403,7 +404,7 @@ export class CircuitBreakerService {
     circuitName: string,
     result: "SUCCESS" | "FAILURE",
     executionTime: number,
-    error?: Error,
+    _error?: Error,
   ): Promise<void> {
     try {
       if (this.loggingService) {
@@ -419,7 +420,7 @@ export class CircuitBreakerService {
 
         if (result === "SUCCESS") {
           await this.loggingService.info(
-            logContext as any,
+            logContext as LogContext,
             `熔断器 ${circuitName}: ${result}`,
             {
               executionTime,
@@ -428,18 +429,18 @@ export class CircuitBreakerService {
           );
         } else {
           await this.loggingService.warn(
-            logContext as any,
+            logContext as LogContext,
             `熔断器 ${circuitName}: ${result}`,
             {
               executionTime,
               result,
-              error: error?.message,
+              _error: _error?.message,
             },
           );
         }
       }
-    } catch (error) {
-      console.error("记录熔断器执行日志失败:", error);
+    } catch (_error) {
+      console.error("记录熔断器执行日志失败:", _error);
     }
   }
 
@@ -449,7 +450,7 @@ export class CircuitBreakerService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

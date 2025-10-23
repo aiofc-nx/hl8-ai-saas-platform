@@ -8,6 +8,7 @@
 import { Injectable } from "@nestjs/common";
 import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
 import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
+import type { LogContext } from "../../types/logging.types.js";
 
 /**
  * 错误类型
@@ -45,7 +46,7 @@ export interface ErrorInfo {
   /** 时间戳 */
   timestamp: Date;
   /** 上下文信息 */
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   /** 是否可恢复 */
   recoverable: boolean;
   /** 恢复策略 */
@@ -59,7 +60,7 @@ export interface ErrorHandleResult {
   /** 是否处理成功 */
   success: boolean;
   /** 处理后的错误信息 */
-  error?: ErrorInfo;
+  _error?: ErrorInfo;
   /** 恢复操作 */
   recovery?: {
     action: string;
@@ -78,7 +79,7 @@ export class ErrorHandlerService {
   private errorHistory: ErrorInfo[] = [];
   private recoveryStrategies = new Map<
     ErrorType,
-    (error: ErrorInfo) => Promise<boolean>
+    (_error: ErrorInfo) => Promise<boolean>
   >();
   private config = {
     maxErrorHistory: 1000,
@@ -98,14 +99,14 @@ export class ErrorHandlerService {
    * 处理错误
    */
   async handleError(
-    error: Error,
-    context?: Record<string, any>,
+    _error: Error,
+    context?: Record<string, unknown>,
   ): Promise<ErrorHandleResult> {
     const startTime = Date.now();
 
     try {
       // 创建错误信息
-      const errorInfo = this.createErrorInfo(error, context);
+      const errorInfo = this.createErrorInfo(_error, context);
 
       // 记录错误
       this.recordError(errorInfo);
@@ -121,7 +122,7 @@ export class ErrorHandlerService {
 
       const result: ErrorHandleResult = {
         success: true,
-        error: errorInfo,
+        _error: errorInfo,
         recovery,
         processingTime: Date.now() - startTime,
       };
@@ -130,7 +131,7 @@ export class ErrorHandlerService {
     } catch (handleError) {
       const result: ErrorHandleResult = {
         success: false,
-        error: {
+        _error: {
           id: this.generateErrorId(),
           type: "SYSTEM",
           severity: "CRITICAL",
@@ -149,45 +150,45 @@ export class ErrorHandlerService {
    * 处理数据库错误
    */
   async handleDatabaseError(
-    error: Error,
-    context?: Record<string, any>,
+    _error: Error,
+    context?: Record<string, unknown>,
   ): Promise<ErrorHandleResult> {
-    const errorInfo = this.createErrorInfo(error, context);
+    const errorInfo = this.createErrorInfo(_error, context);
     errorInfo.type = "DATABASE";
-    errorInfo.recoverable = this.isDatabaseErrorRecoverable(error);
-    errorInfo.recoveryStrategy = this.getDatabaseRecoveryStrategy(error);
+    errorInfo.recoverable = this.isDatabaseErrorRecoverable(_error);
+    errorInfo.recoveryStrategy = this.getDatabaseRecoveryStrategy(_error);
 
-    return await this.handleError(error, context);
+    return await this.handleError(_error, context);
   }
 
   /**
    * 处理缓存错误
    */
   async handleCacheError(
-    error: Error,
-    context?: Record<string, any>,
+    _error: Error,
+    context?: Record<string, unknown>,
   ): Promise<ErrorHandleResult> {
-    const errorInfo = this.createErrorInfo(error, context);
+    const errorInfo = this.createErrorInfo(_error, context);
     errorInfo.type = "CACHE";
-    errorInfo.recoverable = this.isCacheErrorRecoverable(error);
-    errorInfo.recoveryStrategy = this.getCacheRecoveryStrategy(error);
+    errorInfo.recoverable = this.isCacheErrorRecoverable(_error);
+    errorInfo.recoveryStrategy = this.getCacheRecoveryStrategy(_error);
 
-    return await this.handleError(error, context);
+    return await this.handleError(_error, context);
   }
 
   /**
    * 处理网络错误
    */
   async handleNetworkError(
-    error: Error,
-    context?: Record<string, any>,
+    _error: Error,
+    context?: Record<string, unknown>,
   ): Promise<ErrorHandleResult> {
-    const errorInfo = this.createErrorInfo(error, context);
+    const errorInfo = this.createErrorInfo(_error, context);
     errorInfo.type = "NETWORK";
-    errorInfo.recoverable = this.isNetworkErrorRecoverable(error);
-    errorInfo.recoveryStrategy = this.getNetworkRecoveryStrategy(error);
+    errorInfo.recoverable = this.isNetworkErrorRecoverable(_error);
+    errorInfo.recoveryStrategy = this.getNetworkRecoveryStrategy(_error);
 
-    return await this.handleError(error, context);
+    return await this.handleError(_error, context);
   }
 
   /**
@@ -201,19 +202,19 @@ export class ErrorHandlerService {
   /**
    * 获取错误统计
    */
-  getErrorStats(): Record<string, any> {
+  getErrorStats(): Record<string, unknown> {
     const total = this.errorHistory.length;
     const byType = this.errorHistory.reduce(
-      (acc, error) => {
-        acc[error.type] = (acc[error.type] || 0) + 1;
+      (acc, _error) => {
+        acc[_error.type] = (acc[_error.type] || 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
     );
 
     const bySeverity = this.errorHistory.reduce(
-      (acc, error) => {
-        acc[error.severity] = (acc[error.severity] || 0) + 1;
+      (acc, _error) => {
+        acc[_error.severity] = (acc[_error.severity] || 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
@@ -239,7 +240,7 @@ export class ErrorHandlerService {
    */
   registerRecoveryStrategy(
     type: ErrorType,
-    strategy: (error: ErrorInfo) => Promise<boolean>,
+    strategy: (_error: ErrorInfo) => Promise<boolean>,
   ): void {
     this.recoveryStrategies.set(type, strategy);
   }
@@ -254,7 +255,7 @@ export class ErrorHandlerService {
   /**
    * 获取配置
    */
-  getConfig(): Record<string, any> {
+  getConfig(): Record<string, unknown> {
     return { ...this.config };
   }
 
@@ -269,28 +270,28 @@ export class ErrorHandlerService {
    * 创建错误信息
    */
   private createErrorInfo(
-    error: Error,
-    context?: Record<string, any>,
+    _error: Error,
+    context?: Record<string, unknown>,
   ): ErrorInfo {
     return {
       id: this.generateErrorId(),
-      type: this.determineErrorType(error),
-      severity: this.determineErrorSeverity(error),
-      message: error.message,
-      stack: error.stack,
-      code: (error as any).code,
+      type: this.determineErrorType(_error),
+      severity: this.determineErrorSeverity(_error),
+      message: _error.message,
+      stack: _error.stack,
+      code: (_error as { code?: string }).code,
       timestamp: new Date(),
       context,
-      recoverable: this.isErrorRecoverable(error),
-      recoveryStrategy: this.getRecoveryStrategy(error),
+      recoverable: this.isErrorRecoverable(_error),
+      recoveryStrategy: this.getRecoveryStrategy(_error),
     };
   }
 
   /**
    * 确定错误类型
    */
-  private determineErrorType(error: Error): ErrorType {
-    const message = error.message.toLowerCase();
+  private determineErrorType(_error: Error): ErrorType {
+    const message = _error.message.toLowerCase();
 
     if (message.includes("database") || message.includes("connection")) {
       return "DATABASE";
@@ -318,14 +319,14 @@ export class ErrorHandlerService {
   /**
    * 确定错误严重级别
    */
-  private determineErrorSeverity(error: Error): ErrorSeverity {
-    const message = error.message.toLowerCase();
+  private determineErrorSeverity(_error: Error): ErrorSeverity {
+    const message = _error.message.toLowerCase();
 
     if (message.includes("critical") || message.includes("fatal")) {
       return "CRITICAL";
     }
 
-    if (message.includes("error") || message.includes("failed")) {
+    if (message.includes("_error") || message.includes("failed")) {
       return "HIGH";
     }
 
@@ -339,8 +340,8 @@ export class ErrorHandlerService {
   /**
    * 检查错误是否可恢复
    */
-  private isErrorRecoverable(error: Error): boolean {
-    const message = error.message.toLowerCase();
+  private isErrorRecoverable(_error: Error): boolean {
+    const message = _error.message.toLowerCase();
 
     // 网络错误通常可恢复
     if (message.includes("timeout") || message.includes("connection")) {
@@ -363,32 +364,32 @@ export class ErrorHandlerService {
   /**
    * 检查数据库错误是否可恢复
    */
-  private isDatabaseErrorRecoverable(error: Error): boolean {
-    const message = error.message.toLowerCase();
+  private isDatabaseErrorRecoverable(_error: Error): boolean {
+    const message = _error.message.toLowerCase();
     return message.includes("connection") || message.includes("timeout");
   }
 
   /**
    * 检查缓存错误是否可恢复
    */
-  private isCacheErrorRecoverable(error: Error): boolean {
-    const message = error.message.toLowerCase();
+  private isCacheErrorRecoverable(_error: Error): boolean {
+    const message = _error.message.toLowerCase();
     return message.includes("connection") || message.includes("timeout");
   }
 
   /**
    * 检查网络错误是否可恢复
    */
-  private isNetworkErrorRecoverable(error: Error): boolean {
-    const message = error.message.toLowerCase();
+  private isNetworkErrorRecoverable(_error: Error): boolean {
+    const message = _error.message.toLowerCase();
     return message.includes("timeout") || message.includes("connection");
   }
 
   /**
    * 获取恢复策略
    */
-  private getRecoveryStrategy(error: Error): string | undefined {
-    const type = this.determineErrorType(error);
+  private getRecoveryStrategy(_error: Error): string | undefined {
+    const type = this.determineErrorType(_error);
 
     switch (type) {
       case "DATABASE":
@@ -405,8 +406,8 @@ export class ErrorHandlerService {
   /**
    * 获取数据库恢复策略
    */
-  private getDatabaseRecoveryStrategy(error: Error): string | undefined {
-    const message = error.message.toLowerCase();
+  private getDatabaseRecoveryStrategy(_error: Error): string | undefined {
+    const message = _error.message.toLowerCase();
 
     if (message.includes("connection")) {
       return "retry_connection";
@@ -422,8 +423,8 @@ export class ErrorHandlerService {
   /**
    * 获取缓存恢复策略
    */
-  private getCacheRecoveryStrategy(error: Error): string | undefined {
-    const message = error.message.toLowerCase();
+  private getCacheRecoveryStrategy(_error: Error): string | undefined {
+    const message = _error.message.toLowerCase();
 
     if (message.includes("connection")) {
       return "retry_connection";
@@ -439,8 +440,8 @@ export class ErrorHandlerService {
   /**
    * 获取网络恢复策略
    */
-  private getNetworkRecoveryStrategy(error: Error): string | undefined {
-    const message = error.message.toLowerCase();
+  private getNetworkRecoveryStrategy(_error: Error): string | undefined {
+    const message = _error.message.toLowerCase();
 
     if (message.includes("timeout")) {
       return "retry_request";
@@ -456,8 +457,8 @@ export class ErrorHandlerService {
   /**
    * 记录错误
    */
-  private recordError(error: ErrorInfo): void {
-    this.errorHistory.push(error);
+  private recordError(_error: ErrorInfo): void {
+    this.errorHistory.push(_error);
 
     // 限制错误历史记录大小
     if (this.errorHistory.length > this.config.maxErrorHistory) {
@@ -468,13 +469,13 @@ export class ErrorHandlerService {
   /**
    * 尝试恢复
    */
-  private async attemptRecovery(error: ErrorInfo): Promise<{
+  private async attemptRecovery(_error: ErrorInfo): Promise<{
     action: string;
     result: boolean;
     message: string;
   }> {
     try {
-      const strategy = this.recoveryStrategies.get(error.type);
+      const strategy = this.recoveryStrategies.get(_error.type);
       if (!strategy) {
         return {
           action: "no_strategy",
@@ -483,18 +484,18 @@ export class ErrorHandlerService {
         };
       }
 
-      const result = await strategy(error);
+      const result = await strategy(_error);
 
       return {
-        action: error.recoveryStrategy || "unknown",
+        action: _error.recoveryStrategy || "unknown",
         result,
         message: result ? "恢复成功" : "恢复失败",
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         action: "recovery_failed",
         result: false,
-        message: error instanceof Error ? error.message : "恢复操作失败",
+        message: _error instanceof Error ? _error.message : "恢复操作失败",
       };
     }
   }
@@ -502,27 +503,28 @@ export class ErrorHandlerService {
   /**
    * 记录错误日志
    */
-  private async logError(error: ErrorInfo): Promise<void> {
+  private async logError(_error: ErrorInfo): Promise<void> {
     try {
       if (this.loggingService) {
-        const logContext = {
-          requestId: `error_${error.id}`,
+        const logContext: LogContext = {
+          requestId: `error_${_error.id}`,
           tenantId: "system",
           operation: "error-handling",
           resource: "error-handler",
-          timestamp: error.timestamp,
-          level: error.severity === "CRITICAL" ? "error" : ("warn" as const),
-          message: `错误处理: ${error.message}`,
+          userId: (_error.context?.userId as string) || "system",
+          timestamp: _error.timestamp,
+          level: _error.severity === "CRITICAL" ? "_error" : ("warn" as const),
+          message: `错误处理: ${_error.message}`,
         };
 
-        await this.loggingService.error(
-          logContext as any,
-          `错误处理: ${error.message}`,
-          error as any,
+        await this.loggingService._error(
+          logContext,
+          `错误处理: ${_error.message}`,
+          new Error(_error.message),
         );
       }
-    } catch (error) {
-      console.error("记录错误日志失败:", error);
+    } catch (_error) {
+      console.error("记录错误日志失败:", _error);
     }
   }
 
@@ -531,32 +533,32 @@ export class ErrorHandlerService {
    */
   private registerDefaultRecoveryStrategies(): void {
     // 数据库恢复策略
-    this.registerRecoveryStrategy("DATABASE", async (error) => {
+    this.registerRecoveryStrategy("DATABASE", async (_error) => {
       try {
         // 尝试重新连接数据库
         await this.databaseAdapter.healthCheck();
         return true;
-      } catch (error) {
+      } catch (_error) {
         return false;
       }
     });
 
     // 缓存恢复策略
-    this.registerRecoveryStrategy("CACHE", async (error) => {
+    this.registerRecoveryStrategy("CACHE", async (_error) => {
       try {
         // 这里应该实现缓存恢复逻辑
         return true;
-      } catch (error) {
+      } catch (_error) {
         return false;
       }
     });
 
     // 网络恢复策略
-    this.registerRecoveryStrategy("NETWORK", async (error) => {
+    this.registerRecoveryStrategy("NETWORK", async (_error) => {
       try {
         // 这里应该实现网络恢复逻辑
         return true;
-      } catch (error) {
+      } catch (_error) {
         return false;
       }
     });
@@ -575,7 +577,7 @@ export class ErrorHandlerService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

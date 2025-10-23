@@ -47,7 +47,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
    */
   async monitorAccess(
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
     action: string,
   ): Promise<void> {
     try {
@@ -60,8 +60,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
 
       // 记录访问日志
       await this.logAccessAttempt(context, resource, action);
-    } catch (error) {
-      console.error("监控访问尝试失败:", error);
+    } catch (_error) {
+      console.error("监控访问尝试失败:", _error);
     }
   }
 
@@ -70,7 +70,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
    */
   async detectAnomalousAccess(
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
   ): Promise<boolean> {
     try {
       const accessKey = this.generateAccessKey(context, resource, "access");
@@ -115,8 +115,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
       }
 
       return false;
-    } catch (error) {
-      console.error("检测异常访问失败:", error);
+    } catch (_error) {
+      console.error("检测异常访问失败:", _error);
       return false;
     }
   }
@@ -138,8 +138,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
 
       // 检查是否需要告警
       await this.checkSecurityAlerts(event);
-    } catch (error) {
-      console.error("记录安全事件失败:", error);
+    } catch (_error) {
+      console.error("记录安全事件失败:", _error);
     }
   }
 
@@ -202,9 +202,9 @@ export class SecurityMonitorService implements ISecurityMonitorService {
         byTenant,
         period: { startTime, endTime },
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取安全事件统计失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取安全事件统计失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -245,9 +245,9 @@ export class SecurityMonitorService implements ISecurityMonitorService {
         highRiskAccess: highRiskAccess as any,
         recommendations,
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取异常访问报告失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取异常访问报告失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -257,7 +257,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
    */
   private async checkMonitoringRules(
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
     action: string,
   ): Promise<void> {
     try {
@@ -270,8 +270,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
           await this.evaluateRule(rule, context, resource, action);
         }
       }
-    } catch (error) {
-      console.error("检查监控规则失败:", error);
+    } catch (_error) {
+      console.error("检查监控规则失败:", _error);
     }
   }
 
@@ -279,8 +279,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
    * 检查访问模式
    */
   private async checkAccessPattern(
-    context: IsolationContext,
-    resource: any,
+    _context: IsolationContext,
+    _resource: unknown,
   ): Promise<boolean> {
     try {
       // 这里可以实现更复杂的访问模式检测逻辑
@@ -295,7 +295,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
       }
 
       return false;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -308,8 +308,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
       if (event.severity === "CRITICAL") {
         await this.triggerSecurityAlert(event);
       }
-    } catch (error) {
-      console.error("检查安全告警失败:", error);
+    } catch (_error) {
+      console.error("检查安全告警失败:", _error);
     }
   }
 
@@ -338,8 +338,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
           event as unknown as Record<string, unknown>,
         );
       }
-    } catch (error) {
-      console.error("触发安全告警失败:", error);
+    } catch (_error) {
+      console.error("触发安全告警失败:", _error);
     }
   }
 
@@ -348,7 +348,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
    */
   private generateAccessKey(
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
     action: string,
   ): string {
     const resourceInfo = this.getResourceInfo(resource);
@@ -358,15 +358,22 @@ export class SecurityMonitorService implements ISecurityMonitorService {
   /**
    * 获取资源信息
    */
-  private getResourceInfo(resource: any): { type: string; id: string } {
+  private getResourceInfo(resource: unknown): { type: string; id: string } {
     if (typeof resource === "string") {
       return { type: "string", id: resource };
     }
 
     if (resource && typeof resource === "object") {
+      const resourceObj = resource as Record<string, unknown>;
       return {
-        type: resource.type || resource.resourceType || "unknown",
-        id: resource.id || resource.resourceId || "unknown",
+        type:
+          (resourceObj.type as string) ||
+          (resourceObj.resourceType as string) ||
+          "unknown",
+        id:
+          (resourceObj.id as string) ||
+          (resourceObj.resourceId as string) ||
+          "unknown",
       };
     }
 
@@ -379,7 +386,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
   private isRuleApplicable(
     rule: MonitoringRule,
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
     action: string,
   ): boolean {
     try {
@@ -401,7 +408,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -412,7 +419,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
   private async evaluateRule(
     rule: MonitoringRule,
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
     action: string,
   ): Promise<void> {
     try {
@@ -441,8 +448,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
           });
         }
       }
-    } catch (error) {
-      console.error("评估规则失败:", error);
+    } catch (_error) {
+      console.error("评估规则失败:", _error);
     }
   }
 
@@ -466,7 +473,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
    */
   private async logAccessAttempt(
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
     action: string,
   ): Promise<void> {
     try {
@@ -487,8 +494,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
           action,
         });
       }
-    } catch (error) {
-      console.error("记录访问尝试失败:", error);
+    } catch (_error) {
+      console.error("记录访问尝试失败:", _error);
     }
   }
 
@@ -516,8 +523,8 @@ export class SecurityMonitorService implements ISecurityMonitorService {
         `安全事件: ${event.type}`,
         event as unknown as Record<string, unknown>,
       );
-    } catch (error) {
-      console.error("记录到日志系统失败:", error);
+    } catch (_error) {
+      console.error("记录到日志系统失败:", _error);
     }
   }
 
@@ -529,9 +536,11 @@ export class SecurityMonitorService implements ISecurityMonitorService {
       const repository = this.databaseAdapter.getRepository(
         this.getSecurityEventEntityClass(),
       );
-      await (repository as { persistAndFlush(entity: unknown): Promise<void> }).persistAndFlush(event);
-    } catch (error) {
-      console.error("保存安全事件失败:", error);
+      await (
+        repository as { persistAndFlush(entity: unknown): Promise<void> }
+      ).persistAndFlush(event);
+    } catch (_error) {
+      console.error("保存安全事件失败:", _error);
     }
   }
 
@@ -545,7 +554,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
   /**
    * 获取安全事件实体类
    */
-  private getSecurityEventEntityClass(): any {
+  private getSecurityEventEntityClass(): unknown {
     // 这里应该返回安全事件实体类
     // 暂时返回一个占位符
     return class SecurityEventEntity {};
@@ -557,7 +566,7 @@ export class SecurityMonitorService implements ISecurityMonitorService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

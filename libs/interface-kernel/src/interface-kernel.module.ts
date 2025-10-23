@@ -6,6 +6,7 @@
 import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
+import { ExceptionModule } from "@hl8/exceptions";
 
 // 服务导入
 import { ApiGatewayService } from "./services/api-gateway.service.js";
@@ -30,6 +31,13 @@ import { JwtAuthStrategy } from "./services/authentication.service.js";
  */
 @Module({
   imports: [
+    // 异常处理模块
+    ExceptionModule.forRoot({
+      enableLogging: true,
+      isProduction: process.env.NODE_ENV === "production",
+      registerGlobalFilters: true,
+    }),
+
     // JWT 模块配置
     JwtModule.register({
       secret: process.env.JWT_SECRET || "default-secret",

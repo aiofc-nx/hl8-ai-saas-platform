@@ -83,7 +83,11 @@ export class AuditLogService implements IAuditLogService {
       const conditions = this.buildQueryConditions(filters);
 
       // 执行查询
-      const auditLogs = await (repository as { find(conditions: unknown, options?: unknown): Promise<unknown[]> }).find(conditions, {
+      const auditLogs = await (
+        repository as {
+          find(conditions: unknown, options?: unknown): Promise<unknown[]>;
+        }
+      ).find(conditions, {
         limit: filters.limit || 100,
         offset: filters.offset || 0,
         orderBy: { timestamp: "DESC" },
@@ -107,7 +111,9 @@ export class AuditLogService implements IAuditLogService {
       );
 
       // 删除过期日志
-      const result = await (repository as { nativeDelete(conditions: unknown): Promise<number> }).nativeDelete({
+      const result = await (
+        repository as { nativeDelete(conditions: unknown): Promise<number> }
+      ).nativeDelete({
         timestamp: { $lt: olderThan },
       });
 
@@ -158,31 +164,39 @@ export class AuditLogService implements IAuditLogService {
   async getAuditStats(
     startTime: Date,
     endTime: Date,
-  ): Promise<Record<string, any>> {
+  ): Promise<Record<string, unknown>> {
     try {
       const repository = this.databaseAdapter.getRepository(
         this.getAuditLogEntityClass(),
       );
 
       // 获取基本统计
-      const total = await (repository as { count(conditions: unknown): Promise<number> }).count({
+      const total = await (
+        repository as { count(conditions: unknown): Promise<number> }
+      ).count({
         timestamp: { $gte: startTime, $lte: endTime },
       });
 
       // 按操作类型统计
-      const byAction = await (repository as { aggregate(pipeline: unknown): Promise<unknown[]> }).aggregate([
+      const byAction = await (
+        repository as { aggregate(pipeline: unknown): Promise<unknown[]> }
+      ).aggregate([
         { $match: { timestamp: { $gte: startTime, $lte: endTime } } },
         { $group: { _id: "$action", count: { $sum: 1 } } },
       ]);
 
       // 按结果统计
-      const byResult = await (repository as { aggregate(pipeline: unknown): Promise<unknown[]> }).aggregate([
+      const byResult = await (
+        repository as { aggregate(pipeline: unknown): Promise<unknown[]> }
+      ).aggregate([
         { $match: { timestamp: { $gte: startTime, $lte: endTime } } },
         { $group: { _id: "$result", count: { $sum: 1 } } },
       ]);
 
       // 按租户统计
-      const byTenant = await (repository as { aggregate(pipeline: unknown): Promise<unknown[]> }).aggregate([
+      const byTenant = await (
+        repository as { aggregate(pipeline: unknown): Promise<unknown[]> }
+      ).aggregate([
         { $match: { timestamp: { $gte: startTime, $lte: endTime } } },
         { $group: { _id: "$tenantId", count: { $sum: 1 } } },
       ]);
@@ -190,13 +204,22 @@ export class AuditLogService implements IAuditLogService {
       return {
         total,
         byAction: Object.fromEntries(
-          (byAction as unknown[]).map((item: unknown) => [(item as { _id: string })._id, (item as { count: number }).count]),
+          (byAction as unknown[]).map((item: unknown) => [
+            (item as { _id: string })._id,
+            (item as { count: number }).count,
+          ]),
         ),
         byResult: Object.fromEntries(
-          (byResult as unknown[]).map((item: unknown) => [(item as { _id: string })._id, (item as { count: number }).count]),
+          (byResult as unknown[]).map((item: unknown) => [
+            (item as { _id: string })._id,
+            (item as { count: number }).count,
+          ]),
         ),
         byTenant: Object.fromEntries(
-          (byTenant as unknown[]).map((item: unknown) => [(item as { _id: string })._id, (item as { count: number }).count]),
+          (byTenant as unknown[]).map((item: unknown) => [
+            (item as { _id: string })._id,
+            (item as { count: number }).count,
+          ]),
         ),
         period: { startTime, endTime },
       };
@@ -253,7 +276,9 @@ export class AuditLogService implements IAuditLogService {
       const repository = this.databaseAdapter.getRepository(
         this.getAuditLogEntityClass(),
       );
-      await (repository as { persistAndFlush(entity: unknown): Promise<void> }).persistAndFlush(auditLog);
+      await (
+        repository as { persistAndFlush(entity: unknown): Promise<void> }
+      ).persistAndFlush(auditLog);
     } catch (error) {
       throw new Error(
         `保存审计日志失败: ${error instanceof Error ? error.message : "未知错误"}`,
@@ -269,7 +294,9 @@ export class AuditLogService implements IAuditLogService {
       const repository = this.databaseAdapter.getRepository(
         this.getAuditLogEntityClass(),
       );
-      await (repository as { persistAndFlush(entities: unknown): Promise<void> }).persistAndFlush(auditLogs);
+      await (
+        repository as { persistAndFlush(entities: unknown): Promise<void> }
+      ).persistAndFlush(auditLogs);
     } catch (error) {
       throw new Error(
         `批量保存审计日志失败: ${error instanceof Error ? error.message : "未知错误"}`,
@@ -319,8 +346,8 @@ export class AuditLogService implements IAuditLogService {
    */
   private buildQueryConditions(
     filters: AuditLogQueryFilters,
-  ): Record<string, any> {
-    const conditions: Record<string, any> = {};
+  ): Record<string, unknown> {
+    const conditions: Record<string, unknown> = {};
 
     if (filters.tenantId) {
       conditions.tenantId = filters.tenantId;
@@ -352,11 +379,15 @@ export class AuditLogService implements IAuditLogService {
 
     if (filters.startTime || filters.endTime) {
       conditions.timestamp = {};
+      const timestampConditions = conditions.timestamp as Record<
+        string,
+        unknown
+      >;
       if (filters.startTime) {
-        conditions.timestamp.$gte = filters.startTime;
+        timestampConditions.$gte = filters.startTime;
       }
       if (filters.endTime) {
-        conditions.timestamp.$lte = filters.endTime;
+        timestampConditions.$lte = filters.endTime;
       }
     }
 
@@ -415,7 +446,7 @@ export class AuditLogService implements IAuditLogService {
   /**
    * 获取审计日志实体类
    */
-  private getAuditLogEntityClass(): any {
+  private getAuditLogEntityClass(): new () => unknown {
     // 这里应该返回审计日志实体类
     // 暂时返回一个占位符
     return class AuditLogEntity {};
@@ -427,7 +458,7 @@ export class AuditLogService implements IAuditLogService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

@@ -146,8 +146,8 @@ export class RateLimitService {
     const tenantId = request.tenantId || "default";
     const endpointKey =
       endpoint ||
-      (request as any).routerPath ||
-      (request as any).url ||
+      ((request as unknown as Record<string, unknown>).routerPath as string) ||
+      request.url ||
       "unknown";
 
     return `${tenantId}:${endpointKey}:${clientIp}`;
@@ -161,21 +161,21 @@ export class RateLimitService {
    */
   private getClientIp(request: InterfaceFastifyRequest): string {
     // 优先从代理头获取IP
-    const forwardedFor = (request as any).headers?.[
-      "x-forwarded-for"
-    ] as string;
+    const forwardedFor = request.headers?.["x-forwarded-for"] as string;
     if (forwardedFor) {
       return forwardedFor.split(",")[0]?.trim() || "unknown";
     }
 
-    const realIP = (request as any).headers?.["x-real-ip"] as string;
+    const realIP = request.headers?.["x-real-ip"] as string;
     if (realIP) {
       return realIP;
     }
 
     // 从socket获取IP
-    if ((request as any).socket?.remoteAddress) {
-      return (request as any).socket.remoteAddress;
+    const socket = (request as unknown as Record<string, unknown>)
+      .socket as Record<string, unknown>;
+    if (socket?.remoteAddress) {
+      return socket.remoteAddress as string;
     }
 
     return "unknown";
@@ -320,7 +320,7 @@ export class RateLimitService {
    * @description 获取速率限制服务的统计信息
    * @returns 统计信息
    */
-  getStatistics(): any {
+  getStatistics(): Record<string, unknown> {
     try {
       const now = Date.now();
       let activeRecords = 0;

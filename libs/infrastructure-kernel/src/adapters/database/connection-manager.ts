@@ -10,6 +10,8 @@ import type {
   IDatabaseAdapter,
 } from "../../interfaces/database-adapter.interface.js";
 import type { DatabaseConnectionEntity } from "../../entities/database-connection.entity.js";
+import type { PostgreSQLConnectionEntity } from "../../entities/postgresql-connection.entity.js";
+import type { MongoDBConnectionEntity } from "../../entities/mongodb-connection.entity.js";
 import { PostgreSQLAdapter } from "./postgresql-adapter.js";
 import { MongoDBAdapter } from "./mongodb-adapter.js";
 
@@ -46,10 +48,14 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
 
     switch (config.type) {
       case "POSTGRESQL":
-        adapter = new PostgreSQLAdapter(config as any);
+        adapter = new PostgreSQLAdapter(
+          config as unknown as PostgreSQLConnectionEntity,
+        );
         break;
       case "MONGODB":
-        adapter = new MongoDBAdapter(config as any);
+        adapter = new MongoDBAdapter(
+          config as unknown as MongoDBConnectionEntity,
+        );
         break;
       default:
         throw new Error(`不支持的数据库类型: ${config.type}`);
@@ -82,8 +88,8 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
       async ([name, connection]) => {
         try {
           await connection.disconnect();
-        } catch (error) {
-          console.error(`关闭连接 ${name} 失败:`, error);
+        } catch (_error) {
+          console.error(`关闭连接 ${name} 失败:`, _error);
         }
       },
     );
@@ -128,7 +134,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
         try {
           const isHealthy = await connection.healthCheck();
           healthChecks[name] = isHealthy;
-        } catch (error) {
+        } catch (_error) {
           healthChecks[name] = false;
         }
       },
@@ -192,7 +198,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
 
     try {
       await connection.disconnect();
-    } catch (error) {
+    } catch (_error) {
       // 忽略断开连接时的错误
     }
 
@@ -207,8 +213,8 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
       async (name) => {
         try {
           await this.reconnect(name);
-        } catch (error) {
-          console.error(`重新连接 ${name} 失败:`, error);
+        } catch (_error) {
+          console.error(`重新连接 ${name} 失败:`, _error);
         }
       },
     );
@@ -219,7 +225,7 @@ export class DatabaseConnectionManager implements IDatabaseConnectionManager {
   /**
    * 获取管理器统计信息
    */
-  getManagerStats(): Record<string, any> {
+  getManagerStats(): Record<string, unknown> {
     return {
       totalConnections: this.connections.size,
       connectionNames: this.getConnectionNames(),

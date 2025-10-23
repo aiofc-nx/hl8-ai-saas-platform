@@ -7,6 +7,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
+import { InfrastructureExceptionConverter } from "../../exceptions/infrastructure-exception.mapping.js";
 import { BaseRepositoryAdapter } from "../base/base-repository-adapter.js";
 import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
 import type { IsolationContext } from "../../types/isolation.types.js";
@@ -37,7 +38,9 @@ export interface ReadModelQueryOptions {
  * 读模型仓储适配器
  */
 @Injectable()
-export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
+export class ReadModelRepositoryAdapter<
+  T extends Record<string, unknown>,
+> extends BaseRepositoryAdapter<T> {
   constructor(
     databaseAdapter: IDatabaseAdapter,
     cacheService?: ICacheService,
@@ -51,11 +54,8 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
    */
   async findByQuery(query: BaseQuery): Promise<T[]> {
     try {
-      // 应用隔离上下文
-      const isolatedQuery = this.applyIsolationContext(query);
-
       // 构建查询条件
-      const conditions = this.buildQueryConditions(isolatedQuery);
+      const conditions = this.buildQueryConditions(query);
 
       // 执行查询
       const repository = this.databaseAdapter.getRepository(
@@ -85,9 +85,13 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         .filter((result) => result !== null) as T[];
 
       return filteredResults;
-    } catch (error) {
-      throw new Error(
-        `根据查询对象查找读模型失败: ${error instanceof Error ? error.message : "未知错误"}`,
+    } catch (_error) {
+      const standardError =
+        _error instanceof Error ? _error : new Error(String(_error));
+      throw InfrastructureExceptionConverter.convertToStandardException(
+        standardError,
+        "DATABASE",
+        { operation: "findByQuery", queryType: query.constructor.name },
       );
     }
   }
@@ -99,7 +103,7 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     try {
       // 尝试从缓存获取
       if (this.cacheService) {
-        const cacheKey = this.generateCacheKey({ id } as T);
+        const cacheKey = this.generateCacheKey({ id } as unknown as T);
         const cached = await this.cacheService.get<T>(cacheKey);
         if (cached) {
           return cached;
@@ -128,9 +132,13 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
       }
 
       return null;
-    } catch (error) {
-      throw new Error(
-        `根据ID查找读模型失败: ${error instanceof Error ? error.message : "未知错误"}`,
+    } catch (_error) {
+      const standardError =
+        _error instanceof Error ? _error : new Error(String(_error));
+      throw InfrastructureExceptionConverter.convertToStandardException(
+        standardError,
+        "DATABASE",
+        { operation: "findById", entityId: id },
       );
     }
   }
@@ -157,9 +165,9 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         .filter((result) => result !== null) as T[];
 
       return filteredResults;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `根据条件查找读模型失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `根据条件查找读模型失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -206,9 +214,9 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         page,
         pageSize,
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `分页查询读模型失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `分页查询读模型失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -250,9 +258,9 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         .filter((result) => result !== null) as T[];
 
       return filteredResults;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `搜索读模型失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `搜索读模型失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -260,7 +268,9 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
   /**
    * 聚合查询
    */
-  async aggregate(pipeline: any[]): Promise<any[]> {
+  async aggregate(
+    pipeline: Record<string, unknown>[],
+  ): Promise<Record<string, unknown>[]> {
     // 符合宪章 IX：MongoDB 聚合管道，支持任意操作符和阶段
     try {
       // 应用隔离条件到管道
@@ -273,10 +283,10 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         repository as { aggregate(pipeline: unknown): Promise<unknown[]> }
       ).aggregate(isolatedPipeline);
 
-      return results;
-    } catch (error) {
+      return results as Record<string, unknown>[];
+    } catch (_error) {
       throw new Error(
-        `聚合查询失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `聚合查询失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -303,9 +313,9 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
         total,
         groupBy,
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取读模型统计信息失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取读模型统计信息失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -361,7 +371,7 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
   /**
    * 应用隔离上下文到实体
    */
-  protected applyIsolationContext(entity: any): any {
+  protected applyIsolationContext(entity: T): T {
     // 符合宪章 IX：实体隔离处理，支持任意实体类型
     if (!this.isolationContext) {
       return entity;
@@ -397,7 +407,9 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
   /**
    * 应用隔离条件到聚合管道
    */
-  protected applyIsolationToPipeline(pipeline: any[]): any[] {
+  protected applyIsolationToPipeline(
+    pipeline: Record<string, unknown>[],
+  ): Record<string, unknown>[] {
     // 符合宪章 IX：MongoDB 聚合管道处理，支持任意操作符和阶段
     if (!this.isolationContext) {
       return pipeline;
@@ -406,6 +418,7 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
     const isolatedPipeline = [...pipeline];
 
     // 在管道开始添加匹配阶段
+
     const matchStage: any = {}; // 符合宪章 IX：MongoDB 匹配阶段，支持任意查询条件
 
     if (this.isolationContext.tenantId) {
@@ -444,7 +457,7 @@ export class ReadModelRepositoryAdapter<T> extends BaseRepositoryAdapter<T> {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

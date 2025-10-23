@@ -7,14 +7,15 @@
 
 import { Injectable } from "@nestjs/common";
 import type { IIsolationContextManager } from "../../interfaces/isolation-service.interface.js";
+import type { IsolationContext } from "../../types/isolation.types.js";
 
 /**
  * 隔离上下文管理器
  */
 @Injectable()
 export class IsolationContextManager implements IIsolationContextManager {
-  private currentContext: any | null = null;
-  private contextHistory: any[] = [];
+  private currentContext: IsolationContext | null = null;
+  private contextHistory: unknown[] = [];
   private maxHistorySize = 100;
 
   constructor() {}
@@ -27,7 +28,7 @@ export class IsolationContextManager implements IIsolationContextManager {
     organizationId?: string,
     departmentId?: string,
     userId?: string,
-  ): any {
+  ): IsolationContext {
     // 简化的上下文创建
     return {
       tenantId,
@@ -53,13 +54,13 @@ export class IsolationContextManager implements IIsolationContextManager {
   /**
    * 验证隔离上下文
    */
-  validateContext(context: any): boolean {
+  validateContext(context: unknown): boolean {
     try {
       // 使用领域模型的验证逻辑
       // IsolationContext 构造函数内部已经进行了验证
       return context !== null && context !== undefined;
-    } catch (error) {
-      console.error("隔离上下文验证失败:", error);
+    } catch (_error) {
+      console.error("隔离上下文验证失败:", _error);
       return false;
     }
   }
@@ -67,14 +68,14 @@ export class IsolationContextManager implements IIsolationContextManager {
   /**
    * 获取当前隔离上下文
    */
-  getCurrentContext(): any | null {
+  getCurrentContext(): IsolationContext | null {
     return this.currentContext;
   }
 
   /**
    * 设置当前隔离上下文
    */
-  setCurrentContext(context: any): void {
+  setCurrentContext(context: IsolationContext): void {
     if (!this.validateContext(context)) {
       throw new Error("无效的隔离上下文");
     }
@@ -100,7 +101,7 @@ export class IsolationContextManager implements IIsolationContextManager {
   /**
    * 验证隔离上下文完整性
    */
-  validateContextIntegrity(context: any): boolean {
+  validateContextIntegrity(context: unknown): boolean {
     try {
       // 验证上下文完整性
       if (!this.validateContext(context)) {
@@ -122,7 +123,7 @@ export class IsolationContextManager implements IIsolationContextManager {
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -130,13 +131,14 @@ export class IsolationContextManager implements IIsolationContextManager {
   /**
    * 获取隔离上下文层级
    */
-  getContextLevel(context: any): number {
+  getContextLevel(context: unknown): number {
     let level = 0;
+    const contextObj = context as Record<string, unknown>;
 
-    if (context.tenantId) level++;
-    if (context.organizationId) level++;
-    if (context.departmentId) level++;
-    if (context.userId) level++;
+    if (contextObj.tenantId) level++;
+    if (contextObj.organizationId) level++;
+    if (contextObj.departmentId) level++;
+    if (contextObj.userId) level++;
 
     return level;
   }
@@ -145,7 +147,7 @@ export class IsolationContextManager implements IIsolationContextManager {
    * 检查上下文权限
    */
   async checkContextPermissions(
-    context: any,
+    context: unknown,
     resource: string,
     action: string,
   ): Promise<boolean> {
@@ -159,7 +161,7 @@ export class IsolationContextManager implements IIsolationContextManager {
 
       // 默认权限检查
       return this.checkPermissions(context, resource, action);
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -175,8 +177,8 @@ export class IsolationContextManager implements IIsolationContextManager {
             organizationId: this.currentContext.organizationId,
             departmentId: this.currentContext.departmentId,
             userId: this.currentContext.userId,
-            sharingLevel: (this.currentContext as any).sharingLevel,
-            isShared: (this.currentContext as any).isShared,
+            sharingLevel: this.currentContext.sharingLevel,
+            isShared: this.currentContext.isShared,
           }
         : null,
       historySize: this.contextHistory.length,
@@ -188,9 +190,9 @@ export class IsolationContextManager implements IIsolationContextManager {
    * 检查权限
    */
   private checkPermissions(
-    context: any,
-    resource: string,
-    action: string,
+    _context: unknown,
+    _resource: string,
+    _action: string,
   ): boolean {
     // 使用领域模型的权限检查逻辑
     // 这里可以根据实际需求调整逻辑
@@ -200,7 +202,7 @@ export class IsolationContextManager implements IIsolationContextManager {
   /**
    * 添加到历史记录
    */
-  private addToHistory(context: any): void {
+  private addToHistory(context: unknown): void {
     this.contextHistory.push(context);
 
     // 限制历史记录大小
@@ -212,7 +214,7 @@ export class IsolationContextManager implements IIsolationContextManager {
   /**
    * 获取历史记录
    */
-  getContextHistory(): any[] {
+  getContextHistory(): unknown[] {
     return [...this.contextHistory];
   }
 

@@ -17,9 +17,17 @@ import type { PostgreSQLConnectionEntity } from "../../entities/postgresql-conne
 /**
  * PostgreSQL数据库适配器
  */
+interface DatabaseConnection {
+  execute: (
+    sql: string,
+    params?: unknown[],
+  ) => Promise<{ affectedRows?: number; data?: unknown[] }>;
+  close: () => Promise<void>;
+}
+
 export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   private orm?: MikroORM;
-  private connection?: any;
+  private connection?: DatabaseConnection;
   private isConnected = false;
 
   constructor(private readonly config: PostgreSQLConnectionEntity) {}
@@ -42,10 +50,10 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
 
       this.connection = this.orm.em.getConnection();
       this.isConnected = true;
-    } catch (error) {
+    } catch (_error) {
       this.isConnected = false;
       throw new Error(
-        `PostgreSQL连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `PostgreSQL连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -61,9 +69,9 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         this.connection = undefined;
         this.isConnected = false;
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `PostgreSQL断开连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `PostgreSQL断开连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -71,7 +79,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   /**
    * 获取仓储实例
    */
-  getRepository<T>(entity: any): any {
+  getRepository<T>(entity: new () => T): unknown {
     if (!this.orm) {
       throw new Error("数据库未连接");
     }
@@ -89,7 +97,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
 
       await this.connection.execute("SELECT 1");
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -104,9 +112,9 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   /**
    * 执行查询
    */
-  async query<T = any>(
+  async query<T = unknown>(
     sql: string,
-    params?: any[],
+    params?: unknown[],
   ): Promise<DatabaseOperationResult<T[]>> {
     const startTime = Date.now();
 
@@ -120,14 +128,14 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
 
       return {
         success: true,
-        data: result,
+        data: result.data as T[],
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "查询执行失败",
+        _error: _error instanceof Error ? _error.message : "查询执行失败",
         executionTime,
       };
     }
@@ -137,8 +145,8 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
    * 执行事务
    */
   async transaction<T>(
-    callback: (trx: any) => Promise<T>,
-    options?: DatabaseTransactionOptions,
+    callback: (trx: unknown) => Promise<T>,
+    _options?: DatabaseTransactionOptions,
   ): Promise<DatabaseOperationResult<T>> {
     const startTime = Date.now();
 
@@ -158,11 +166,11 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         data: result,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "事务执行失败",
+        _error: _error instanceof Error ? _error.message : "事务执行失败",
         executionTime,
       };
     }
@@ -174,7 +182,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   async batchInsert<T>(
     table: string,
     data: T[],
-    options?: DatabaseQueryOptions,
+    _options?: DatabaseQueryOptions,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
 
@@ -191,8 +199,10 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         };
       }
 
-      const columns = Object.keys(data[0] as any);
-      const values = data.map((row) => columns.map((col) => (row as any)[col]));
+      const columns = Object.keys(data[0] as Record<string, unknown>);
+      const values = data.map((row) =>
+        columns.map((col) => (row as Record<string, unknown>)[col]),
+      );
 
       const placeholders = values
         .map(() => `(${columns.map(() => "?").join(", ")})`)
@@ -209,11 +219,11 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         data: result.affectedRows || data.length,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "批量插入失败",
+        _error: _error instanceof Error ? _error.message : "批量插入失败",
         executionTime,
       };
     }
@@ -225,7 +235,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   async batchUpdate<T>(
     table: string,
     data: T[],
-    where: Record<string, any>,
+    where: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
 
@@ -244,7 +254,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
 
       let totalAffected = 0;
       for (const row of data) {
-        const setClause = Object.keys(row as any)
+        const setClause = Object.keys(row as Record<string, unknown>)
           .map((key) => `${key} = ?`)
           .join(", ");
 
@@ -253,7 +263,10 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
           .join(" AND ");
 
         const sql = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
-        const params = [...Object.values(row as any), ...Object.values(where)];
+        const params = [
+          ...Object.values(row as Record<string, unknown>),
+          ...Object.values(where),
+        ];
 
         const result = await this.connection.execute(sql, params);
         totalAffected += result.affectedRows || 0;
@@ -266,11 +279,11 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         data: totalAffected,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "批量更新失败",
+        _error: _error instanceof Error ? _error.message : "批量更新失败",
         executionTime,
       };
     }
@@ -281,7 +294,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
    */
   async batchDelete(
     table: string,
-    where: Record<string, any>,
+    where: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<number>> {
     const startTime = Date.now();
 
@@ -305,11 +318,11 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         data: result.affectedRows || 0,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "批量删除失败",
+        _error: _error instanceof Error ? _error.message : "批量删除失败",
         executionTime,
       };
     }
@@ -318,7 +331,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   /**
    * 获取连接信息
    */
-  async getConnectionInfo(): Promise<Record<string, any>> {
+  async getConnectionInfo(): Promise<Record<string, unknown>> {
     return {
       type: "PostgreSQL",
       host: this.config.host,
@@ -337,7 +350,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   /**
    * 获取性能统计
    */
-  async getPerformanceStats(): Promise<Record<string, any>> {
+  async getPerformanceStats(): Promise<Record<string, unknown>> {
     try {
       if (!this.connection) {
         return {};
@@ -355,15 +368,16 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         [this.config.database],
       );
 
+      const firstRow = stats.data?.[0] as Record<string, unknown> | undefined;
       return {
-        totalConnections: stats.data?.[0]?.total_connections || 0,
-        activeConnections: stats.data?.[0]?.active_connections || 0,
-        idleConnections: stats.data?.[0]?.idle_connections || 0,
+        totalConnections: (firstRow?.total_connections as number) || 0,
+        activeConnections: (firstRow?.active_connections as number) || 0,
+        idleConnections: (firstRow?.idle_connections as number) || 0,
         isConnected: this.isConnected,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
-        error: error instanceof Error ? error.message : "获取统计信息失败",
+        _error: _error instanceof Error ? _error.message : "获取统计信息失败",
         isConnected: this.isConnected,
       };
     }
@@ -372,9 +386,9 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   /**
    * 执行PostgreSQL特定查询
    */
-  async executePostgreSQLQuery<T = any>(
+  async executePostgreSQLQuery<T = unknown>(
     sql: string,
-    params?: any[],
+    params?: unknown[],
   ): Promise<DatabaseOperationResult<T[]>> {
     return this.query<T>(sql, params);
   }
@@ -385,7 +399,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   async createIndex(
     table: string,
     columns: string[],
-    options?: Record<string, any>,
+    options?: Record<string, unknown>,
   ): Promise<DatabaseOperationResult<void>> {
     const startTime = Date.now();
 
@@ -407,11 +421,11 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         success: true,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "创建索引失败",
+        _error: _error instanceof Error ? _error.message : "创建索引失败",
         executionTime,
       };
     }
@@ -440,11 +454,11 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
         success: true,
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "删除索引失败",
+        _error: _error instanceof Error ? _error.message : "删除索引失败",
         executionTime,
       };
     }
@@ -453,7 +467,7 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   /**
    * 获取表信息
    */
-  async getTableInfo(table: string): Promise<DatabaseOperationResult<any>> {
+  async getTableInfo(table: string): Promise<DatabaseOperationResult<unknown>> {
     const startTime = Date.now();
 
     try {
@@ -481,14 +495,14 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
 
       return {
         success: true,
-        data: result,
+        data: result.data as unknown[],
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "获取表信息失败",
+        _error: _error instanceof Error ? _error.message : "获取表信息失败",
         executionTime,
       };
     }
@@ -497,7 +511,9 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
   /**
    * 获取索引信息
    */
-  async getIndexInfo(table: string): Promise<DatabaseOperationResult<any[]>> {
+  async getIndexInfo(
+    table: string,
+  ): Promise<DatabaseOperationResult<unknown[]>> {
     const startTime = Date.now();
 
     try {
@@ -523,14 +539,14 @@ export class PostgreSQLAdapter implements IPostgreSQLAdapter {
 
       return {
         success: true,
-        data: result,
+        data: result.data as unknown[],
         executionTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const executionTime = Date.now() - startTime;
       return {
         success: false,
-        error: error instanceof Error ? error.message : "获取索引信息失败",
+        _error: _error instanceof Error ? _error.message : "获取索引信息失败",
         executionTime,
       };
     }

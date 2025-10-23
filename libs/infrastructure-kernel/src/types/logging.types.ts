@@ -8,7 +8,7 @@
 /**
  * 日志级别枚举
  */
-export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+export type LogLevel = "trace" | "debug" | "info" | "warn" | "_error" | "fatal";
 
 /**
  * 日志上下文接口
@@ -69,10 +69,10 @@ export interface LoggingService {
     data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录错误日志 */
-  error(
+  _error(
     context: LogContext,
     message: string,
-    error?: Error,
+    _error?: Error,
     data?: Record<string, unknown>,
   ): Promise<void>;
   /** 记录警告日志 */

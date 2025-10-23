@@ -32,14 +32,14 @@ export class IsolationManager implements IIsolationManager {
   /**
    * 注册隔离服务
    */
-  registerService(name: string, service: any): void {
+  registerService(name: string, service: unknown): void {
     this.services.set(name, service);
   }
 
   /**
    * 获取隔离服务
    */
-  getService(name: string): any {
+  getService(name: string): unknown {
     return this.services.get(name);
   }
 
@@ -78,8 +78,8 @@ export class IsolationManager implements IIsolationManager {
           healthChecks[name] = true;
         }
       }
-    } catch (error) {
-      console.error("隔离管理器健康检查失败:", error);
+    } catch (_error) {
+      console.error("隔离管理器健康检查失败:", _error);
       // 设置所有服务为不健康
       for (const key of Object.keys(healthChecks)) {
         healthChecks[key] = false;
@@ -114,9 +114,9 @@ export class IsolationManager implements IIsolationManager {
           registered: Array.from(this.services.keys()),
         },
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取隔离统计失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取隔离统计失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -157,7 +157,7 @@ export class IsolationManager implements IIsolationManager {
    */
   async validateAccess(
     context: IsolationContext,
-    resource: any,
+    resource: unknown,
   ): Promise<boolean> {
     try {
       // 监控访问尝试
@@ -203,8 +203,8 @@ export class IsolationManager implements IIsolationManager {
       } as any);
 
       return hasAccess;
-    } catch (error) {
-      console.error("验证访问权限失败:", error);
+    } catch (_error) {
+      console.error("验证访问权限失败:", _error);
       return false;
     }
   }
@@ -212,7 +212,7 @@ export class IsolationManager implements IIsolationManager {
   /**
    * 应用隔离过滤
    */
-  applyIsolationFilter(query: any, context: IsolationContext): any {
+  applyIsolationFilter(query: unknown, context: IsolationContext): unknown {
     return this.accessControlService.applyIsolationFilter(
       query,
       context as any,
@@ -255,8 +255,8 @@ export class IsolationManager implements IIsolationManager {
         ipAddress: "unknown",
         userAgent: "unknown",
       } as any);
-    } catch (error) {
-      console.error("记录审计事件失败:", error);
+    } catch (_error) {
+      console.error("记录审计事件失败:", _error);
     }
   }
 
@@ -284,8 +284,8 @@ export class IsolationManager implements IIsolationManager {
         timestamp: new Date(),
         details: details || {},
       });
-    } catch (error) {
-      console.error("记录安全事件失败:", error);
+    } catch (_error) {
+      console.error("记录安全事件失败:", _error);
     }
   }
 
@@ -299,7 +299,7 @@ export class IsolationManager implements IIsolationManager {
   /**
    * 获取审计日志
    */
-  async getAuditLogs(filters: any): Promise<any[]> {
+  async getAuditLogs(filters: unknown): Promise<any[]> {
     return await this.auditLogService.query(filters);
   }
 
@@ -336,13 +336,18 @@ export class IsolationManager implements IIsolationManager {
   /**
    * 获取资源类型
    */
-  private getResourceType(resource: any): string {
+  private getResourceType(resource: unknown): string {
     if (typeof resource === "string") {
       return resource;
     }
 
     if (resource && typeof resource === "object") {
-      return resource.type || resource.resourceType || "unknown";
+      const resourceObj = resource as Record<string, unknown>;
+      return (
+        (resourceObj.type as string) ||
+        (resourceObj.resourceType as string) ||
+        "unknown"
+      );
     }
 
     return "unknown";
@@ -351,13 +356,16 @@ export class IsolationManager implements IIsolationManager {
   /**
    * 获取资源ID
    */
-  private getResourceId(resource: any): string {
+  private getResourceId(resource: unknown): string {
     if (typeof resource === "string") {
       return resource;
     }
 
     if (resource && typeof resource === "object") {
-      return resource.id || resource.resourceId || "";
+      const resourceObj = resource as Record<string, unknown>;
+      return (
+        (resourceObj.id as string) || (resourceObj.resourceId as string) || ""
+      );
     }
 
     return "";

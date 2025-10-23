@@ -118,8 +118,8 @@ export class MonitoringDashboardService {
     this.refreshTimer = setInterval(async () => {
       try {
         await this.refreshDashboardData();
-      } catch (error) {
-        console.error("刷新仪表板数据失败:", error);
+      } catch (_error) {
+        console.error("刷新仪表板数据失败:", _error);
       }
     }, this.config.refreshInterval);
   }
@@ -184,9 +184,9 @@ export class MonitoringDashboardService {
         data,
         timeRange,
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取性能趋势数据失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取性能趋势数据失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -212,9 +212,9 @@ export class MonitoringDashboardService {
         },
         status: "up",
       };
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `获取系统概览失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `获取系统概览失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -234,7 +234,7 @@ export class MonitoringDashboardService {
         health: isHealthy,
         responseTime: connectionInfo.responseTime || 0,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         connections: 0,
         queries: 0,
@@ -266,7 +266,7 @@ export class MonitoringDashboardService {
         totalEntries: (await stats).totalEntries || 0,
         memoryUsage: (await stats).memoryUsage || 0,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         hitRate: 0,
         missRate: 0,
@@ -289,7 +289,7 @@ export class MonitoringDashboardService {
         errorCount: Math.floor(Math.random() * 10),
         activeUsers: Math.floor(Math.random() * 1000),
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         requestsPerSecond: 0,
         responseTime: 0,
@@ -323,7 +323,7 @@ export class MonitoringDashboardService {
           timestamp: new Date(),
         },
       ];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -348,7 +348,7 @@ export class MonitoringDashboardService {
           timestamp: new Date(),
         },
       ];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -388,8 +388,8 @@ export class MonitoringDashboardService {
 
       // 更新图表数据
       await this.updateChartData();
-    } catch (error) {
-      console.error("刷新仪表板数据失败:", error);
+    } catch (_error) {
+      console.error("刷新仪表板数据失败:", _error);
     }
   }
 
@@ -444,8 +444,8 @@ export class MonitoringDashboardService {
       };
 
       this.chartData = [performanceChart, resourceChart, databaseChart];
-    } catch (error) {
-      console.error("更新图表数据失败:", error);
+    } catch (_error) {
+      console.error("更新图表数据失败:", _error);
     }
   }
 
@@ -510,7 +510,7 @@ export class MonitoringDashboardService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

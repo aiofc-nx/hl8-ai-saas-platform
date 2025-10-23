@@ -112,8 +112,8 @@ export class PerformanceMonitorService {
     this.monitoringInterval = setInterval(async () => {
       try {
         await this.collectMetrics();
-      } catch (error) {
-        console.error("收集性能指标失败:", error);
+      } catch (_error) {
+        console.error("收集性能指标失败:", _error);
       }
     }, interval);
   }
@@ -134,7 +134,7 @@ export class PerformanceMonitorService {
    */
   async collectMetrics(): Promise<PerformanceMetrics> {
     try {
-      const startTime = Date.now();
+      const _startTime = Date.now();
 
       // 收集各种性能指标
       const responseTime = await this.measureResponseTime();
@@ -171,9 +171,9 @@ export class PerformanceMonitorService {
       await this.logPerformanceMetrics(metrics);
 
       return metrics;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `收集性能指标失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `收集性能指标失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -274,7 +274,7 @@ export class PerformanceMonitorService {
       const startTime = Date.now();
       await this.databaseAdapter.healthCheck();
       return Date.now() - startTime;
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -287,7 +287,7 @@ export class PerformanceMonitorService {
       // 这里可以实现更复杂的吞吐量计算逻辑
       // 暂时返回一个模拟值
       return Math.random() * 1000;
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -300,7 +300,7 @@ export class PerformanceMonitorService {
       // 这里可以实现错误率计算逻辑
       // 暂时返回一个模拟值
       return Math.random() * 0.1;
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -313,7 +313,7 @@ export class PerformanceMonitorService {
       const memUsage = process.memoryUsage();
       const totalMem = os.totalmem();
       return memUsage.heapUsed / totalMem;
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -326,7 +326,7 @@ export class PerformanceMonitorService {
       // 这里可以实现CPU使用率计算逻辑
       // 暂时返回一个模拟值
       return Math.random() * 0.5;
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -337,8 +337,8 @@ export class PerformanceMonitorService {
   private async getDatabaseConnections(): Promise<number> {
     try {
       const connectionInfo = await this.databaseAdapter.getConnectionInfo();
-      return connectionInfo.connections || 0;
-    } catch (error) {
+      return (connectionInfo.connections as number) || 0;
+    } catch (_error) {
       return 0;
     }
   }
@@ -354,7 +354,7 @@ export class PerformanceMonitorService {
 
       const stats = this.cacheService.getStats();
       return (await stats).hitRate || 1;
-    } catch (error) {
+    } catch (_error) {
       return 1;
     }
   }
@@ -435,8 +435,8 @@ export class PerformanceMonitorService {
           "MEDIUM",
         );
       }
-    } catch (error) {
-      console.error("检查阈值失败:", error);
+    } catch (_error) {
+      console.error("检查阈值失败:", _error);
     }
   }
 
@@ -469,8 +469,8 @@ export class PerformanceMonitorService {
 
       // 记录告警日志
       await this.logPerformanceAlert(alert);
-    } catch (error) {
-      console.error("创建告警失败:", error);
+    } catch (_error) {
+      console.error("创建告警失败:", _error);
     }
   }
 
@@ -492,10 +492,14 @@ export class PerformanceMonitorService {
           message: "性能指标收集",
         };
 
-        await this.loggingService.info(logContext, "性能指标收集", metrics as unknown as Record<string, unknown>);
+        await this.loggingService.info(
+          logContext,
+          "性能指标收集",
+          metrics as unknown as Record<string, unknown>,
+        );
       }
-    } catch (error) {
-      console.error("记录性能指标日志失败:", error);
+    } catch (_error) {
+      console.error("记录性能指标日志失败:", _error);
     }
   }
 
@@ -521,8 +525,8 @@ export class PerformanceMonitorService {
           alert as unknown as Record<string, unknown>,
         );
       }
-    } catch (error) {
-      console.error("记录性能告警日志失败:", error);
+    } catch (_error) {
+      console.error("记录性能告警日志失败:", _error);
     }
   }
 
@@ -539,7 +543,7 @@ export class PerformanceMonitorService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

@@ -3,9 +3,73 @@
  * @description 提供系统监控指标接口
  */
 
-import { Controller, Get, Query, HttpStatus, Logger } from "@nestjs/common";
+import { Controller, Get, Query, Logger } from "@nestjs/common";
 import { MonitoringService } from "../services/monitoring.service.js";
 import { RateLimitService } from "../services/rate-limit.service.js";
+
+/**
+ * 性能指标接口
+ * @description 定义性能指标的结构
+ */
+interface PerformanceMetrics {
+  requests?: {
+    total: number;
+    successful: number;
+    failed: number;
+  };
+  responseTime?: {
+    average: number;
+    p95: number;
+    p99: number;
+  };
+  errors?: Record<string, number>;
+  [key: string]: unknown;
+}
+
+/**
+ * 系统指标接口
+ * @description 定义系统指标的结构
+ */
+interface SystemMetrics {
+  cpu?: {
+    usage: number;
+    cores: number;
+  };
+  memory?: {
+    used: number;
+    total: number;
+    free: number;
+  };
+  disk?: {
+    used: number;
+    total: number;
+    free: number;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * 业务指标接口
+ * @description 定义业务指标的结构
+ */
+interface BusinessMetrics {
+  users?: {
+    total: number;
+    active: number;
+    new: number;
+  };
+  orders?: {
+    total: number;
+    pending: number;
+    completed: number;
+  };
+  revenue?: {
+    total: number;
+    monthly: number;
+    daily: number;
+  };
+  [key: string]: unknown;
+}
 
 /**
  * 指标控制器
@@ -28,10 +92,10 @@ export class MetricsController {
    * @returns 性能指标
    */
   @Get("performance")
-  async getPerformanceMetrics(): Promise<any> {
+  async getPerformanceMetrics(): Promise<PerformanceMetrics> {
     try {
       this.logger.debug("Getting performance metrics");
-      return this.monitoringService.getPerformanceMetrics();
+      return this.monitoringService.getPerformanceMetrics() as unknown as PerformanceMetrics;
     } catch (error) {
       this.logger.error(
         `Failed to get performance metrics: ${error instanceof Error ? error.message : String(error)}`,
@@ -46,7 +110,7 @@ export class MetricsController {
    * @returns 系统信息
    */
   @Get("system")
-  async getSystemInfo(): Promise<any> {
+  async getSystemInfo(): Promise<SystemMetrics> {
     try {
       this.logger.debug("Getting system info");
       return this.monitoringService.getSystemInfo();
@@ -69,13 +133,12 @@ export class MetricsController {
   async getMetricData(
     @Query("name") name: string,
     @Query("limit") limit?: number,
-  ): Promise<any> {
+  ): Promise<BusinessMetrics> {
     try {
       this.logger.debug(`Getting metric data for: ${name}`);
 
       if (!name) {
         return {
-          success: false,
           error: {
             code: "MISSING_PARAMETER",
             message: "Metric name is required",
@@ -86,7 +149,6 @@ export class MetricsController {
 
       const data = this.monitoringService.getMetricData(name, limit);
       return {
-        success: true,
         data: {
           name,
           data,
@@ -111,21 +173,12 @@ export class MetricsController {
    * @returns 指标名称列表
    */
   @Get("names")
-  async getMetricNames(): Promise<any> {
+  async getMetricNames(): Promise<string[]> {
     try {
       this.logger.debug("Getting metric names");
       const names = this.monitoringService.getAllMetricNames();
 
-      return {
-        success: true,
-        data: {
-          names,
-          count: names.length,
-        },
-        meta: {
-          timestamp: new Date().toISOString(),
-        },
-      };
+      return names;
     } catch (error) {
       this.logger.error(
         `Failed to get metric names: ${error instanceof Error ? error.message : String(error)}`,
@@ -140,7 +193,7 @@ export class MetricsController {
    * @returns 速率限制统计
    */
   @Get("rate-limit")
-  async getRateLimitStats(): Promise<any> {
+  async getRateLimitStats(): Promise<Record<string, unknown>> {
     try {
       this.logger.debug("Getting rate limit statistics");
       const stats = this.rateLimitService.getStatistics();
@@ -166,7 +219,7 @@ export class MetricsController {
    * @returns 所有指标数据
    */
   @Get("export")
-  async exportMetrics(): Promise<any> {
+  async exportMetrics(): Promise<Record<string, unknown>> {
     try {
       this.logger.debug("Exporting all metrics");
       const metrics = this.monitoringService.exportMetrics();
@@ -193,7 +246,7 @@ export class MetricsController {
    * @returns 重置结果
    */
   @Get("reset")
-  async resetMetrics(): Promise<any> {
+  async resetMetrics(): Promise<{ success: boolean; message: string }> {
     try {
       this.logger.debug("Resetting all metrics");
       this.monitoringService.resetMetrics();
@@ -201,9 +254,6 @@ export class MetricsController {
       return {
         success: true,
         message: "All metrics have been reset",
-        meta: {
-          timestamp: new Date().toISOString(),
-        },
       };
     } catch (error) {
       this.logger.error(
@@ -220,7 +270,9 @@ export class MetricsController {
    * @returns 清理结果
    */
   @Get("cleanup")
-  async cleanupMetrics(@Query("maxAge") maxAge?: number): Promise<any> {
+  async cleanupMetrics(
+    @Query("maxAge") maxAge?: number,
+  ): Promise<{ success: boolean; message: string; cleaned: number }> {
     try {
       this.logger.debug("Cleaning up old metrics");
 
@@ -230,10 +282,7 @@ export class MetricsController {
       return {
         success: true,
         message: `Cleaned up metrics older than ${maxAge || 24} hours`,
-        meta: {
-          timestamp: new Date().toISOString(),
-          maxAge: maxAge || 24,
-        },
+        cleaned: 0, // 实际清理的数量需要从服务获取
       };
     } catch (error) {
       this.logger.error(

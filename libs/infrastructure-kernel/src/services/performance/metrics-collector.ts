@@ -112,8 +112,8 @@ export class MetricsCollectorService {
         try {
           const metrics = await collector();
           allMetrics.push(...metrics);
-        } catch (error) {
-          console.error(`收集器 ${name} 失败:`, error);
+        } catch (_error) {
+          console.error(`收集器 ${name} 失败:`, _error);
         }
       }
 
@@ -127,9 +127,9 @@ export class MetricsCollectorService {
       this.limitMetricsCount();
 
       return allMetrics;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `收集指标失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `收集指标失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -201,7 +201,7 @@ export class MetricsCollectorService {
         max,
         percentiles,
       };
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -287,19 +287,19 @@ export class MetricsCollectorService {
           {
             name: "database_connections",
             type: "gauge" as MetricType,
-            value: connectionInfo.connections || 0,
+            value: (connectionInfo.connections as number) || 0,
             timestamp: new Date(),
             description: "数据库连接数",
           },
           {
             name: "database_health",
             type: "gauge" as MetricType,
-            value: connectionInfo.healthy ? 1 : 0,
+            value: (connectionInfo.healthy as boolean) ? 1 : 0,
             timestamp: new Date(),
             description: "数据库健康状态",
           },
         ];
-      } catch (error) {
+      } catch (_error) {
         return [];
       }
     });
@@ -332,7 +332,7 @@ export class MetricsCollectorService {
               description: "缓存总条目数",
             },
           ];
-        } catch (error) {
+        } catch (_error) {
           return [];
         }
       });
@@ -374,7 +374,7 @@ export class MetricsCollectorService {
             description: "内存使用率",
           },
         ];
-      } catch (error) {
+      } catch (_error) {
         return [];
       }
     });
@@ -408,7 +408,7 @@ export class MetricsCollectorService {
             description: "系统CPU时间",
           },
         ];
-      } catch (error) {
+      } catch (_error) {
         return [];
       }
     });
@@ -461,7 +461,7 @@ export class MetricsCollectorService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.databaseAdapter.healthCheck();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

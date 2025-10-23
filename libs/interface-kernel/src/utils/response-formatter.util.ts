@@ -10,6 +10,41 @@ import type {
 } from "../types/index.js";
 
 /**
+ * 健康检查结果接口
+ * @description 定义健康检查结果的结构
+ */
+interface HealthCheckResult {
+  status: "healthy" | "degraded" | "unhealthy";
+  services: Record<
+    string,
+    {
+      status: string;
+      responseTime?: number;
+      lastCheck?: string;
+    }
+  >;
+  timestamp: string;
+}
+
+/**
+ * 指标数据接口
+ * @description 定义指标数据的结构
+ */
+interface MetricsData {
+  requests: {
+    total: number;
+    successful: number;
+    failed: number;
+  };
+  responseTime: {
+    average: number;
+    p95: number;
+    p99: number;
+  };
+  errors: Record<string, number>;
+}
+
+/**
  * 响应格式化工具类
  * @description 提供统一的API响应格式化功能
  */
@@ -46,7 +81,7 @@ export class ResponseFormatter {
   static error(
     code: string,
     message: string,
-    details?: Record<string, any>,
+    details?: Record<string, unknown>,
     meta?: Partial<ResponseMeta>,
   ): ApiResponse {
     return {
@@ -295,7 +330,7 @@ export class ResponseFormatter {
    * @param health 健康检查结果
    * @returns 格式化的健康检查响应
    */
-  static healthCheck(health: any): ApiResponse {
+  static healthCheck(health: HealthCheckResult): ApiResponse {
     return {
       success: health.status === "healthy" || health.status === "degraded",
       data: health,
@@ -313,7 +348,7 @@ export class ResponseFormatter {
    * @param metrics 指标数据
    * @returns 格式化的指标响应
    */
-  static metrics(metrics: any): ApiResponse {
+  static metrics(metrics: MetricsData): ApiResponse {
     return {
       success: true,
       data: metrics,

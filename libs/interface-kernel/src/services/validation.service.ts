@@ -3,12 +3,23 @@
  * @description 提供数据验证功能，包括请求数据验证、类型检查、业务规则验证等
  */
 
-import { Injectable, Logger, BadRequestException } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { z } from "zod";
+import { GeneralBadRequestException } from "@hl8/exceptions";
 import type {
   ValidationRule,
   InterfaceFastifyRequest,
 } from "../types/index.js";
+
+/**
+ * 验证结果接口
+ * @description 定义验证结果的结构
+ */
+interface ValidationResult {
+  isValid: boolean;
+  data?: Record<string, unknown>;
+  errors?: string[];
+}
 
 /**
  * 数据验证服务
@@ -34,13 +45,17 @@ export class ValidationService {
   async validateRequestData(
     request: InterfaceFastifyRequest,
     schemaName: string,
-  ): Promise<{ isValid: boolean; data?: any; errors?: string[] }> {
+  ): Promise<ValidationResult> {
     try {
       this.logger.debug(`Validating request data with schema: ${schemaName}`);
 
       const schema = this.validationSchemas.get(schemaName);
       if (!schema) {
-        throw new Error(`Validation schema not found: ${schemaName}`);
+        throw new GeneralBadRequestException(
+          "验证模式未找到",
+          `验证模式 "${schemaName}" 不存在`,
+          { schemaName },
+        );
       }
 
       // 获取请求数据
@@ -62,19 +77,30 @@ export class ValidationService {
         this.logger.debug(
           `Request data validation failed: ${errors.join(", ")}`,
         );
-        return {
-          isValid: false,
-          errors,
-        };
+
+        // 抛出验证失败异常
+        throw new GeneralBadRequestException(
+          "数据验证失败",
+          `请求数据验证失败: ${errors.join(", ")}`,
+          { errors, schemaName },
+        );
       }
     } catch (error) {
       this.logger.error(
         `Request data validation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      return {
-        isValid: false,
-        errors: [error instanceof Error ? error.message : String(error)],
-      };
+
+      // 如果是标准异常，直接抛出
+      if (error instanceof GeneralBadRequestException) {
+        throw error;
+      }
+
+      // 其他错误转换为验证失败异常
+      throw new GeneralBadRequestException(
+        "数据验证失败",
+        error instanceof Error ? error.message : String(error),
+        { schemaName },
+      );
     }
   }
 
@@ -88,11 +114,11 @@ export class ValidationService {
   async validateQueryParams(
     request: InterfaceFastifyRequest,
     rules: ValidationRule[],
-  ): Promise<{ isValid: boolean; data?: any; errors?: string[] }> {
+  ): Promise<ValidationResult> {
     try {
       this.logger.debug("Validating query parameters");
 
-      const queryParams = (request as any).query || {};
+      const queryParams = request.query || {};
       const errors: string[] = [];
 
       for (const rule of rules) {
@@ -130,25 +156,34 @@ export class ValidationService {
         this.logger.debug(
           `Query parameter validation failed: ${errors.join(", ")}`,
         );
-        return {
-          isValid: false,
-          errors,
-        };
+        throw new GeneralBadRequestException(
+          "查询参数验证失败",
+          `查询参数验证失败: ${errors.join(", ")}`,
+          { errors, parameterType: "query" },
+        );
       }
 
       this.logger.debug("Query parameter validation successful");
       return {
         isValid: true,
-        data: queryParams,
+        data: queryParams as Record<string, unknown>,
       };
     } catch (error) {
       this.logger.error(
         `Query parameter validation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      return {
-        isValid: false,
-        errors: [error instanceof Error ? error.message : String(error)],
-      };
+
+      // 如果是标准异常，直接抛出
+      if (error instanceof GeneralBadRequestException) {
+        throw error;
+      }
+
+      // 其他错误转换为验证失败异常
+      throw new GeneralBadRequestException(
+        "查询参数验证失败",
+        error instanceof Error ? error.message : String(error),
+        { parameterType: "query" },
+      );
     }
   }
 
@@ -162,11 +197,11 @@ export class ValidationService {
   async validatePathParams(
     request: InterfaceFastifyRequest,
     rules: ValidationRule[],
-  ): Promise<{ isValid: boolean; data?: any; errors?: string[] }> {
+  ): Promise<ValidationResult> {
     try {
       this.logger.debug("Validating path parameters");
 
-      const pathParams = (request as any).params || {};
+      const pathParams = request.params || {};
       const errors: string[] = [];
 
       for (const rule of rules) {
@@ -204,25 +239,34 @@ export class ValidationService {
         this.logger.debug(
           `Path parameter validation failed: ${errors.join(", ")}`,
         );
-        return {
-          isValid: false,
-          errors,
-        };
+        throw new GeneralBadRequestException(
+          "路径参数验证失败",
+          `路径参数验证失败: ${errors.join(", ")}`,
+          { errors, parameterType: "path" },
+        );
       }
 
       this.logger.debug("Path parameter validation successful");
       return {
         isValid: true,
-        data: pathParams,
+        data: pathParams as Record<string, unknown>,
       };
     } catch (error) {
       this.logger.error(
         `Path parameter validation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      return {
-        isValid: false,
-        errors: [error instanceof Error ? error.message : String(error)],
-      };
+
+      // 如果是标准异常，直接抛出
+      if (error instanceof GeneralBadRequestException) {
+        throw error;
+      }
+
+      // 其他错误转换为验证失败异常
+      throw new GeneralBadRequestException(
+        "路径参数验证失败",
+        error instanceof Error ? error.message : String(error),
+        { parameterType: "path" },
+      );
     }
   }
 
@@ -236,11 +280,11 @@ export class ValidationService {
   async validateRequestBody(
     request: InterfaceFastifyRequest,
     rules: ValidationRule[],
-  ): Promise<{ isValid: boolean; data?: any; errors?: string[] }> {
+  ): Promise<ValidationResult> {
     try {
       this.logger.debug("Validating request body");
 
-      const body = (request as any).body || {};
+      const body = request.body || {};
       const errors: string[] = [];
 
       for (const rule of rules) {
@@ -275,25 +319,34 @@ export class ValidationService {
         this.logger.debug(
           `Request body validation failed: ${errors.join(", ")}`,
         );
-        return {
-          isValid: false,
-          errors,
-        };
+        throw new GeneralBadRequestException(
+          "请求体验证失败",
+          `请求体验证失败: ${errors.join(", ")}`,
+          { errors, parameterType: "body" },
+        );
       }
 
       this.logger.debug("Request body validation successful");
       return {
         isValid: true,
-        data: body,
+        data: body as Record<string, unknown>,
       };
     } catch (error) {
       this.logger.error(
         `Request body validation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      return {
-        isValid: false,
-        errors: [error instanceof Error ? error.message : String(error)],
-      };
+
+      // 如果是标准异常，直接抛出
+      if (error instanceof GeneralBadRequestException) {
+        throw error;
+      }
+
+      // 其他错误转换为验证失败异常
+      throw new GeneralBadRequestException(
+        "请求体验证失败",
+        error instanceof Error ? error.message : String(error),
+        { parameterType: "body" },
+      );
     }
   }
 
@@ -304,7 +357,10 @@ export class ValidationService {
    * @param rule 验证规则
    * @returns 错误信息或 null
    */
-  private validateFieldType(value: any, rule: ValidationRule): string | null {
+  private validateFieldType(
+    value: unknown,
+    rule: ValidationRule,
+  ): string | null {
     try {
       switch (rule.type) {
         case "string":
@@ -313,7 +369,7 @@ export class ValidationService {
           }
           break;
         case "number":
-          if (typeof value !== "number" && !/^\d+$/.test(value)) {
+          if (typeof value !== "number" && !/^\d+$/.test(String(value))) {
             return `${rule.field} must be a number`;
           }
           break;
@@ -376,7 +432,10 @@ export class ValidationService {
    * @param rule 验证规则
    * @returns 错误信息或 null
    */
-  private validateFieldValue(value: any, rule: ValidationRule): string | null {
+  private validateFieldValue(
+    value: unknown,
+    rule: ValidationRule,
+  ): string | null {
     try {
       // 验证最小值
       if (rule.min !== undefined) {
@@ -460,9 +519,11 @@ export class ValidationService {
    * @param request 请求对象
    * @returns 请求数据
    */
-  private extractRequestData(request: InterfaceFastifyRequest): any {
+  private extractRequestData(
+    request: InterfaceFastifyRequest,
+  ): Record<string, unknown> {
     // 对于 validateRequestData，我们主要验证请求体中的数据
-    return (request as any).body || {};
+    return (request.body || {}) as Record<string, unknown>;
   }
 
   /**

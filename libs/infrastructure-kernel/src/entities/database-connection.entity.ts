@@ -154,7 +154,7 @@ export class DatabaseConnectionEntity {
    * 获取连接配置对象
    * @returns 连接配置
    */
-  getConnectionConfig(): Record<string, any> {
+  getConnectionConfig(): Record<string, unknown> {
     return {
       host: this.host,
       port: this.port,

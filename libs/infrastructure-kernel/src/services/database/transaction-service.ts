@@ -66,9 +66,9 @@ export interface TransactionOperation {
   /** 表名 */
   table: string;
   /** 数据 */
-  data?: any;
+  data?: unknown;
   /** 条件 */
-  where?: Record<string, any>;
+  where?: Record<string, unknown>;
   /** 时间戳 */
   timestamp: Date;
 }
@@ -120,9 +120,9 @@ export class TransactionService {
       }
 
       return transactionContext;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `开始事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `开始事务失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -148,7 +148,7 @@ export class TransactionService {
       );
 
       // 执行事务提交
-      await connection.transaction(async (trx) => {
+      await connection.transaction(async (_trx) => {
         // 执行所有操作
         for (const operation of transaction.operations) {
           await this.executeOperation(connection, operation);
@@ -162,10 +162,10 @@ export class TransactionService {
 
       // 清理事务
       this.cleanupTransaction(transactionId);
-    } catch (error) {
+    } catch (_error) {
       await this.rollbackTransaction(transactionId);
       throw new Error(
-        `提交事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `提交事务失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -187,9 +187,9 @@ export class TransactionService {
 
       // 清理事务
       this.cleanupTransaction(transactionId);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `回滚事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `回滚事务失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -221,9 +221,9 @@ export class TransactionService {
 
       transaction.operations.push(fullOperation);
       this.activeTransactions.set(transactionId, transaction);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `添加事务操作失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `添加事务操作失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -248,7 +248,7 @@ export class TransactionService {
   /**
    * 获取事务统计信息
    */
-  getTransactionStats(): Record<string, any> {
+  getTransactionStats(): Record<string, unknown> {
     const activeCount = this.getActiveTransactions().length;
     const totalCount = this.activeTransactions.size;
 
@@ -281,7 +281,7 @@ export class TransactionService {
   ): Promise<void> {
     try {
       const transactionId = this.generateTransactionId();
-      const transaction = await this.beginTransaction("distributed", {
+      const _transaction = await this.beginTransaction("distributed", {
         distributed: true,
         timeout: 60000,
       });
@@ -293,9 +293,9 @@ export class TransactionService {
 
       // 提交事务
       await this.commitTransaction(transactionId);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `执行分布式事务失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `执行分布式事务失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -304,23 +304,36 @@ export class TransactionService {
    * 执行操作
    */
   private async executeOperation(
-    connection: any,
+    connection: unknown,
     operation: TransactionOperation,
   ): Promise<void> {
     try {
+      const dbConnection = connection as {
+        batchInsert: (table: string, data: unknown[]) => Promise<void>;
+        batchUpdate: (
+          table: string,
+          data: unknown[],
+          where?: Record<string, unknown>,
+        ) => Promise<void>;
+        batchDelete: (
+          table: string,
+          where?: Record<string, unknown>,
+        ) => Promise<void>;
+      };
+
       switch (operation.type) {
         case "INSERT":
-          await connection.batchInsert(operation.table, [operation.data]);
+          await dbConnection.batchInsert(operation.table, [operation.data]);
           break;
         case "UPDATE":
-          await connection.batchUpdate(
+          await dbConnection.batchUpdate(
             operation.table,
             [operation.data],
             operation.where,
           );
           break;
         case "DELETE":
-          await connection.batchDelete(operation.table, operation.where);
+          await dbConnection.batchDelete(operation.table, operation.where);
           break;
         case "SELECT":
           // SELECT操作通常不需要在事务中执行
@@ -328,9 +341,9 @@ export class TransactionService {
         default:
           throw new Error(`不支持的操作类型: ${operation.type}`);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
-        `执行操作失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `执行操作失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
       );
     }
   }
@@ -401,7 +414,7 @@ export class TransactionService {
       }
 
       return healthChecks;
-    } catch (error) {
+    } catch (_error) {
       return {};
     }
   }
