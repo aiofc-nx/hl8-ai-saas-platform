@@ -4,7 +4,7 @@ import { TenantId } from "../../domain/entities/tenant.entity.js";
 
 /**
  * 缓存服务适配器
- * 
+ *
  * @description 基于@hl8/caching的缓存服务实现，支持多租户隔离
  * @since 1.0.0
  */
@@ -14,21 +14,21 @@ export class CacheServiceAdapter {
 
   /**
    * 获取缓存值
-   * 
+   *
    * @param key - 缓存键
    * @param isolationContext - 隔离上下文
    * @returns 缓存值
    */
   async get<T>(
     key: string,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<T | null> {
     return this.cacheService.get<T>(key, isolationContext);
   }
 
   /**
    * 设置缓存值
-   * 
+   *
    * @param key - 缓存键
    * @param value - 缓存值
    * @param ttl - 生存时间（秒）
@@ -38,41 +38,41 @@ export class CacheServiceAdapter {
     key: string,
     value: T,
     ttl?: number,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<void> {
     await this.cacheService.set(key, value, ttl, isolationContext);
   }
 
   /**
    * 删除缓存
-   * 
+   *
    * @param key - 缓存键
    * @param isolationContext - 隔离上下文
    */
   async delete(
     key: string,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<void> {
     await this.cacheService.delete(key, isolationContext);
   }
 
   /**
    * 检查缓存是否存在
-   * 
+   *
    * @param key - 缓存键
    * @param isolationContext - 隔离上下文
    * @returns 是否存在
    */
   async exists(
     key: string,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<boolean> {
     return this.cacheService.exists(key, isolationContext);
   }
 
   /**
    * 获取或设置缓存
-   * 
+   *
    * @param key - 缓存键
    * @param factory - 值工厂函数
    * @param ttl - 生存时间（秒）
@@ -83,28 +83,28 @@ export class CacheServiceAdapter {
     key: string,
     factory: () => Promise<T>,
     ttl?: number,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<T> {
     return this.cacheService.getOrSet(key, factory, ttl, isolationContext);
   }
 
   /**
    * 批量获取缓存
-   * 
+   *
    * @param keys - 缓存键数组
    * @param isolationContext - 隔离上下文
    * @returns 缓存值映射
    */
   async mget<T>(
     keys: string[],
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<Record<string, T | null>> {
     return this.cacheService.mget<T>(keys, isolationContext);
   }
 
   /**
    * 批量设置缓存
-   * 
+   *
    * @param values - 缓存值映射
    * @param ttl - 生存时间（秒）
    * @param isolationContext - 隔离上下文
@@ -112,27 +112,27 @@ export class CacheServiceAdapter {
   async mset<T>(
     values: Record<string, T>,
     ttl?: number,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<void> {
     await this.cacheService.mset(values, ttl, isolationContext);
   }
 
   /**
    * 清空缓存
-   * 
+   *
    * @param pattern - 键模式
    * @param isolationContext - 隔离上下文
    */
   async clear(
     pattern?: string,
-    isolationContext?: IsolationContext
+    isolationContext?: IsolationContext,
   ): Promise<void> {
     await this.cacheService.clear(pattern, isolationContext);
   }
 
   /**
    * 获取缓存统计信息
-   * 
+   *
    * @param isolationContext - 隔离上下文
    * @returns 统计信息
    */
@@ -142,7 +142,7 @@ export class CacheServiceAdapter {
 
   /**
    * 创建租户隔离上下文
-   * 
+   *
    * @param tenantId - 租户ID
    * @returns 隔离上下文
    */
@@ -154,14 +154,14 @@ export class CacheServiceAdapter {
 
   /**
    * 创建组织隔离上下文
-   * 
+   *
    * @param tenantId - 租户ID
    * @param organizationId - 组织ID
    * @returns 隔离上下文
    */
   createOrganizationContext(
     tenantId: TenantId,
-    organizationId: string
+    organizationId: string,
   ): IsolationContext {
     return {
       tenantId: tenantId.toString(),
@@ -171,7 +171,7 @@ export class CacheServiceAdapter {
 
   /**
    * 创建部门隔离上下文
-   * 
+   *
    * @param tenantId - 租户ID
    * @param organizationId - 组织ID
    * @param departmentId - 部门ID
@@ -180,7 +180,7 @@ export class CacheServiceAdapter {
   createDepartmentContext(
     tenantId: TenantId,
     organizationId: string,
-    departmentId: string
+    departmentId: string,
   ): IsolationContext {
     return {
       tenantId: tenantId.toString(),
@@ -191,7 +191,7 @@ export class CacheServiceAdapter {
 
   /**
    * 创建用户隔离上下文
-   * 
+   *
    * @param tenantId - 租户ID
    * @param organizationId - 组织ID
    * @param departmentId - 部门ID
@@ -202,7 +202,7 @@ export class CacheServiceAdapter {
     tenantId: TenantId,
     organizationId: string,
     departmentId: string,
-    userId: string
+    userId: string,
   ): IsolationContext {
     return {
       tenantId: tenantId.toString(),
@@ -214,7 +214,7 @@ export class CacheServiceAdapter {
 
   /**
    * 缓存租户信息
-   * 
+   *
    * @param tenantId - 租户ID
    * @param tenantData - 租户数据
    * @param ttl - 生存时间（秒）
@@ -222,7 +222,7 @@ export class CacheServiceAdapter {
   async cacheTenant(
     tenantId: TenantId,
     tenantData: unknown,
-    ttl: number = 3600
+    ttl: number = 3600,
   ): Promise<void> {
     const key = `tenant:${tenantId}`;
     const context = this.createTenantContext(tenantId);
@@ -231,7 +231,7 @@ export class CacheServiceAdapter {
 
   /**
    * 获取租户缓存
-   * 
+   *
    * @param tenantId - 租户ID
    * @returns 租户数据
    */
@@ -243,7 +243,7 @@ export class CacheServiceAdapter {
 
   /**
    * 清除租户缓存
-   * 
+   *
    * @param tenantId - 租户ID
    */
   async clearTenantCache(tenantId: TenantId): Promise<void> {
@@ -254,7 +254,7 @@ export class CacheServiceAdapter {
 
   /**
    * 缓存用户会话
-   * 
+   *
    * @param sessionId - 会话ID
    * @param sessionData - 会话数据
    * @param ttl - 生存时间（秒）
@@ -262,7 +262,7 @@ export class CacheServiceAdapter {
   async cacheSession(
     sessionId: string,
     sessionData: unknown,
-    ttl: number = 1800
+    ttl: number = 1800,
   ): Promise<void> {
     const key = `session:${sessionId}`;
     await this.set(key, sessionData, ttl);
@@ -270,7 +270,7 @@ export class CacheServiceAdapter {
 
   /**
    * 获取用户会话
-   * 
+   *
    * @param sessionId - 会话ID
    * @returns 会话数据
    */
@@ -281,7 +281,7 @@ export class CacheServiceAdapter {
 
   /**
    * 清除用户会话
-   * 
+   *
    * @param sessionId - 会话ID
    */
   async clearSession(sessionId: string): Promise<void> {

@@ -5,6 +5,24 @@
  * @since 1.0.0
  */
 
+// 基础值对象
+export { BaseValueObject } from "./base-value-object.js";
+
+// ID值对象
+export { PlatformId } from "./platform-id.vo.js";
+export { TenantId } from "./tenant-id.vo.js";
+export { OrganizationId } from "./organization-id.vo.js";
+export { DepartmentId } from "./department-id.vo.js";
+export { UserId } from "./user-id.vo.js";
+export { RoleId } from "./role-id.vo.js";
+export { CaslAbilityId } from "./casl-ability-id.vo.js";
+
+// 隔离上下文值对象
+export {
+  IsolationContext,
+  type IsolationContextData,
+} from "./isolation-context.vo.js";
+
 // 租户相关值对象
 export { TenantCode } from "./tenant-code.vo.js";
 export { TenantName } from "./tenant-name.vo.js";

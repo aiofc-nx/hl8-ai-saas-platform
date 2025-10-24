@@ -1,4 +1,3 @@
-import { MikroOrmModuleOptions } from "@mikro-orm/core";
 import { Tenant } from "../../domain/entities/tenant.entity.js";
 import { Organization } from "../../domain/entities/organization.entity.js";
 import { User } from "../../domain/entities/user.entity.js";
@@ -10,16 +9,18 @@ import { Role } from "../../domain/entities/role.entity.js";
  * @description 配置MikroORM数据库连接和实体映射
  * @since 1.0.0
  */
-export const mikroOrmConfig: MikroOrmModuleOptions = {
+export const mikroOrmConfig = {
   // 数据库类型
-  type: "postgresql",
+  type: "postgresql" as const,
 
-  // 数据库连接配置
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "5432"),
-  user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "password",
-  dbName: process.env.DB_NAME || "saas_core",
+  // 连接配置
+  connection: {
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "5432"),
+    username: process.env.DB_USER || "postgres",
+    password: process.env.DB_PASSWORD || "password",
+    database: process.env.DB_NAME || "saas_core",
+  },
 
   // 实体配置
   entities: [Tenant, Organization, User, Role],
@@ -27,7 +28,6 @@ export const mikroOrmConfig: MikroOrmModuleOptions = {
   // 迁移配置
   migrations: {
     path: "./src/infrastructure/database/migrations",
-    pattern: /^[\w-]+\d+\.(ts|js)$/,
     transactional: true,
     disableForeignKeys: false,
     allOrNothing: true,
@@ -53,27 +53,6 @@ export const mikroOrmConfig: MikroOrmModuleOptions = {
     if (process.env.NODE_ENV === "development") {
       console.log(message);
     }
-  },
-
-  // 性能优化配置
-  cache: {
-    enabled: true,
-    pretty: process.env.NODE_ENV === "development",
-    adapter: "redis",
-    options: {
-      host: process.env.REDIS_HOST || "localhost",
-      port: parseInt(process.env.REDIS_PORT || "6379"),
-    },
-  },
-
-  // 查询优化
-  resultCache: {
-    expiration: 1000 * 60 * 5, // 5分钟缓存
-    adapter: "redis",
-    options: {
-      host: process.env.REDIS_HOST || "localhost",
-      port: parseInt(process.env.REDIS_PORT || "6379"),
-    },
   },
 
   // 连接池配置
@@ -127,52 +106,16 @@ export const mikroOrmConfig: MikroOrmModuleOptions = {
   // 字符集配置
   charset: "utf8mb4",
 
-  // 索引配置
-  indexes: [
-    {
-      name: "tenant_tenant_id_idx",
-      properties: ["tenantId"],
-    },
-    {
-      name: "organization_tenant_id_idx",
-      properties: ["tenantId"],
-    },
-    {
-      name: "user_tenant_id_idx",
-      properties: ["tenantId"],
-    },
-    {
-      name: "role_tenant_id_idx",
-      properties: ["tenantId"],
-    },
-  ],
-
-  // 约束配置
-  constraints: {
-    foreignKeys: true,
-    checkConstraints: true,
-  },
-
   // 序列化配置
   serialization: {
     includePrimaryKeys: true,
-    includeVersion: true,
-    includeMetadata: true,
+    forceObject: true,
   },
-
-  // 元数据配置
-  metadataProvider: "ReflectMetadataProvider",
 
   // 实体发现配置
   discovery: {
     warnWhenNoEntities: true,
     requireEntitiesArray: true,
     alwaysAnalyseProperties: false,
-  },
-
-  // 性能监控配置
-  performance: {
-    enabled: process.env.NODE_ENV === "development",
-    threshold: 1000, // 1秒阈值
   },
 };

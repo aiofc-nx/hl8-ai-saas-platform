@@ -198,10 +198,10 @@ const tenants = await tenantRepository.findByTenantId(tenantId);
 
 // 创建租户数据，自动设置租户ID
 const newTenant = new Tenant({
-  code: 'new-tenant',
-  name: 'New Tenant',
+  code: "new-tenant",
+  name: "New Tenant",
   type: TenantType.BASIC,
-  tenantId: currentTenantId
+  tenantId: currentTenantId,
 });
 ```
 
@@ -209,14 +209,15 @@ const newTenant = new Tenant({
 
 ```typescript
 // 获取组织数据，自动应用组织级隔离
-const organizations = await organizationRepository.findByOrganizationId(organizationId);
+const organizations =
+  await organizationRepository.findByOrganizationId(organizationId);
 
 // 创建组织数据，自动设置组织ID
 const newOrganization = new Organization({
-  name: 'New Organization',
+  name: "New Organization",
   type: OrganizationType.COMMITTEE,
   tenantId: currentTenantId,
-  organizationId: currentOrganizationId
+  organizationId: currentOrganizationId,
 });
 ```
 
@@ -228,11 +229,11 @@ const departments = await departmentRepository.findByDepartmentId(departmentId);
 
 // 创建部门数据，自动设置部门ID
 const newDepartment = new Department({
-  name: 'New Department',
-  code: 'new-dept',
+  name: "New Department",
+  code: "new-dept",
   tenantId: currentTenantId,
   organizationId: currentOrganizationId,
-  departmentId: currentDepartmentId
+  departmentId: currentDepartmentId,
 });
 ```
 
@@ -270,19 +271,21 @@ export class TenantCreatedEventHandler {
 ### 1. 单元测试
 
 ```typescript
-describe('TenantAggregate', () => {
-  it('应该能够创建租户', () => {
+describe("TenantAggregate", () => {
+  it("应该能够创建租户", () => {
     const command = new CreateTenantCommand({
-      code: 'test-tenant',
-      name: 'Test Tenant',
-      type: TenantType.BASIC
+      code: "test-tenant",
+      name: "Test Tenant",
+      type: TenantType.BASIC,
     });
 
     const aggregate = new TenantAggregate();
     aggregate.createTenant(command);
 
     expect(aggregate.getUncommittedEvents()).toHaveLength(1);
-    expect(aggregate.getUncommittedEvents()[0]).toBeInstanceOf(TenantCreatedEvent);
+    expect(aggregate.getUncommittedEvents()[0]).toBeInstanceOf(
+      TenantCreatedEvent,
+    );
   });
 });
 ```
@@ -290,19 +293,19 @@ describe('TenantAggregate', () => {
 ### 2. 集成测试
 
 ```typescript
-describe('Tenant Management Integration', () => {
-  it('应该能够创建和查询租户', async () => {
+describe("Tenant Management Integration", () => {
+  it("应该能够创建和查询租户", async () => {
     // 创建租户
     const tenant = await tenantService.createTenant({
-      code: 'integration-test',
-      name: 'Integration Test Tenant',
-      type: TenantType.BASIC
+      code: "integration-test",
+      name: "Integration Test Tenant",
+      type: TenantType.BASIC,
     });
 
     // 查询租户
     const foundTenant = await tenantService.getTenant(tenant.id);
     expect(foundTenant).toBeDefined();
-    expect(foundTenant.code).toBe('integration-test');
+    expect(foundTenant.code).toBe("integration-test");
   });
 });
 ```

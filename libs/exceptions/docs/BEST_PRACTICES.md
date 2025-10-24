@@ -24,13 +24,22 @@
 // ✅ 好的做法
 class UserNotFoundException extends UserException {
   constructor(userId: string, data?: Record<string, unknown>) {
-    super("USER_NOT_FOUND", "用户未找到", `ID 为 "${userId}" 的用户不存在`, 404, { userId, ...data });
+    super(
+      "USER_NOT_FOUND",
+      "用户未找到",
+      `ID 为 "${userId}" 的用户不存在`,
+      404,
+      { userId, ...data },
+    );
   }
 }
 
 // ❌ 不好的做法
 class UserException extends AbstractHttpException {
-  constructor(type: 'not_found' | 'already_exists' | 'invalid_status', ...args: any[]) {
+  constructor(
+    type: "not_found" | "already_exists" | "invalid_status",
+    ...args: any[]
+  ) {
     // 一个异常类处理多种情况
   }
 }
@@ -44,7 +53,7 @@ class UserException extends AbstractHttpException {
 // ✅ 好的做法
 throw new ValidationFailedException("email", "邮箱格式无效", {
   providedValue: "invalid-email",
-  expectedFormat: "user@example.com"
+  expectedFormat: "user@example.com",
 });
 
 // ❌ 不好的做法
@@ -62,7 +71,7 @@ throw new AuthenticationFailedException("密码错误", {
   attemptCount: 3,
   lastAttemptTime: new Date(),
   ipAddress: request.ip,
-  userAgent: request.headers['user-agent']
+  userAgent: request.headers["user-agent"],
 });
 ```
 
@@ -83,7 +92,10 @@ throw new UserAlreadyExistsException(email, "email");
 
 // 数据验证相关
 throw new ValidationFailedException("email", "邮箱格式无效");
-throw new BusinessRuleViolationException("ORDER_AMOUNT_LIMIT", "订单金额超过限制");
+throw new BusinessRuleViolationException(
+  "ORDER_AMOUNT_LIMIT",
+  "订单金额超过限制",
+);
 
 // 系统资源相关
 throw new RateLimitExceededException("API请求频率超出限制");
@@ -117,10 +129,16 @@ class ExternalServiceUnavailableException extends IntegrationException {} // 继
 try {
   await this.externalService.call();
 } catch (error) {
-  throw new ExternalServiceUnavailableException("payment-gateway", "服务调用失败", {
-    serviceUrl: this.externalService.url,
-    requestId: request.id
-  }, "https://docs.hl8.com/errors#INTEGRATION_EXTERNAL_SERVICE_UNAVAILABLE", error);
+  throw new ExternalServiceUnavailableException(
+    "payment-gateway",
+    "服务调用失败",
+    {
+      serviceUrl: this.externalService.url,
+      requestId: request.id,
+    },
+    "https://docs.hl8.com/errors#INTEGRATION_EXTERNAL_SERVICE_UNAVAILABLE",
+    error,
+  );
 }
 ```
 
@@ -166,7 +184,10 @@ throw new DataIsolationViolationException("违反了数据隔离规则");
 
 // 数据验证异常
 throw new ValidationFailedException("email", "邮箱格式无效");
-throw new BusinessRuleViolationException("ORDER_AMOUNT_LIMIT", "订单金额超过限制");
+throw new BusinessRuleViolationException(
+  "ORDER_AMOUNT_LIMIT",
+  "订单金额超过限制",
+);
 
 // 业务逻辑异常
 throw new OperationFailedException("order_creation", "订单创建失败");
@@ -183,7 +204,10 @@ throw new RateLimitExceededException("API请求频率超出限制");
 throw new ServiceUnavailableException("数据库连接超时");
 
 // 集成异常
-throw new ExternalServiceUnavailableException("payment-gateway", "支付网关服务不可用");
+throw new ExternalServiceUnavailableException(
+  "payment-gateway",
+  "支付网关服务不可用",
+);
 throw new ExternalServiceTimeoutException("payment-gateway", 5000);
 ```
 
@@ -197,7 +221,7 @@ throw new ExternalServiceTimeoutException("payment-gateway", 5000);
 // ✅ 好的做法
 class ExceptionFactory {
   private static readonly userNotFound = new UserNotFoundException("template");
-  
+
   static createUserNotFound(userId: string): UserNotFoundException {
     return new UserNotFoundException(userId);
   }
@@ -213,7 +237,7 @@ class ExceptionFactory {
 throw new ValidationFailedException("email", "邮箱格式无效", {
   providedValue: email,
   validationRules: () => this.getValidationRules("email"), // 延迟计算
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 ```
 
@@ -227,12 +251,12 @@ async validateUser(userId: string): Promise<User> {
   if (!userId) {
     throw new ValidationFailedException("userId", "用户ID不能为空");
   }
-  
+
   const user = await this.userRepository.findById(userId);
   if (!user) {
     throw new UserNotFoundException(userId);
   }
-  
+
   return user;
 }
 ```
@@ -253,7 +277,7 @@ throw new AuthenticationFailedException("认证失败", {
 // ❌ 不好的做法
 throw new AuthenticationFailedException("认证失败", {
   password: userInput.password, // 敏感信息泄露
-  token: authToken
+  token: authToken,
 });
 ```
 
@@ -297,17 +321,19 @@ const sanitizedData = {
 describe("UserNotFoundException", () => {
   it("应该创建基本异常实例", () => {
     const exception = new UserNotFoundException("user-123");
-    
+
     expect(exception.errorCode).toBe("USER_NOT_FOUND");
     expect(exception.title).toBe("用户未找到");
     expect(exception.httpStatus).toBe(404);
   });
-  
+
   it("应该转换为RFC7807格式", () => {
     const exception = new UserNotFoundException("user-123");
     const problemDetails = exception.toRFC7807();
-    
-    expect(problemDetails.type).toBe("https://docs.hl8.com/errors#USER_NOT_FOUND");
+
+    expect(problemDetails.type).toBe(
+      "https://docs.hl8.com/errors#USER_NOT_FOUND",
+    );
     expect(problemDetails.status).toBe(404);
   });
 });
@@ -323,7 +349,7 @@ describe("HttpExceptionFilter", () => {
     const response = await request(app.getHttpServer())
       .get("/users/invalid-id")
       .expect(404);
-    
+
     expect(response.body).toEqual({
       type: "https://docs.hl8.com/errors#USER_NOT_FOUND",
       title: "用户未找到",
@@ -331,7 +357,7 @@ describe("HttpExceptionFilter", () => {
       status: 404,
       errorCode: "USER_NOT_FOUND",
       instance: expect.any(String),
-      data: { userId: "invalid-id" }
+      data: { userId: "invalid-id" },
     });
   });
 });
@@ -345,11 +371,11 @@ describe("HttpExceptionFilter", () => {
 describe("异常处理性能", () => {
   it("异常创建性能测试", () => {
     const start = performance.now();
-    
+
     for (let i = 0; i < 1000; i++) {
       new UserNotFoundException(`user-${i}`);
     }
-    
+
     const end = performance.now();
     expect(end - start).toBeLessThan(100); // 1000次异常创建应在100ms内完成
   });
@@ -403,7 +429,9 @@ try {
   await this.riskyOperation();
 } catch (error) {
   this.logger.error("操作失败", error.stack, { operation: "riskyOperation" });
-  throw new OperationFailedException("risky_operation", "操作执行失败", { originalError: error.message });
+  throw new OperationFailedException("risky_operation", "操作执行失败", {
+    originalError: error.message,
+  });
 }
 ```
 
@@ -419,7 +447,7 @@ throw new ValidationFailedException("field", "invalid");
 throw new ValidationFailedException("email", "邮箱格式无效", {
   providedValue: "invalid-email",
   expectedFormat: "user@example.com",
-  validationRule: "email_format"
+  validationRule: "email_format",
 });
 ```
 

@@ -51,8 +51,8 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseDynamicConfig(config: any): Record<string, any> {
   // 添加运行时类型验证
-  if (typeof config !== 'object' || config === null) {
-    throw new Error('配置必须是对象类型');
+  if (typeof config !== "object" || config === null) {
+    throw new Error("配置必须是对象类型");
   }
   return config;
 }
@@ -78,22 +78,22 @@ function parseDynamicConfig(config: any): Record<string, any> {
 #### 测试示例
 
 ```typescript
-describe('parseDynamicConfig', () => {
-  it('should parse valid config object', () => {
-    const config = { name: 'test', value: 123 };
+describe("parseDynamicConfig", () => {
+  it("should parse valid config object", () => {
+    const config = { name: "test", value: 123 };
     const result = parseDynamicConfig(config);
     expect(result).toEqual(config);
   });
 
-  it('should throw error for invalid config', () => {
-    expect(() => parseDynamicConfig(null)).toThrow('配置必须是对象类型');
-    expect(() => parseDynamicConfig('invalid')).toThrow('配置必须是对象类型');
+  it("should throw error for invalid config", () => {
+    expect(() => parseDynamicConfig(null)).toThrow("配置必须是对象类型");
+    expect(() => parseDynamicConfig("invalid")).toThrow("配置必须是对象类型");
   });
 
-  it('should handle nested objects', () => {
-    const config = { nested: { value: 'test' } };
+  it("should handle nested objects", () => {
+    const config = { nested: { value: "test" } };
     const result = parseDynamicConfig(config);
-    expect(result.nested.value).toBe('test');
+    expect(result.nested.value).toBe("test");
   });
 });
 ```
@@ -217,10 +217,10 @@ function analyzeTypeUsage(sourceCode: string): TypeUsageStats {
 interface ImprovementPlan {
   id: string;
   description: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   estimatedEffort: number;
   targetDate: Date;
-  status: 'planned' | 'in-progress' | 'completed';
+  status: "planned" | "in-progress" | "completed";
 }
 ```
 

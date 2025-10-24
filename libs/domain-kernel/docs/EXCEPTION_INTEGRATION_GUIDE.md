@@ -44,29 +44,27 @@ export class DomainException extends Error {
 
 ```typescript
 const exception = new BusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效',
-  { email: 'invalid-email' }
+  "INVALID_EMAIL",
+  "邮箱格式无效",
+  { email: "invalid-email" },
 );
 ```
 
 **验证异常 (`ValidationException`)**
 
 ```typescript
-const exception = new ValidationException(
-  'email',
-  '邮箱格式无效',
-  { providedValue: 'invalid-email' }
-);
+const exception = new ValidationException("email", "邮箱格式无效", {
+  providedValue: "invalid-email",
+});
 ```
 
 **租户隔离异常 (`TenantIsolationException`)**
 
 ```typescript
 const exception = new TenantIsolationException(
-  '跨租户访问被拒绝',
-  'CROSS_TENANT_ACCESS',
-  { currentTenantId: 'tenant1', targetTenantId: 'tenant2' }
+  "跨租户访问被拒绝",
+  "CROSS_TENANT_ACCESS",
+  { currentTenantId: "tenant1", targetTenantId: "tenant2" },
 );
 ```
 
@@ -74,7 +72,8 @@ const exception = new TenantIsolationException(
 
 ```typescript
 // 转换领域异常为HTTP异常
-const httpException = ExceptionConverter.convertToHttpException(domainException);
+const httpException =
+  ExceptionConverter.convertToHttpException(domainException);
 
 // 转换业务规则验证结果
 const exceptions = ExceptionConverter.convertValidationResult(result);
@@ -96,7 +95,7 @@ class UserRegistrationBusinessRule extends BusinessRuleValidator {
       throw new BusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        firstError.context
+        firstError.context,
       );
     }
   }
@@ -108,20 +107,20 @@ class UserRegistrationBusinessRule extends BusinessRuleValidator {
 ### 1. 创建异常
 
 ```typescript
-import { BusinessRuleViolationException } from '@hl8/domain-kernel';
+import { BusinessRuleViolationException } from "@hl8/domain-kernel";
 
 // 创建业务规则违规异常
 const exception = new BusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效',
-  { email: 'invalid-email' }
+  "INVALID_EMAIL",
+  "邮箱格式无效",
+  { email: "invalid-email" },
 );
 ```
 
 ### 2. 异常转换
 
 ```typescript
-import { ExceptionConverter } from '@hl8/domain-kernel';
+import { ExceptionConverter } from "@hl8/domain-kernel";
 
 // 转换为HTTP异常
 const httpException = exception.toHttpException();
@@ -133,18 +132,18 @@ const rfc7807 = exception.toRFC7807();
 ### 3. 业务规则验证
 
 ```typescript
-import { UserRegistrationBusinessRule } from '@hl8/domain-kernel';
+import { UserRegistrationBusinessRule } from "@hl8/domain-kernel";
 
 const validator = new UserRegistrationBusinessRule();
 
 // 验证并抛出异常
 validator.validateUserRegistrationAndThrow({
-  operation: 'user_registration',
+  operation: "user_registration",
   userData: {
-    email: 'invalid-email',
-    username: 'testuser',
-    password: 'weak'
-  }
+    email: "invalid-email",
+    username: "testuser",
+    password: "weak",
+  },
 });
 ```
 
@@ -172,14 +171,14 @@ try {
 ```typescript
 // 原有用法仍然支持
 const error = new IsolationValidationError(
-  '租户 ID 必须是非空字符串',
-  'INVALID_TENANT_ID',
-  { value: '' }
+  "租户 ID 必须是非空字符串",
+  "INVALID_TENANT_ID",
+  { value: "" },
 );
 
 // 现在支持新异常体系的功能
-expect(error.getCategory()).toBe('tenant');
-expect(error.getLayer()).toBe('domain');
+expect(error.getCategory()).toBe("tenant");
+expect(error.getLayer()).toBe("domain");
 ```
 
 ## 测试覆盖
@@ -287,11 +286,11 @@ const supportedTypes = ExceptionConverter.getSupportedExceptionTypes();
 ```typescript
 // 获取异常详细信息
 const info = exception.getExceptionInfo();
-console.log('异常信息:', info);
+console.log("异常信息:", info);
 
 // 检查异常转换能力
 const canConvert = ExceptionConverter.canConvert();
-console.log('转换能力:', canConvert);
+console.log("转换能力:", canConvert);
 ```
 
 ## 总结

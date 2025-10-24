@@ -29,8 +29,11 @@ describe("Interface Kernel Integration Tests", () => {
     }).compile();
 
     apiGatewayService = module.get<ApiGatewayService>(ApiGatewayService);
-    authenticationService = module.get<AuthenticationService>(AuthenticationService);
-    authorizationService = module.get<AuthorizationService>(AuthorizationService);
+    authenticationService = module.get<AuthenticationService>(
+      AuthenticationService,
+    );
+    authorizationService =
+      module.get<AuthorizationService>(AuthorizationService);
     validationService = module.get<ValidationService>(ValidationService);
   });
 
@@ -48,13 +51,13 @@ describe("Interface Kernel Integration Tests", () => {
       } as any;
 
       await expect(
-        apiGatewayService.handleHttpRequest(mockRequest, {} as any)
+        apiGatewayService.handleHttpRequest(mockRequest, {} as any),
       ).rejects.toThrow(InterfaceLayerException);
     });
 
     it("should throw AuthenticationFailedException for invalid credentials", async () => {
       await expect(
-        authenticationService.validateUser("invalid@test.com", "wrongpassword")
+        authenticationService.validateUser("invalid@test.com", "wrongpassword"),
       ).resolves.toBeNull();
     });
 
@@ -65,7 +68,7 @@ describe("Interface Kernel Integration Tests", () => {
       } as any;
 
       await expect(
-        validationService.validateRequestData(mockRequest, "userCreate")
+        validationService.validateRequestData(mockRequest, "userCreate"),
       ).rejects.toThrow(ValidationFailedException);
     });
 
@@ -90,7 +93,12 @@ describe("Interface Kernel Integration Tests", () => {
       };
 
       await expect(
-        authorizationService.checkPermission(mockUser, "users", "read", mockContext)
+        authorizationService.checkPermission(
+          mockUser,
+          "users",
+          "read",
+          mockContext,
+        ),
       ).rejects.toThrow(InsufficientPermissionsException);
     });
   });

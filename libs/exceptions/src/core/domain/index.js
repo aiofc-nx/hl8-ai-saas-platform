@@ -6,14 +6,14 @@ import { DomainBusinessRuleViolationException } from "./business-rule-violation.
 import { DomainValidationException } from "./validation.exception.js";
 import { DomainTenantIsolationException } from "./tenant-isolation.exception.js";
 export class DomainExceptionFactory {
-    static createBusinessRuleViolation(ruleCode, message, context) {
-        return new DomainBusinessRuleViolationException(ruleCode, message, context);
-    }
-    static createValidation(field, message, context) {
-        return new DomainValidationException(field, message, context);
-    }
-    static createTenantIsolation(message, code, context) {
-        return new DomainTenantIsolationException(message, code, context);
-    }
+  static createBusinessRuleViolation(ruleCode, message, context) {
+    return new DomainBusinessRuleViolationException(ruleCode, message, context);
+  }
+  static createValidation(field, message, context) {
+    return new DomainValidationException(field, message, context);
+  }
+  static createTenantIsolation(message, code, context) {
+    return new DomainTenantIsolationException(message, code, context);
+  }
 }
 //# sourceMappingURL=index.js.map

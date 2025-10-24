@@ -7,3 +7,9 @@
 
 // 租户聚合根
 export { TenantAggregate } from "./tenant.aggregate.js";
+
+// 组织聚合根
+export { OrganizationAggregate } from "./organization.aggregate.js";
+
+// 部门聚合根
+export { DepartmentAggregate } from "./department.aggregate.js";

@@ -49,11 +49,11 @@ libs/exceptions/
 
 #### 异常类映射
 
-| domain-kernel 异常类 | libs/exceptions 异常类 | 说明 |
-|---------------------|----------------------|------|
+| domain-kernel 异常类                   | libs/exceptions 异常类                 | 说明                   |
+| -------------------------------------- | -------------------------------------- | ---------------------- |
 | `DomainBusinessRuleViolationException` | `DomainBusinessRuleViolationException` | 迁移到 libs/exceptions |
-| `DomainValidationException` | `DomainValidationException` | 迁移到 libs/exceptions |
-| `DomainTenantIsolationException` | `DomainTenantIsolationException` | 迁移到 libs/exceptions |
+| `DomainValidationException`            | `DomainValidationException`            | 迁移到 libs/exceptions |
+| `DomainTenantIsolationException`       | `DomainTenantIsolationException`       | 迁移到 libs/exceptions |
 
 ## 实施步骤
 
@@ -150,25 +150,25 @@ export class IsolationValidationError extends DomainTenantIsolationException {
 
 ```typescript
 // 导入领域层异常
-import { 
+import {
   DomainBusinessRuleViolationException,
   DomainValidationException,
   DomainTenantIsolationException,
-  DomainExceptionFactory
+  DomainExceptionFactory,
 } from "@hl8/exceptions/core/domain";
 
 // 创建业务规则违规异常
 const businessException = new DomainBusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效',
-  { email: 'invalid-email' }
+  "INVALID_EMAIL",
+  "邮箱格式无效",
+  { email: "invalid-email" },
 );
 
 // 使用工厂方法创建异常
 const validationException = DomainExceptionFactory.createValidation(
-  'email',
-  '邮箱格式无效',
-  { providedValue: 'invalid-email' }
+  "email",
+  "邮箱格式无效",
+  { providedValue: "invalid-email" },
 );
 ```
 
@@ -185,7 +185,7 @@ class UserRegistrationBusinessRule extends BusinessRuleValidator {
       throw new DomainBusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        firstError.context
+        firstError.context,
       );
     }
   }
@@ -199,8 +199,8 @@ import { DomainBusinessRuleViolationException } from "@hl8/exceptions/core/domai
 
 // 领域层异常转换为HTTP异常
 const domainException = new DomainBusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效'
+  "INVALID_EMAIL",
+  "邮箱格式无效",
 );
 
 // 转换为HTTP异常（如果 libs/exceptions 可用）
@@ -214,16 +214,16 @@ const httpException = domainException.toHttpException();
 ```typescript
 import { DomainBusinessRuleViolationException } from "@hl8/exceptions/core/domain";
 
-describe('DomainBusinessRuleViolationException', () => {
-  it('应该创建异常实例', () => {
+describe("DomainBusinessRuleViolationException", () => {
+  it("应该创建异常实例", () => {
     const exception = new DomainBusinessRuleViolationException(
-      'INVALID_EMAIL',
-      '邮箱格式无效',
-      { email: 'invalid-email' }
+      "INVALID_EMAIL",
+      "邮箱格式无效",
+      { email: "invalid-email" },
     );
 
-    expect(exception.errorCode).toBe('BUSINESS_RULE_VIOLATION');
-    expect(exception.detail).toBe('邮箱格式无效');
+    expect(exception.errorCode).toBe("BUSINESS_RULE_VIOLATION");
+    expect(exception.detail).toBe("邮箱格式无效");
     expect(exception.status).toBe(422);
   });
 });
@@ -234,12 +234,12 @@ describe('DomainBusinessRuleViolationException', () => {
 ```typescript
 import { DomainExceptionFactory } from "@hl8/exceptions/core/domain";
 
-describe('DomainExceptionFactory', () => {
-  it('应该创建业务规则违规异常', () => {
+describe("DomainExceptionFactory", () => {
+  it("应该创建业务规则违规异常", () => {
     const exception = DomainExceptionFactory.createBusinessRuleViolation(
-      'INVALID_EMAIL',
-      '邮箱格式无效',
-      { email: 'invalid-email' }
+      "INVALID_EMAIL",
+      "邮箱格式无效",
+      { email: "invalid-email" },
     );
 
     expect(exception).toBeInstanceOf(DomainBusinessRuleViolationException);

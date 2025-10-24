@@ -117,7 +117,7 @@ import {
   DatabaseConnectionException,
   CacheOperationException,
   NetworkConnectionException,
-  DataIsolationViolationException
+  DataIsolationViolationException,
 } from "@hl8/exceptions";
 
 export const InfrastructureExceptionMapping = {
@@ -126,7 +126,7 @@ export const InfrastructureExceptionMapping = {
   NETWORK: NetworkConnectionException,
   ISOLATION: DataIsolationViolationException,
   SYSTEM: SystemInternalException,
-  INFRASTRUCTURE: InfrastructureLayerException
+  INFRASTRUCTURE: InfrastructureLayerException,
 };
 ```
 
@@ -138,7 +138,7 @@ export class InfrastructureExceptionConverter {
   static convertToStandardException(
     error: Error,
     type: keyof typeof InfrastructureExceptionMapping,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): InfrastructureLayerException {
     const ExceptionClass = InfrastructureExceptionMapping[type];
     return new ExceptionClass(
@@ -147,8 +147,8 @@ export class InfrastructureExceptionConverter {
       {
         originalError: error.message,
         stack: error.stack,
-        ...context
-      }
+        ...context,
+      },
     );
   }
 }
@@ -166,14 +166,15 @@ import { InfrastructureExceptionConverter } from "../../exceptions/exception-con
 export class EnhancedErrorHandlerService extends ErrorHandlerService {
   async handleError(
     error: Error,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): Promise<ErrorHandleResult> {
     // 转换为标准异常
-    const standardException = InfrastructureExceptionConverter.convertToStandardException(
-      error,
-      this.determineErrorType(error),
-      context
-    );
+    const standardException =
+      InfrastructureExceptionConverter.convertToStandardException(
+        error,
+        this.determineErrorType(error),
+        context,
+      );
 
     // 调用父类处理
     return await super.handleError(standardException, context);
@@ -197,8 +198,8 @@ export class DatabaseService {
         `获取数据库连接失败: ${error instanceof Error ? error.message : "未知错误"}`,
         {
           connectionName: name,
-          originalError: error instanceof Error ? error.message : "未知错误"
-        }
+          originalError: error instanceof Error ? error.message : "未知错误",
+        },
       );
     }
   }
@@ -218,7 +219,7 @@ describe("DatabaseConnectionException", () => {
     const exception = new DatabaseConnectionException(
       "连接失败",
       "数据库连接失败",
-      { connectionName: "test-db" }
+      { connectionName: "test-db" },
     );
 
     expect(exception.title).toBe("连接失败");
@@ -236,9 +237,9 @@ describe("DatabaseConnectionException", () => {
 describe("Exception Integration", () => {
   it("should handle database connection errors correctly", async () => {
     const databaseService = new DatabaseService(mockConnectionManager);
-    
+
     await expect(
-      databaseService.getConnection("invalid-connection")
+      databaseService.getConnection("invalid-connection"),
     ).rejects.toThrow(DatabaseConnectionException);
   });
 });

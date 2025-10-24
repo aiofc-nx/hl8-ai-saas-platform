@@ -14,7 +14,7 @@ Implementation tasks for SAAS Core module with integrated CASL (Code Access Secu
 ### User Story Completion Order
 
 1. **User Story 1** (P1) - Multi-Tenant Architecture Documentation
-2. **User Story 2** (P1) - Tenant Lifecycle Management Documentation  
+2. **User Story 2** (P1) - Tenant Lifecycle Management Documentation
 3. **User Story 3** (P1) - Organization and Department Structure Documentation
 4. **User Story 4** (P1) - Permission and Access Control Documentation
 5. **User Story 5** (P2) - Business Rules and Validation Documentation
@@ -102,35 +102,35 @@ Multi-tenant architecture supports Platform/Tenant/Organization/Department/User 
 
 ### Domain Layer Tasks
 
-- [ ] T021 [US1] Create PlatformId value object in src/domain/value-objects/platform-id.vo.ts
-- [ ] T022 [US1] Create TenantId value object in src/domain/value-objects/tenant-id.vo.ts
-- [ ] T023 [US1] Create OrganizationId value object in src/domain/value-objects/organization-id.vo.ts
-- [ ] T024 [US1] Create DepartmentId value object in src/domain/value-objects/department-id.vo.ts
-- [ ] T025 [US1] Create UserId value object in src/domain/value-objects/user-id.vo.ts
-- [ ] T026 [US1] Create IsolationContext value object in src/domain/value-objects/isolation-context.vo.ts
-- [ ] T027 [US1] Create RoleId value object in src/domain/value-objects/role-id.vo.ts
-- [ ] T028 [US1] Create CaslAbilityId value object in src/domain/value-objects/casl-ability-id.vo.ts
-- [ ] T029 [US1] Create Platform entity in src/domain/entities/platform.entity.ts
+- [x] T021 [US1] Create PlatformId value object in src/domain/value-objects/platform-id.vo.ts
+- [x] T022 [US1] Create TenantId value object in src/domain/value-objects/tenant-id.vo.ts
+- [x] T023 [US1] Create OrganizationId value object in src/domain/value-objects/organization-id.vo.ts
+- [x] T024 [US1] Create DepartmentId value object in src/domain/value-objects/department-id.vo.ts
+- [x] T025 [US1] Create UserId value object in src/domain/value-objects/user-id.vo.ts
+- [x] T026 [US1] Create IsolationContext value object in src/domain/value-objects/isolation-context.vo.ts
+- [x] T027 [US1] Create RoleId value object in src/domain/value-objects/role-id.vo.ts
+- [x] T028 [US1] Create CaslAbilityId value object in src/domain/value-objects/casl-ability-id.vo.ts
+- [x] T029 [US1] Create Platform entity in src/domain/entities/platform.entity.ts
 - [x] T030 [US1] Create Tenant entity in src/domain/entities/tenant.entity.ts
 - [x] T031 [US1] Create Organization entity in src/domain/entities/organization.entity.ts
-- [ ] T032 [US1] Create Department entity in src/domain/entities/department.entity.ts
+- [x] T032 [US1] Create Department entity in src/domain/entities/department.entity.ts
 - [x] T033 [US1] Create User entity in src/domain/entities/user.entity.ts
 - [x] T034 [US1] Create Role entity in src/domain/entities/role.entity.ts
-- [ ] T035 [US1] Create CaslAbility entity in src/domain/entities/casl-ability.entity.ts
+- [x] T035 [US1] Create CaslAbility entity in src/domain/entities/casl-ability.entity.ts
 
 ### Application Layer Tasks
 
-- [ ] T036 [US1] Create GetTenantQuery in src/application/queries/get-tenant.query.ts
-- [ ] T037 [US1] Create ListTenantsQuery in src/application/queries/list-tenants.query.ts
-- [ ] T038 [US1] Create GetTenantHandler in src/application/handlers/get-tenant.handler.ts
-- [ ] T039 [US1] Create ListTenantsHandler in src/application/handlers/list-tenants.handler.ts
+- [x] T036 [US1] Create GetTenantQuery in src/application/queries/get-tenant.query.ts
+- [x] T037 [US1] Create ListTenantsQuery in src/application/queries/list-tenants.query.ts
+- [x] T038 [US1] Create GetTenantHandler in src/application/handlers/get-tenant.handler.ts
+- [x] T039 [US1] Create ListTenantsHandler in src/application/handlers/list-tenants.handler.ts
 - [ ] T040 [US1] Create CheckPermissionQuery in src/application/queries/check-permission.query.ts
 - [ ] T041 [US1] Create CheckPermissionHandler in src/application/handlers/check-permission.handler.ts
 
 ### Infrastructure Layer Tasks
 
 - [ ] T042 [US1] Create TenantRepository interface in src/domain/repositories/tenant.repository.ts
-- [ ] T043 [US1] Create TenantRepositoryImpl in src/infrastructure/repositories/tenant.repository.impl.ts
+- [x] T043 [US1] Create TenantRepositoryImpl in src/infrastructure/repositories/tenant.repository.impl.ts
 - [ ] T044 [US1] Create TenantEntity in src/infrastructure/persistence/tenant.entity.ts
 - [ ] T045 [US1] Create OrganizationRepository interface in src/domain/repositories/organization.repository.ts
 - [ ] T046 [US1] Create OrganizationRepositoryImpl in src/infrastructure/repositories/organization.repository.impl.ts
@@ -167,24 +167,24 @@ Tenant lifecycle supports all 5 tenant types (FREE, BASIC, PROFESSIONAL, ENTERPR
 - [ ] T061 [US2] Create CaslRule value object in src/domain/value-objects/casl-rule.vo.ts
 - [ ] T062 [US2] Create CaslCondition value object in src/domain/value-objects/casl-condition.vo.ts
 - [ ] T063 [US2] Create RoleLevel value object in src/domain/value-objects/role-level.vo.ts
-- [ ] T064 [US2] Create TenantAggregate in src/domain/aggregates/tenant.aggregate.ts
-- [ ] T065 [US2] Create TenantCreatedEvent in src/domain/events/tenant-created.event.ts
-- [ ] T066 [US2] Create TenantStatusChangedEvent in src/domain/events/tenant-status-changed.event.ts
-- [ ] T067 [US2] Create TenantDeletedEvent in src/domain/events/tenant-deleted.event.ts
-- [ ] T068 [US2] Create PermissionChangedEvent in src/domain/events/permission-changed.event.ts
+- [x] T064 [US2] Create TenantAggregate in src/domain/aggregates/tenant.aggregate.ts
+- [x] T065 [US2] Create TenantCreatedEvent in src/domain/events/tenant-created.event.ts
+- [x] T066 [US2] Create TenantStatusChangedEvent in src/domain/events/tenant-status-changed.event.ts
+- [x] T067 [US2] Create TenantDeletedEvent in src/domain/events/tenant-deleted.event.ts
+- [x] T068 [US2] Create PermissionChangedEvent in src/domain/events/permission-changed.event.ts
 
 ### Application Layer Tasks
 
-- [ ] T069 [US2] Create CreateTenantCommand in src/application/commands/create-tenant.command.ts
-- [ ] T070 [US2] Create UpdateTenantCommand in src/application/commands/update-tenant.command.ts
+- [x] T069 [US2] Create CreateTenantCommand in src/application/commands/create-tenant.command.ts
+- [x] T070 [US2] Create UpdateTenantCommand in src/application/commands/update-tenant.command.ts
 - [ ] T071 [US2] Create DeleteTenantCommand in src/application/commands/delete-tenant.command.ts
 - [ ] T072 [US2] Create AssignPermissionCommand in src/application/commands/assign-permission.command.ts
-- [ ] T073 [US2] Create CreateTenantHandler in src/application/handlers/create-tenant.handler.ts
+- [x] T073 [US2] Create CreateTenantHandler in src/application/handlers/create-tenant.handler.ts
 - [ ] T074 [US2] Create UpdateTenantHandler in src/application/handlers/update-tenant.handler.ts
 - [ ] T075 [US2] Create DeleteTenantHandler in src/application/handlers/delete-tenant.handler.ts
 - [ ] T076 [US2] Create AssignPermissionHandler in src/application/handlers/assign-permission.handler.ts
-- [ ] T077 [US2] Create TenantCreationUseCase in src/application/use-cases/tenant-creation.use-case.ts
-- [ ] T078 [US2] Create PermissionManagementUseCase in src/application/use-cases/permission-management.use-case.ts
+- [x] T077 [US2] Create TenantCreationUseCase in src/application/use-cases/tenant-creation.use-case.ts
+- [x] T078 [US2] Create PermissionManagementUseCase in src/application/use-cases/permission-management.use-case.ts
 
 ### Infrastructure Layer Tasks
 
@@ -192,12 +192,12 @@ Tenant lifecycle supports all 5 tenant types (FREE, BASIC, PROFESSIONAL, ENTERPR
 - [ ] T080 [US2] Create EventStore in src/infrastructure/events/event-store.ts
 - [ ] T081 [US2] Create TenantCreatedEventHandler in src/infrastructure/events/tenant-created.event-handler.ts
 - [ ] T082 [US2] Create PermissionChangedEventHandler in src/infrastructure/events/permission-changed.event-handler.ts
-- [ ] T083 [US2] Create CaslAbilityFactory in src/infrastructure/casl/casl-ability.factory.ts
+- [x] T083 [US2] Create CaslAbilityFactory in src/infrastructure/casl/casl-ability.factory.ts
 - [ ] T084 [US2] Create CaslAbilityService in src/infrastructure/casl/casl-ability.service.ts
 
 ### Interface Layer Tasks
 
-- [ ] T085 [US2] Create UpdateTenantDto in src/interface/dto/update-tenant.dto.ts
+- [x] T085 [US2] Create UpdateTenantDto in src/interface/dto/update-tenant.dto.ts
 - [ ] T086 [US2] Create TenantListResponseDto in src/interface/dto/tenant-list-response.dto.ts
 - [ ] T087 [US2] Create AssignPermissionDto in src/interface/dto/assign-permission.dto.ts
 
@@ -214,8 +214,8 @@ Organization and department structure supports 7-level department hierarchy with
 ### Domain Layer Tasks
 
 - [ ] T088 [US3] Create OrganizationType value object in src/domain/value-objects/organization-type.vo.ts
-- [ ] T089 [US3] Create OrganizationAggregate in src/domain/aggregates/organization.aggregate.ts
-- [ ] T090 [US3] Create DepartmentAggregate in src/domain/aggregates/department.aggregate.ts
+- [x] T089 [US3] Create OrganizationAggregate in src/domain/aggregates/organization.aggregate.ts
+- [x] T090 [US3] Create DepartmentAggregate in src/domain/aggregates/department.aggregate.ts
 - [ ] T091 [US3] Create OrganizationCreatedEvent in src/domain/events/organization-created.event.ts
 - [ ] T092 [US3] Create DepartmentCreatedEvent in src/domain/events/department-created.event.ts
 - [ ] T093 [US3] Create UserAssignedEvent in src/domain/events/user-assigned.event.ts

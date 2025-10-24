@@ -205,7 +205,7 @@ export const InfrastructureExceptionMapping = {
   CACHE: CacheOperationException,
   NETWORK: NetworkConnectionException,
   ISOLATION: DataIsolationViolationException,
-  SYSTEM: SystemInternalException
+  SYSTEM: SystemInternalException,
 };
 ```
 
@@ -214,10 +214,13 @@ export const InfrastructureExceptionMapping = {
 ```typescript
 // 集成现有错误处理器
 export class EnhancedErrorHandlerService extends ErrorHandlerService {
-  async handleError(error: Error, context?: Record<string, unknown>): Promise<ErrorHandleResult> {
+  async handleError(
+    error: Error,
+    context?: Record<string, unknown>,
+  ): Promise<ErrorHandleResult> {
     // 转换为标准异常
     const standardException = this.convertToStandardException(error, context);
-    
+
     // 调用父类处理
     return await super.handleError(standardException, context);
   }

@@ -34,11 +34,12 @@ try {
 try {
   await databaseOperation();
 } catch (error) {
-  const standardError = error instanceof Error ? error : new Error(String(error));
+  const standardError =
+    error instanceof Error ? error : new Error(String(error));
   throw InfrastructureExceptionConverter.convertToStandardException(
     standardError,
     "DATABASE",
-    { operation: "databaseOperation" }
+    { operation: "databaseOperation" },
   );
 }
 ```
@@ -54,9 +55,9 @@ import { HandleInfrastructureException } from "@hl8/infrastructure-kernel";
 export class DatabaseService {
   @HandleInfrastructureException({
     errorType: "DATABASE",
-    contextProvider: (args) => ({ 
-      operation: "getConnection", 
-      connectionName: args[0] 
+    contextProvider: (args) => ({
+      operation: "getConnection",
+      connectionName: args[0],
     }),
     logError: true,
     retryable: true,
@@ -109,7 +110,7 @@ export class NetworkService {
       const result = await this.errorHandler.handleInfrastructureError(
         error as Error,
         "NETWORK",
-        { operation: "httpRequest", url }
+        { operation: "httpRequest", url },
       );
       throw result.error;
     }
@@ -196,14 +197,17 @@ const exceptionManager = new ExceptionHandlerManager({
 describe("DatabaseService Exception Handling", () => {
   it("should throw standardized exceptions for connection failures", async () => {
     const mockConnectionManager = {
-      getConnection: jest.fn().mockRejectedValue(new Error("Connection failed")),
+      getConnection: jest
+        .fn()
+        .mockRejectedValue(new Error("Connection failed")),
     };
 
     const middleware = new ExceptionHandlingMiddleware();
     const dbService = new DatabaseService(mockConnectionManager, middleware);
 
-    await expect(dbService.getConnection("test-db"))
-      .rejects.toThrow(GeneralInternalServerException);
+    await expect(dbService.getConnection("test-db")).rejects.toThrow(
+      GeneralInternalServerException,
+    );
   });
 });
 ```
@@ -214,17 +218,18 @@ describe("DatabaseService Exception Handling", () => {
 
 ```typescript
 // 连接错误
-const connectionError = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "DATABASE",
-  { operation: "connect", connectionName: "main-db" }
-);
+const connectionError =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "DATABASE",
+    { operation: "connect", connectionName: "main-db" },
+  );
 
 // 查询错误
 const queryError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "DATABASE",
-  { operation: "query", sql: "SELECT * FROM users", table: "users" }
+  { operation: "query", sql: "SELECT * FROM users", table: "users" },
 );
 ```
 
@@ -235,14 +240,14 @@ const queryError = InfrastructureExceptionConverter.convertToStandardException(
 const redisError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "CACHE",
-  { operation: "connect", cacheType: "redis", host: "localhost:6379" }
+  { operation: "connect", cacheType: "redis", host: "localhost:6379" },
 );
 
 // 缓存操作错误
 const cacheError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "CACHE",
-  { operation: "get", cacheKey: "user:123", cacheType: "redis" }
+  { operation: "get", cacheKey: "user:123", cacheType: "redis" },
 );
 ```
 
@@ -253,15 +258,24 @@ const cacheError = InfrastructureExceptionConverter.convertToStandardException(
 const httpError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "NETWORK",
-  { operation: "http_request", endpoint: "https://api.example.com", method: "POST" }
+  {
+    operation: "http_request",
+    endpoint: "https://api.example.com",
+    method: "POST",
+  },
 );
 
 // 超时错误
-const timeoutError = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "NETWORK",
-  { operation: "timeout", endpoint: "https://api.example.com", timeout: 5000 }
-);
+const timeoutError =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "NETWORK",
+    {
+      operation: "timeout",
+      endpoint: "https://api.example.com",
+      timeout: 5000,
+    },
+  );
 ```
 
 ## 🔍 监控和日志
@@ -310,18 +324,23 @@ const monitoringData = {
 describe("DatabaseService Exception Handling", () => {
   it("should throw standardized exceptions for connection failures", async () => {
     const mockConnectionManager = {
-      getConnection: jest.fn().mockRejectedValue(new Error("Connection failed")),
+      getConnection: jest
+        .fn()
+        .mockRejectedValue(new Error("Connection failed")),
     };
 
     const dbService = new DatabaseService(mockConnectionManager);
 
-    await expect(dbService.getConnection("test-db"))
-      .rejects.toThrow(GeneralInternalServerException);
+    await expect(dbService.getConnection("test-db")).rejects.toThrow(
+      GeneralInternalServerException,
+    );
   });
 
   it("should include proper context in exceptions", async () => {
     const mockConnectionManager = {
-      getConnection: jest.fn().mockRejectedValue(new Error("Connection failed")),
+      getConnection: jest
+        .fn()
+        .mockRejectedValue(new Error("Connection failed")),
     };
 
     const dbService = new DatabaseService(mockConnectionManager);
@@ -352,7 +371,9 @@ describe("Exception Integration", () => {
     expect(results).toHaveLength(3);
     expect(results[0].error).toBeInstanceOf(GeneralInternalServerException);
     expect(results[1].error).toBeInstanceOf(GeneralInternalServerException);
-    expect(results[2].error).toBeInstanceOf(ExternalServiceUnavailableException);
+    expect(results[2].error).toBeInstanceOf(
+      ExternalServiceUnavailableException,
+    );
   });
 });
 ```
@@ -363,7 +384,10 @@ describe("Exception Integration", () => {
 
 ```typescript
 class CachedExceptionConverter {
-  private static conversionCache = new Map<string, InfrastructureLayerException>();
+  private static conversionCache = new Map<
+    string,
+    InfrastructureLayerException
+  >();
 
   static convertToStandardException(
     error: Error,
@@ -371,16 +395,17 @@ class CachedExceptionConverter {
     context?: Record<string, unknown>,
   ): InfrastructureLayerException {
     const cacheKey = `${error.message}:${errorType}:${JSON.stringify(context)}`;
-    
+
     if (this.conversionCache.has(cacheKey)) {
       return this.conversionCache.get(cacheKey)!;
     }
 
-    const standardException = InfrastructureExceptionConverter.convertToStandardException(
-      error,
-      errorType,
-      context,
-    );
+    const standardException =
+      InfrastructureExceptionConverter.convertToStandardException(
+        error,
+        errorType,
+        context,
+      );
 
     this.conversionCache.set(cacheKey, standardException);
     return standardException;
@@ -442,11 +467,12 @@ try {
 try {
   await databaseOperation();
 } catch (error) {
-  const standardError = error instanceof Error ? error : new Error(String(error));
+  const standardError =
+    error instanceof Error ? error : new Error(String(error));
   throw InfrastructureExceptionConverter.convertToStandardException(
     standardError,
     "DATABASE",
-    { operation: "databaseOperation" }
+    { operation: "databaseOperation" },
   );
 }
 ```
@@ -455,14 +481,14 @@ try {
 
 ```typescript
 // 批量转换错误处理
-const errors = await Promise.allSettled(operations.map(op => op.execute()));
+const errors = await Promise.allSettled(operations.map((op) => op.execute()));
 const failedOperations = errors
-  .filter(result => result.status === 'rejected')
-  .map(result => result.reason);
+  .filter((result) => result.status === "rejected")
+  .map((result) => result.reason);
 
 if (failedOperations.length > 0) {
   const batchResults = await enhancedErrorHandler.handleBatchErrors(
-    failedOperations.map(error => ({ error }))
+    failedOperations.map((error) => ({ error })),
   );
 }
 ```

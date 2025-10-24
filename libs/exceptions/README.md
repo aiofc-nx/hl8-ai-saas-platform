@@ -165,15 +165,15 @@ export class AppModule {}
 
 ```typescript
 // main.ts
-import { NestFactory } from '@nestjs/core';
-import { HttpExceptionFilter, AnyExceptionFilter } from '@hl8/exceptions';
+import { NestFactory } from "@nestjs/core";
+import { HttpExceptionFilter, AnyExceptionFilter } from "@hl8/exceptions";
 
 const app = await NestFactory.create(AppModule);
 
 // 注册全局异常过滤器
 app.useGlobalFilters(
   new HttpExceptionFilter(logger, messageProvider),
-  new AnyExceptionFilter(logger)
+  new AnyExceptionFilter(logger),
 );
 
 await app.listen(3000);
@@ -190,7 +190,7 @@ import {
   UnauthorizedException,
   TokenExpiredException,
   InvalidTokenException,
-  InsufficientPermissionsException
+  InsufficientPermissionsException,
 } from "@hl8/exceptions/core/auth";
 
 // 用户管理异常
@@ -199,61 +199,61 @@ import {
   UserAlreadyExistsException,
   InvalidUserStatusException,
   UserAccountLockedException,
-  UserAccountDisabledException
+  UserAccountDisabledException,
 } from "@hl8/exceptions/core/user";
 
 // 多租户异常
 import {
   CrossTenantAccessException,
   DataIsolationViolationException,
-  InvalidTenantContextException
+  InvalidTenantContextException,
 } from "@hl8/exceptions/core/tenant";
 
 // 数据验证异常
 import {
   ValidationFailedException,
   BusinessRuleViolationException,
-  ConstraintViolationException
+  ConstraintViolationException,
 } from "@hl8/exceptions/core/validation";
 
 // 系统资源异常
 import {
   RateLimitExceededException,
   ServiceUnavailableException,
-  ResourceNotFoundException
+  ResourceNotFoundException,
 } from "@hl8/exceptions/core/system";
 
 // 组织管理异常
 import {
   OrganizationNotFoundException,
-  UnauthorizedOrganizationException
+  UnauthorizedOrganizationException,
 } from "@hl8/exceptions/core/organization";
 
 // 部门管理异常
 import {
   DepartmentNotFoundException,
   UnauthorizedDepartmentException,
-  InvalidDepartmentHierarchyException
+  InvalidDepartmentHierarchyException,
 } from "@hl8/exceptions/core/department";
 
 // 业务逻辑异常
 import {
   OperationFailedException,
   InvalidStateTransitionException,
-  StepFailedException
+  StepFailedException,
 } from "@hl8/exceptions/core/business";
 
 // 集成异常
 import {
   ExternalServiceUnavailableException,
   ExternalServiceErrorException,
-  ExternalServiceTimeoutException
+  ExternalServiceTimeoutException,
 } from "@hl8/exceptions/core/integration";
 
 // 通用异常
 import {
   NotImplementedException,
-  MaintenanceModeException
+  MaintenanceModeException,
 } from "@hl8/exceptions/core/general";
 ```
 
@@ -271,10 +271,10 @@ export class UserService {
 
   async authenticateUser(username: string, password: string) {
     const user = await this.userRepository.findByUsername(username);
-    if (!user || !await this.validatePassword(password, user.passwordHash)) {
+    if (!user || !(await this.validatePassword(password, user.passwordHash))) {
       throw new AuthenticationFailedException("用户名或密码错误", {
         username,
-        attemptCount: this.getAttemptCount(username)
+        attemptCount: this.getAttemptCount(username),
       });
     }
     return user;
@@ -284,8 +284,8 @@ export class UserService {
     const user = await this.userRepository.findById(userId);
     if (!user.tenants.includes(tenantId)) {
       throw new CrossTenantAccessException(user.currentTenantId, tenantId, {
-        resourceType: 'user',
-        userId
+        resourceType: "user",
+        userId,
       });
     }
   }

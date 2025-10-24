@@ -67,8 +67,8 @@ pnpm add @hl8/exceptions
 ```typescript
 // ✅ 正确的注册顺序
 app.useGlobalFilters(
-  new HttpExceptionFilter(),  // 优先处理已知异常
-  new AnyExceptionFilter()    // 兜底处理未知异常
+  new HttpExceptionFilter(), // 优先处理已知异常
+  new AnyExceptionFilter(), // 兜底处理未知异常
 );
 ```
 
@@ -113,14 +113,18 @@ class CustomException extends Error {
 
 ```typescript
 export class CustomMessageProvider implements ExceptionMessageProvider {
-  getMessage(errorCode: string, messageType: 'title' | 'detail', params?: Record<string, unknown>): string | undefined {
+  getMessage(
+    errorCode: string,
+    messageType: "title" | "detail",
+    params?: Record<string, unknown>,
+  ): string | undefined {
     // 实现消息获取逻辑
   }
-  
-  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+
+  hasMessage(errorCode: string, messageType: "title" | "detail"): boolean {
     // 实现消息存在检查
   }
-  
+
   getAvailableErrorCodes(): string[] {
     // 返回可用错误代码
   }
@@ -159,11 +163,11 @@ export class AppModule {}
 class UserNotFoundException extends AbstractHttpException {
   constructor(userId: string, data?: Record<string, unknown>) {
     super(
-      'USER_NOT_FOUND',
-      '用户未找到',
+      "USER_NOT_FOUND",
+      "用户未找到",
       `ID 为 "${userId}" 的用户不存在`,
       404,
-      { userId, ...data }
+      { userId, ...data },
     );
   }
 }
@@ -201,7 +205,7 @@ return new UserNotFoundException(userId); // 没有抛出异常
 throw new UserNotFoundException(userId, {
   requestId: request.id,
   timestamp: new Date(),
-  additionalInfo: 'custom data'
+  additionalInfo: "custom data",
 });
 ```
 
@@ -238,11 +242,11 @@ try {
   await this.riskyOperation();
 } catch (error) {
   throw new OperationFailedException(
-    'risky_operation',
-    '操作执行失败',
+    "risky_operation",
+    "操作执行失败",
     { originalError: error.message },
-    'https://docs.hl8.com/errors#OPERATION_FAILED',
-    error // 传递原始异常作为rootCause
+    "https://docs.hl8.com/errors#OPERATION_FAILED",
+    error, // 传递原始异常作为rootCause
   );
 }
 ```
@@ -293,10 +297,7 @@ export class AppModule {}
 ```typescript
 // ✅ 手动注册
 // main.ts
-app.useGlobalFilters(
-  new HttpExceptionFilter(),
-  new AnyExceptionFilter()
-);
+app.useGlobalFilters(new HttpExceptionFilter(), new AnyExceptionFilter());
 
 // app.module.ts
 @Module({
@@ -324,8 +325,8 @@ export class AppModule {}
 ```typescript
 // ✅ 正确的顺序
 app.useGlobalFilters(
-  new HttpExceptionFilter(),  // 先处理已知异常
-  new AnyExceptionFilter()    // 再处理未知异常
+  new HttpExceptionFilter(), // 先处理已知异常
+  new AnyExceptionFilter(), // 再处理未知异常
 );
 ```
 
@@ -334,7 +335,8 @@ app.useGlobalFilters(
 ```typescript
 // ✅ 正确的装饰器使用
 @Catch(AbstractHttpException)
-export class HttpExceptionFilter implements ExceptionFilter<AbstractHttpException> {
+export class HttpExceptionFilter
+  implements ExceptionFilter<AbstractHttpException> {
   // ...
 }
 
@@ -398,7 +400,7 @@ catch(exception: AbstractHttpException, host: ArgumentsHost): void {
 ```typescript
 class ExceptionPool {
   private static readonly pool = new Map<string, AbstractHttpException>();
-  
+
   static getException(type: string, ...args: any[]): AbstractHttpException {
     const key = `${type}_${JSON.stringify(args)}`;
     if (!this.pool.has(key)) {
@@ -446,14 +448,14 @@ constructor(userId: string, data?: Record<string, unknown>) {
 // ✅ 只保存必要的数据
 throw new UserNotFoundException(userId, {
   userId,
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 
 // ❌ 保存大量数据
 throw new UserNotFoundException(userId, {
   userId,
   fullUserData: largeUserObject, // 避免保存大量数据
-  allRelatedData: largeDataSet
+  allRelatedData: largeDataSet,
 });
 ```
 
@@ -462,7 +464,7 @@ throw new UserNotFoundException(userId, {
 ```typescript
 class ExceptionPool {
   private static readonly maxSize = 1000;
-  
+
   static cleanup(): void {
     if (this.pool.size > this.maxSize) {
       const entries = Array.from(this.pool.entries());
@@ -488,7 +490,7 @@ class ExceptionPool {
 1. 在测试中正确配置异常处理：
 
 ```typescript
-describe('UserService', () => {
+describe("UserService", () => {
   let service: UserService;
   let app: INestApplication;
 
@@ -512,8 +514,10 @@ describe('UserService', () => {
 2. 使用正确的测试断言：
 
 ```typescript
-it('应该抛出UserNotFoundException', async () => {
-  await expect(service.findUser('non-existent-user')).rejects.toThrow(UserNotFoundException);
+it("应该抛出UserNotFoundException", async () => {
+  await expect(service.findUser("non-existent-user")).rejects.toThrow(
+    UserNotFoundException,
+  );
 });
 ```
 
@@ -530,20 +534,22 @@ it('应该抛出UserNotFoundException', async () => {
 1. 为所有异常类创建测试：
 
 ```typescript
-describe('UserNotFoundException', () => {
-  it('应该创建基本异常实例', () => {
-    const exception = new UserNotFoundException('user-123');
-    
-    expect(exception.errorCode).toBe('USER_NOT_FOUND');
-    expect(exception.title).toBe('用户未找到');
+describe("UserNotFoundException", () => {
+  it("应该创建基本异常实例", () => {
+    const exception = new UserNotFoundException("user-123");
+
+    expect(exception.errorCode).toBe("USER_NOT_FOUND");
+    expect(exception.title).toBe("用户未找到");
     expect(exception.httpStatus).toBe(404);
   });
-  
-  it('应该转换为RFC7807格式', () => {
-    const exception = new UserNotFoundException('user-123');
+
+  it("应该转换为RFC7807格式", () => {
+    const exception = new UserNotFoundException("user-123");
     const problemDetails = exception.toRFC7807();
-    
-    expect(problemDetails.type).toBe('https://docs.hl8.com/errors#USER_NOT_FOUND');
+
+    expect(problemDetails.type).toBe(
+      "https://docs.hl8.com/errors#USER_NOT_FOUND",
+    );
     expect(problemDetails.status).toBe(404);
   });
 });
@@ -552,16 +558,16 @@ describe('UserNotFoundException', () => {
 2. 测试异常过滤器的所有分支：
 
 ```typescript
-describe('HttpExceptionFilter', () => {
-  it('应该处理AbstractHttpException', () => {
+describe("HttpExceptionFilter", () => {
+  it("应该处理AbstractHttpException", () => {
     // 测试正常流程
   });
-  
-  it('应该处理带消息提供者的异常', () => {
+
+  it("应该处理带消息提供者的异常", () => {
     // 测试消息提供者流程
   });
-  
-  it('应该处理没有日志服务的情况', () => {
+
+  it("应该处理没有日志服务的情况", () => {
     // 测试没有日志服务的情况
   });
 });
@@ -585,7 +591,7 @@ describe('HttpExceptionFilter', () => {
 @Module({
   imports: [
     ExceptionModule.forRoot({
-      isProduction: process.env.NODE_ENV === 'production', // 确保生产环境配置
+      isProduction: process.env.NODE_ENV === "production", // 确保生产环境配置
     }),
   ],
 })
@@ -596,15 +602,15 @@ export class AppModule {}
 
 ```typescript
 // ✅ 安全的异常数据
-throw new AuthenticationFailedException('认证失败', {
+throw new AuthenticationFailedException("认证失败", {
   attemptCount: 3,
   // 不包含密码、令牌等敏感信息
 });
 
 // ❌ 不安全的异常数据
-throw new AuthenticationFailedException('认证失败', {
+throw new AuthenticationFailedException("认证失败", {
   password: userInput.password, // 敏感信息泄露
-  token: authToken
+  token: authToken,
 });
 ```
 
@@ -625,7 +631,7 @@ throw new AuthenticationFailedException('认证失败', {
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === 'production',
+      isProduction: process.env.NODE_ENV === "production",
     }),
   ],
 })
@@ -642,7 +648,11 @@ export class ProductionLoggerService implements ILoggerService {
     this.logger.info(message, context);
   }
 
-  error(message: string, stack?: string, context?: Record<string, unknown>): void {
+  error(
+    message: string,
+    stack?: string,
+    context?: Record<string, unknown>,
+  ): void {
     this.logger.error(message, { stack, context });
   }
 
@@ -685,15 +695,15 @@ constructor(userId: string, data?: Record<string, unknown>) {
 try {
   await this.riskyOperation();
 } catch (error) {
-  console.log('Original error:', error);
-  console.log('Error stack:', error.stack);
-  
+  console.log("Original error:", error);
+  console.log("Error stack:", error.stack);
+
   throw new OperationFailedException(
-    'risky_operation',
-    '操作执行失败',
+    "risky_operation",
+    "操作执行失败",
     { originalError: error.message },
-    'https://docs.hl8.com/errors#OPERATION_FAILED',
-    error
+    "https://docs.hl8.com/errors#OPERATION_FAILED",
+    error,
   );
 }
 ```

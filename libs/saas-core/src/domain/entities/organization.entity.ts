@@ -6,13 +6,7 @@
  */
 
 import { BaseEntity } from "@hl8/domain-kernel";
-import {
-  EntityId,
-  TenantId,
-  OrganizationId,
-  DepartmentId,
-  UserId,
-} from "@hl8/domain-kernel";
+import { TenantId, OrganizationId } from "@hl8/domain-kernel";
 
 /**
  * 组织状态枚举

@@ -203,10 +203,7 @@ export class IsolationValidationException extends DomainException {
   }
 
   toHttpException(): InvalidTenantContextException {
-    return new InvalidTenantContextException(
-      this.message,
-      { ...this.context }
-    );
+    return new InvalidTenantContextException(this.message, { ...this.context });
   }
 }
 ```
@@ -235,7 +232,7 @@ export class BusinessRuleValidator<Context = unknown> {
       throw new BusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        firstError.context
+        firstError.context,
       );
     }
   }
@@ -256,11 +253,9 @@ export class BusinessRuleViolationException extends DomainException {
   }
 
   toHttpException(): BusinessRuleViolationException {
-    return new BusinessRuleViolationException(
-      this.code,
-      this.message,
-      { ...this.context }
-    );
+    return new BusinessRuleViolationException(this.code, this.message, {
+      ...this.context,
+    });
   }
 }
 ```
@@ -283,13 +278,22 @@ export { ExceptionConverter } from "./exceptions/exception-converter.js";
 ```typescript
 // libs/domain-kernel/src/exceptions/exception-converter.ts
 export class ExceptionConverter {
-  static convertToHttpException(domainException: DomainException): AbstractHttpException {
+  static convertToHttpException(
+    domainException: DomainException,
+  ): AbstractHttpException {
     return domainException.toHttpException();
   }
 
-  static convertValidationResult(result: BusinessRuleValidationResult): AbstractHttpException[] {
-    return result.errors.map(error => 
-      new BusinessRuleViolationException(error.code, error.message, error.context)
+  static convertValidationResult(
+    result: BusinessRuleValidationResult,
+  ): AbstractHttpException[] {
+    return result.errors.map(
+      (error) =>
+        new BusinessRuleViolationException(
+          error.code,
+          error.message,
+          error.context,
+        ),
     );
   }
 }
@@ -315,7 +319,7 @@ export class ExceptionConverter {
 
 ```typescript
 // libs/domain-kernel/src/rules/business-rule-validator.ts
-import { BusinessRuleViolationException } from '@hl8/exceptions/core/business';
+import { BusinessRuleViolationException } from "@hl8/exceptions/core/business";
 
 export class BusinessRuleValidator<Context = unknown> {
   validateAndThrow(context: Context): void {
@@ -325,7 +329,7 @@ export class BusinessRuleValidator<Context = unknown> {
       throw new BusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        { ...firstError.context }
+        { ...firstError.context },
       );
     }
   }

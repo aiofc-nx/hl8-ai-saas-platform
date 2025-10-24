@@ -28,11 +28,12 @@ export class BasicExceptionConversionExample {
       throw new Error("Database connection failed");
     } catch (error) {
       // 转换为标准化异常
-      const standardException = InfrastructureExceptionConverter.convertToStandardException(
-        error as Error,
-        "DATABASE",
-        { operation: "connect", connectionName: "main-db" }
-      );
+      const standardException =
+        InfrastructureExceptionConverter.convertToStandardException(
+          error as Error,
+          "DATABASE",
+          { operation: "connect", connectionName: "main-db" },
+        );
 
       console.log("标准化异常:", {
         errorCode: standardException.errorCode,
@@ -54,9 +55,9 @@ export class BasicExceptionConversionExample {
 export class DatabaseServiceExample {
   @HandleInfrastructureException({
     errorType: "DATABASE",
-    contextProvider: (args) => ({ 
-      operation: "getConnection", 
-      connectionName: args[0] 
+    contextProvider: (args) => ({
+      operation: "getConnection",
+      connectionName: args[0],
     }),
     logError: true,
     retryable: true,
@@ -72,13 +73,16 @@ export class DatabaseServiceExample {
 
   @HandleInfrastructureException({
     errorType: "DATABASE",
-    contextProvider: (args) => ({ 
-      operation: "query", 
+    contextProvider: (args) => ({
+      operation: "query",
       sql: args[0],
-      table: args[1] 
+      table: args[1],
     }),
   })
-  async executeQuery(sql: string, table: string): Promise<Record<string, unknown>[]> {
+  async executeQuery(
+    sql: string,
+    table: string,
+  ): Promise<Record<string, unknown>[]> {
     // 模拟查询执行
     if (Math.random() > 0.7) {
       throw new Error("Query execution failed");
@@ -167,7 +171,7 @@ export class NetworkServiceExample {
       const result = await this.errorHandler.handleInfrastructureError(
         error as Error,
         "NETWORK",
-        { operation: "httpRequest", url }
+        { operation: "httpRequest", url },
       );
 
       if (result.handled) {
@@ -179,15 +183,15 @@ export class NetworkServiceExample {
   }
 
   async batchRequests(urls: string[]): Promise<Record<string, unknown>[]> {
-    const errors = urls.map(url => ({
+    const errors = urls.map((url) => ({
       error: new Error(`Request failed for ${url}`),
       type: "NETWORK" as InfrastructureErrorType,
       context: { url },
     }));
 
     const results = await this.errorHandler.handleBatchErrors(errors);
-    
-    return results.map(result => ({
+
+    return results.map((result) => ({
       success: result.handled,
       error: result.error?.message,
     }));
@@ -211,7 +215,7 @@ export class UtilityFunctionsExample {
         return "success";
       },
       "SYSTEM",
-      { operation: "demo" }
+      { operation: "demo" },
     );
 
     console.log("安全执行结果:", result);
@@ -229,7 +233,7 @@ export class UtilityFunctionsExample {
         "NETWORK",
         3,
         1000,
-        { operation: "retryDemo" }
+        { operation: "retryDemo" },
       );
 
       console.log("重试执行结果:", retryResult);
@@ -249,7 +253,7 @@ export class UtilityFunctionsExample {
     const batchResults = await ExceptionHandlerUtils.batchExecute(
       operations,
       "SYSTEM",
-      { batchId: "demo-batch" }
+      { batchId: "demo-batch" },
     );
 
     console.log("批量执行结果:", batchResults);
@@ -258,7 +262,7 @@ export class UtilityFunctionsExample {
     const parallelResults = await ExceptionHandlerUtils.parallelExecute(
       operations,
       "SYSTEM",
-      { parallelId: "demo-parallel" }
+      { parallelId: "demo-parallel" },
     );
 
     console.log("并行执行结果:", parallelResults);
@@ -290,9 +294,9 @@ export class ExceptionManagerExample {
       throw new Error("Manager demo error");
     } catch (error) {
       // 记录错误
-      this.manager.logError(error as Error, { 
+      this.manager.logError(error as Error, {
         operation: "demo",
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString(),
       });
 
       // 发送到监控系统
@@ -333,7 +337,7 @@ export class ComprehensiveExample {
           return { connected: true };
         },
         "DATABASE",
-        { operation: "connect", database: "main" }
+        { operation: "connect", database: "main" },
       );
       console.log("数据库连接成功");
     } catch (error) {
@@ -350,7 +354,7 @@ export class ComprehensiveExample {
           return { cached: true };
         },
         "CACHE",
-        { operation: "set", key: "user:123" }
+        { operation: "set", key: "user:123" },
       );
       console.log("缓存操作成功");
     } catch (error) {
@@ -367,7 +371,7 @@ export class ComprehensiveExample {
           return { response: "success" };
         },
         "NETWORK",
-        { operation: "httpRequest", url: "https://api.example.com" }
+        { operation: "httpRequest", url: "https://api.example.com" },
       );
       console.log("网络请求成功");
     } catch (error) {
@@ -376,9 +380,15 @@ export class ComprehensiveExample {
 
     // 4. 批量错误处理
     const errors = [
-      { error: new Error("Error 1"), type: "DATABASE" as InfrastructureErrorType },
+      {
+        error: new Error("Error 1"),
+        type: "DATABASE" as InfrastructureErrorType,
+      },
       { error: new Error("Error 2"), type: "CACHE" as InfrastructureErrorType },
-      { error: new Error("Error 3"), type: "NETWORK" as InfrastructureErrorType },
+      {
+        error: new Error("Error 3"),
+        type: "NETWORK" as InfrastructureErrorType,
+      },
     ];
 
     const results = await this.errorHandler.handleBatchErrors(errors);

@@ -33,14 +33,14 @@
 
 ## 🔧 技术架构匹配
 
-| 组件 | 当前层次 | libs/exceptions 支持 | 匹配度 |
-|------|----------|---------------------|--------|
-| BaseUseCase | 应用层 | ApplicationLayerException | ✅ 完美匹配 |
-| BaseCommand | 应用层 | ApplicationLayerException | ✅ 完美匹配 |
-| BaseQuery | 应用层 | ApplicationLayerException | ✅ 完美匹配 |
-| 事务管理 | 基础设施层 | InfrastructureLayerException | ✅ 完美匹配 |
-| 事件系统 | 应用层 | ApplicationLayerException | ✅ 完美匹配 |
-| 验证系统 | 应用层 | ValidationException | ✅ 完美匹配 |
+| 组件        | 当前层次   | libs/exceptions 支持         | 匹配度      |
+| ----------- | ---------- | ---------------------------- | ----------- |
+| BaseUseCase | 应用层     | ApplicationLayerException    | ✅ 完美匹配 |
+| BaseCommand | 应用层     | ApplicationLayerException    | ✅ 完美匹配 |
+| BaseQuery   | 应用层     | ApplicationLayerException    | ✅ 完美匹配 |
+| 事务管理    | 基础设施层 | InfrastructureLayerException | ✅ 完美匹配 |
+| 事件系统    | 应用层     | ApplicationLayerException    | ✅ 完美匹配 |
+| 验证系统    | 应用层     | ValidationException          | ✅ 完美匹配 |
 
 ## 📈 预期收益
 

@@ -28,7 +28,7 @@
 ```typescript
 // 应用层异常映射
 BaseUseCase → ApplicationLayerException
-BaseCommand → ApplicationLayerException  
+BaseCommand → ApplicationLayerException
 BaseQuery → ApplicationLayerException
 事件处理 → ApplicationLayerException
 事务管理 → InfrastructureLayerException
@@ -44,7 +44,7 @@ export class ApplicationUseCaseException extends ApplicationLayerException {
     useCaseName: string,
     errorCode: string,
     detail: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ) {
     super(errorCode, `用例执行失败: ${useCaseName}`, detail, 500, context);
   }
@@ -55,7 +55,7 @@ export class ApplicationCommandException extends ApplicationLayerException {
     commandName: string,
     errorCode: string,
     detail: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ) {
     super(errorCode, `命令执行失败: ${commandName}`, detail, 400, context);
   }
@@ -66,7 +66,7 @@ export class ApplicationQueryException extends ApplicationLayerException {
     queryName: string,
     errorCode: string,
     detail: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ) {
     super(errorCode, `查询执行失败: ${queryName}`, detail, 400, context);
   }
@@ -97,17 +97,17 @@ export class ApplicationQueryException extends ApplicationLayerException {
 
 ```typescript
 // src/use-cases/base-use-case.ts
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
 export abstract class BaseUseCase<TRequest, TResponse> {
   protected validateRequest(request: TRequest): void {
     if (!request) {
       throw new ApplicationLayerException(
-        'APPLICATION_INVALID_REQUEST',
-        '应用层请求验证失败',
-        '请求对象不能为空',
+        "APPLICATION_INVALID_REQUEST",
+        "应用层请求验证失败",
+        "请求对象不能为空",
         400,
-        { useCaseName: this.useCaseName }
+        { useCaseName: this.useCaseName },
       );
     }
   }
@@ -118,17 +118,17 @@ export abstract class BaseUseCase<TRequest, TResponse> {
     }
 
     // 权限验证失败时抛出异常
-    if (!await this.checkPermissions(context)) {
+    if (!(await this.checkPermissions(context))) {
       throw new ApplicationLayerException(
-        'APPLICATION_PERMISSION_DENIED',
-        '应用层权限验证失败',
-        `缺少所需权限: ${this.requiredPermissions.join(', ')}`,
+        "APPLICATION_PERMISSION_DENIED",
+        "应用层权限验证失败",
+        `缺少所需权限: ${this.requiredPermissions.join(", ")}`,
         403,
-        { 
+        {
           useCaseName: this.useCaseName,
           requiredPermissions: this.requiredPermissions,
-          userId: context.userId
-        }
+          userId: context.userId,
+        },
       );
     }
   }
@@ -141,7 +141,7 @@ export abstract class BaseUseCase<TRequest, TResponse> {
 
 ```typescript
 // src/validation/base-class.validator.ts
-import { ValidationException } from '@hl8/exceptions/core/validation';
+import { ValidationException } from "@hl8/exceptions/core/validation";
 
 export class BaseClassValidator {
   static validateCommandClass(commandClass: any): BaseClassValidationResult {
@@ -150,13 +150,13 @@ export class BaseClassValidator {
 
     if (!this.isSubclassOf(commandClass, BaseCommand)) {
       throw new ValidationException(
-        'commandClass',
+        "commandClass",
         `命令类 ${commandClass.name} 必须继承自 BaseCommand`,
         {
           className: commandClass.name,
-          expectedBaseClass: 'BaseCommand',
-          suggestion: `将 ${commandClass.name} 改为继承自 BaseCommand`
-        }
+          expectedBaseClass: "BaseCommand",
+          suggestion: `将 ${commandClass.name} 改为继承自 BaseCommand`,
+        },
       );
     }
 
@@ -185,17 +185,17 @@ export class BaseClassValidator {
 
 ```typescript
 // src/cqrs/commands/base-command.ts
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
 export abstract class BaseCommand {
   protected validateCommand(): void {
     if (!this.commandName) {
       throw new ApplicationLayerException(
-        'APPLICATION_INVALID_COMMAND',
-        '应用层命令验证失败',
-        '命令名称不能为空',
+        "APPLICATION_INVALID_COMMAND",
+        "应用层命令验证失败",
+        "命令名称不能为空",
         400,
-        { commandId: this.commandId.getValue() }
+        { commandId: this.commandId.getValue() },
       );
     }
   }
@@ -203,14 +203,14 @@ export abstract class BaseCommand {
   protected validateIsolationContext(): void {
     if (!this.isolationContext) {
       throw new ApplicationLayerException(
-        'APPLICATION_MISSING_ISOLATION_CONTEXT',
-        '应用层隔离上下文验证失败',
-        '命令缺少隔离上下文',
+        "APPLICATION_MISSING_ISOLATION_CONTEXT",
+        "应用层隔离上下文验证失败",
+        "命令缺少隔离上下文",
         400,
-        { 
+        {
           commandName: this.commandName,
-          commandId: this.commandId.getValue()
-        }
+          commandId: this.commandId.getValue(),
+        },
       );
     }
   }
@@ -223,17 +223,17 @@ export abstract class BaseCommand {
 
 ```typescript
 // src/cqrs/queries/base-query.ts
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
 export abstract class BaseQuery {
   protected validateQuery(): void {
     if (!this.queryName) {
       throw new ApplicationLayerException(
-        'APPLICATION_INVALID_QUERY',
-        '应用层查询验证失败',
-        '查询名称不能为空',
+        "APPLICATION_INVALID_QUERY",
+        "应用层查询验证失败",
+        "查询名称不能为空",
         400,
-        { queryId: this.queryId.getValue() }
+        { queryId: this.queryId.getValue() },
       );
     }
   }
@@ -246,13 +246,16 @@ export abstract class BaseQuery {
 
 ```typescript
 // src/cqrs/commands/command-handler.interface.ts
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
 export interface CommandHandler<TCommand extends BaseCommand, TResult> {
   execute(command: TCommand): Promise<TResult>;
-  
+
   // 添加异常处理能力
-  handleError(error: ApplicationLayerException, command: TCommand): Promise<void>;
+  handleError(
+    error: ApplicationLayerException,
+    command: TCommand,
+  ): Promise<void>;
 }
 ```
 
@@ -271,15 +274,15 @@ export interface CommandHandler<TCommand extends BaseCommand, TResult> {
 
 ```typescript
 // src/context/use-case-context.interface.ts
-import { 
+import {
   TenantDataIsolationException,
   OrganizationIsolationException,
-  DepartmentIsolationException 
-} from '@hl8/exceptions/core/tenant';
+  DepartmentIsolationException,
+} from "@hl8/exceptions/core/tenant";
 
 export interface IUseCaseContext {
   // 现有属性...
-  
+
   // 添加异常处理能力
   validateTenantAccess(resourceTenantId: string): void;
   validateOrganizationAccess(resourceOrgId: string): void;
@@ -290,29 +293,23 @@ export interface IUseCaseContext {
 export class UseCaseContext implements IUseCaseContext {
   validateTenantAccess(resourceTenantId: string): void {
     if (this.tenantId !== resourceTenantId) {
-      throw new TenantDataIsolationException(
-        '跨租户访问被拒绝',
-        {
-          isolationLevel: 'tenant',
-          resourceType: 'data',
-          currentTenantId: this.tenantId,
-          targetTenantId: resourceTenantId,
-          violationType: 'cross_tenant_access'
-        }
-      );
+      throw new TenantDataIsolationException("跨租户访问被拒绝", {
+        isolationLevel: "tenant",
+        resourceType: "data",
+        currentTenantId: this.tenantId,
+        targetTenantId: resourceTenantId,
+        violationType: "cross_tenant_access",
+      });
     }
   }
 
   validateOrganizationAccess(resourceOrgId: string): void {
     if (this.organizationId !== resourceOrgId) {
-      throw new OrganizationIsolationException(
-        '跨组织访问被拒绝',
-        {
-          organizationId: this.organizationId,
-          resourceType: 'data',
-          violationType: 'cross_organization_access'
-        }
-      );
+      throw new OrganizationIsolationException("跨组织访问被拒绝", {
+        organizationId: this.organizationId,
+        resourceType: "data",
+        violationType: "cross_organization_access",
+      });
     }
   }
 }
@@ -324,11 +321,11 @@ export class UseCaseContext implements IUseCaseContext {
 
 ```typescript
 // src/transactions/transaction-manager.interface.ts
-import { InfrastructureLayerException } from '@hl8/exceptions/core/layers/infrastructure';
+import { InfrastructureLayerException } from "@hl8/exceptions/core/layers/infrastructure";
 
 export interface ITransactionManager {
   // 现有方法...
-  
+
   // 添加异常处理能力
   handleTransactionError(error: InfrastructureLayerException): Promise<void>;
 }
@@ -337,7 +334,7 @@ export interface ITransactionManager {
 export class TransactionManagerUtils {
   static async executeTransaction<T>(
     operation: () => Promise<T>,
-    context: TransactionContext
+    context: TransactionContext,
   ): Promise<T> {
     try {
       return await operation();
@@ -345,18 +342,18 @@ export class TransactionManagerUtils {
       if (error instanceof InfrastructureLayerException) {
         throw error;
       }
-      
+
       // 将其他错误转换为基础设施层异常
       throw new InfrastructureLayerException(
-        'INFRASTRUCTURE_TRANSACTION_FAILED',
-        '基础设施层事务失败',
-        error instanceof Error ? error.message : '未知错误',
+        "INFRASTRUCTURE_TRANSACTION_FAILED",
+        "基础设施层事务失败",
+        error instanceof Error ? error.message : "未知错误",
         500,
-        { 
+        {
           transactionId: context.transactionId,
-          operation: context.operation
+          operation: context.operation,
         },
-        error instanceof Error ? error : undefined
+        error instanceof Error ? error : undefined,
       );
     }
   }
@@ -369,7 +366,7 @@ export class TransactionManagerUtils {
 
 ```typescript
 // src/events/event-handler.base.ts
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
 export abstract class BaseEventHandler<TEvent extends DomainEvent> {
   protected async handleEvent(event: TEvent): Promise<void> {
@@ -377,17 +374,17 @@ export abstract class BaseEventHandler<TEvent extends DomainEvent> {
       await this.processEvent(event);
     } catch (error) {
       throw new ApplicationLayerException(
-        'APPLICATION_EVENT_PROCESSING_FAILED',
-        '应用层事件处理失败',
-        `事件 ${event.eventType} 处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        "APPLICATION_EVENT_PROCESSING_FAILED",
+        "应用层事件处理失败",
+        `事件 ${event.eventType} 处理失败: ${error instanceof Error ? error.message : "未知错误"}`,
         500,
         {
           eventId: event.eventId,
           eventType: event.eventType,
           aggregateId: event.aggregateId,
-          eventVersion: event.eventVersion
+          eventVersion: event.eventVersion,
         },
-        error instanceof Error ? error : undefined
+        error instanceof Error ? error : undefined,
       );
     }
   }
@@ -411,17 +408,20 @@ export abstract class BaseEventHandler<TEvent extends DomainEvent> {
 ```typescript
 // src/exceptions/exception-performance.optimizer.ts
 export class ExceptionPerformanceOptimizer {
-  private static readonly exceptionCache = new Map<string, ApplicationLayerException>();
-  
+  private static readonly exceptionCache = new Map<
+    string,
+    ApplicationLayerException
+  >();
+
   static createCachedException(
     errorCode: string,
     title: string,
     detail: string,
     status: number,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): ApplicationLayerException {
     const cacheKey = `${errorCode}:${title}`;
-    
+
     if (this.exceptionCache.has(cacheKey)) {
       const cached = this.exceptionCache.get(cacheKey)!;
       // 创建新的实例以避免状态污染
@@ -430,18 +430,18 @@ export class ExceptionPerformanceOptimizer {
         cached.title,
         detail, // 使用新的 detail
         status,
-        context
+        context,
       );
     }
-    
+
     const exception = new ApplicationLayerException(
       errorCode,
       title,
       detail,
       status,
-      context
+      context,
     );
-    
+
     this.exceptionCache.set(cacheKey, exception);
     return exception;
   }
@@ -454,51 +454,49 @@ export class ExceptionPerformanceOptimizer {
 
 ```typescript
 // docs/examples/use-case-exception-handling.example.ts
-import { BaseUseCase } from '../../src/use-cases/base-use-case.js';
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { BaseUseCase } from "../../src/use-cases/base-use-case.js";
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
-export class CreateUserUseCase extends BaseUseCase<CreateUserRequest, CreateUserResponse> {
+export class CreateUserUseCase extends BaseUseCase<
+  CreateUserRequest,
+  CreateUserResponse
+> {
   constructor() {
-    super(
-      'CreateUser',
-      '创建用户用例',
-      '1.0.0',
-      ['user:create']
-    );
+    super("CreateUser", "创建用户用例", "1.0.0", ["user:create"]);
   }
 
   protected async executeUseCase(
     request: CreateUserRequest,
-    context: IUseCaseContext
+    context: IUseCaseContext,
   ): Promise<CreateUserResponse> {
     try {
       // 验证租户访问权限
       context.validateTenantAccess(request.tenantId);
-      
+
       // 执行业务逻辑
       const user = await this.userRepository.create(request);
-      
+
       return {
         success: true,
-        data: user
+        data: user,
       };
     } catch (error) {
       if (error instanceof ApplicationLayerException) {
         throw error;
       }
-      
+
       // 转换其他错误为应用层异常
       throw new ApplicationLayerException(
-        'APPLICATION_USER_CREATION_FAILED',
-        '应用层用户创建失败',
-        error instanceof Error ? error.message : '用户创建失败',
+        "APPLICATION_USER_CREATION_FAILED",
+        "应用层用户创建失败",
+        error instanceof Error ? error.message : "用户创建失败",
         500,
         {
           useCaseName: this.useCaseName,
           userId: context.userId,
-          tenantId: request.tenantId
+          tenantId: request.tenantId,
         },
-        error instanceof Error ? error : undefined
+        error instanceof Error ? error : undefined,
       );
     }
   }
@@ -509,28 +507,30 @@ export class CreateUserUseCase extends BaseUseCase<CreateUserRequest, CreateUser
 
 **任务**：创建迁移指南
 
-```markdown
+````markdown
 # 迁移指南
 
 ## 从原生 Error 迁移到 ApplicationLayerException
 
 ### 迁移前
+
 ```typescript
 if (!request) {
   throw new Error("请求对象不能为空");
 }
 ```
+````
 
 ### 迁移后
 
 ```typescript
 if (!request) {
   throw new ApplicationLayerException(
-    'APPLICATION_INVALID_REQUEST',
-    '应用层请求验证失败',
-    '请求对象不能为空',
+    "APPLICATION_INVALID_REQUEST",
+    "应用层请求验证失败",
+    "请求对象不能为空",
     400,
-    { useCaseName: this.useCaseName }
+    { useCaseName: this.useCaseName },
   );
 }
 ```
@@ -542,7 +542,7 @@ if (!request) {
 3. **错误代码**：使用有意义的错误代码
 4. **异常链**：保持异常链的完整性
 
-```
+````
 
 #### 3.4.4 交付物
 
@@ -572,28 +572,28 @@ interface ApplicationExceptionContext {
   // 用例信息
   useCaseName?: string;
   useCaseVersion?: string;
-  
+
   // 用户信息
   userId?: string;
   tenantId?: string;
   organizationId?: string;
   departmentId?: string;
-  
+
   // 请求信息
   requestId?: string;
   commandId?: string;
   queryId?: string;
-  
+
   // 业务信息
   resourceType?: string;
   resourceId?: string;
   operation?: string;
-  
+
   // 时间信息
   timestamp?: string;
   duration?: number;
 }
-```
+````
 
 ### 4.3 异常处理策略
 
@@ -606,13 +606,13 @@ export interface ExceptionHandlingStrategy {
     retryDelay: number;
     retryableErrors: string[];
   };
-  
+
   // 异常降级策略
   fallbackPolicy: {
     enableFallback: boolean;
     fallbackHandler?: (error: ApplicationLayerException) => Promise<any>;
   };
-  
+
   // 异常监控策略
   monitoringPolicy: {
     enableMetrics: boolean;
@@ -628,26 +628,28 @@ export interface ExceptionHandlingStrategy {
 
 ```typescript
 // src/use-cases/base-use-case.spec.ts
-import { BaseUseCase } from './base-use-case.js';
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { BaseUseCase } from "./base-use-case.js";
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
-describe('BaseUseCase', () => {
-  it('应该在使用空请求时抛出 ApplicationLayerException', async () => {
+describe("BaseUseCase", () => {
+  it("应该在使用空请求时抛出 ApplicationLayerException", async () => {
     const useCase = new TestUseCase();
     const context = createMockContext();
-    
-    await expect(useCase.execute(null, context))
-      .rejects
-      .toThrow(ApplicationLayerException);
+
+    await expect(useCase.execute(null, context)).rejects.toThrow(
+      ApplicationLayerException,
+    );
   });
-  
-  it('应该在权限不足时抛出 ApplicationLayerException', async () => {
-    const useCase = new TestUseCase('TestUseCase', '测试用例', '1.0.0', ['admin:read']);
-    const context = createMockContext({ permissions: ['user:read'] });
-    
-    await expect(useCase.execute({}, context))
-      .rejects
-      .toThrow(ApplicationLayerException);
+
+  it("应该在权限不足时抛出 ApplicationLayerException", async () => {
+    const useCase = new TestUseCase("TestUseCase", "测试用例", "1.0.0", [
+      "admin:read",
+    ]);
+    const context = createMockContext({ permissions: ["user:read"] });
+
+    await expect(useCase.execute({}, context)).rejects.toThrow(
+      ApplicationLayerException,
+    );
   });
 });
 ```
@@ -656,20 +658,17 @@ describe('BaseUseCase', () => {
 
 ```typescript
 // test/integration/exception-handling.integration.spec.ts
-import { ApplicationLayerException } from '@hl8/exceptions/core/layers/application';
+import { ApplicationLayerException } from "@hl8/exceptions/core/layers/application";
 
-describe('异常处理集成测试', () => {
-  it('应该正确处理应用层异常', async () => {
-    const response = await request(app)
-      .post('/api/users')
-      .send({})
-      .expect(400);
-    
+describe("异常处理集成测试", () => {
+  it("应该正确处理应用层异常", async () => {
+    const response = await request(app).post("/api/users").send({}).expect(400);
+
     expect(response.body).toMatchObject({
-      type: 'https://docs.hl8.com/errors#APPLICATION_INVALID_REQUEST',
-      title: '应用层请求验证失败',
+      type: "https://docs.hl8.com/errors#APPLICATION_INVALID_REQUEST",
+      title: "应用层请求验证失败",
       status: 400,
-      errorCode: 'APPLICATION_INVALID_REQUEST'
+      errorCode: "APPLICATION_INVALID_REQUEST",
     });
   });
 });
@@ -679,22 +678,22 @@ describe('异常处理集成测试', () => {
 
 ```typescript
 // test/performance/exception-performance.spec.ts
-describe('异常处理性能测试', () => {
-  it('应该能够快速创建异常实例', () => {
+describe("异常处理性能测试", () => {
+  it("应该能够快速创建异常实例", () => {
     const startTime = performance.now();
-    
+
     for (let i = 0; i < 10000; i++) {
       new ApplicationLayerException(
-        'APPLICATION_TEST_ERROR',
-        '测试异常',
-        '性能测试异常',
-        500
+        "APPLICATION_TEST_ERROR",
+        "测试异常",
+        "性能测试异常",
+        500,
       );
     }
-    
+
     const endTime = performance.now();
     const duration = endTime - startTime;
-    
+
     expect(duration).toBeLessThan(100); // 应该在100ms内完成
   });
 });

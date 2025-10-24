@@ -104,18 +104,18 @@ libs/exceptions/
 
 ### 4. HTTP 状态码与异常类型映射
 
-| 状态码 | 异常类型 | 使用场景 | 示例异常 |
-|--------|----------|----------|----------|
-| 400 | 客户端错误 | 请求参数错误、业务规则违规 | ValidationFailedException |
-| 401 | 认证失败 | 未认证、令牌过期 | AuthenticationFailedException |
-| 403 | 权限不足 | 无权限访问资源 | UnauthorizedException |
-| 404 | 资源未找到 | 实体不存在 | UserNotFoundException |
-| 409 | 资源冲突 | 重复创建、状态冲突 | UserAlreadyExistsException |
-| 422 | 业务逻辑错误 | 业务规则违规、状态不一致 | BusinessRuleViolationException |
-| 423 | 资源锁定 | 账户锁定、资源被占用 | UserAccountLockedException |
-| 429 | 请求频率限制 | 速率限制超出 | RateLimitExceededException |
-| 500 | 服务器内部错误 | 未预期的系统错误 | GeneralInternalServerException |
-| 503 | 服务不可用 | 外部服务不可用 | ServiceUnavailableException |
+| 状态码 | 异常类型       | 使用场景                   | 示例异常                       |
+| ------ | -------------- | -------------------------- | ------------------------------ |
+| 400    | 客户端错误     | 请求参数错误、业务规则违规 | ValidationFailedException      |
+| 401    | 认证失败       | 未认证、令牌过期           | AuthenticationFailedException  |
+| 403    | 权限不足       | 无权限访问资源             | UnauthorizedException          |
+| 404    | 资源未找到     | 实体不存在                 | UserNotFoundException          |
+| 409    | 资源冲突       | 重复创建、状态冲突         | UserAlreadyExistsException     |
+| 422    | 业务逻辑错误   | 业务规则违规、状态不一致   | BusinessRuleViolationException |
+| 423    | 资源锁定       | 账户锁定、资源被占用       | UserAccountLockedException     |
+| 429    | 请求频率限制   | 速率限制超出               | RateLimitExceededException     |
+| 500    | 服务器内部错误 | 未预期的系统错误           | GeneralInternalServerException |
+| 503    | 服务不可用     | 外部服务不可用             | ServiceUnavailableException    |
 
 ## 🎯 异常使用场景映射
 
@@ -163,35 +163,35 @@ const EXCEPTION_CONFIG = {
   // 认证异常配置
   AUTH_LOGIN_FAILED: {
     status: 401,
-    category: 'auth',
-    layer: 'interface',
+    category: "auth",
+    layer: "interface",
     message: {
-      title: '认证失败',
-      detail: '用户名或密码错误'
-    }
+      title: "认证失败",
+      detail: "用户名或密码错误",
+    },
   },
-  
+
   // 用户异常配置
   USER_NOT_FOUND: {
     status: 404,
-    category: 'user',
-    layer: 'interface',
+    category: "user",
+    layer: "interface",
     message: {
-      title: '用户未找到',
-      detail: 'ID 为 "{{userId}}" 的用户不存在'
-    }
+      title: "用户未找到",
+      detail: 'ID 为 "{{userId}}" 的用户不存在',
+    },
   },
-  
+
   // 业务规则异常配置
   BUSINESS_RULE_VIOLATION: {
     status: 422,
-    category: 'business',
-    layer: 'domain',
+    category: "business",
+    layer: "domain",
     message: {
-      title: '业务规则违规',
-      detail: '业务规则 "{{ruleName}}" 被违反: {{violation}}'
-    }
-  }
+      title: "业务规则违规",
+      detail: '业务规则 "{{ruleName}}" 被违反: {{violation}}',
+    },
+  },
 };
 ```
 
