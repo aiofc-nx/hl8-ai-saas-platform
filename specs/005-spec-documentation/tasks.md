@@ -67,10 +67,22 @@ Core infrastructure components are properly configured and can be imported by ot
 
 ### Implementation Tasks
 
-- [ ] T011 [P] Create domain/base/ directory for shared domain components
-- [ ] T012 [P] Create application/base/ directory for shared application components
-- [ ] T013 [P] Create infrastructure/base/ directory for shared infrastructure components
-- [ ] T014 [P] Create interface/base/ directory for shared interface components
+- [x] T011 [P] Integrate existing domain-kernel infrastructure for shared domain components
+- [x] T012 [P] Remove duplicate base components and leverage domain-kernel
+- [x] T013 [P] Configure domain-kernel dependencies in package.json
+- [x] T014 [P] Update project structure to extend domain-kernel
+- [x] T014A [P] Integrate existing application-kernel infrastructure for CQRS components
+- [x] T014B [P] Configure application-kernel dependencies and leverage BaseCommand/BaseQuery
+- [x] T014C [P] Update application layer structure to extend application-kernel
+- [x] T014D [P] Integrate existing infrastructure-kernel infrastructure for repository adapters
+- [x] T014E [P] Configure infrastructure-kernel dependencies and leverage BaseRepositoryAdapter
+- [x] T014F [P] Update infrastructure layer structure to extend infrastructure-kernel
+- [x] T014G [P] Integrate existing interface-kernel infrastructure for controllers and guards
+- [x] T014H [P] Configure interface-kernel dependencies and leverage controllers/guards/middleware
+- [x] T014I [P] Update interface layer structure to extend interface-kernel
+- [x] T014J [P] Integrate existing NestJS infrastructure libraries (@hl8/nestjs-fastify, @hl8/caching, @hl8/database, @hl8/messaging, @hl8/config, @hl8/exceptions, @hl8/nestjs-isolation)
+- [x] T014K [P] Configure NestJS infrastructure dependencies and prioritize existing libraries
+- [x] T014L [P] Update project structure to leverage existing NestJS infrastructure libraries
 - [ ] T015 [P] Configure MikroORM entities and database connection
 - [ ] T016 [P] Configure Redis caching setup
 - [ ] T017 [P] Configure event bus and event store infrastructure
@@ -99,11 +111,11 @@ Multi-tenant architecture supports Platform/Tenant/Organization/Department/User 
 - [ ] T027 [US1] Create RoleId value object in src/domain/value-objects/role-id.vo.ts
 - [ ] T028 [US1] Create CaslAbilityId value object in src/domain/value-objects/casl-ability-id.vo.ts
 - [ ] T029 [US1] Create Platform entity in src/domain/entities/platform.entity.ts
-- [ ] T030 [US1] Create Tenant entity in src/domain/entities/tenant.entity.ts
-- [ ] T031 [US1] Create Organization entity in src/domain/entities/organization.entity.ts
+- [x] T030 [US1] Create Tenant entity in src/domain/entities/tenant.entity.ts
+- [x] T031 [US1] Create Organization entity in src/domain/entities/organization.entity.ts
 - [ ] T032 [US1] Create Department entity in src/domain/entities/department.entity.ts
-- [ ] T033 [US1] Create User entity in src/domain/entities/user.entity.ts
-- [ ] T034 [US1] Create Role entity in src/domain/entities/role.entity.ts
+- [x] T033 [US1] Create User entity in src/domain/entities/user.entity.ts
+- [x] T034 [US1] Create Role entity in src/domain/entities/role.entity.ts
 - [ ] T035 [US1] Create CaslAbility entity in src/domain/entities/casl-ability.entity.ts
 
 ### Application Layer Tasks

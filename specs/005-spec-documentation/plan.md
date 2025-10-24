@@ -1,24 +1,30 @@
-# Implementation Plan: SAAS Core Module with CASL Permission System
+# Implementation Plan: [FEATURE]
 
-**Branch**: `005-spec-documentation` | **Date**: 2024-12-19 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/005-spec-documentation/spec.md`
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-Create comprehensive technical documentation for the SAAS Core module that covers multi-tenant architecture, tenant lifecycle management, organizational structures, permission systems, and event-driven architecture. The documentation must follow Clean Architecture + DDD + CQRS + Event Sourcing + Event-Driven Architecture patterns and support the 5-tier data isolation strategy (Platform/Tenant/Organization/Department/User) with ROW_LEVEL_SECURITY as the default isolation strategy. Additionally, integrate CASL (Code Access Security Library) for sophisticated permission and authorization management across all 8 subdomains.
+[Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.9.2, Node.js >= 20  
-**Primary Dependencies**: NestJS, @hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel, @casl/ability, @casl/prisma, @casl/mongoose  
-**Storage**: PostgreSQL with MikroORM, Redis for caching, Event Store for event sourcing  
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
+
+**Language/Version**: TypeScript 5.9.2, Node.js >= 20, NestJS 11.x  
+**Primary Dependencies**: NestJS (existing), @hl8/domain-kernel (existing), @hl8/application-kernel (existing), @hl8/infrastructure-kernel (existing), @hl8/interface-kernel (existing), @hl8/nestjs-fastify (existing), @hl8/caching (existing), @hl8/database (existing), @hl8/messaging (existing), @hl8/config (existing), @hl8/exceptions (existing), @hl8/nestjs-isolation (existing), @casl/ability, @casl/prisma, @casl/mongoose  
+**Storage**: PostgreSQL with MikroORM (@hl8/database), Redis for caching (@hl8/caching), Event Store for event sourcing (@hl8/messaging)  
 **Testing**: Jest with ts-jest, unit tests (.spec.ts), integration tests, e2e tests  
 **Target Platform**: Linux server environment, Docker containerized  
-**Project Type**: Monorepo library module (libs/saas-core) with CASL permission system integration  
+**Project Type**: Monorepo library module (libs/saas-core) with CASL permission system integration, extending existing NestJS infrastructure libraries  
 **Performance Goals**: Support 10,000+ concurrent tenants, <100ms tenant operations, 99.9% uptime, <50ms permission checks  
-**Constraints**: Must follow Clean Architecture + DDD + CQRS + ES + EDA patterns, 5-tier data isolation, Chinese documentation, CASL integration for all 8 subdomains  
+**Constraints**: Must follow Clean Architecture + DDD + CQRS + ES + EDA patterns, 5-tier data isolation, Chinese documentation, CASL integration for all 8 subdomains, prioritize existing NestJS infrastructure libraries  
 **Scale/Scope**: Multi-tenant SAAS platform supporting 5 tenant types, 7-level department hierarchy, complex permission systems with CASL-based authorization
 
 ## Constitution Check
@@ -27,54 +33,54 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### Architecture Compliance
 
-- [x] **Clean Architecture**: Documentation will follow four-layer architecture (Domain, Application, Infrastructure, Interface)
-- [x] **DDD Compliance**: Documentation will specify rich domain models with business logic, no anemic domain models
-- [x] **CQRS Pattern**: Documentation will specify commands and queries separation
-- [x] **Event Sourcing**: Documentation will specify event recording for state changes
-- [x] **Event-Driven Architecture**: Documentation will specify event-based communication for loose coupling
+- [ ] **Clean Architecture**: Feature design follows four-layer architecture (Domain, Application, Infrastructure, Interface)
+- [ ] **DDD Compliance**: Rich domain models with business logic, no anemic domain models
+- [ ] **CQRS Pattern**: Commands and queries are properly separated
+- [ ] **Event Sourcing**: State changes are recorded as events where applicable
+- [ ] **Event-Driven Architecture**: Components communicate through events for loose coupling
 
 ### Monorepo Organization
 
-- [x] **Project Structure**: Documentation will follow apps/libs/packages/examples structure
-- [x] **Domain Module Independence**: SAAS Core will be developed as independent domain module
-- [x] **Service Naming**: Service modules will drop "-service" suffix
-- [x] **Package Management**: Uses pnpm as package manager
+- [ ] **Project Structure**: Feature follows apps/libs/packages/examples structure
+- [ ] **Domain Module Independence**: Domain modules are developed as independent projects
+- [ ] **Service Naming**: Service modules in services directory drop "-service" suffix
+- [ ] **Package Management**: Uses pnpm as package manager
 
 ### Quality Assurance
 
-- [x] **ESLint Configuration**: Will extend root eslint.config.mjs
-- [x] **TypeScript Configuration**: Will extend monorepo root tsconfig.json
-- [x] **Documentation**: Detailed design files will use "XS" prefix
+- [ ] **ESLint Configuration**: Extends root eslint.config.mjs
+- [ ] **TypeScript Configuration**: Extends monorepo root tsconfig.json
+- [ ] **Documentation**: Detailed design files use "XS" prefix
 
 ### Testing Architecture
 
-- [x] **Unit Tests**: Will be located in same directory as source files with .spec.ts naming
-- [x] **Integration Tests**: Will be located in **tests**/integration/ directory
-- [x] **E2E Tests**: Will be located in **tests**/e2e/ directory
-- [x] **Test Coverage**: Core business logic ≥ 80%, critical paths ≥ 90%
+- [ ] **Unit Tests**: Located in same directory as source files with .spec.ts naming
+- [ ] **Integration Tests**: Located in **tests**/integration/ directory
+- [ ] **E2E Tests**: Located in **tests**/e2e/ directory
+- [ ] **Test Coverage**: Core business logic ≥ 80%, critical paths ≥ 90%
 
 ### Data Isolation
 
-- [x] **Multi-level Isolation**: Documentation will specify platform/tenant/organization/department/user level isolation
-- [x] **Data Classification**: Documentation will distinguish between shared and non-shared data
-- [x] **Access Rules**: Documentation will specify complete isolation context for all data access
+- [ ] **Multi-level Isolation**: Supports platform/tenant/organization/department/user level isolation
+- [ ] **Data Classification**: Distinguishes between shared and non-shared data
+- [ ] **Access Rules**: All data access includes complete isolation context
 
 ### Unified Language
 
-- [x] **Terminology**: Documentation will use consistent domain terminology (Platform, Tenant, Organization, Department, User)
-- [x] **Entity Mapping**: Technical implementation will map to business terminology
+- [ ] **Terminology**: Uses consistent domain terminology (Platform, Tenant, Organization, Department, User)
+- [ ] **Entity Mapping**: Technical implementation maps to business terminology
 
 ### TypeScript Standards
 
-- [x] **NodeNext Module System**: Will use NodeNext module system for all server-side projects
-- [x] **any Type Usage**: any type usage will be justified and follow safety rules
-- [x] **ESM Migration**: Will use NodeNext module system (no CommonJS)
+- [ ] **NodeNext Module System**: Uses NodeNext module system for all server-side projects
+- [ ] **any Type Usage**: any type usage is justified and follows safety rules
+- [ ] **ESM Migration**: Migrated from CommonJS to NodeNext where applicable
 
 ### Error Handling
 
-- [x] **Exception-First**: Documentation will specify exceptions for business logic, logs for monitoring
-- [x] **Error Hierarchy**: Documentation will specify proper error handling at data/business/controller layers
-- [x] **Anti-patterns Avoided**: Documentation will avoid log-only error handling, exception-only without logging
+- [ ] **Exception-First**: Uses exceptions for business logic, logs for monitoring
+- [ ] **Error Hierarchy**: Proper error handling at data/business/controller layers
+- [ ] **Anti-patterns Avoided**: No log-only error handling, no exception-only without logging
 
 ## Project Structure
 
@@ -92,6 +98,13 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
+
 ```
 libs/saas-core/
 ├── src/
@@ -108,8 +121,9 @@ libs/saas-core/
 │   │   │   ├── tenant-name.vo.ts
 │   │   │   ├── tenant-type.vo.ts
 │   │   │   ├── tenant-status.vo.ts
-│   │   │   ├── isolation-context.vo.ts
-│   │   │   └── permission.vo.ts
+│   │   │   ├── casl-rule.vo.ts
+│   │   │   ├── casl-condition.vo.ts
+│   │   │   └── role-level.vo.ts
 │   │   ├── aggregates/
 │   │   │   ├── tenant.aggregate.ts
 │   │   │   ├── organization.aggregate.ts
@@ -174,21 +188,22 @@ libs/saas-core/
 │   │       ├── casl-ability.factory.ts
 │   │       ├── casl-ability.repository.ts
 │   │       └── casl-ability.service.ts
-│   └── interface/
-│       ├── controllers/
-│       │   ├── tenant.controller.ts
-│       │   ├── organization.controller.ts
-│       │   ├── department.controller.ts
-│       │   └── permission.controller.ts
-│       ├── dto/
-│       │   ├── create-tenant.dto.ts
-│       │   ├── update-tenant.dto.ts
-│       │   ├── tenant-response.dto.ts
-│       │   └── permission.dto.ts
-│       └── guards/
-│           ├── tenant-isolation.guard.ts
-│           ├── permission.guard.ts
-│           └── casl-ability.guard.ts
+│   ├── interface/
+│   │   ├── controllers/
+│   │   │   ├── tenant.controller.ts
+│   │   │   ├── organization.controller.ts
+│   │   │   ├── department.controller.ts
+│   │   │   └── permission.controller.ts
+│   │   ├── dto/
+│   │   │   ├── create-tenant.dto.ts
+│   │   │   ├── update-tenant.dto.ts
+│   │   │   ├── tenant-response.dto.ts
+│   │   │   └── permission.dto.ts
+│   │   └── guards/
+│   │       ├── tenant-isolation.guard.ts
+│   │       ├── permission.guard.ts
+│   │       └── casl-ability.guard.ts
+│   └── saas-core.module.ts
 ├── tests/
 │   ├── unit/
 │   │   ├── domain/
@@ -208,7 +223,7 @@ libs/saas-core/
 └── README.md
 ```
 
-**Structure Decision**: Monorepo library module structure following Clean Architecture with four distinct layers (Domain, Application, Infrastructure, Interface) and integrated CASL permission system. The structure supports the 5-tier data isolation strategy, follows DDD principles with rich domain models, aggregates, and value objects, and includes comprehensive CASL integration for sophisticated permission management across all 8 subdomains. Each layer has clear responsibilities and dependencies flow inward only.
+**Structure Decision**: Monorepo library module structure following Clean Architecture with four distinct layers (Domain, Application, Infrastructure, Interface) and integrated CASL permission system. The structure extends existing NestJS infrastructure libraries (@hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel, @hl8/nestjs-fastify, @hl8/caching, @hl8/database, @hl8/messaging, @hl8/config, @hl8/exceptions, @hl8/nestjs-isolation) and supports the 5-tier data isolation strategy, follows DDD principles with rich domain models, aggregates, and value objects, and includes comprehensive CASL integration for sophisticated permission management across all 8 subdomains. Each layer has clear responsibilities and dependencies flow inward only. The module follows NestJS module structure with saas-core.module.ts as the main module entry point.
 
 ## Complexity Tracking
 

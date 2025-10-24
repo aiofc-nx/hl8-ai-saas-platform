@@ -6,7 +6,7 @@
 
 ## Research Overview
 
-This research phase focused on analyzing the existing architecture documentation, business requirements, and domain terminology to create comprehensive technical documentation for the SAAS Core module with integrated CASL (Code Access Security Library) permission system. The research covered multi-tenant architecture patterns, Clean Architecture implementation, DDD principles, event-driven architecture, and CASL integration strategies.
+This research phase focused on analyzing the existing architecture documentation, business requirements, and domain terminology to create comprehensive technical documentation for the SAAS Core module with integrated CASL (Code Access Security Library) permission system. The research covered multi-tenant architecture patterns, Clean Architecture implementation, DDD principles, event-driven architecture, CASL integration strategies, and leveraging existing domain-kernel infrastructure.
 
 ## Key Research Areas
 
@@ -235,6 +235,157 @@ This research phase focused on analyzing the existing architecture documentation
 4. **Documentation Creation**: Create technical documentation and implementation guides
 5. **Review and Validation**: Conduct architecture review and stakeholder validation
 
+### 10. Domain-Kernel Integration Strategy
+
+**Decision**: Leverage existing @hl8/domain-kernel infrastructure for SAAS Core module development
+
+**Rationale**:
+
+- Existing domain-kernel provides comprehensive base classes and infrastructure
+- BaseEntity, AggregateRoot, BaseValueObject classes are already implemented
+- IsolationContext and data isolation infrastructure is already available
+- Domain events, business rules, and specifications are already implemented
+- Reduces development time and ensures consistency with existing patterns
+- Provides robust foundation for multi-tenant architecture
+
+**Alternatives Considered**:
+
+- Creating new domain infrastructure: Would duplicate existing functionality
+- Using external DDD libraries: Would introduce inconsistency with existing patterns
+- Minimal domain layer: Insufficient for complex business logic requirements
+
+**Integration Approach**:
+
+- Extend existing BaseEntity, AggregateRoot classes for SAAS-specific entities
+- Use existing IsolationContext for multi-tenant data isolation
+- Leverage existing domain events infrastructure for business events
+- Utilize existing business rules and specifications for validation
+- Build upon existing value objects and entity ID infrastructure
+
+### 11. Application-Kernel Integration Strategy
+
+**Decision**: Leverage existing @hl8/application-kernel infrastructure for SAAS Core module application layer development
+
+**Rationale**:
+
+- Existing application-kernel provides comprehensive CQRS infrastructure
+- BaseCommand, BaseQuery classes are already implemented
+- BaseUseCase, BaseCommandUseCase provide use case lifecycle management
+- CommandHandler and QueryHandler interfaces are already defined
+- Context management and transaction management infrastructure is available
+- Validation system with BaseClassValidator is already implemented
+- Reduces development time and ensures consistency with existing patterns
+- Provides robust foundation for application layer architecture
+
+**Alternatives Considered**:
+
+- Creating new application infrastructure: Would duplicate existing functionality
+- Using external CQRS libraries: Would introduce inconsistency with existing patterns
+- Minimal application layer: Insufficient for complex business logic requirements
+
+**Integration Approach**:
+
+- Extend existing BaseCommand, BaseQuery classes for SAAS-specific commands and queries
+- Use existing BaseUseCase, BaseCommandUseCase for business use cases
+- Leverage existing CommandHandler and QueryHandler interfaces
+- Utilize existing context management for multi-tenant isolation
+- Build upon existing validation infrastructure for input validation
+
+### 12. Infrastructure-Kernel Integration Strategy
+
+**Decision**: Leverage existing @hl8/infrastructure-kernel infrastructure for SAAS Core module infrastructure layer development
+
+**Rationale**:
+
+- Existing infrastructure-kernel provides comprehensive FINAL infrastructure
+- BaseRepositoryAdapter, AggregateRepositoryAdapter provide repository infrastructure
+- IsolationContextManager provides multi-tenant isolation management
+- Database services (PostgreSQL, MongoDB) are already implemented
+- Cache services with Redis integration are available
+- Performance monitoring and health check services are implemented
+- Error handling with circuit breaker and retry mechanisms are available
+- CQRS support with command/query handlers and use case executors
+- Reduces development time and ensures consistency with existing patterns
+- Provides robust foundation for infrastructure layer architecture
+
+**Alternatives Considered**:
+
+- Creating new infrastructure components: Would duplicate existing functionality
+- Using external infrastructure libraries: Would introduce inconsistency with existing patterns
+- Minimal infrastructure layer: Insufficient for complex multi-tenant requirements
+
+**Integration Approach**:
+
+- Extend existing BaseRepositoryAdapter for SAAS-specific repository implementations
+- Use existing IsolationContextManager for multi-tenant data isolation
+- Leverage existing database services and connection management
+- Utilize existing cache services for performance optimization
+- Build upon existing performance monitoring and health check infrastructure
+- Integrate existing error handling and circuit breaker mechanisms
+
+### 13. Interface-Kernel Integration Strategy
+
+**Decision**: Leverage existing @hl8/interface-kernel infrastructure for SAAS Core module interface layer development
+
+**Rationale**:
+
+- Existing interface-kernel provides comprehensive interface layer infrastructure
+- Controllers (REST, Health, Metrics) provide API gateway functionality
+- Guards provide authentication, authorization, and rate limiting capabilities
+- Middleware provides request/response processing and cross-cutting concerns
+- Decorators provide metadata and validation capabilities
+- Services provide interface layer business logic and integration
+- Reduces development time and ensures consistency with existing patterns
+- Provides robust foundation for interface layer architecture
+
+**Alternatives Considered**:
+
+- Creating new interface components: Would duplicate existing functionality
+- Using external interface libraries: Would introduce inconsistency with existing patterns
+- Minimal interface layer: Insufficient for complex multi-tenant requirements
+
+**Integration Approach**:
+
+- Extend existing controllers for SAAS-specific API endpoints
+- Use existing guards for authentication and authorization
+- Leverage existing middleware for request processing and validation
+- Utilize existing decorators for metadata and validation
+- Build upon existing services for interface layer business logic
+
+### 14. NestJS Infrastructure Libraries Integration Strategy
+
+**Decision**: Prioritize existing NestJS infrastructure libraries for SAAS Core module development
+
+**Rationale**:
+
+- Existing NestJS infrastructure libraries provide comprehensive enterprise-grade functionality
+- @hl8/nestjs-fastify provides Fastify integration with enterprise features (compression, CORS, helmet, rate limiting)
+- @hl8/caching provides Redis caching with multi-level data isolation support
+- @hl8/database provides MikroORM database management with transaction support and multi-tenancy
+- @hl8/messaging provides event bus and messaging with Kafka, RabbitMQ, and Redis support
+- @hl8/config provides centralized configuration management
+- @hl8/exceptions provides comprehensive exception handling
+- @hl8/nestjs-isolation provides multi-tenant isolation capabilities
+- All libraries are built on NestJS framework ensuring consistency and compatibility
+- Reduces development time and ensures enterprise-grade quality
+- Provides robust foundation for SAAS platform architecture
+
+**Alternatives Considered**:
+
+- Creating new infrastructure components: Would duplicate existing functionality and reduce quality
+- Using external libraries: Would introduce inconsistency with existing NestJS infrastructure
+- Minimal infrastructure layer: Insufficient for enterprise SAAS platform requirements
+
+**Integration Approach**:
+
+- Extend existing @hl8/nestjs-fastify for web server and API gateway functionality
+- Use existing @hl8/caching for Redis-based caching with multi-tenant isolation
+- Leverage existing @hl8/database for PostgreSQL/MongoDB database management
+- Utilize existing @hl8/messaging for event-driven architecture and messaging
+- Build upon existing @hl8/config for configuration management
+- Integrate existing @hl8/exceptions for error handling
+- Use existing @hl8/nestjs-isolation for multi-tenant data isolation
+
 ## Conclusion
 
-The research phase has established a solid foundation for the SAAS Core module documentation with integrated CASL permission system. The chosen architecture patterns and technology decisions provide a robust, scalable, and maintainable solution that aligns with the project's requirements and constraints. The CASL integration provides sophisticated permission management capabilities while maintaining the clean architecture principles and DDD patterns. The next phase will focus on creating detailed design artifacts and implementation guidance.
+The research phase has established a solid foundation for the SAAS Core module documentation with integrated CASL permission system. The chosen architecture patterns and technology decisions provide a robust, scalable, and maintainable solution that aligns with the project's requirements and constraints. The CASL integration provides sophisticated permission management capabilities while maintaining the clean architecture principles and DDD patterns. The integration with existing NestJS infrastructure libraries (@hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel, @hl8/nestjs-fastify, @hl8/caching, @hl8/database, @hl8/messaging, @hl8/config, @hl8/exceptions, @hl8/nestjs-isolation) ensures consistency and reduces development overhead while providing enterprise-grade quality. The next phase will focus on creating detailed design artifacts and implementation guidance.

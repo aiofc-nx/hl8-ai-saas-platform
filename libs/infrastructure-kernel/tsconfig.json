@@ -1,13 +1,18 @@
 {
-  "extends": "@repo/typescript-config/nestjs.json",
+  "extends": "../../packages/typescript-config/nestjs.json",
   "compilerOptions": {
     "allowJs": false,
     "esModuleInterop": true,
-    "incremental": false,
     "baseUrl": ".",
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
-  "include": ["src", "src/**/*.spec.ts", "src/**/*.test.ts", "test", "test/**/*.spec.ts", "test/**/*.test.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "test", "dist", "**/*.js", "**/*.js.map"]
 }

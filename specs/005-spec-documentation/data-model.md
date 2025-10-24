@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document defines the complete data model for the SAAS Core module with integrated CASL (Code Access Security Library) permission system, including domain entities, value objects, aggregates, and their relationships. The model follows DDD principles, supports the 5-tier data isolation strategy (Platform/Tenant/Organization/Department/User), and includes comprehensive CASL integration for sophisticated permission and authorization management across all 8 subdomains.
+This document defines the complete data model for the SAAS Core module with integrated CASL (Code Access Security Library) permission system, including domain entities, value objects, aggregates, and their relationships. The model extends the existing NestJS infrastructure libraries (@hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel, @hl8/nestjs-fastify, @hl8/caching, @hl8/database, @hl8/messaging, @hl8/config, @hl8/exceptions, @hl8/nestjs-isolation), follows DDD principles, supports the 5-tier data isolation strategy (Platform/Tenant/Organization/Department/User), and includes comprehensive CASL integration for sophisticated permission and authorization management across all 8 subdomains.
 
 ## Domain Entities
 
