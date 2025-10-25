@@ -22,12 +22,14 @@
 
 **问题**: 事件类使用 `extends DomainEvent` 导致错误：`Cannot extend an interface 'DomainEvent'`
 
-**解决方案**: 
+**解决方案**:
+
 - 使用 `extends DomainEventBase` 代替 `extends DomainEvent`
 - 实现 `IDomainEvent` 接口
 - 添加必要的 `eventData` 和 `eventType` 属性
 
 **修复的文件** (13 个):
+
 1. `src/domain/events/department-hierarchy-limit-exceeded.event.ts`
 2. `src/domain/events/permission-conflict-detected.event.ts`
 3. `src/domain/events/resource-limit-exceeded.event.ts`
@@ -45,11 +47,13 @@
 ### 2. 导入更新
 
 **修改前**:
+
 ```typescript
 import { DomainEvent } from "@hl8/domain-kernel";
 ```
 
 **修改后**:
+
 ```typescript
 import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 ```
@@ -57,6 +61,7 @@ import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel
 ### 3. 类声明更新
 
 **修改前**:
+
 ```typescript
 export class SomeEvent extends DomainEvent {
   constructor(eventData: ISomeEvent) {
@@ -67,6 +72,7 @@ export class SomeEvent extends DomainEvent {
 ```
 
 **修改后**:
+
 ```typescript
 export class SomeEvent extends DomainEventBase implements IDomainEvent {
   public readonly eventData: Record<string, unknown>;
@@ -87,16 +93,19 @@ export class SomeEvent extends DomainEventBase implements IDomainEvent {
 ## 🎯 关键改进
 
 ### 1. 统一事件基类
+
 - 所有事件类现在都继承 `DomainEventBase`
 - 实现统一的 `IDomainEvent` 接口
 - 自动生成 `eventId`、`occurredAt` 等标准字段
 
 ### 2. 类型安全
+
 - 使用 `Record<string, unknown>` 作为 `eventData` 类型
 - 保持了事件数据的类型检查
 - 避免了接口继承的错误
 
 ### 3. 代码一致性
+
 - 统一了所有事件类的结构
 - 简化了事件创建的逻辑
 - 提高了代码的可维护性
