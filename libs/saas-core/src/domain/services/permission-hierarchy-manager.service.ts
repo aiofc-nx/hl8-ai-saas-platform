@@ -71,6 +71,15 @@ export class PermissionHierarchyManager extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入
+    return input;
+  }
+
+
+  /**
    * 获取继承的权限
    *
    * @param template - 权限模板

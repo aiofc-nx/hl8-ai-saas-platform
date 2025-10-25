@@ -112,6 +112,15 @@ export class OrganizationBusinessRules extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入
+    return input;
+  }
+
+
+  /**
    * 添加组织业务规则
    *
    * @param rule - 组织业务规则

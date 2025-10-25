@@ -40,6 +40,15 @@ export class TenantNameReviewRulesService extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入
+    return input;
+  }
+
+
+  /**
    * 验证审核请求
    *
    * @param request - 审核请求

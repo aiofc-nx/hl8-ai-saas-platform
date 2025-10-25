@@ -145,6 +145,15 @@ export class DomainValidationService extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入
+    return input;
+  }
+
+
+  /**
    * 添加验证规则
    *
    * @param rule - 验证规则

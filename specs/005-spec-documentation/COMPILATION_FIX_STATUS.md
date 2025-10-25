@@ -2,8 +2,8 @@
 
 > **开始时间**: 2024-01-15  
 > **初始错误数**: 1202  
-> **当前错误数**: 1196  
-> **完成度**: 0.5%
+> **当前错误数**: 1194  
+> **完成度**: 0.67%
 
 ---
 
@@ -16,9 +16,12 @@
 - [x] PlatformId.create() 修复
 - [x] IsolationContext 使用修复
 - [x] CreateTenantHandler 简化重构
+- [x] 批量修复 DomainService → BaseDomainService (15个文件)
+- [x] 添加 execute 方法 stub 到 UserIdentityManager
 
 ### 🔄 进行中
 
+- [ ] 批量添加 execute 方法到所有服务类 (15个文件剩余)
 - [ ] 阶段 1: ID 值对象修复
 
 ### 📋 待处理
@@ -48,17 +51,27 @@
 4. **CreateTenantHandler 简化** ✅
    - 文件: `src/application/handlers/create-tenant.handler.ts`
    - 修复: 使用 `TenantAggregate.create()` 静态方法
-   - 移除复杂的构造函数调用
+
+### 第二批修复（2个错误）
+
+5. **BaseDomainService 导入** ✅
+   - 文件: 15个服务文件
+   - 修复: `DomainService` → `BaseDomainService`
+
+6. **UserIdentityManager execute 方法** ✅
+   - 文件: `src/domain/services/user-identity-manager.service.ts`
+   - 修复: 添加 execute 方法实现
 
 ---
 
 ## 当前错误类型统计
 
-### 1. ID 值对象构造错误
+### 1. 缺少 execute 方法 (~15个错误)
 
-- **计数**: ~45（减少5个）
-- **位置**: 其他文件中仍有误用
-- **状态**: 进行中
+- **计数**: ~15
+- **位置**: 所有 BaseDomainService 子类
+- **状态**: 待修复
+- **优先级**: 高
 
 ### 2. BaseEntity 构造函数参数错误
 
@@ -72,27 +85,21 @@
 - **问题**: domain, getResourceLimits 等
 - **状态**: 待修复
 
-### 4. IsolationContext 使用错误
-
-- **计数**: ~45（减少5个）
-- **问题**: createTenantLevel 方法不存在
-- **状态**: 进行中
-
-### 5. 事件类型错误
+### 4. 事件类型错误
 
 - **计数**: ~200
 - **问题**: 事件构造函数和泛型
 - **状态**: 待修复
 
-### 6. 实体继承错误
+### 5. 实体继承错误
 
 - **计数**: ~100
 - **问题**: BaseEntity 继承和私有属性
 - **状态**: 待修复
 
-### 7. 其他错误
+### 6. 其他错误
 
-- **计数**: ~102
+- **计数**: ~279
 - **问题**: 各种类型错误
 - **状态**: 待修复
 
@@ -100,19 +107,30 @@
 
 ## 下一步行动
 
-### 继续修复隔离上下文错误
+### 立即行动：批量添加 execute 方法
 
-需要修复的文件：
+需要修复的文件（15个）：
 
-- `src/domain/aggregates/*.ts` - 查找更多 IsolationContext 使用
-- `src/application/use-cases/*.ts` - 继续修复
+1. department-business-rules.service.ts
+2. department-hierarchy-manager.service.ts
+3. department-level-config.service.ts
+4. domain-business-rules-engine.service.ts
+5. domain-integration.service.ts
+6. domain-validation.service.ts
+7. organization-business-rules.service.ts
+8. permission-conflict-detector.service.ts
+9. permission-hierarchy-manager.service.ts
+10. permission-template.service.ts
+11. resource-monitoring.service.ts
+12. tenant-business-rules.service.ts
+13. tenant-name-review.service.ts
+14. user-tenant-switcher.service.ts
+15. 及其他
 
-### 修复 BaseEntity 构造
-
-优先处理影响面大的文件
+预计减少错误数：15个
 
 ---
 
 ## 更新时间
 
-最后更新：2024-01-15 15:30（已修复6个错误）
+最后更新：2024-01-15 15:45（已修复8个错误，包括批量修复）

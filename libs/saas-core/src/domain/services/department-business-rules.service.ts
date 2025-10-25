@@ -115,6 +115,14 @@ export class DepartmentBusinessRules extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入（这个方法在这些服务中通常不被直接使用）
+    return input;
+  }
+
+  /**
    * 添加部门业务规则
    *
    * @param rule - 部门业务规则

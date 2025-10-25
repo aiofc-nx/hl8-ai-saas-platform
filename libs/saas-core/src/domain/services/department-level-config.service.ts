@@ -56,6 +56,15 @@ export class DepartmentLevelConfigService extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入
+    return input;
+  }
+
+
+  /**
    * 创建部门层级配置
    *
    * @param level - 层级

@@ -65,6 +65,15 @@ export class DepartmentHierarchyManager extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入
+    return input;
+  }
+
+
+  /**
    * 构建部门层次结构
    *
    * @param departments - 部门列表

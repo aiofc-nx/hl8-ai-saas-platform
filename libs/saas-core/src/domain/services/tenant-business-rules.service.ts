@@ -115,6 +115,15 @@ export class TenantBusinessRules extends BaseDomainService {
   }
 
   /**
+   * 实现基类的抽象方法
+   */
+  async execute(input: unknown): Promise<unknown> {
+    // 默认实现：返回输入
+    return input;
+  }
+
+
+  /**
    * 添加租户业务规则
    *
    * @param rule - 租户业务规则
