@@ -353,6 +353,116 @@ export class UserController extends RestController {
   @UseGuards(AuthenticationGuard, AuthorizationGuard)
   public async getUsers() { ... }
 }
+```
+
+#### 3.3.6 Exceptions 组件（异常处理）
+
+**必须优先使用** `@hl8/exceptions` 提供的异常类：
+
+```typescript
+// ✅ 正确：使用 exceptions 库的异常类
+import { 
+  DomainException,
+  BusinessException,
+  ValidationException,
+  NotFoundException
+} from "@hl8/exceptions";
+
+export class UserService {
+  public async getUser(id: string): Promise<User> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
+  }
+}
+```
+
+```typescript
+// ❌ 错误：自己定义异常类
+export class NotFoundException extends Error {
+  // ... 重复定义
+}
+```
+
+#### 3.3.7 Caching 组件（缓存管理）
+
+**必须优先使用** `@hl8/caching` 提供的缓存服务：
+
+```typescript
+// ✅ 正确：使用 caching 库的缓存服务
+import { ICacheService } from "@hl8/caching";
+
+@Injectable()
+export class UserService {
+  constructor(private readonly cacheService: ICacheService) {}
+  
+  public async getUser(id: string): Promise<User> {
+    const cacheKey = `user:${id}`;
+    let user = await this.cacheService.get<User>(cacheKey);
+    
+    if (!user) {
+      user = await this.userRepository.findById(id);
+      await this.cacheService.set(cacheKey, user, 3600);
+    }
+    
+    return user;
+  }
+}
+```
+
+#### 3.3.8 Config 组件（配置管理）
+
+**必须优先使用** `@hl8/config` 提供的配置管理：
+
+```typescript
+// ✅ 正确：使用 config 库的配置服务
+import { ConfigService } from "@hl8/config";
+
+@Injectable()
+export class DatabaseService {
+  constructor(private readonly configService: ConfigService) {}
+  
+  public getConnectionString(): string {
+    return this.configService.get("DATABASE_URL") || 
+           this.configService.get("database.url");
+  }
+}
+```
+
+#### 3.3.9 NestJS-Fastify 组件（Logging）
+
+**必须优先使用** `@hl8/nestjs-fastify` 提供的 logging 组件：
+
+```typescript
+// ✅ 正确：使用 nestjs-fastify 的 logging
+import { Logger } from "@hl8/nestjs-fastify";
+
+@Injectable()
+export class UserService {
+  private readonly logger = new Logger(UserService.name);
+  
+  public async createUser(data: CreateUserDto): Promise<User> {
+    this.logger.log(`Creating user: ${data.email}`);
+    
+    try {
+      const user = await this.userRepository.create(data);
+      this.logger.log(`User created successfully: ${user.id}`);
+      return user;
+    } catch (error) {
+      this.logger.error(`Failed to create user: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+}
+```
+
+```typescript
+// ❌ 错误：自己实现 logging
+console.log("Creating user"); // 不应该使用 console.log
+const logger = new CustomLogger(); // 不应该自己实现 logger
+```
 
 ```typescript
 // ✅ 正确：使用 IsolationContext
@@ -382,7 +492,7 @@ export class UserRepository {
 }
 ```
 
-#### 3.3.5 完整的导入示例
+#### 3.3.10 完整的导入示例
 
 以下是一个完整的实体实现示例，展示如何正确使用 domain-kernel 的组件：
 
@@ -435,7 +545,7 @@ export class User extends BaseEntity {
 }
 ```
 
-#### 3.3.6 错误示例和常见问题
+#### 3.3.11 错误示例和常见问题
 
 **问题 1: 重复定义 ID 值对象**
 
