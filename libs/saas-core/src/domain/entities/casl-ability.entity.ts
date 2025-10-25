@@ -1,10 +1,13 @@
-import { BaseEntity } from "@hl8/domain-kernel";
-import { CaslAbilityId } from "../value-objects/casl-ability-id.vo.js";
-import { UserId } from "@hl8/domain-kernel";
-import { RoleId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import {
+  BaseEntity,
+  GenericEntityId,
+  UserId,
+  RoleId,
+  TenantId,
+  IsolationContext,
+  IPartialAuditInfo,
+} from "@hl8/domain-kernel";
 import { CaslCondition } from "../value-objects/casl-condition.vo.js";
-import { AuditInfo } from "@hl8/domain-kernel";
 
 /**
  * CASL权限能力实体
@@ -12,8 +15,8 @@ import { AuditInfo } from "@hl8/domain-kernel";
  * @description 表示用户的CASL权限能力，包含具体的操作权限和条件
  * @since 1.0.0
  */
-export class CaslAbility extends BaseEntity<CaslAbilityId> {
-  private _userId: UserId;
+export class CaslAbility extends BaseEntity {
+  private readonly _abilityUserId: UserId;
   private _roleId: RoleId | null;
   private _subject: string;
   private _action: string;
@@ -33,17 +36,29 @@ export class CaslAbility extends BaseEntity<CaslAbilityId> {
    * @param auditInfo - 审计信息
    */
   constructor(
-    id: CaslAbilityId,
+    id: GenericEntityId,
+    tenantId: TenantId,
     userId: UserId,
     subject: string,
     action: string,
     context: IsolationContext,
     roleId: RoleId | null = null,
     conditions: CaslCondition[] = [],
-    auditInfo: AuditInfo,
+    organizationId?: unknown,
+    departmentId?: unknown,
+    auditInfo?: IPartialAuditInfo,
   ) {
-    super(id, auditInfo);
-    this._userId = userId;
+    super(
+      id,
+      tenantId,
+      organizationId,
+      departmentId,
+      userId, // Pass userId to BaseEntity
+      false,
+      undefined,
+      auditInfo,
+    );
+    this._abilityUserId = userId;
     this._roleId = roleId;
     this._subject = subject;
     this._action = action;
@@ -57,7 +72,7 @@ export class CaslAbility extends BaseEntity<CaslAbilityId> {
    * @returns 用户ID
    */
   get userId(): UserId {
-    return this._userId;
+    return this._abilityUserId;
   }
 
   /**
@@ -239,7 +254,13 @@ export class CaslAbility extends BaseEntity<CaslAbilityId> {
    * @returns 是否适用
    */
   appliesToContext(context: IsolationContext): boolean {
-    return this._context.equals(context);
+    // Compare isolation contexts by comparing their constituent IDs
+    return (
+      this._context.tenantId?.equals(context.tenantId) === true &&
+      this._context.organizationId?.equals(context.organizationId) === true &&
+      this._context.departmentId?.equals(context.departmentId) === true &&
+      this._context.userId?.equals(context.userId) === true
+    );
   }
 
   /**
