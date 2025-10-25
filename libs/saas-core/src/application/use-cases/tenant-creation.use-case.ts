@@ -9,7 +9,7 @@ import { TenantAggregate } from "../../domain/aggregates/tenant.aggregate.js";
 import { TenantRepositoryImpl } from "../../infrastructure/repositories/tenant.repository.impl.js";
 import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
 import { PlatformId } from "../../domain/value-objects/platform-id.vo.js";
-import { TenantId } from "../../domain/value-objects/tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
 
 /**
  * 租户创建用例
@@ -44,7 +44,7 @@ export class TenantCreationUseCase extends BaseUseCase<
   ): Promise<TenantAggregate> {
     // 创建隔离上下文
     const platformId = new PlatformId("platform_001"); // TODO: 从配置或参数获取
-    const tempTenantId = new TenantId("temp_tenant"); // TODO: 从配置或参数获取
+    const tempTenantId = TenantId.create("temp_tenant"); // TODO: 从配置或参数获取
     const isolationContext = IsolationContext.createTenantLevel(
       platformId,
       tempTenantId,
