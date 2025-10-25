@@ -262,7 +262,7 @@ Both PostgreSQL and MongoDB databases are fully supported with complete implemen
 #### Phase 6A.3: PostgreSQL Mappers
 
 - [x] T118 [P] Move TenantMapper to src/infrastructure/mappers/postgresql/tenant.mapper.ts
-- [ ] T119 [P] Create OrganizationMapper for PostgreSQL in src/infrastructure/mappers/postgresql/organization.mapper.ts
+- [x] T119 [P] Create OrganizationMapper for PostgreSQL in src/infrastructure/mappers/postgresql/organization.mapper.ts
 - [ ] T120 [P] Create DepartmentMapper for PostgreSQL in src/infrastructure/mappers/postgresql/department.mapper.ts
 - [ ] T121 [P] Create UserMapper for PostgreSQL in src/infrastructure/mappers/postgresql/user.mapper.ts
 - [ ] T122 [P] Create RoleMapper for PostgreSQL in src/infrastructure/mappers/postgresql/role.mapper.ts
