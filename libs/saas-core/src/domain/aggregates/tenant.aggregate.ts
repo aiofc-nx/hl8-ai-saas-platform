@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { AggregateRoot } from "@hl8/domain-kernel";
+import { AggregateRoot, TenantId } from "@hl8/domain-kernel";
 import { Tenant } from "../entities/index.js";
 import {
   TenantCode,
@@ -69,7 +69,11 @@ export class TenantAggregate extends AggregateRoot {
     settings: Record<string, any> = {},
     trialPeriodConfig?: TrialPeriodConfig,
   ) {
-    super(id);
+    // TODO: 需要提供 tenantId，暂时使用临时值
+    // 注意：租户聚合根需要 tenantId，但这里创建的是租户本身
+    // 应该使用特殊的 tenantId 或者传递正确的 tenantId
+    const tenantId = new TenantId("platform-level-tenant");
+    super(id, tenantId);
 
     this._tenant = new Tenant(
       id,
@@ -937,5 +941,35 @@ export class TenantAggregate extends AggregateRoot {
    */
   updateResourceMonitoringService(service: ResourceMonitoringService): void {
     this._resourceMonitoringService = service;
+  }
+
+  /**
+   * 获取快照数据
+   *
+   * @returns 快照数据
+   */
+  protected getSnapshotData(): Record<string, unknown> {
+    return {
+      tenant: this._tenant,
+      trialPeriodConfig: this._trialPeriodConfig,
+      trialPeriodService: this._trialPeriodService,
+      tenantCreationRules: this._tenantCreationRules,
+      resourceMonitoringService: this._resourceMonitoringService,
+    };
+  }
+
+  /**
+   * 从快照加载数据
+   *
+   * @param snapshot - 快照数据
+   */
+  protected loadFromSnapshot(snapshot: Record<string, unknown>): void {
+    this._tenant = snapshot.tenant as Tenant;
+    this._trialPeriodConfig = snapshot.trialPeriodConfig as TrialPeriodConfig;
+    this._trialPeriodService = snapshot.trialPeriodService as TrialPeriodService;
+    this._tenantCreationRules =
+      snapshot.tenantCreationRules as TenantCreationRules;
+    this._resourceMonitoringService =
+      snapshot.resourceMonitoringService as ResourceMonitoringService;
   }
 }
