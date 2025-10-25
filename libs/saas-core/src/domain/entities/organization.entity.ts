@@ -256,6 +256,38 @@ export class Organization extends BaseEntity<OrganizationId> {
   }
 
   /**
+   * 更新组织类型
+   *
+   * @param type - 新的组织类型
+   */
+  updateType(type: OrganizationTypeEnum): void {
+    this._type = type;
+    this.updateTimestamp();
+  }
+
+  /**
+   * 激活组织
+   */
+  activate(): void {
+    if (this._status === OrganizationStatusEnum.ACTIVE) {
+      return;
+    }
+    this._status = OrganizationStatusEnum.ACTIVE;
+    this.updateTimestamp();
+  }
+
+  /**
+   * 停用组织
+   */
+  deactivate(): void {
+    if (this._status === OrganizationStatusEnum.INACTIVE) {
+      return;
+    }
+    this._status = OrganizationStatusEnum.INACTIVE;
+    this.updateTimestamp();
+  }
+
+  /**
    * 设置父组织
    *
    * @param parentId - 父组织ID

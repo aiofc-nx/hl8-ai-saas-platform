@@ -2,7 +2,10 @@ import {
   AggregateRoot,
   TenantId as KernelTenantId,
 } from "@hl8/domain-kernel";
-import { Organization } from "../entities/organization.entity.js";
+import {
+  Organization,
+  OrganizationTypeEnum,
+} from "../entities/organization.entity.js";
 import { OrganizationId } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
@@ -93,9 +96,8 @@ export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
    *
    * @param type - 新的组织类型
    */
-  updateType(type: string): void {
+  updateType(type: OrganizationTypeEnum): void {
     this._organization.updateType(type);
-    this.updateTimestamp();
   }
 
   /**
@@ -103,7 +105,6 @@ export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
    */
   activate(): void {
     this._organization.activate();
-    this.updateTimestamp();
   }
 
   /**
@@ -111,7 +112,6 @@ export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
    */
   deactivate(): void {
     this._organization.deactivate();
-    this.updateTimestamp();
   }
 
   /**
