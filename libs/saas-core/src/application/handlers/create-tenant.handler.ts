@@ -25,7 +25,7 @@ export class CreateTenantHandler
    */
   async handle(command: CreateTenantCommand): Promise<TenantAggregate> {
     // 验证命令
-    command.validate();
+    this.validateCommand(command);
 
     try {
       // 生成租户ID
@@ -69,11 +69,47 @@ export class CreateTenantHandler
   }
 
   /**
-   * 获取处理器类型
+   * 验证命令
    *
-   * @returns 处理器类型
+   * @param command - 要验证的命令
    */
-  getHandlerType(): string {
+  validateCommand(command: CreateTenantCommand): void {
+    if (!command.code) {
+      throw new Error("租户代码不能为空");
+    }
+    if (!command.name) {
+      throw new Error("租户名称不能为空");
+    }
+    if (!command.type) {
+      throw new Error("租户类型不能为空");
+    }
+  }
+
+  /**
+   * 检查是否可以处理命令
+   *
+   * @param command - 要检查的命令
+   * @returns 是否可以处理
+   */
+  canHandle(command: CreateTenantCommand): boolean {
+    return command.commandName === "CreateTenantCommand";
+  }
+
+  /**
+   * 获取处理器名称
+   *
+   * @returns 处理器名称
+   */
+  getHandlerName(): string {
     return "CreateTenantHandler";
+  }
+
+  /**
+   * 获取处理器优先级
+   *
+   * @returns 处理器优先级
+   */
+  getPriority(): number {
+    return 0;
   }
 }
