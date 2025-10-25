@@ -5,13 +5,14 @@
  * @since 1.0.0
  */
 
-import { BaseEntity } from "@hl8/domain-kernel";
 import {
+  BaseEntity,
   EntityId,
   TenantId,
   OrganizationId,
   DepartmentId,
   UserId,
+  IPartialAuditInfo,
 } from "@hl8/domain-kernel";
 import { RoleLevel } from "../value-objects/index.js";
 
@@ -61,8 +62,8 @@ export class Role extends BaseEntity<EntityId> {
   private _inheritedRoles: string[];
   private _isDefault: boolean;
   private _isSystem: boolean;
-  private _settings: Record<string, any>;
-  private _metadata: Record<string, any>;
+  private _settings: Record<string, unknown>;
+  private _metadata: Record<string, unknown>;
 
   constructor(
     id: EntityId,
@@ -76,13 +77,13 @@ export class Role extends BaseEntity<EntityId> {
     inheritedRoles: string[] = [],
     isDefault: boolean = false,
     isSystem: boolean = false,
-    settings: Record<string, any> = {},
-    metadata: Record<string, any> = {},
+    settings: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {},
     organizationId?: OrganizationId,
     departmentId?: DepartmentId,
     isShared: boolean = false,
     sharingLevel?: string,
-    auditInfo?: any,
+    auditInfo?: IPartialAuditInfo,
   ) {
     super(
       id,
@@ -423,7 +424,7 @@ export class Role extends BaseEntity<EntityId> {
    * @param key - 设置键
    * @returns 设置值
    */
-  getSetting(key: string): any {
+  getSetting(key: string): unknown {
     return this._settings[key];
   }
 
@@ -433,7 +434,7 @@ export class Role extends BaseEntity<EntityId> {
    * @param key - 设置键
    * @param value - 设置值
    */
-  setSetting(key: string, value: any): void {
+  setSetting(key: string, value: unknown): void {
     this._settings[key] = value;
     this.markAsModified();
   }

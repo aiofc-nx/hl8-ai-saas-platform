@@ -165,6 +165,7 @@ export class TenantController {
    * @param tenantAggregate - 租户聚合根
    * @returns 租户响应DTO
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: 定义 TenantAggregate 接口
   private mapToResponseDto(tenantAggregate: any): TenantResponseDto {
     // TODO: 实现映射逻辑
     return {

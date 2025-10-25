@@ -43,6 +43,7 @@ describe("CreateTenantHandler", () => {
     });
 
     it("应该抛出错误当命令无效", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试中用于测试无效输入
       const invalidCommand = new CreateTenantCommand(
         validCode,
         validName,
@@ -68,6 +69,7 @@ describe("CreateTenantHandler", () => {
     });
 
     it("应该抛出错误当代码为空", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试中用于测试无效输入
       const invalidCommand = new CreateTenantCommand(
         undefined as any,
         validName,
@@ -80,6 +82,7 @@ describe("CreateTenantHandler", () => {
     });
 
     it("应该抛出错误当名称为空", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试中用于测试无效输入
       const invalidCommand = new CreateTenantCommand(
         validCode,
         undefined as any,
@@ -92,6 +95,7 @@ describe("CreateTenantHandler", () => {
     });
 
     it("应该抛出错误当类型为空", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试中用于测试无效输入
       const invalidCommand = new CreateTenantCommand(
         validCode,
         validName,
@@ -110,6 +114,7 @@ describe("CreateTenantHandler", () => {
     });
 
     it("应该返回 false 对于其他命令", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试中用于模拟其他命令类型
       const otherCommand = {
         commandName: "OtherCommand",
       } as any;

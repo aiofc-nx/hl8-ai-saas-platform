@@ -5,8 +5,12 @@
  * @since 1.0.0
  */
 
-import { BaseEntity } from "@hl8/domain-kernel";
-import { TenantId, OrganizationId } from "@hl8/domain-kernel";
+import {
+  BaseEntity,
+  TenantId,
+  OrganizationId,
+  IPartialAuditInfo,
+} from "@hl8/domain-kernel";
 
 /**
  * 组织状态枚举
@@ -52,8 +56,8 @@ export class Organization extends BaseEntity<OrganizationId> {
   private _parentId?: OrganizationId;
   private _level: number;
   private _path: string;
-  private _settings: Record<string, any>;
-  private _metadata: Record<string, any>;
+  private _settings: Record<string, unknown>;
+  private _metadata: Record<string, unknown>;
 
   constructor(
     id: OrganizationId,
@@ -65,11 +69,11 @@ export class Organization extends BaseEntity<OrganizationId> {
     parentId?: OrganizationId,
     level: number = 1,
     path: string = "",
-    settings: Record<string, any> = {},
-    metadata: Record<string, any> = {},
+    settings: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {},
     isShared: boolean = false,
     sharingLevel?: string,
-    auditInfo?: any,
+    auditInfo?: IPartialAuditInfo,
   ) {
     super(
       id,
@@ -301,7 +305,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    * @param key - 设置键
    * @returns 设置值
    */
-  getSetting(key: string): any {
+  getSetting(key: string): unknown {
     return this._settings[key];
   }
 
@@ -311,7 +315,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    * @param key - 设置键
    * @param value - 设置值
    */
-  setSetting(key: string, value: any): void {
+  setSetting(key: string, value: unknown): void {
     this._settings[key] = value;
     this.markAsModified();
   }
@@ -322,7 +326,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    * @param key - 元数据键
    * @returns 元数据值
    */
-  getMetadata(key: string): any {
+  getMetadata(key: string): unknown {
     return this._metadata[key];
   }
 
@@ -332,7 +336,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    * @param key - 元数据键
    * @param value - 元数据值
    */
-  setMetadata(key: string, value: any): void {
+  setMetadata(key: string, value: unknown): void {
     this._metadata[key] = value;
     this.markAsModified();
   }

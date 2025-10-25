@@ -13,6 +13,7 @@ describe("CreateTenantCommand", () => {
   let validCode: TenantCode;
   let validName: TenantName;
   let validType: TenantType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 测试中用于模拟隔离上下文
   let isolationContext: any;
 
   beforeEach(() => {

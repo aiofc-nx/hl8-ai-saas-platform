@@ -464,6 +464,7 @@ export class UserAssignmentConflictEvent
       departmentId: new DepartmentId(eventData.departmentId as string),
       conflictType: eventData.conflictType as UserAssignmentConflictType,
       conflictReason: eventData.conflictReason as string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 动态解析事件数据，类型未知
       existingAssignments: (eventData.existingAssignments as any[]).map(
         (a) => ({
           userId: new UserId(a.userId),

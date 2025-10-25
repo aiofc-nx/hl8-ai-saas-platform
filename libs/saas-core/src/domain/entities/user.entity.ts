@@ -5,9 +5,13 @@
  * @since 1.0.0
  */
 
-import { BaseEntity } from "@hl8/domain-kernel";
 import {
+  BaseEntity,
+  AuditInfo,
   EntityId,
+  IPartialAuditInfo,
+} from "@hl8/domain-kernel";
+import {
   TenantId,
   OrganizationId,
   DepartmentId,
@@ -94,7 +98,7 @@ export class User extends BaseEntity<UserId> {
     departmentId?: DepartmentId,
     isShared: boolean = false,
     sharingLevel?: string,
-    auditInfo?: any,
+    auditInfo?: IPartialAuditInfo,
   ) {
     super(
       id,
