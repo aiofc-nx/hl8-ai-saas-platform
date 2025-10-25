@@ -153,8 +153,8 @@ description: "Task list for SAAS Core Module Specification Documentation"
 - [X] T048 [US5] Document tenant resource limits by type in specs/005-spec-documentation/business-rules/resource-limits.md
 - [X] T049 [US5] Document validation rules (tenant code, domain, name) in specs/005-spec-documentation/business-rules/validation-rules.md
 - [X] T050 [US5] Document business constraints (trial periods, upgrades, deletion) in specs/005-spec-documentation/business-rules/constraints.md
-- [ ] T051 [US5] Create edge case examples and scenarios
-- [ ] T052 [US5] Document approval processes for tenant names
+- [X] T051 [US5] Create edge case examples and scenarios
+- [X] T052 [US5] Document approval processes for tenant names
 
 **Checkpoint**: User Story 5 documentation complete and validated
 
