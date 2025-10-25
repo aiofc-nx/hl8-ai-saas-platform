@@ -5,7 +5,11 @@
  * @since 1.0.0
  */
 
-import { AggregateRoot, TenantId, EntityId } from "@hl8/domain-kernel";
+import {
+  AggregateRoot,
+  TenantId,
+  GenericEntityId,
+} from "@hl8/domain-kernel";
 import { Tenant } from "../entities/index.js";
 import {
   TenantCode,
@@ -57,7 +61,7 @@ export class TenantAggregate extends AggregateRoot {
   private _resourceMonitoringService: ResourceMonitoringService;
 
   constructor(
-    id: EntityId,
+    id: GenericEntityId,
     code: TenantCode,
     name: TenantName,
     type: TenantType,
@@ -71,11 +75,12 @@ export class TenantAggregate extends AggregateRoot {
     settings: Record<string, any> = {},
     trialPeriodConfig?: TrialPeriodConfig,
   ) {
-    // TODO: 需要提供 tenantId，暂时使用临时值
-    // 注意：租户聚合根需要 tenantId，但这里创建的是租户本身
-    // 应该使用特殊的 tenantId 或者传递正确的 tenantId
-    const tenantId = new TenantId("platform-level-tenant");
-    super(id, tenantId);
+    // 租户本身作为聚合根，使用平台级别的 tenantId
+    // 使用固定的平台级 ID: "00000000-0000-0000-0000-000000000000"
+    const platformTenantId = TenantId.create(
+      "00000000-0000-0000-0000-000000000000",
+    );
+    super(id, platformTenantId);
 
     this._tenant = new Tenant(
       id,
@@ -128,7 +133,7 @@ export class TenantAggregate extends AggregateRoot {
     contactPhone?: string,
     address?: string,
   ): TenantAggregate {
-    const id = new EntityId();
+    const id = GenericEntityId.generate();
     const status = new TenantStatus(TenantStatusEnum.PENDING);
 
     const aggregate = new TenantAggregate(

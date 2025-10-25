@@ -509,3 +509,35 @@ All domain layer components are thoroughly tested and meet quality standards.
 - **Performance Issues**: Optimized domain operations and efficient business rule validation
 - **Data Consistency**: Proper domain validation and business rule enforcement
 - **Security Vulnerabilities**: Comprehensive domain validation and business rule security
+
+## 当前待修复问题 (Current Issues)
+
+### 聚合根构造函数问题
+
+**问题描述**:
+
+- AggregateRoot 基类构造函数需要 `tenantId` 参数，但 TenantAggregate 等聚合根在创建时无法获得有效的 tenantId
+- 使用 `new TenantId("platform-level-tenant")` 会失败，因为 TenantId 构造函数是私有的
+- 类似的，EntityId 的构造函数是 protected 的，无法直接使用 `new EntityId()`
+
+**影响范围**:
+
+- TenantAggregate
+- OrganizationAggregate  
+- DepartmentAggregate
+
+**修复方案**:
+
+1. 为租户聚合根提供特殊的 tenantId 处理逻辑
+2. 或者在 AggregateRoot 基类中提供更好的默认值处理
+3. 或者修改 AggregateRoot 构造函数，使 tenantId 成为可选参数
+
+**待处理任务**:
+
+- [ ] T160 修复 TenantId 构造函数可访问性问题
+- [ ] T161 修复 EntityId 构造函数可访问性问题
+- [ ] T162 为 TenantAggregate 提供正确的 tenantId
+- [ ] T163 修复 TenantCreatedEvent 及相关事件类的创建
+- [ ] T164 为 OrganizationAggregate 实现 getSnapshotData 和 loadFromSnapshot
+- [ ] T165 为 DepartmentAggregate 实现 getSnapshotData 和 loadFromSnapshot
+- [ ] T166 统一所有聚合根的事件发布方式（从 addDomainEvent 迁移到 apply(createDomainEvent(...))）
