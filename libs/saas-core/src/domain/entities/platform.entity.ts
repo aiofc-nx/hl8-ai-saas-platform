@@ -1,6 +1,5 @@
-import { BaseEntity } from "@hl8/domain-kernel";
+import { BaseEntity, AuditInfo, IPartialAuditInfo, TenantId } from "@hl8/domain-kernel";
 import { PlatformId } from "../value-objects/platform-id.vo.js";
-import { AuditInfo } from "@hl8/domain-kernel";
 
 /**
  * 平台配置接口
@@ -32,7 +31,7 @@ export interface PlatformConfiguration {
 export class Platform extends BaseEntity<PlatformId> {
   private _name: string;
   private _description: string;
-  private _version: string;
+  private _platformVersion: string;
   private _configuration: PlatformConfiguration;
 
   /**
@@ -51,12 +50,22 @@ export class Platform extends BaseEntity<PlatformId> {
     description: string,
     version: string,
     configuration: PlatformConfiguration,
-    auditInfo: AuditInfo,
+    auditInfo?: IPartialAuditInfo,
   ) {
-    super(id, auditInfo);
+    const platformTenantId = TenantId.create("00000000-0000-0000-0000-000000000000");
+    super(
+      id,
+      platformTenantId,
+      undefined, // organizationId
+      undefined, // departmentId
+      undefined, // userId
+      false, // isShared
+      undefined, // sharingLevel
+      auditInfo,
+    );
     this._name = name;
     this._description = description;
-    this._version = version;
+    this._platformVersion = version;
     this._configuration = configuration;
   }
 
@@ -83,8 +92,8 @@ export class Platform extends BaseEntity<PlatformId> {
    *
    * @returns 平台版本
    */
-  get version(): string {
-    return this._version;
+  get platformVersion(): string {
+    return this._platformVersion;
   }
 
   /**
@@ -148,7 +157,7 @@ export class Platform extends BaseEntity<PlatformId> {
       throw new Error("平台版本必须遵循语义版本控制格式");
     }
 
-    this._version = version;
+    this._platformVersion = version;
     this.updateTimestamp();
   }
 
