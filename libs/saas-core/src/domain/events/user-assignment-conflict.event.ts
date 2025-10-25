@@ -5,10 +5,8 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel";
-import { OrganizationId } from "@hl8/domain-kernel";
-import { DepartmentId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, UserId, OrganizationId, DepartmentId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 
 /**
  * 用户分配冲突类型枚举
@@ -73,47 +71,30 @@ export interface IUserAssignmentConflictEvent {
  * });
  * ```
  */
-export class UserAssignmentConflictEvent
-  extends DomainEventBase implements IDomainEvent
-  implements IUserAssignmentConflictEvent
-{
-  public readonly userId: UserId;
-  public readonly organizationId: OrganizationId;
-  public readonly departmentId: DepartmentId;
-  public readonly conflictType: UserAssignmentConflictType;
-  public readonly conflictReason: string;
-  public readonly existingAssignments: readonly {
-    readonly userId: UserId;
-    readonly organizationId: OrganizationId;
-    readonly departmentId: DepartmentId;
-    readonly assignedAt: Date;
-    readonly isTemporary: boolean;
-    readonly expiresAt?: Date;
-  }[];
-  public readonly attemptedAssignment: {
-    readonly userId: UserId;
-    readonly organizationId: OrganizationId;
-    readonly departmentId: DepartmentId;
-    readonly assignedAt: Date;
-    readonly isTemporary: boolean;
-    readonly expiresAt?: Date;
-  };
-  public readonly conflictDetectedAt: Date;
-  public readonly metadata: Record<string, unknown>;
+export class UserAssignmentConflictEvent extends DomainEventBase {
+  public readonly eventData: IUserAssignmentConflictEvent;
 
-  constructor(eventData: IUserAssignmentConflictEvent) {
-    super();
-    this.userId = eventData.userId;
-    this.organizationId = eventData.organizationId;
-    this.departmentId = eventData.departmentId;
-    this.conflictType = eventData.conflictType;
-    this.conflictReason = eventData.conflictReason;
-    this.existingAssignments = eventData.existingAssignments;
-    this.attemptedAssignment = eventData.attemptedAssignment;
-    this.conflictDetectedAt = eventData.conflictDetectedAt;
-    this.metadata = eventData.metadata;
+  constructor(aggregateId: EntityId, eventData: IUserAssignmentConflictEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
+
+    this.eventData = eventData;
     this.validateEvent(eventData);
   }
+
+  get userId(): UserId { return this.eventData.userId; }
+  get organizationId(): OrganizationId { return this.eventData.organizationId; }
+  get departmentId(): DepartmentId { return this.eventData.departmentId; }
+  get conflictType(): UserAssignmentConflictType { return this.eventData.conflictType; }
+  get conflictReason(): string { return this.eventData.conflictReason; }
+  get existingAssignments() { return this.eventData.existingAssignments; }
+  get attemptedAssignment() { return this.eventData.attemptedAssignment; }
+  get conflictDetectedAt(): Date { return this.eventData.conflictDetectedAt; }
+  get metadata(): Record<string, unknown> { return this.eventData.metadata; }
 
   /**
    * 验证用户分配冲突事件
@@ -261,8 +242,8 @@ export class UserAssignmentConflictEvent
    */
   getAffectedOrganizationCount(): number {
     const organizations = new Set([
-      this.organizationId.value,
-      ...this.existingAssignments.map((a) => a.organizationId.value),
+      this.organizationId.getValue(),
+      ...this.existingAssignments.map((a) => a.organizationId.getValue()),
     ]);
     return organizations.size;
   }
@@ -274,8 +255,8 @@ export class UserAssignmentConflictEvent
    */
   getAffectedDepartmentCount(): number {
     const departments = new Set([
-      this.departmentId.value,
-      ...this.existingAssignments.map((a) => a.departmentId.value),
+      this.departmentId.getValue(),
+      ...this.existingAssignments.map((a) => a.departmentId.getValue()),
     ]);
     return departments.size;
   }
@@ -336,7 +317,7 @@ export class UserAssignmentConflictEvent
    * @returns 事件ID
    */
   getEventId(): string {
-    return `user-assignment-conflict-${this.userId.value}-${this.organizationId.value}-${this.departmentId.value}-${this.conflictDetectedAt.getTime()}`;
+    return this.eventId.getValue();
   }
 
   /**
@@ -345,7 +326,7 @@ export class UserAssignmentConflictEvent
    * @returns 聚合根ID
    */
   getAggregateId(): string {
-    return this.userId.value;
+    return this.aggregateId.getValue();
   }
 
   /**
@@ -364,23 +345,23 @@ export class UserAssignmentConflictEvent
    */
   getEventData(): Record<string, unknown> {
     return {
-      userId: this.userId.value,
-      organizationId: this.organizationId.value,
-      departmentId: this.departmentId.value,
+      userId: this.userId.getValue(),
+      organizationId: this.organizationId.getValue(),
+      departmentId: this.departmentId.getValue(),
       conflictType: this.conflictType,
       conflictReason: this.conflictReason,
       existingAssignments: this.existingAssignments.map((a) => ({
-        userId: a.userId.value,
-        organizationId: a.organizationId.value,
-        departmentId: a.departmentId.value,
+        userId: a.userId.getValue(),
+        organizationId: a.organizationId.getValue(),
+        departmentId: a.departmentId.getValue(),
         assignedAt: a.assignedAt.toISOString(),
         isTemporary: a.isTemporary,
         expiresAt: a.expiresAt?.toISOString(),
       })),
       attemptedAssignment: {
-        userId: this.attemptedAssignment.userId.value,
-        organizationId: this.attemptedAssignment.organizationId.value,
-        departmentId: this.attemptedAssignment.departmentId.value,
+        userId: this.attemptedAssignment.userId.getValue(),
+        organizationId: this.attemptedAssignment.organizationId.getValue(),
+        departmentId: this.attemptedAssignment.departmentId.getValue(),
         assignedAt: this.attemptedAssignment.assignedAt.toISOString(),
         isTemporary: this.attemptedAssignment.isTemporary,
         expiresAt: this.attemptedAssignment.expiresAt?.toISOString(),
@@ -396,7 +377,7 @@ export class UserAssignmentConflictEvent
    * @returns 字符串表示
    */
   toString(): string {
-    return `UserAssignmentConflictEvent(userId: ${this.userId.value}, organizationId: ${this.organizationId.value}, departmentId: ${this.departmentId.value}, conflictType: ${this.conflictType}, conflictReason: ${this.conflictReason})`;
+    return `UserAssignmentConflictEvent(userId: ${this.userId.getValue()}, organizationId: ${this.organizationId.getValue()}, departmentId: ${this.departmentId.getValue()}, conflictType: ${this.conflictType}, conflictReason: ${this.conflictReason})`;
   }
 
   /**
@@ -436,17 +417,20 @@ export class UserAssignmentConflictEvent
     },
     metadata: Record<string, unknown> = {},
   ): UserAssignmentConflictEvent {
-    return new UserAssignmentConflictEvent({
-      userId,
-      organizationId,
-      departmentId,
-      conflictType,
-      conflictReason,
-      existingAssignments,
-      attemptedAssignment,
-      conflictDetectedAt: new Date(),
-      metadata,
-    });
+    return new UserAssignmentConflictEvent(
+      userId, // aggregateId
+      {
+        userId,
+        organizationId,
+        departmentId,
+        conflictType,
+        conflictReason,
+        existingAssignments,
+        attemptedAssignment,
+        conflictDetectedAt: new Date(),
+        metadata,
+      }
+    );
   }
 
   /**
@@ -458,15 +442,18 @@ export class UserAssignmentConflictEvent
   static fromEventData(
     eventData: Record<string, unknown>,
   ): UserAssignmentConflictEvent {
-    return new UserAssignmentConflictEvent({
+    const userId = UserId.create(eventData.userId as string);
+    return new UserAssignmentConflictEvent(
+      userId, // aggregateId
+      {
       userId: UserId.create(eventData.userId as string),
       organizationId: OrganizationId.create(eventData.organizationId as string),
       departmentId: DepartmentId.create(eventData.departmentId as string),
       conflictType: eventData.conflictType as UserAssignmentConflictType,
       conflictReason: eventData.conflictReason as string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 动态解析事件数据，类型未知
-      existingAssignments: (eventData.existingAssignments as any[]).map(
-        (a) => ({
+      existingAssignments: ((eventData.existingAssignments as any[]) || []).map(
+        (a: any) => ({
           userId: UserId.create(a.userId),
           organizationId: OrganizationId.create(a.organizationId),
           departmentId: DepartmentId.create(a.departmentId),
@@ -476,21 +463,22 @@ export class UserAssignmentConflictEvent
         }),
       ),
       attemptedAssignment: {
-        userId: UserId.create(eventData.attemptedAssignment.userId),
+        userId: UserId.create((eventData.attemptedAssignment as any).userId),
         organizationId: OrganizationId.create(
-          eventData.attemptedAssignment.organizationId,
+          (eventData.attemptedAssignment as any).organizationId,
         ),
         departmentId: DepartmentId.create(
-          eventData.attemptedAssignment.departmentId,
+          (eventData.attemptedAssignment as any).departmentId,
         ),
-        assignedAt: new Date(eventData.attemptedAssignment.assignedAt),
-        isTemporary: eventData.attemptedAssignment.isTemporary,
-        expiresAt: eventData.attemptedAssignment.expiresAt
-          ? new Date(eventData.attemptedAssignment.expiresAt)
+        assignedAt: new Date((eventData.attemptedAssignment as any).assignedAt),
+        isTemporary: (eventData.attemptedAssignment as any).isTemporary,
+        expiresAt: (eventData.attemptedAssignment as any).expiresAt
+          ? new Date((eventData.attemptedAssignment as any).expiresAt)
           : undefined,
       },
       conflictDetectedAt: new Date(eventData.conflictDetectedAt as string),
       metadata: eventData.metadata as Record<string, unknown>,
-    });
+      }
+    );
   }
 }
