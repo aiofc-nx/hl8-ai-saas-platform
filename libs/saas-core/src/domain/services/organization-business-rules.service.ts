@@ -7,9 +7,9 @@
 
 import { Injectable } from "@nestjs/common";
 import { DomainService } from "@hl8/domain-kernel";
-import { TenantId } from "../value-objects/tenant-id.vo.js";
-import { OrganizationId } from "../value-objects/organization-id.vo.js";
-import { UserId } from "../value-objects/user-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
+import { OrganizationId } from "@hl8/domain-kernel";
+import { UserId } from "@hl8/domain-kernel";
 
 /**
  * 组织业务规则类型枚举

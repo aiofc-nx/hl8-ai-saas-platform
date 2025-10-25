@@ -6,9 +6,9 @@
  */
 
 import { DomainEvent } from "@hl8/domain-kernel";
-import { UserId } from "../value-objects/user-id.vo.js";
-import { OrganizationId } from "../value-objects/organization-id.vo.js";
-import { DepartmentId } from "../value-objects/department-id.vo.js";
+import { UserId } from "@hl8/domain-kernel";
+import { OrganizationId } from "@hl8/domain-kernel";
+import { DepartmentId } from "@hl8/domain-kernel";
 
 /**
  * 用户分配冲突类型枚举

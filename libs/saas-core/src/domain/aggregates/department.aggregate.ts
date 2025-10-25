@@ -3,9 +3,9 @@ import {
   TenantId as KernelTenantId,
 } from "@hl8/domain-kernel";
 import { Department } from "../entities/department.entity.js";
-import { DepartmentId } from "../value-objects/department-id.vo.js";
-import { OrganizationId } from "../value-objects/organization-id.vo.js";
-import { TenantId } from "../value-objects/tenant-id.vo.js";
+import { DepartmentId } from "@hl8/domain-kernel";
+import { OrganizationId } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
 import { type AuditInfo } from "@hl8/domain-kernel";
 
 /**

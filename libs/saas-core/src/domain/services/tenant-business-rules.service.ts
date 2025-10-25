@@ -7,7 +7,7 @@
 
 import { Injectable } from "@nestjs/common";
 import { DomainService } from "@hl8/domain-kernel";
-import { TenantId } from "../value-objects/tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
 import { TenantCode } from "../value-objects/tenant-code.vo.js";
 import { TenantName } from "../value-objects/tenant-name.vo.js";
 import { TenantType } from "../value-objects/tenant-type.vo.js";

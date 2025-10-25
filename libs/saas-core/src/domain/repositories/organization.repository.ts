@@ -6,7 +6,7 @@
  */
 
 import { OrganizationAggregate } from "../aggregates/organization.aggregate.js";
-import { OrganizationId } from "../value-objects/organization-id.vo.js";
+import { OrganizationId } from "@hl8/domain-kernel";
 import { IsolationContext } from "../value-objects/isolation-context.vo.js";
 
 /**

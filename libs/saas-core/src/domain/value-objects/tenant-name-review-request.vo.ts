@@ -6,7 +6,7 @@
  */
 
 import { BaseValueObject } from "./base-value-object.js";
-import { TenantId } from "./tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
 import { UserId } from "./user-id.vo.js";
 
 /**

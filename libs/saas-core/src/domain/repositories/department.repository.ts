@@ -6,7 +6,7 @@
  */
 
 import { DepartmentAggregate } from "../aggregates/department.aggregate.js";
-import { DepartmentId } from "../value-objects/department-id.vo.js";
+import { DepartmentId } from "@hl8/domain-kernel";
 import { IsolationContext } from "../value-objects/isolation-context.vo.js";
 
 /**

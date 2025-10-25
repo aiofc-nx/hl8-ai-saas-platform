@@ -6,7 +6,7 @@
  */
 
 import { User } from "../entities/user.entity.js";
-import { UserId } from "../value-objects/user-id.vo.js";
+import { UserId } from "@hl8/domain-kernel";
 import { IsolationContext } from "../value-objects/isolation-context.vo.js";
 
 /**

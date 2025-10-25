@@ -6,8 +6,8 @@
  */
 
 import { DomainEvent } from "@hl8/domain-kernel";
-import { TenantId } from "../value-objects/tenant-id.vo.js";
-import { UserId } from "../value-objects/user-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
+import { UserId } from "@hl8/domain-kernel";
 import {
   TenantNameReviewRequestType,
   TenantNameReviewRequestPriority,

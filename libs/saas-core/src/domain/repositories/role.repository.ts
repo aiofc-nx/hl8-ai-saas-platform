@@ -6,7 +6,7 @@
  */
 
 import { Role } from "../entities/role.entity.js";
-import { RoleId } from "../value-objects/role-id.vo.js";
+import { RoleId } from "@hl8/domain-kernel";
 import { IsolationContext } from "../value-objects/isolation-context.vo.js";
 
 /**

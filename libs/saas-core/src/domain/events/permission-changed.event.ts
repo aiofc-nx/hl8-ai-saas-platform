@@ -1,6 +1,6 @@
 import { DomainEvent } from "@hl8/domain-kernel";
-import { UserId } from "../value-objects/user-id.vo.js";
-import { RoleId } from "../value-objects/role-id.vo.js";
+import { UserId } from "@hl8/domain-kernel";
+import { RoleId } from "@hl8/domain-kernel";
 
 /**
  * 权限变更事件

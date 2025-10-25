@@ -6,7 +6,7 @@
  */
 
 import { DomainEvent } from "@hl8/domain-kernel";
-import { TenantId } from "../value-objects/tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
 import { ResourceType } from "../value-objects/resource-usage.vo.js";
 import { ResourceLimitType } from "../value-objects/resource-limits.vo.js";
 

@@ -1,6 +1,6 @@
 import { BaseValueObject } from "./base-value-object.js";
 import { PlatformId } from "./platform-id.vo.js";
-import { TenantId } from "./tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "./organization-id.vo.js";
 import { DepartmentId } from "./department-id.vo.js";
 import { UserId } from "./user-id.vo.js";

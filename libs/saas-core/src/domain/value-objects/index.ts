@@ -10,7 +10,7 @@ export { BaseValueObject } from "./base-value-object.js";
 
 // ID值对象
 export { PlatformId } from "./platform-id.vo.js";
-export { TenantId } from "./tenant-id.vo.js";
+export { TenantId } from "@hl8/domain-kernel";
 export { OrganizationId } from "./organization-id.vo.js";
 export { DepartmentId } from "./department-id.vo.js";
 export { UserId } from "./user-id.vo.js";

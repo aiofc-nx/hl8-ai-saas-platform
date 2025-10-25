@@ -7,7 +7,7 @@
 
 import { BaseValueObject } from "@hl8/domain-kernel";
 import { UserId } from "./user-id.vo.js";
-import { TenantId } from "./tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel";
 
 /**
  * 平台用户类型枚举
