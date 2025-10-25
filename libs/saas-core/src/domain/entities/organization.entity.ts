@@ -72,7 +72,7 @@ export class Organization extends BaseEntity<OrganizationId> {
     settings: Record<string, unknown> = {},
     metadata: Record<string, unknown> = {},
     isShared: boolean = false,
-    sharingLevel?: string,
+    sharingLevel?: SharingLevel,
     auditInfo?: IPartialAuditInfo,
   ) {
     super(

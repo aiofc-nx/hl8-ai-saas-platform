@@ -82,7 +82,7 @@ export class Role extends BaseEntity<EntityId> {
     organizationId?: OrganizationId,
     departmentId?: DepartmentId,
     isShared: boolean = false,
-    sharingLevel?: string,
+    sharingLevel?: SharingLevel,
     auditInfo?: IPartialAuditInfo,
   ) {
     super(

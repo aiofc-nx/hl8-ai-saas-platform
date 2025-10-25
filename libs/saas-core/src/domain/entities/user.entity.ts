@@ -97,7 +97,7 @@ export class User extends BaseEntity<UserId> {
     organizationId?: OrganizationId,
     departmentId?: DepartmentId,
     isShared: boolean = false,
-    sharingLevel?: string,
+    sharingLevel?: SharingLevel,
     auditInfo?: IPartialAuditInfo,
   ) {
     super(
