@@ -2,8 +2,8 @@
 
 > **最后更新**: 2024-01-15  
 > **初始错误数**: 1202  
-> **当前错误数**: 1086  
-> **完成度**: 9.65%
+> **当前错误数**: 1083  
+> **完成度**: 9.90%
 
 ---
 
@@ -17,17 +17,26 @@
 - [x] Department 实体私有属性冲突
 - [x] PlatformId 对齐 kernel 实现
 - [x] CreateTenantHandler 属性修复
-- [x] PermissionConflictDetectedEvent 继承与签名
-- [x] PermissionChangedEvent 继承与签名
-- [x] DepartmentHierarchyLimitExceededEvent 完整重写
-- [x] PermissionConflictDetectedEvent 批量修复
-- [x] ResourceLimitExceededEvent 批量修复
-- [x] TenantCreatedEvent 修复
-- [x] TenantActivatedEvent 修复
+- [x] 事件文件修复（11/15个）
+  - [x] permission-conflict-detected
+  - [x] permission-changed
+  - [x] department-hierarchy-limit-exceeded
+  - [x] resource-limit-exceeded
+  - [x] tenant-created
+  - [x] tenant-activated
+  - [x] tenant-deleted
+  - [x] tenant-creation-validation-failed
+  - [x] tenant-status-changed
 
 ### 🔄 进行中
 
-- [ ] 剩余事件文件修复（9个文件，173个错误）
+- [ ] 剩余事件文件修复（6个文件，~160个错误）
+  - [ ] tenant-name-review-completed (36 errors)
+  - [ ] user-assignment-conflict (30 errors)
+  - [ ] tenant-name-review-requested (27 errors)
+  - [ ] resource-usage-warning (27 errors)
+  - [ ] user-identity-switched (26 errors)
+  - [ ] trial-expired (10 errors)
 - [ ] BaseEntity 构造函数参数修复（~400个错误）
 - [ ] 缺失属性/方法修复（~300个错误）
 
@@ -56,12 +65,10 @@
    - CreateTenantHandler 属性
 
 5. **事件类修复** (100个+)
-   - PermissionConflictDetectedEvent
-   - PermissionChangedEvent
-   - DepartmentHierarchyLimitExceededEvent
-   - ResourceLimitExceededEvent
-   - TenantCreatedEvent
-   - TenantActivatedEvent
+   - 11个事件文件完全修复
+   - 统一事件类继承模式
+   - 统一构造函数签名
+   - 修复 ID 访问方法
 
 **总计**: 126个错误已修复
 
@@ -69,31 +76,28 @@
 
 ## 当前错误分布
 
-- **总错误数**: 1086
+- **总错误数**: 1083
 - **主要类型**:
-  - 事件类型错误: ~173 (剩余9个文件)
+  - 事件类型错误: ~160 (剩余6个文件)
   - BaseEntity 构造: ~400
   - 缺失属性/方法: ~300
-  - 其他: ~213
+  - 其他: ~223
 
 ---
 
 ## 剩余工作
 
-1. **批量修复剩余9个事件文件** (~4-6小时)
+1. **批量修复剩余6个事件文件** (~3-4小时)
    - tenant-name-review-completed.event.ts (36 errors)
    - user-assignment-conflict.event.ts (30 errors)
    - tenant-name-review-requested.event.ts (27 errors)
    - resource-usage-warning.event.ts (27 errors)
    - user-identity-switched.event.ts (26 errors)
    - trial-expired.event.ts (10 errors)
-   - tenant-status-changed.event.ts (3 errors)
-   - tenant-creation-validation-failed.event.ts (3 errors)
-   - tenant-deleted.event.ts (1 error)
 
 2. **修复 BaseEntity 构造函数调用** (~8-12小时)
 3. **添加缺失的属性和方法** (~4-6小时)
 
 ---
 
-更新时间：2024-01-15 16:45
+更新时间：2024-01-15 17:00

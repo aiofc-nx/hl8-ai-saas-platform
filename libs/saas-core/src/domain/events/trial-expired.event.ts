@@ -5,10 +5,9 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId, UserId } from "@hl8/domain-kernel";
 import { TrialPeriodStatus } from "../services/trial-period.service.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * 试用期过期事件接口
@@ -44,31 +43,29 @@ export interface ITrialExpiredEvent {
  * });
  * ```
  */
-export class TrialExpiredEvent
-  extends DomainEventBase implements IDomainEvent
-  implements ITrialExpiredEvent
-{
-  public readonly tenantId: TenantId;
-  public readonly userId: UserId;
-  public readonly expiredAt: Date;
-  public readonly trialStartDate: Date;
-  public readonly trialEndDate: Date;
-  public readonly gracePeriodDays: number;
-  public readonly status: TrialPeriodStatus;
-  public readonly metadata: Record<string, unknown>;
+export class TrialExpiredEvent extends DomainEventBase {
+  public readonly eventData: ITrialExpiredEvent;
 
-  constructor(eventData: ITrialExpiredEvent) {
-    super();
-    this.tenantId = eventData.tenantId;
-    this.userId = eventData.userId;
-    this.expiredAt = eventData.expiredAt;
-    this.trialStartDate = eventData.trialStartDate;
-    this.trialEndDate = eventData.trialEndDate;
-    this.gracePeriodDays = eventData.gracePeriodDays;
-    this.status = eventData.status;
-    this.metadata = eventData.metadata;
+  constructor(aggregateId: EntityId, eventData: ITrialExpiredEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
+
+    this.eventData = eventData;
     this.validateEvent(eventData);
   }
+
+  get tenantId(): TenantId { return this.eventData.tenantId; }
+  get userId(): UserId { return this.eventData.userId; }
+  get expiredAt(): Date { return this.eventData.expiredAt; }
+  get trialStartDate(): Date { return this.eventData.trialStartDate; }
+  get trialEndDate(): Date { return this.eventData.trialEndDate; }
+  get gracePeriodDays(): number { return this.eventData.gracePeriodDays; }
+  get status(): TrialPeriodStatus { return this.eventData.status; }
+  get metadata(): Record<string, unknown> { return this.eventData.metadata; }
 
   /**
    * 验证试用期过期事件
@@ -190,7 +187,7 @@ export class TrialExpiredEvent
    * @returns 事件ID
    */
   getEventId(): string {
-    return `trial-expired-${this.tenantId.value}-${this.userId.value}-${this.expiredAt.getTime()}`;
+    return this.eventId.getValue();
   }
 
   /**
@@ -199,7 +196,7 @@ export class TrialExpiredEvent
    * @returns 聚合根ID
    */
   getAggregateId(): string {
-    return this.tenantId.value;
+    return this.aggregateId.getValue();
   }
 
   /**
@@ -218,8 +215,8 @@ export class TrialExpiredEvent
    */
   getEventData(): Record<string, unknown> {
     return {
-      tenantId: this.tenantId.value,
-      userId: this.userId.value,
+      tenantId: this.tenantId.getValue(),
+      userId: this.userId.getValue(),
       expiredAt: this.expiredAt.toISOString(),
       trialStartDate: this.trialStartDate.toISOString(),
       trialEndDate: this.trialEndDate.toISOString(),
@@ -235,7 +232,7 @@ export class TrialExpiredEvent
    * @returns 字符串表示
    */
   toString(): string {
-    return `TrialExpiredEvent(tenantId: ${this.tenantId.value}, userId: ${this.userId.value}, expiredAt: ${this.expiredAt.toISOString()}, status: ${this.status})`;
+    return `TrialExpiredEvent(tenantId: ${this.tenantId.getValue()}, userId: ${this.userId.getValue()}, expiredAt: ${this.expiredAt.toISOString()}, status: ${this.status})`;
   }
 
   /**
@@ -257,16 +254,19 @@ export class TrialExpiredEvent
     gracePeriodDays: number = 7,
     metadata: Record<string, unknown> = {},
   ): TrialExpiredEvent {
-    return new TrialExpiredEvent({
-      tenantId,
-      userId,
-      expiredAt: new Date(),
-      trialStartDate,
-      trialEndDate,
-      gracePeriodDays,
-      status: TrialPeriodStatus.EXPIRED,
-      metadata,
-    });
+    return new TrialExpiredEvent(
+      tenantId, // aggregateId
+      {
+        tenantId,
+        userId,
+        expiredAt: new Date(),
+        trialStartDate,
+        trialEndDate,
+        gracePeriodDays,
+        status: TrialPeriodStatus.EXPIRED,
+        metadata,
+      }
+    );
   }
 
   /**
@@ -276,15 +276,19 @@ export class TrialExpiredEvent
    * @returns 试用期过期事件
    */
   static fromEventData(eventData: Record<string, unknown>): TrialExpiredEvent {
-    return new TrialExpiredEvent({
-      tenantId: TenantId.create(eventData.tenantId as string),
-      userId: UserId.create(eventData.userId as string),
-      expiredAt: new Date(eventData.expiredAt as string),
-      trialStartDate: new Date(eventData.trialStartDate as string),
-      trialEndDate: new Date(eventData.trialEndDate as string),
-      gracePeriodDays: eventData.gracePeriodDays as number,
-      status: eventData.status as TrialPeriodStatus,
-      metadata: eventData.metadata as Record<string, unknown>,
-    });
+    const tenantId = TenantId.create(eventData.tenantId as string);
+    return new TrialExpiredEvent(
+      tenantId, // aggregateId
+      {
+        tenantId,
+        userId: UserId.create(eventData.userId as string),
+        expiredAt: new Date(eventData.expiredAt as string),
+        trialStartDate: new Date(eventData.trialStartDate as string),
+        trialEndDate: new Date(eventData.trialEndDate as string),
+        gracePeriodDays: eventData.gracePeriodDays as number,
+        status: eventData.status as TrialPeriodStatus,
+        metadata: eventData.metadata as Record<string, unknown>,
+      }
+    );
   }
 }
