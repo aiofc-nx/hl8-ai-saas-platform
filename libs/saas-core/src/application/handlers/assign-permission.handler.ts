@@ -19,8 +19,7 @@ export class AssignPermissionHandler
    * @throws {Error} 当命令处理失败时抛出错误
    */
   async handle(command: AssignPermissionCommand): Promise<CaslAbility> {
-    // 验证命令
-    command.validate();
+    this.validateCommand(command);
 
     try {
       // 这里应该实现权限分配的业务逻辑
@@ -34,12 +33,30 @@ export class AssignPermissionHandler
     }
   }
 
-  /**
-   * 获取处理器类型
-   *
-   * @returns 处理器类型
-   */
-  getHandlerType(): string {
+  validateCommand(command: AssignPermissionCommand): void {
+    if (!command.userId) {
+      throw new Error("用户ID不能为空");
+    }
+    if (!command.subject) {
+      throw new Error("权限主体不能为空");
+    }
+    if (!command.action) {
+      throw new Error("操作类型不能为空");
+    }
+    if (!command.context) {
+      throw new Error("隔离上下文不能为空");
+    }
+  }
+
+  canHandle(command: AssignPermissionCommand): boolean {
+    return command.commandName === "AssignPermissionCommand";
+  }
+
+  getHandlerName(): string {
     return "AssignPermissionHandler";
+  }
+
+  getPriority(): number {
+    return 0;
   }
 }

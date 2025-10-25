@@ -33,8 +33,7 @@ export class ListTenantsHandler
    * @throws {Error} 当查询处理失败时抛出错误
    */
   async handle(query: ListTenantsQuery): Promise<ListTenantsResult> {
-    // 验证查询
-    query.validate();
+    this.validateQuery(query);
 
     try {
       // 设置默认参数
@@ -60,12 +59,24 @@ export class ListTenantsHandler
     }
   }
 
-  /**
-   * 获取处理器类型
-   *
-   * @returns 处理器类型
-   */
-  getHandlerType(): string {
+  validateQuery(query: ListTenantsQuery): void {
+    const { page, limit, sortOrder } = query.params;
+    if (page && page < 1) {
+      throw new Error("页码必须大于0");
+    }
+    if (limit && (limit < 1 || limit > 100)) {
+      throw new Error("每页数量必须在1-100之间");
+    }
+    if (sortOrder && !["asc", "desc"].includes(sortOrder)) {
+      throw new Error("排序顺序必须是asc或desc");
+    }
+  }
+
+  canHandle(query: ListTenantsQuery): boolean {
+    return query.queryName === "ListTenantsQuery";
+  }
+
+  getHandlerName(): string {
     return "ListTenantsHandler";
   }
 }

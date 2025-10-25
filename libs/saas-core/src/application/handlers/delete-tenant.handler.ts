@@ -18,8 +18,7 @@ export class DeleteTenantHandler
    * @throws {Error} 当命令处理失败时抛出错误
    */
   async handle(command: DeleteTenantCommand): Promise<void> {
-    // 验证命令
-    command.validate();
+    this.validateCommand(command);
 
     try {
       // 这里应该从仓储中获取现有租户
@@ -34,12 +33,21 @@ export class DeleteTenantHandler
     }
   }
 
-  /**
-   * 获取处理器类型
-   *
-   * @returns 处理器类型
-   */
-  getHandlerType(): string {
+  validateCommand(command: DeleteTenantCommand): void {
+    if (!command.tenantId) {
+      throw new Error("租户ID不能为空");
+    }
+  }
+
+  canHandle(command: DeleteTenantCommand): boolean {
+    return command.commandName === "DeleteTenantCommand";
+  }
+
+  getHandlerName(): string {
     return "DeleteTenantHandler";
+  }
+
+  getPriority(): number {
+    return 0;
   }
 }

@@ -352,12 +352,12 @@ All application layer components properly extend application-kernel base classes
 
 #### Handler Alignment
 
-- [ ] T115 [P] Update CreateTenantHandler to implement CommandHandler interface from @hl8/application-kernel
-- [ ] T116 [P] Update UpdateTenantHandler to implement CommandHandler interface from @hl8/application-kernel
-- [ ] T117 [P] Update DeleteTenantHandler to implement CommandHandler interface from @hl8/application-kernel
-- [ ] T118 [P] Update GetTenantHandler to implement QueryHandler interface from @hl8/application-kernel
-- [ ] T119 [P] Update ListTenantsHandler to implement QueryHandler interface from @hl8/application-kernel
-- [ ] T120 Update all handlers to implement execute() method signature from kernel interfaces
+- [x] T115 [P] Update CreateTenantHandler to implement CommandHandler interface from @hl8/application-kernel
+- [x] T116 [P] Update UpdateTenantHandler to implement CommandHandler interface from @hl8/application-kernel
+- [x] T117 [P] Update DeleteTenantHandler to implement CommandHandler interface from @hl8/application-kernel
+- [x] T118 [P] Update GetTenantHandler to implement QueryHandler interface from @hl8/application-kernel
+- [x] T119 [P] Update ListTenantsHandler to implement QueryHandler interface from @hl8/application-kernel
+- [x] T120 Update all handlers to implement execute() method signature from kernel interfaces
 
 #### Use Case Alignment
 

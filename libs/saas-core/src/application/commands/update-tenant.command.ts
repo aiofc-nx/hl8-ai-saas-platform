@@ -17,7 +17,7 @@ export class UpdateTenantCommand extends BaseCommand {
    * @param tenantId - 租户ID
    * @param name - 新的租户名称（可选）
    * @param type - 新的租户类型（可选）
-   * @param description - 新的租户描述（可选）
+   * @param tenantDescription - 新的租户描述（可选）
    * @param updatedBy - 更新者ID（可选）
    * @param isolationContext - 隔离上下文（可选）
    */
@@ -25,7 +25,7 @@ export class UpdateTenantCommand extends BaseCommand {
     public readonly tenantId: TenantId,
     public readonly name?: TenantName,
     public readonly type?: TenantType,
-    public readonly description?: string,
+    public readonly tenantDescription?: string,
     public readonly updatedBy?: string,
     isolationContext?: IsolationContext,
   ) {

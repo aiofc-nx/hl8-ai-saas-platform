@@ -19,8 +19,7 @@ export class UpdateTenantHandler
    * @throws {Error} 当命令处理失败时抛出错误
    */
   async handle(command: UpdateTenantCommand): Promise<TenantAggregate> {
-    // 验证命令
-    command.validate();
+    this.validateCommand(command);
 
     try {
       // 这里应该从仓储中获取现有租户
@@ -35,12 +34,21 @@ export class UpdateTenantHandler
     }
   }
 
-  /**
-   * 获取处理器类型
-   *
-   * @returns 处理器类型
-   */
-  getHandlerType(): string {
+  validateCommand(command: UpdateTenantCommand): void {
+    if (!command.tenantId) {
+      throw new Error("租户ID不能为空");
+    }
+  }
+
+  canHandle(command: UpdateTenantCommand): boolean {
+    return command.commandName === "UpdateTenantCommand";
+  }
+
+  getHandlerName(): string {
     return "UpdateTenantHandler";
+  }
+
+  getPriority(): number {
+    return 0;
   }
 }

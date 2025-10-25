@@ -30,8 +30,7 @@ export class CheckPermissionHandler
    * @throws {Error} 当查询处理失败时抛出错误
    */
   async handle(query: CheckPermissionQuery): Promise<CheckPermissionResult> {
-    // 验证查询
-    query.validate();
+    this.validateQuery(query);
 
     try {
       // 这里应该实现权限检查的业务逻辑
@@ -50,12 +49,26 @@ export class CheckPermissionHandler
     }
   }
 
-  /**
-   * 获取处理器类型
-   *
-   * @returns 处理器类型
-   */
-  getHandlerType(): string {
+  validateQuery(query: CheckPermissionQuery): void {
+    if (!query.userId) {
+      throw new Error("用户ID不能为空");
+    }
+    if (!query.context) {
+      throw new Error("隔离上下文不能为空");
+    }
+    if (!query.params.subject) {
+      throw new Error("权限主体不能为空");
+    }
+    if (!query.params.action) {
+      throw new Error("操作类型不能为空");
+    }
+  }
+
+  canHandle(query: CheckPermissionQuery): boolean {
+    return query.queryName === "CheckPermissionQuery";
+  }
+
+  getHandlerName(): string {
     return "CheckPermissionHandler";
   }
 }

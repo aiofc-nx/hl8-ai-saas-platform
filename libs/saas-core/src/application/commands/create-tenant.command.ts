@@ -17,7 +17,7 @@ export class CreateTenantCommand extends BaseCommand {
    * @param code - 租户代码
    * @param name - 租户名称
    * @param type - 租户类型
-   * @param description - 租户描述（可选）
+   * @param tenantDescription - 租户描述（可选）
    * @param createdBy - 创建者ID（可选）
    * @param isolationContext - 隔离上下文（可选）
    */
@@ -25,7 +25,7 @@ export class CreateTenantCommand extends BaseCommand {
     public readonly code: TenantCode,
     public readonly name: TenantName,
     public readonly type: TenantType,
-    public readonly description?: string,
+    public readonly tenantDescription?: string,
     public readonly createdBy?: string,
     isolationContext?: IsolationContext,
   ) {

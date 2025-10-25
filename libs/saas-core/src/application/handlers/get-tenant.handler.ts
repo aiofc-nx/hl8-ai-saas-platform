@@ -19,8 +19,7 @@ export class GetTenantHandler
    * @throws {Error} 当查询处理失败时抛出错误
    */
   async handle(query: GetTenantQuery): Promise<TenantAggregate | null> {
-    // 验证查询
-    query.validate();
+    this.validateQuery(query);
 
     try {
       // 这里应该从仓储中获取租户
@@ -34,12 +33,17 @@ export class GetTenantHandler
     }
   }
 
-  /**
-   * 获取处理器类型
-   *
-   * @returns 处理器类型
-   */
-  getHandlerType(): string {
+  validateQuery(query: GetTenantQuery): void {
+    if (!query.tenantId) {
+      throw new Error("租户ID不能为空");
+    }
+  }
+
+  canHandle(query: GetTenantQuery): boolean {
+    return query.queryName === "GetTenantQuery";
+  }
+
+  getHandlerName(): string {
     return "GetTenantHandler";
   }
 }
