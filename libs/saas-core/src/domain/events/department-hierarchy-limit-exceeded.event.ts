@@ -5,10 +5,8 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
-import { OrganizationId } from "@hl8/domain-kernel";
-import { DepartmentId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId, OrganizationId, DepartmentId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 
 /**
  * 部门层次结构限制超出事件接口
@@ -65,16 +63,18 @@ export interface IDepartmentHierarchyLimitExceededEvent {
  * });
  * ```
  */
-export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase implements IDomainEvent {
-  public readonly eventData: Record<string, unknown>;
-  public readonly eventType: string = "DepartmentHierarchyLimitExceededEvent";
+export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase {
+  public readonly eventData: IDepartmentHierarchyLimitExceededEvent;
   
-  constructor(eventData: IDepartmentHierarchyLimitExceededEvent) {
-    const { GenericEntityId } = require("@hl8/domain-kernel");
-    const eventId = GenericEntityId.generate();
-    super(eventId, new Date(), eventData.tenantId as any, 0);
+  constructor(aggregateId: EntityId, eventData: IDepartmentHierarchyLimitExceededEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
 
-    this.eventData = eventData as unknown as Record<string, unknown>;
+    this.eventData = eventData;
   }
 
   /**
@@ -328,7 +328,7 @@ export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase imple
           ? "最大权限数"
           : "最大约束数";
 
-    return `租户 ${this.tenantId.value} 的组织 ${this.organizationId.value} 的部门 ${this.departmentName} 超出 ${limitTypeText}，当前值: ${this.currentValue}，限制: ${this.limitValue}，超出: ${this.exceededBy}，严重程度: ${severityText}`;
+    return `租户 ${this.tenantId.getValue()} 的组织 ${this.organizationId.getValue()} 的部门 ${this.departmentName} 超出 ${limitTypeText}，当前值: ${this.currentValue}，限制: ${this.limitValue}，超出: ${this.exceededBy}，严重程度: ${severityText}`;
   }
 
   /**
@@ -339,9 +339,9 @@ export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase imple
   getDetails(): Record<string, unknown> {
     return {
       eventType: "DepartmentHierarchyLimitExceededEvent",
-      tenantId: this.tenantId.value,
-      organizationId: this.organizationId.value,
-      departmentId: this.departmentId.value,
+      tenantId: this.tenantId.getValue(),
+      organizationId: this.organizationId.getValue(),
+      departmentId: this.departmentId.getValue(),
       limitType: this.limitType,
       currentValue: this.currentValue,
       limitValue: this.limitValue,
@@ -409,23 +409,26 @@ export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase imple
     },
     metadata: Record<string, unknown> = {},
   ): DepartmentHierarchyLimitExceededEvent {
-    return new DepartmentHierarchyLimitExceededEvent({
-      tenantId,
-      organizationId,
-      departmentId,
-      limitType,
-      currentValue,
-      limitValue,
-      exceededBy,
-      departmentName,
-      departmentLevel,
-      departmentType,
-      exceededAt: new Date(),
-      severity,
-      autoExpansionEnabled,
-      expansionRecommendation,
-      metadata,
-    });
+    return new DepartmentHierarchyLimitExceededEvent(
+      departmentId, // aggregateId
+      {
+        tenantId,
+        organizationId,
+        departmentId,
+        limitType,
+        currentValue,
+        limitValue,
+        exceededBy,
+        departmentName,
+        departmentLevel,
+        departmentType,
+        exceededAt: new Date(),
+        severity,
+        autoExpansionEnabled,
+        expansionRecommendation,
+        metadata,
+      }
+    );
   }
 
   /**
