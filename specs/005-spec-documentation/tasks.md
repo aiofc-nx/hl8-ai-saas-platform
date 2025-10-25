@@ -168,7 +168,7 @@ description: "Task list for SAAS Core Module Specification Documentation"
 
 ### Documentation for User Story 6
 
-- [ ] T053 [P] [US6] Create tenant API contract in specs/005-spec-documentation/contracts/tenant-api.md
+- [X] T053 [P] [US6] Create tenant API contract in specs/005-spec-documentation/api/tenant-api.md
 - [ ] T054 [P] [US6] Create organization API contract in specs/005-spec-documentation/contracts/organization-api.md
 - [ ] T055 [P] [US6] Create department API contract in specs/005-spec-documentation/contracts/department-api.md
 - [ ] T056 [US6] Document API authentication and authorization in specs/005-spec-documentation/api/authentication.md
