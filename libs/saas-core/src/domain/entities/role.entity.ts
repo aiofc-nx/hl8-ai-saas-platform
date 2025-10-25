@@ -13,6 +13,7 @@ import {
   DepartmentId,
   UserId,
   IPartialAuditInfo,
+  SharingLevel,
 } from "@hl8/domain-kernel";
 import { RoleLevel } from "../value-objects/index.js";
 

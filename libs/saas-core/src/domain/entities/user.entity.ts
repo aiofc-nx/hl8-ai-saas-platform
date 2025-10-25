@@ -10,8 +10,7 @@ import {
   AuditInfo,
   EntityId,
   IPartialAuditInfo,
-} from "@hl8/domain-kernel";
-import {
+  SharingLevel,
   TenantId,
   OrganizationId,
   DepartmentId,

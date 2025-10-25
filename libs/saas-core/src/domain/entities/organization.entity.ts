@@ -10,6 +10,7 @@ import {
   TenantId,
   OrganizationId,
   IPartialAuditInfo,
+  SharingLevel,
 } from "@hl8/domain-kernel";
 
 /**
