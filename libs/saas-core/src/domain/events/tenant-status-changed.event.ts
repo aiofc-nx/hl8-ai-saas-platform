@@ -40,8 +40,8 @@ export class TenantStatusChangedEvent extends DomainEventBase {
   getEventData(): Record<string, unknown> {
     return {
       tenantId: this.tenantId.getValue(),
-      oldStatus: this.oldStatus.getValue(),
-      newStatus: this.newStatus.getValue(),
+      oldStatus: this.oldStatus.value,
+      newStatus: this.newStatus.value,
       reason: this.reason,
       occurredOn: this.occurredAt.toISOString(),
     };

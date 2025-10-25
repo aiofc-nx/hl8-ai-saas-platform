@@ -5,10 +5,10 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId } from "@hl8/domain-kernel";
 import { ResourceType } from "../value-objects/resource-usage.vo.js";
 import { ResourceLimitType } from "../value-objects/resource-limits.vo.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * 资源使用警告事件接口
@@ -61,9 +61,16 @@ export interface IResourceUsageWarningEvent {
  * });
  * ```
  */
-export class ResourceUsageWarningEvent extends DomainEventBase implements IDomainEvent {
-  constructor(eventData: IResourceUsageWarningEvent) {
-    super("ResourceUsageWarningEvent", eventData.tenantId.value);
+export class ResourceUsageWarningEvent extends DomainEventBase {
+  public readonly eventData: IResourceUsageWarningEvent;
+
+  constructor(aggregateId: EntityId, eventData: IResourceUsageWarningEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
 
     this.eventData = eventData;
   }
@@ -285,7 +292,7 @@ export class ResourceUsageWarningEvent extends DomainEventBase implements IDomai
         ? "接近限制"
         : "接近限制";
 
-    return `租户 ${this.tenantId.value} 的 ${this.resourceType} 资源使用警告，当前使用: ${this.currentUsage}/${this.maxLimit} (${this.usagePercentage.toFixed(1)}%)，警告类型: ${warningTypeText}，警告级别: ${warningLevel}，预计到达限制时间: ${this.estimatedTimeToLimit}小时`;
+    return `租户 ${this.tenantId.getValue()} 的 ${this.resourceType} 资源使用警告，当前使用: ${this.currentUsage}/${this.maxLimit} (${this.usagePercentage.toFixed(1)}%)，警告类型: ${warningTypeText}，警告级别: ${warningLevel}，预计到达限制时间: ${this.estimatedTimeToLimit}小时`;
   }
 
   /**
@@ -296,7 +303,7 @@ export class ResourceUsageWarningEvent extends DomainEventBase implements IDomai
   getDetails(): Record<string, unknown> {
     return {
       eventType: "ResourceUsageWarningEvent",
-      tenantId: this.tenantId.value,
+      tenantId: this.tenantId.getValue(),
       resourceType: this.resourceType,
       currentUsage: this.currentUsage,
       maxLimit: this.maxLimit,
@@ -356,21 +363,24 @@ export class ResourceUsageWarningEvent extends DomainEventBase implements IDomai
     },
     metadata: Record<string, unknown> = {},
   ): ResourceUsageWarningEvent {
-    return new ResourceUsageWarningEvent({
-      tenantId,
-      resourceType,
-      currentUsage,
-      maxLimit,
-      usagePercentage,
-      warningThreshold,
-      warningType,
-      remainingCapacity,
-      estimatedTimeToLimit,
-      warningAt: new Date(),
-      autoExpansionEnabled,
-      expansionRecommendation,
-      metadata,
-    });
+    return new ResourceUsageWarningEvent(
+      tenantId, // aggregateId
+      {
+        tenantId,
+        resourceType,
+        currentUsage,
+        maxLimit,
+        usagePercentage,
+        warningThreshold,
+        warningType,
+        remainingCapacity,
+        estimatedTimeToLimit,
+        warningAt: new Date(),
+        autoExpansionEnabled,
+        expansionRecommendation,
+        metadata,
+      }
+    );
   }
 
   /**
