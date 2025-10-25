@@ -5,10 +5,10 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId } from "@hl8/domain-kernel";
 import { ResourceType } from "../value-objects/resource-usage.vo.js";
 import { ResourceLimitType } from "../value-objects/resource-limits.vo.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * 资源限制超出事件接口
@@ -53,9 +53,16 @@ export interface IResourceLimitExceededEvent {
  * });
  * ```
  */
-export class ResourceLimitExceededEvent extends DomainEventBase implements IDomainEvent {
-  constructor(eventData: IResourceLimitExceededEvent) {
-    super("ResourceLimitExceededEvent", eventData.tenantId.value);
+export class ResourceLimitExceededEvent extends DomainEventBase {
+  public readonly eventData: IResourceLimitExceededEvent;
+
+  constructor(aggregateId: EntityId, eventData: IResourceLimitExceededEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
 
     this.eventData = eventData;
   }
@@ -271,7 +278,7 @@ export class ResourceLimitExceededEvent extends DomainEventBase implements IDoma
           ? "警告限制"
           : "紧急限制";
 
-    return `租户 ${this.tenantId.value} 的 ${this.resourceType} 资源超出 ${limitTypeText}，当前使用: ${this.currentUsage}，限制: ${this.limitValue}，超出: ${this.exceededBy}，严重程度: ${severityText}`;
+    return `租户 ${this.tenantId.getValue()} 的 ${this.resourceType} 资源超出 ${limitTypeText}，当前使用: ${this.currentUsage}，限制: ${this.limitValue}，超出: ${this.exceededBy}，严重程度: ${severityText}`;
   }
 
   /**
@@ -282,7 +289,7 @@ export class ResourceLimitExceededEvent extends DomainEventBase implements IDoma
   getDetails(): Record<string, unknown> {
     return {
       eventType: "ResourceLimitExceededEvent",
-      tenantId: this.tenantId.value,
+      tenantId: this.tenantId.getValue(),
       resourceType: this.resourceType,
       currentUsage: this.currentUsage,
       limitType: this.limitType,
@@ -336,19 +343,22 @@ export class ResourceLimitExceededEvent extends DomainEventBase implements IDoma
     },
     metadata: Record<string, unknown> = {},
   ): ResourceLimitExceededEvent {
-    return new ResourceLimitExceededEvent({
-      tenantId,
-      resourceType,
-      currentUsage,
-      limitType,
-      limitValue,
-      exceededBy,
-      exceededAt: new Date(),
-      severity,
-      autoExpansionEnabled,
-      expansionRecommendation,
-      metadata,
-    });
+    return new ResourceLimitExceededEvent(
+      tenantId, // aggregateId
+      {
+        tenantId,
+        resourceType,
+        currentUsage,
+        limitType,
+        limitValue,
+        exceededBy,
+        exceededAt: new Date(),
+        severity,
+        autoExpansionEnabled,
+        expansionRecommendation,
+        metadata,
+      }
+    );
   }
 
   /**

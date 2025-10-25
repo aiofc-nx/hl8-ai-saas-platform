@@ -5,8 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent, EntityId, GenericEntityId } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId } from "@hl8/domain-kernel";
 import { randomUUID } from "node:crypto";
 import {
   PermissionConflictType,
@@ -51,7 +50,7 @@ export interface IPermissionConflictDetectedEvent {
  * );
  * ```
  */
-export class PermissionConflictDetectedEvent extends DomainEvent {
+export class PermissionConflictDetectedEvent extends DomainEventBase {
   public readonly eventData: IPermissionConflictDetectedEvent;
 
   constructor(aggregateId: EntityId, eventData: IPermissionConflictDetectedEvent) {
@@ -275,7 +274,7 @@ export class PermissionConflictDetectedEvent extends DomainEvent {
               ? "条件冲突"
               : "模板冲突";
 
-    return `租户 ${this.tenantId.value} 检测到权限冲突: ${conflictTypeText}，严重程度: ${severityText}，涉及权限: ${this.conflictingPermissions.join(", ")}`;
+    return `租户 ${this.tenantId.getValue()} 检测到权限冲突: ${conflictTypeText}，严重程度: ${severityText}，涉及权限: ${this.conflictingPermissions.join(", ")}`;
   }
 
   /**
@@ -286,7 +285,7 @@ export class PermissionConflictDetectedEvent extends DomainEvent {
   getDetails(): Record<string, unknown> {
     return {
       eventType: "PermissionConflictDetectedEvent",
-      tenantId: this.tenantId.value,
+      tenantId: this.tenantId.getValue(),
       conflictType: this.conflictType,
       severity: this.severity,
       description: this.description,
@@ -332,17 +331,20 @@ export class PermissionConflictDetectedEvent extends DomainEvent {
     conflictingTemplates?: readonly string[],
     metadata: Record<string, unknown> = {},
   ): PermissionConflictDetectedEvent {
-    return new PermissionConflictDetectedEvent({
-      tenantId,
-      conflictType,
-      severity,
-      description,
-      conflictingPermissions,
-      conflictingTemplates,
-      suggestions,
-      detectedAt: new Date(),
-      metadata,
-    });
+    return new PermissionConflictDetectedEvent(
+      tenantId, // aggregateId
+      {
+        tenantId,
+        conflictType,
+        severity,
+        description,
+        conflictingPermissions,
+        conflictingTemplates,
+        suggestions,
+        detectedAt: new Date(),
+        metadata,
+      }
+    );
   }
 
   /**
