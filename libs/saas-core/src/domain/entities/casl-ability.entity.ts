@@ -4,6 +4,8 @@ import {
   UserId,
   RoleId,
   TenantId,
+  OrganizationId,
+  DepartmentId,
   IsolationContext,
   IPartialAuditInfo,
 } from "@hl8/domain-kernel";
@@ -44,8 +46,8 @@ export class CaslAbility extends BaseEntity {
     context: IsolationContext,
     roleId: RoleId | null = null,
     conditions: CaslCondition[] = [],
-    organizationId?: unknown,
-    departmentId?: unknown,
+    organizationId?: OrganizationId,
+    departmentId?: DepartmentId,
     auditInfo?: IPartialAuditInfo,
   ) {
     super(
