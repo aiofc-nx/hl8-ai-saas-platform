@@ -5,10 +5,11 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId } from "@hl8/domain-kernel";
 import { TenantCode } from "../value-objects/tenant-code.vo.js";
 import { TenantName } from "../value-objects/tenant-name.vo.js";
 import { TenantType } from "../value-objects/tenant-type.vo.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * 租户创建验证失败事件接口
@@ -48,35 +49,31 @@ export interface ITenantCreationValidationFailedEvent {
  * });
  * ```
  */
-export class TenantCreationValidationFailedEvent
-  extends DomainEventBase implements IDomainEvent
-  implements ITenantCreationValidationFailedEvent
-{
-  public readonly tenantCode: TenantCode;
-  public readonly tenantName: TenantName;
-  public readonly tenantType: TenantType;
-  public readonly domain?: string;
-  public readonly createdBy: string;
-  public readonly validationErrors: readonly string[];
-  public readonly validationWarnings?: readonly string[];
-  public readonly validationSuggestions?: readonly string[];
-  public readonly failedAt: Date;
-  public readonly metadata: Record<string, unknown>;
+export class TenantCreationValidationFailedEvent extends DomainEventBase {
+  public readonly eventData: ITenantCreationValidationFailedEvent;
 
-  constructor(eventData: ITenantCreationValidationFailedEvent) {
-    super();
-    this.tenantCode = eventData.tenantCode;
-    this.tenantName = eventData.tenantName;
-    this.tenantType = eventData.tenantType;
-    this.domain = eventData.domain;
-    this.createdBy = eventData.createdBy;
-    this.validationErrors = eventData.validationErrors;
-    this.validationWarnings = eventData.validationWarnings;
-    this.validationSuggestions = eventData.validationSuggestions;
-    this.failedAt = eventData.failedAt;
-    this.metadata = eventData.metadata;
+  constructor(aggregateId: EntityId, eventData: ITenantCreationValidationFailedEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
+
+    this.eventData = eventData;
     this.validateEvent(eventData);
   }
+
+  get tenantCode(): TenantCode { return this.eventData.tenantCode; }
+  get tenantName(): TenantName { return this.eventData.tenantName; }
+  get tenantType(): TenantType { return this.eventData.tenantType; }
+  get domain(): string | undefined { return this.eventData.domain; }
+  get createdBy(): string { return this.eventData.createdBy; }
+  get validationErrors(): readonly string[] { return this.eventData.validationErrors; }
+  get validationWarnings(): readonly string[] | undefined { return this.eventData.validationWarnings; }
+  get validationSuggestions(): readonly string[] | undefined { return this.eventData.validationSuggestions; }
+  get failedAt(): Date { return this.eventData.failedAt; }
+  get metadata(): Record<string, unknown> { return this.eventData.metadata; }
 
   /**
    * 验证租户创建验证失败事件

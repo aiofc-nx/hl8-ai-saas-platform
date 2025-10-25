@@ -1,5 +1,5 @@
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 
 /**
  * 租户删除事件
@@ -7,11 +7,7 @@ import { TenantId } from "@hl8/domain-kernel";
  * @description 当租户被删除时触发的事件
  * @since 1.0.0
  */
-export class TenantDeletedEvent implements DomainEvent {
-  public readonly eventId: string;
-  public readonly occurredOn: Date;
-  public readonly eventType: string = "TenantDeleted";
-
+export class TenantDeletedEvent extends DomainEventBase {
   /**
    * 创建租户删除事件
    *
@@ -20,12 +16,17 @@ export class TenantDeletedEvent implements DomainEvent {
    * @param deletedBy - 删除操作者
    */
   constructor(
+    aggregateId: EntityId,
     public readonly tenantId: TenantId,
     public readonly reason: string,
     public readonly deletedBy: string,
   ) {
-    this.eventId = `tenant-deleted-${tenantId.getValue()}-${Date.now()}`;
-    this.occurredOn = new Date();
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
   }
 
   /**
@@ -38,21 +39,7 @@ export class TenantDeletedEvent implements DomainEvent {
       tenantId: this.tenantId.getValue(),
       reason: this.reason,
       deletedBy: this.deletedBy,
-      occurredOn: this.occurredOn.toISOString(),
-    };
-  }
-
-  /**
-   * 获取事件元数据
-   *
-   * @returns 事件元数据
-   */
-  getEventMetadata(): Record<string, unknown> {
-    return {
-      eventId: this.eventId,
-      eventType: this.eventType,
-      occurredOn: this.occurredOn.toISOString(),
-      tenantId: this.tenantId.getValue(),
+      occurredOn: this.occurredAt.toISOString(),
     };
   }
 }
