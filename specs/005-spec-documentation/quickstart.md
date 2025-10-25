@@ -1,377 +1,346 @@
-# SAAS Core Module Quick Start Guide
+# Quick Start Guide: libs/saas-core
 
-**Date**: 2024-12-19  
-**Feature**: SAAS Core Module Specification Documentation  
-**Phase**: Phase 1 - Design and Contracts
+> **日期**: 2025-01-27  
+> **版本**: 1.0.0  
+> **目的**: 快速开始使用 libs/saas-core 模块
 
-## 概述
+---
 
-本快速入门指南将帮助您快速理解和使用SAAS Core模块。该模块是HL8 SAAS平台的核心组件，提供多租户架构、组织管理、部门管理和用户管理功能。
+## 📋 概述
 
-## 架构概述
+本指南将帮助您快速了解如何使用 `libs/saas-core` 模块的核心功能。
 
-SAAS Core模块采用混合架构模式，结合了以下设计模式：
+---
 
-- **Clean Architecture**: 四层架构（领域层、应用层、基础设施层、接口层）
-- **DDD (Domain-Driven Design)**: 领域驱动设计，丰富的领域模型
-- **CQRS**: 命令查询职责分离
-- **Event Sourcing**: 事件溯源，完整的状态变更记录
-- **Event-Driven Architecture**: 事件驱动架构，松耦合的组件通信
+## 🚀 安装
 
-## 核心概念
+### 1. 依赖要求
 
-### 1. 多租户架构
+```bash
+# Node.js 20+
+node --version
 
-SAAS Core模块支持5层数据隔离：
-
-1. **平台级隔离**: 平台数据与租户数据完全隔离
-2. **租户级隔离**: 不同租户的数据完全隔离
-3. **组织级隔离**: 同一租户内不同组织的非共享数据相互隔离
-4. **部门级隔离**: 同一组织内不同部门的非共享数据相互隔离
-5. **用户级隔离**: 用户私有数据仅该用户可访问
-
-### 2. 租户类型
-
-支持5种租户类型：
-
-- **FREE**: 免费版，基础功能
-- **BASIC**: 基础版，标准功能
-- **PROFESSIONAL**: 专业版，高级功能
-- **ENTERPRISE**: 企业版，企业级功能
-- **CUSTOM**: 定制版，定制化功能
-
-### 3. 组织类型
-
-支持4种组织类型：
-
-- **COMMITTEE**: 专业委员会
-- **PROJECT_TEAM**: 项目团队
-- **QUALITY_GROUP**: 质量小组
-- **PERFORMANCE_GROUP**: 绩效小组
-
-### 4. 部门层级
-
-支持最多7层的部门层级结构，支持树形组织架构。
-
-## 快速开始
-
-### 1. 环境要求
-
-- Node.js >= 20
-- TypeScript 5.9.2
-- PostgreSQL 14+
-- Redis 6+
-- pnpm 10.12.1
+# pnpm 8+
+pnpm --version
+```
 
 ### 2. 安装依赖
 
 ```bash
-# 安装项目依赖
-pnpm install
-
-# 安装SAAS Core模块依赖
-cd libs/saas-core
+# 在项目根目录
 pnpm install
 ```
-
-### 3. 配置环境
-
-创建环境配置文件：
-
-```bash
-# 复制环境配置模板
-cp .env.example .env
-
-# 编辑环境配置
-nano .env
-```
-
-环境配置示例：
-
-```env
-# 数据库配置
-DATABASE_URL=postgresql://username:password@localhost:5432/hl8_saas
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_NAME=hl8_saas
-DATABASE_USERNAME=username
-DATABASE_PASSWORD=password
-
-# Redis配置
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-# 应用配置
-APP_PORT=3000
-APP_ENV=development
-APP_NAME=HL8 SAAS Platform
-
-# JWT配置
-JWT_SECRET=your-jwt-secret
-JWT_EXPIRES_IN=24h
-
-# 租户配置
-DEFAULT_TENANT_LIMIT=1000
-MAX_TENANT_USERS=10000
-```
-
-### 4. 数据库迁移
-
-```bash
-# 运行数据库迁移
-pnpm run migration:run
-
-# 生成数据库迁移文件
-pnpm run migration:generate --name=initial-schema
-```
-
-### 5. 启动应用
-
-```bash
-# 开发模式启动
-pnpm run dev
-
-# 生产模式启动
-pnpm run start:prod
-```
-
-## API使用示例
-
-### 1. 创建租户
-
-```bash
-curl -X POST http://localhost:3000/v1/tenants \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-jwt-token" \
-  -d '{
-    "code": "acme-corp",
-    "name": "Acme Corporation",
-    "type": "ENTERPRISE",
-    "description": "Acme Corporation tenant"
-  }'
-```
-
-### 2. 获取租户列表
-
-```bash
-curl -X GET http://localhost:3000/v1/tenants \
-  -H "Authorization: Bearer your-jwt-token" \
-  -H "X-Tenant-Id: your-tenant-id"
-```
-
-### 3. 创建组织
-
-```bash
-curl -X POST http://localhost:3000/v1/tenants/{tenantId}/organizations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-jwt-token" \
-  -H "X-Tenant-Id: your-tenant-id" \
-  -d '{
-    "name": "技术委员会",
-    "type": "COMMITTEE",
-    "description": "技术委员会组织"
-  }'
-```
-
-### 4. 创建部门
-
-```bash
-curl -X POST http://localhost:3000/v1/tenants/{tenantId}/organizations/{organizationId}/departments \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-jwt-token" \
-  -H "X-Tenant-Id: your-tenant-id" \
-  -d '{
-    "name": "前端开发部",
-    "code": "frontend-dev",
-    "description": "前端开发部门"
-  }'
-```
-
-## 数据隔离示例
-
-### 1. 租户级隔离
-
-```typescript
-// 获取租户数据，自动应用租户级隔离
-const tenants = await tenantRepository.findByTenantId(tenantId);
-
-// 创建租户数据，自动设置租户ID
-const newTenant = new Tenant({
-  code: "new-tenant",
-  name: "New Tenant",
-  type: TenantType.BASIC,
-  tenantId: currentTenantId,
-});
-```
-
-### 2. 组织级隔离
-
-```typescript
-// 获取组织数据，自动应用组织级隔离
-const organizations =
-  await organizationRepository.findByOrganizationId(organizationId);
-
-// 创建组织数据，自动设置组织ID
-const newOrganization = new Organization({
-  name: "New Organization",
-  type: OrganizationType.COMMITTEE,
-  tenantId: currentTenantId,
-  organizationId: currentOrganizationId,
-});
-```
-
-### 3. 部门级隔离
-
-```typescript
-// 获取部门数据，自动应用部门级隔离
-const departments = await departmentRepository.findByDepartmentId(departmentId);
-
-// 创建部门数据，自动设置部门ID
-const newDepartment = new Department({
-  name: "New Department",
-  code: "new-dept",
-  tenantId: currentTenantId,
-  organizationId: currentOrganizationId,
-  departmentId: currentDepartmentId,
-});
-```
-
-## 事件驱动架构示例
-
-### 1. 发布领域事件
-
-```typescript
-// 在租户聚合中发布事件
-export class TenantAggregate extends AggregateRoot {
-  createTenant(command: CreateTenantCommand): void {
-    // 创建租户逻辑
-    const tenant = new Tenant(command);
-    this.addDomainEvent(new TenantCreatedEvent(tenant));
-  }
-}
-```
-
-### 2. 处理领域事件
-
-```typescript
-// 事件处理器
-@EventHandler(TenantCreatedEvent)
-export class TenantCreatedEventHandler {
-  async handle(event: TenantCreatedEvent): Promise<void> {
-    // 处理租户创建事件
-    await this.sendWelcomeEmail(event.tenant);
-    await this.createDefaultOrganization(event.tenant);
-  }
-}
-```
-
-## 测试示例
-
-### 1. 单元测试
-
-```typescript
-describe("TenantAggregate", () => {
-  it("应该能够创建租户", () => {
-    const command = new CreateTenantCommand({
-      code: "test-tenant",
-      name: "Test Tenant",
-      type: TenantType.BASIC,
-    });
-
-    const aggregate = new TenantAggregate();
-    aggregate.createTenant(command);
-
-    expect(aggregate.getUncommittedEvents()).toHaveLength(1);
-    expect(aggregate.getUncommittedEvents()[0]).toBeInstanceOf(
-      TenantCreatedEvent,
-    );
-  });
-});
-```
-
-### 2. 集成测试
-
-```typescript
-describe("Tenant Management Integration", () => {
-  it("应该能够创建和查询租户", async () => {
-    // 创建租户
-    const tenant = await tenantService.createTenant({
-      code: "integration-test",
-      name: "Integration Test Tenant",
-      type: TenantType.BASIC,
-    });
-
-    // 查询租户
-    const foundTenant = await tenantService.getTenant(tenant.id);
-    expect(foundTenant).toBeDefined();
-    expect(foundTenant.code).toBe("integration-test");
-  });
-});
-```
-
-## 最佳实践
-
-### 1. 领域模型设计
-
-- 使用丰富的领域模型，避免贫血模型
-- 将业务逻辑封装在领域对象内部
-- 使用值对象表示无标识的概念
-- 使用聚合根管理一致性边界
-
-### 2. 数据隔离
-
-- 所有数据访问必须携带完整的隔离上下文
-- 使用数据库行级安全策略（RLS）实现隔离
-- 为隔离字段创建复合索引以优化查询性能
-
-### 3. 事件处理
-
-- 使用领域事件记录重要的业务事实
-- 实现事件溯源以支持状态重建
-- 使用事件驱动架构实现组件解耦
-
-### 4. 错误处理
-
-- 使用异常处理业务逻辑错误
-- 使用日志记录技术错误和监控信息
-- 实现适当的错误恢复机制
-
-## 故障排除
-
-### 1. 常见问题
-
-**问题**: 租户创建失败
-**解决方案**: 检查租户代码是否唯一，验证输入参数格式
-
-**问题**: 数据隔离不生效
-**解决方案**: 确保请求头包含正确的租户ID，检查数据库RLS策略
-
-**问题**: 事件处理失败
-**解决方案**: 检查事件处理器注册，验证事件序列化/反序列化
-
-### 2. 调试技巧
-
-- 启用详细日志记录
-- 使用数据库查询日志分析性能问题
-- 使用事件存储查看事件历史
-- 使用API文档测试端点
-
-## 下一步
-
-1. 阅读完整的API文档：`contracts/saas-core-api.yaml`
-2. 查看数据模型设计：`data-model.md`
-3. 了解架构设计：`research.md`
-4. 开始实现具体的业务功能
-
-## 支持
-
-如果您在使用过程中遇到问题，请：
-
-1. 查看本文档的故障排除部分
-2. 参考API文档和代码示例
-3. 联系开发团队获取支持
 
 ---
 
-**注意**: 本文档基于SAAS Core模块的当前设计，随着功能的发展可能会有所更新。请定期查看最新版本。
+## 📦 模块结构
+
+```
+libs/saas-core/
+├── src/
+│   ├── domain/          # 领域层
+│   ├── application/     # 应用层
+│   ├── infrastructure/  # 基础设施层
+│   └── interface/       # 接口层
+└── tests/              # 测试
+```
+
+---
+
+## 🎯 核心概念
+
+### 1. 多租户架构
+
+libs/saas-core 支持 5 级数据隔离：
+
+- **Platform（平台级）**: 平台管理员数据
+- **Tenant（租户级）**: 租户级数据
+- **Organization（组织级）**: 组织级数据
+- **Department（部门级）**: 部门级数据
+- **User（用户级）**: 用户级数据
+
+### 2. 领域驱动设计（DDD）
+
+- **聚合根（Aggregate Root）**: 管理业务一致性
+- **实体（Entity）**: 有标识的业务对象
+- **值对象（Value Object）**: 无标识的不可变对象
+- **领域事件（Domain Event）**: 业务事件
+
+### 3. CQRS 模式
+
+- **命令（Command）**: 改变系统状态
+- **查询（Query）**: 只读操作
+- **用例（Use Case）**: 业务流程执行
+
+---
+
+## 💻 使用示例
+
+### 1. 创建租户
+
+```typescript
+import { CreateTenantCommand } from "@hl8/saas-core/application";
+import { TenantCode, TenantName, TenantType } from "@hl8/saas-core/domain";
+import { TenantCreationUseCase } from "@hl8/saas-core/application";
+
+// 1. 创建命令
+const command = new CreateTenantCommand(
+  new TenantCode("tenant_001"),
+  new TenantName("示例租户"),
+  new TenantType(TenantTypeEnum.ENTERPRISE),
+  "租户描述",
+  "user_001"
+);
+
+// 2. 执行用例
+const useCase = new TenantCreationUseCase(
+  tenantRepository,
+  eventBus,
+  transactionManager
+);
+
+const tenantAggregate = await useCase.execute(command, context);
+```
+
+### 2. 查询租户
+
+```typescript
+import { GetTenantQuery } from "@hl8/saas-core/application";
+import { TenantId } from "@hl8/domain-kernel";
+
+// 1. 创建查询
+const query = new GetTenantQuery(
+  TenantId.create("tenant_id"),
+  "user_001"
+);
+
+// 2. 执行查询
+const tenant = await tenantQueryHandler.execute(query);
+```
+
+### 3. 更新租户
+
+```typescript
+import { UpdateTenantCommand } from "@hl8/saas-core/application";
+
+// 1. 创建命令
+const command = new UpdateTenantCommand(
+  TenantId.create("tenant_id"),
+  new TenantName("新名称"),
+  undefined, // 不更新类型
+  "新描述"
+);
+
+// 2. 执行用例
+await updateUseCase.execute(command, context);
+```
+
+### 4. 发布领域事件
+
+```typescript
+// 用例会自动发布领域事件
+const tenantAggregate = await createUseCase.execute(command, context);
+
+// 事件会自动发布到 IEventBus
+// 例如：TenantCreatedEvent
+```
+
+---
+
+## 🔧 配置
+
+### 1. 数据库配置
+
+```typescript
+// config/database.ts
+export default {
+  postgresql: {
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "5432"),
+    database: process.env.DB_NAME || "saas_db",
+    username: process.env.DB_USER || "postgres",
+    password: process.env.DB_PASSWORD || "postgres",
+  },
+  mongodb: {
+    // MongoDB 配置（可选）
+  }
+};
+```
+
+### 2. 隔离配置
+
+```typescript
+// config/isolation.ts
+export default {
+  defaultStrategy: "ROW_LEVEL_SECURITY",
+  database: "postgresql", // 默认数据库
+  supportMongoDB: true,    // 是否支持 MongoDB
+};
+```
+
+---
+
+## 🧪 测试
+
+### 单元测试
+
+```bash
+# 运行单元测试
+pnpm test libs/saas-core
+
+# 运行特定测试文件
+pnpm test libs/saas-core/src/domain/aggregates/tenant.aggregate.spec.ts
+```
+
+### 集成测试
+
+```bash
+# 运行集成测试
+pnpm test:integration libs/saas-core
+```
+
+---
+
+## 📚 API 使用
+
+### 1. REST API
+
+```bash
+# 创建租户
+curl -X POST http://localhost:3000/api/tenants \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "code": "tenant_001",
+    "name": "示例租户",
+    "type": "ENTERPRISE",
+    "description": "租户描述"
+  }'
+
+# 获取租户
+curl -X GET http://localhost:3000/api/tenants/tenant_id \
+  -H "Authorization: Bearer <token>"
+```
+
+---
+
+## 🔐 权限控制
+
+### CASL 权限示例
+
+```typescript
+import { CaslAbilityFactory } from "@hl8/saas-core";
+
+// 创建用户权限
+const ability = await caslAbilityFactory.createForUser(
+  userId,
+  tenantId,
+  organizationId,
+  departmentId
+);
+
+// 检查权限
+if (ability.can("update", "Tenant")) {
+  // 允许更新
+}
+```
+
+---
+
+## 📖 最佳实践
+
+### 1. 使用用例而不是直接访问仓储
+
+```typescript
+// ✅ 正确
+await createTenantUseCase.execute(command, context);
+
+// ❌ 错误
+await tenantRepository.save(tenant);
+```
+
+### 2. 使用领域事件
+
+```typescript
+// ✅ 正确 - 聚合自动发布事件
+const tenant = TenantAggregate.create(code, name, type);
+
+// ❌ 错误 - 手动创建事件
+tenantRepository.save(tenant);
+eventBus.publish(new TenantCreatedEvent(...));
+```
+
+### 3. 使用隔离上下文
+
+```typescript
+// ✅ 正确
+const context = IsolationContext.createTenantLevel(
+  platformId,
+  tenantId
+);
+
+// ❌ 错误 - 不传递上下文
+await repository.findById(id);
+```
+
+---
+
+## 📚 相关文档
+
+- [数据模型](./data-model.md) - 完整数据模型定义
+- [API 合约](./contracts/tenant-api.md) - API 接口文档
+- [架构设计](../../docs/architecture/) - 架构设计文档
+
+---
+
+## ❓ 常见问题
+
+### Q: 如何添加新的用例？
+
+A: 创建新的 Use Case 类，继承 `BaseUseCase` 或 `BaseCommandUseCase`：
+
+```typescript
+export class YourUseCase extends BaseUseCase<Request, Response> {
+  protected async executeUseCase(
+    request: Request,
+    context: IUseCaseContext
+  ): Promise<Response> {
+    // 实现业务逻辑
+  }
+}
+```
+
+### Q: 如何处理事务？
+
+A: 使用 `ITransactionManager`：
+
+```typescript
+await this.transactionManager.begin();
+try {
+  // 执行业务逻辑
+  await this.transactionManager.commit();
+} catch (error) {
+  await this.transactionManager.rollback();
+  throw error;
+}
+```
+
+### Q: 如何发布领域事件？
+
+A: 使用 `IEventBus`，用例会自动发布聚合根的事件：
+
+```typescript
+const aggregate = await this.createTenant(command);
+const events = aggregate.pullEvents();
+await this.eventBus.publishAll(events);
+```
+
+---
+
+## 🎉 下一步
+
+1. 阅读[数据模型文档](./data-model.md)
+2. 查看[API 合约文档](./contracts/)
+3. 探索[示例代码](../../libs/saas-core/examples/)
+
+祝您使用愉快！ 🚀
