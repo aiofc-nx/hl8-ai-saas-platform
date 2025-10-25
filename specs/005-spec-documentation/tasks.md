@@ -345,10 +345,10 @@ All application layer components properly extend application-kernel base classes
 
 #### Query Alignment
 
-- [ ] T111 [P] Update GetTenantQuery to extend BaseQuery from @hl8/application-kernel
-- [ ] T112 [P] Update ListTenantsQuery to extend BaseQuery from @hl8/application-kernel
-- [ ] T113 [P] Update CheckPermissionQuery to extend BaseQuery from @hl8/application-kernel
-- [ ] T114 Verify all queries use IsolationContext from @hl8/domain-kernel
+- [x] T111 [P] Update GetTenantQuery to extend BaseQuery from @hl8/application-kernel
+- [x] T112 [P] Update ListTenantsQuery to extend BaseQuery from @hl8/application-kernel
+- [x] T113 [P] Update CheckPermissionQuery to extend BaseQuery from @hl8/application-kernel
+- [x] T114 Verify all queries use IsolationContext from @hl8/domain-kernel
 
 #### Handler Alignment
 
