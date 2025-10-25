@@ -14,6 +14,8 @@ export * from "./organization.mapper.js";
 // 部门映射器
 export * from "./department.mapper.js";
 
-// TODO: 添加其他映射器
-// export * from "./user.mapper.js";
-// export * from "./role.mapper.js";
+// 用户映射器
+export * from "./user.mapper.js";
+
+// 角色映射器
+export * from "./role.mapper.js";

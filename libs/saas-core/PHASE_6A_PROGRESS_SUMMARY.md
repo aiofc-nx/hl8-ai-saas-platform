@@ -2,7 +2,7 @@
 
 ## 总进度
 
-**整体完成度: 60% (18/30 子阶段)**
+**整体完成度: 73% (22/30 子阶段)**
 
 ---
 
@@ -26,13 +26,13 @@
 - ✅ Moved RoleEntity
 - ✅ Created PostgreSQL entities index.ts
 
-### 🚧 Phase 6A.3: PostgreSQL Mappers (4/6) - 67%
+### ✅ Phase 6A.3: PostgreSQL Mappers (6/6) - 100%
 
 - ✅ Moved TenantMapper
 - ✅ Created OrganizationMapper
 - ✅ Created DepartmentMapper
-- ⏳ UserMapper (Pending)
-- ⏳ RoleMapper (Pending)
+- ✅ Created UserMapper
+- ✅ Created RoleMapper
 - ✅ Created PostgreSQL mappers index.ts
 
 ---
@@ -78,7 +78,7 @@ libs/saas-core/src/infrastructure/
 │   ├── postgresql/            ✅ (5 entities + index.ts)
 │   └── mongodb/               ⏳ (Empty)
 ├── mappers/
-│   ├── postgresql/            🚧 (3 mappers + index.ts)
+│   ├── postgresql/            ✅ (5 mappers + index.ts)
 │   └── mongodb/               ⏳ (Empty)
 └── repositories/
     ├── postgresql/            🚧 (index.ts only)
