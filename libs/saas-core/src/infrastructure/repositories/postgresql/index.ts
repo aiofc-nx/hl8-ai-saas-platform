@@ -8,8 +8,14 @@
 // 租户仓储
 export * from "./tenant.repository.js";
 
-// TODO: 添加其他仓储导出
-// export * from "./organization.repository.js";
-// export * from "./department.repository.js";
-// export * from "./user.repository.js";
-// export * from "./role.repository.js";
+// 组织仓储
+export * from "./organization.repository.js";
+
+// 部门仓储
+export * from "./department.repository.js";
+
+// 用户仓储
+export * from "./user.repository.js";
+
+// 角色仓储
+export * from "./role.repository.js";

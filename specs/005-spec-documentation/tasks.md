@@ -271,11 +271,11 @@ Both PostgreSQL and MongoDB databases are fully supported with complete implemen
 #### Phase 6A.4: PostgreSQL Repositories
 
 - [x] T124 [P] Create PostgreSQL TenantRepository in src/infrastructure/repositories/postgresql/tenant.repository.ts
-- [ ] T125 [P] Create PostgreSQL OrganizationRepository in src/infrastructure/repositories/postgresql/organization.repository.ts
-- [ ] T126 [P] Create PostgreSQL DepartmentRepository in src/infrastructure/repositories/postgresql/department.repository.ts
-- [ ] T127 [P] Create PostgreSQL UserRepository in src/infrastructure/repositories/postgresql/user.repository.ts
-- [ ] T128 [P] Create PostgreSQL RoleRepository in src/infrastructure/repositories/postgresql/role.repository.ts
-- [ ] T129 Create PostgreSQL repositories index.ts in src/infrastructure/repositories/postgresql/index.ts
+- [x] T125 [P] Create PostgreSQL OrganizationRepository in src/infrastructure/repositories/postgresql/organization.repository.ts
+- [x] T126 [P] Create PostgreSQL DepartmentRepository in src/infrastructure/repositories/postgresql/department.repository.ts
+- [x] T127 [P] Create PostgreSQL UserRepository in src/infrastructure/repositories/postgresql/user.repository.ts
+- [x] T128 [P] Create PostgreSQL RoleRepository in src/infrastructure/repositories/postgresql/role.repository.ts
+- [x] T129 Create PostgreSQL repositories index.ts in src/infrastructure/repositories/postgresql/index.ts
 
 #### Phase 6A.5: MongoDB Entities
 
