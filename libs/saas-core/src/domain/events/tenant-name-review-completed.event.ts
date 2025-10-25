@@ -5,9 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId, UserId } from "@hl8/domain-kernel";
 import {
   TenantNameReviewRequestType,
   TenantNameReviewRequestPriority,
@@ -16,6 +14,7 @@ import {
   TenantNameReviewStatusEnum,
   TenantNameReviewResult,
 } from "../value-objects/tenant-name-review-status.vo.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * 租户名称审核完成事件接口
@@ -70,9 +69,16 @@ export interface ITenantNameReviewCompletedEvent {
  * });
  * ```
  */
-export class TenantNameReviewCompletedEvent extends DomainEventBase implements IDomainEvent {
-  constructor(eventData: ITenantNameReviewCompletedEvent) {
-    super("TenantNameReviewCompletedEvent", eventData.tenantId.value);
+export class TenantNameReviewCompletedEvent extends DomainEventBase {
+  public readonly eventData: ITenantNameReviewCompletedEvent;
+
+  constructor(aggregateId: EntityId, eventData: ITenantNameReviewCompletedEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
 
     this.eventData = eventData;
   }
@@ -320,7 +326,7 @@ export class TenantNameReviewCompletedEvent extends DomainEventBase implements I
             ? "需要额外信息"
             : "未知";
 
-    return `租户 ${this.tenantId.value} 的租户名称审核已完成，请求名称: "${this.requestedName}"，结果: ${resultText}，审核者: ${this.reviewedBy.value}，持续时间: ${this.reviewDuration}小时`;
+    return `租户 ${this.tenantId.getValue()} 的租户名称审核已完成，请求名称: "${this.requestedName}"，结果: ${resultText}，审核者: ${this.reviewedBy.getValue()}，持续时间: ${this.reviewDuration}小时`;
   }
 
   /**
@@ -331,16 +337,16 @@ export class TenantNameReviewCompletedEvent extends DomainEventBase implements I
   getDetails(): Record<string, unknown> {
     return {
       eventType: "TenantNameReviewCompletedEvent",
-      tenantId: this.tenantId.value,
+      tenantId: this.tenantId.getValue(),
       requestId: this.requestId,
       requestedName: this.requestedName,
       currentName: this.currentName,
       requestType: this.requestType,
       priority: this.priority,
       reason: this.reason,
-      requestedBy: this.requestedBy.value,
+      requestedBy: this.requestedBy.getValue(),
       requestedAt: this.requestedAt.toISOString(),
-      reviewedBy: this.reviewedBy.value,
+      reviewedBy: this.reviewedBy.getValue(),
       reviewedAt: this.reviewedAt.toISOString(),
       status: this.status,
       result: this.result,
@@ -403,27 +409,30 @@ export class TenantNameReviewCompletedEvent extends DomainEventBase implements I
     additionalInfoRequired?: string,
     metadata: Record<string, unknown> = {},
   ): TenantNameReviewCompletedEvent {
-    return new TenantNameReviewCompletedEvent({
-      tenantId,
-      requestId,
-      requestedName,
-      currentName,
-      requestType,
-      priority: priority || TenantNameReviewRequestPriority.MEDIUM,
-      reason,
-      requestedBy,
-      requestedAt,
-      reviewedBy,
-      reviewedAt,
-      status,
-      result,
-      comments,
-      rejectionReason,
-      revisionNotes,
-      additionalInfoRequired,
-      reviewDuration,
-      metadata,
-    });
+    return new TenantNameReviewCompletedEvent(
+      tenantId, // aggregateId
+      {
+        tenantId,
+        requestId,
+        requestedName,
+        currentName,
+        requestType,
+        priority: priority || TenantNameReviewRequestPriority.MEDIUM,
+        reason,
+        requestedBy,
+        requestedAt,
+        reviewedBy,
+        reviewedAt,
+        status,
+        result,
+        comments,
+        rejectionReason,
+        revisionNotes,
+        additionalInfoRequired,
+        reviewDuration,
+        metadata,
+      }
+    );
   }
 
   /**
