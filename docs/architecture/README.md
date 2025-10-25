@@ -86,6 +86,7 @@
 - **@hl8/interface-kernel** - 接口层核心
 
 以及其他基础库：
+
 - **@hl8/exceptions** - 异常处理
 - **@hl8/caching** - 缓存管理
 - **@hl8/config** - 配置管理
@@ -98,6 +99,7 @@
 **必须优先使用** `@hl8/domain-kernel` 提供的以下组件：
 
 #### 基类和接口
+
 ```typescript
 import { 
   BaseEntity, 
@@ -107,6 +109,7 @@ import {
 ```
 
 #### ID 值对象
+
 ```typescript
 import { 
   TenantId, 
@@ -118,6 +121,7 @@ import {
 ```
 
 #### 数据隔离机制
+
 ```typescript
 import { 
   IsolationContext, 
@@ -201,6 +205,7 @@ import { Logger } from "@hl8/nestjs-fastify";
 ```
 
 **为什么这样做？**
+
 - ✅ **统一架构** - 所有业务模块基于相同的架构
 - ✅ **保证一致性** - 使用相同的基类和接口，确保行为一致
 - ✅ **减少重复** - 避免在每个模块中重复定义相同的类

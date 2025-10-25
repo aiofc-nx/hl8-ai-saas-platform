@@ -178,7 +178,10 @@ EDA (事件驱动架构)
 ### 4.1 核心技术栈
 
 - **Web框架**: NestJS + Fastify
-- **数据库**: PostgreSQL + MikroORM
+- **数据库**: PostgreSQL（默认）+ MongoDB，使用 MikroORM
+  - 默认数据库：PostgreSQL（企业级稳定性和ACID特性）
+  - 可选数据库：MongoDB（文档型数据库，适合非结构化数据）
+  - 数据隔离策略：默认使用行级隔离（ROW_LEVEL_SECURITY / RLS）
 - **缓存**: Redis
 - **消息队列**: Kafka + RabbitMQ + Redis
 - **监控**: Prometheus + Grafana
@@ -210,10 +213,16 @@ EDA (事件驱动架构)
 
 #### 4.2.4 数据库管理 (@hl8/database)
 
-- MikroORM集成
-- 多租户数据隔离
-- 连接池管理
-- 事务管理
+- **MikroORM 集成**：统一 ORM 框架
+- **多数据库支持**：
+  - **PostgreSQL（默认）**：企业级关系型数据库，支持 ACID、JSONB、全文搜索
+  - **MongoDB（可选）**：文档型数据库，适合非结构化数据、日志存储
+- **多租户数据隔离**：基于 IsolationContext 的 5 级隔离
+- **默认隔离策略**：**行级隔离（ROW LEVEL SECURITY）**
+  - PostgreSQL：启用 RLS 策略，数据库级别强制隔离
+  - MongoDB：应用层隔离，通过查询条件过滤
+- **连接池管理**：动态连接池，按租户分配连接
+- **事务管理**：支持跨数据库事务（PostgreSQL）
 
 #### 4.2.5 消息系统 (@hl8/messaging)
 

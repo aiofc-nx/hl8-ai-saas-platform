@@ -208,9 +208,69 @@ Business Module
 └── @hl8/exceptions            # 异常处理
 ```
 
+### 3.2.1 数据库配置要求
+
+> **⚠️ 重要**: 业务模块开发时必须支持多种数据库，并遵循以下要求。
+
+#### 支持的数据库
+
+1. **PostgreSQL（默认）**
+   - 企业级关系型数据库
+   - 支持 ACID 事务
+   - 支持 JSONB、全文搜索
+   - **推荐用于**：结构化数据、事务性强业务
+   - **默认使用**：所有核心业务数据
+
+2. **MongoDB（可选）**
+   - 文档型数据库
+   - 灵活的数据模型
+   - **推荐用于**：非结构化数据、日志存储、配置存储
+
+#### 数据隔离策略
+
+**默认使用行级隔离（ROW_LEVEL_SECURITY）**
+
+```typescript
+// PostgreSQL 行级隔离
+- 启用 RLS 策略
+- 数据库级别强制隔离
+- 性能优化：基于索引的查询
+- 自动过滤：透明于应用层
+
+// MongoDB 应用层隔离
+- 通过查询条件过滤
+- 应用层确保隔离
+- 灵活的数据模型
+```
+
+#### 数据库选择建议
+
+| 数据类型 | 推荐数据库 | 说明 |
+|---------|----------|------|
+| 用户、订单、产品等核心业务数据 | PostgreSQL | 需要 ACID 保证 |
+| 日志、审计记录 | MongoDB | 非结构化，写多读少 |
+| 配置、缓存数据 | PostgreSQL | 需要查询和索引 |
+| 文件、图片元数据 | MongoDB | 灵活的结构 |
+
+#### 实现要求
+
+1. **仓储层实现**：必须支持多数据库
+   - `postgresql/`：PostgreSQL 仓储实现
+   - `mongodb/`：MongoDB 仓储实现
+   - `RepositoryFactory`：根据配置选择仓储
+
+2. **实体映射**：为不同数据库提供不同的实体定义
+   - `entities/postgresql/`：PostgreSQL 实体
+   - `entities/mongodb/`：MongoDB 实体
+
+3. **查询优化**：针对不同数据库优化
+   - PostgreSQL：使用索引、SQL 优化
+   - MongoDB：使用聚合管道、索引优化
+
 ### 3.3 优先使用 kernel 组件
 
 > **⚠️ 重要**: 业务模块的开发**必须基于**以下 kernel 和基础库提供的通用组件：
+>
 > - **@hl8/domain-kernel** - 领域层核心
 > - **@hl8/application-kernel** - 应用层核心
 > - **@hl8/infrastructure-kernel** - 基础设施层核心
@@ -219,7 +279,7 @@ Business Module
 > - **@hl8/caching** - 缓存管理
 > - **@hl8/config** - 配置管理
 > - **@hl8/nestjs-fastify** - Fastify 集成和 logging
-> 
+>
 > 因此，必须优先使用这些 kernel 和基础库提供的组件，而不是重新定义。
 
 #### 3.3.1 为什么必须基于 kernel 层？
