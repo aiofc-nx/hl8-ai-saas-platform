@@ -1,478 +1,401 @@
-# Data Model Design: SAAS Core Module with CASL Permission System
+# Data Model: libs/saas-core
+
+> **日期**: 2025-01-27  
+> **分支**: 005-spec-documentation  
+> **目的**: 定义 libs/saas-core 模块的完整数据模型
+
+---
+
+## 📋 模型概览
+
+libs/saas-core 模块实现了多租户 SAAS 平台的核心业务域，包含租户、组织、部门、用户、角色等核心聚合。
+
+---
+
+## 🏗️ 聚合根（Aggregate Roots）
+
+### 1. TenantAggregate（租户聚合）
+
+**聚合根**: TenantAggregate  
+**实体**: Tenant  
+**边界**: 租户本身及其所有配置和资源限制
+
+#### 属性
+
+```typescript
+class TenantAggregate extends AggregateRoot {
+  // 核心实体
+  private _tenant: Tenant;
+  
+  // 服务依赖
+  private _trialPeriodService: TrialPeriodService;
+  private _trialPeriodConfig: TrialPeriodConfig;
+  private _tenantCreationRules: TenantCreationRules;
+  private _resourceMonitoringService: ResourceMonitoringService;
+}
+```
 
-**Date**: 2024-12-19  
-**Feature**: SAAS Core Module Specification Documentation  
-**Phase**: Phase 1 - Design and Contracts
+#### Tenant 实体
+
+```typescript
+class Tenant extends BaseEntity<TenantId> {
+  private _code: TenantCode;              // 租户代码
+  private _name: TenantName;              // 租户名称
+  private _type: TenantType;              // 租户类型
+  private _status: TenantStatus;          // 租户状态
+  private _description?: string;          // 描述
+  private _contactEmail?: string;         // 联系邮箱
+  private _contactPhone?: string;         // 联系电话
+  private _address?: string;              // 地址
+  private _subscriptionStartDate?: Date;  // 订阅开始日期
+  private _subscriptionEndDate?: Date;    // 订阅结束日期
+  private _settings: Record<string, any>; // 设置
+}
+```
+
+#### 值对象
+
+- **TenantCode**: 租户代码（唯一标识）
+- **TenantName**: 租户名称
+- **TenantType**: 租户类型（FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM）
+- **TenantStatus**: 租户状态（PENDING, ACTIVE, SUSPENDED, EXPIRED, DELETED）
 
-## Overview
+#### 领域事件
 
-This document defines the complete data model for the SAAS Core module with integrated CASL (Code Access Security Library) permission system, including domain entities, value objects, aggregates, and their relationships. The model extends the existing NestJS infrastructure libraries (@hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel, @hl8/nestjs-fastify, @hl8/caching, @hl8/database, @hl8/messaging, @hl8/config, @hl8/exceptions, @hl8/nestjs-isolation), follows DDD principles, supports the 5-tier data isolation strategy (Platform/Tenant/Organization/Department/User), and includes comprehensive CASL integration for sophisticated permission and authorization management across all 8 subdomains.
+- **TenantCreatedEvent**: 租户创建
+- **TenantActivatedEvent**: 租户激活
+- **TenantSuspendedEvent**: 租户暂停
+- **TenantResumedEvent**: 租户恢复
+- **TenantCancelledEvent**: 租户取消
+- **TrialExpiredEvent**: 试用期过期
 
-## Domain Entities
+#### 业务规则
 
-### 1. Platform Entity
+1. 租户代码必须唯一
+2. 租户状态转换必须遵循状态机
+3. 试用期到期后自动转为过期状态
+4. 资源使用超过限制时发布警告或错误事件
+
+---
+
+### 2. OrganizationAggregate（组织聚合）
+
+**聚合根**: OrganizationAggregate  
+**实体**: Organization  
+**边界**: 组织本身及其组织结构
+
+#### 属性
+
+```typescript
+class OrganizationAggregate extends AggregateRoot<OrganizationId> {
+  private _organization: Organization;
+  private _userAssignmentRules: UserAssignmentRules;
+}
+```
+
+#### Organization 实体
+
+```typescript
+class Organization extends BaseEntity<OrganizationId> {
+  private _name: string;                     // 组织名称
+  private _description?: string;             // 描述
+  private _type: OrganizationTypeEnum;       // 组织类型
+  private _status: OrganizationStatusEnum;   // 组织状态
+  private _parentId?: OrganizationId;        // 父组织ID
+  private _level: number;                    // 层级
+  private _path: string;                     // 路径
+  private _settings: Record<string, unknown>; // 设置
+  private _metadata: Record<string, unknown>; // 元数据
+  private _isShared: boolean;                // 是否共享
+  private _sharingLevel?: SharingLevel;      // 共享级别
+}
+```
 
-**Purpose**: Represents the SAAS platform provider with global configuration and management capabilities.
+#### 组织类型（OrganizationTypeEnum）
 
-**Attributes**:
+- **COMMITTEE**: 委员会
+- **PROJECT_TEAM**: 项目团队
+- **QUALITY_GROUP**: 质量小组
+- **PERFORMANCE_GROUP**: 绩效小组
 
-- `id: PlatformId` - 平台唯一标识
-- `name: string` - 平台名称
-- `description: string` - 平台描述
-- `version: string` - 平台版本
-- `configuration: PlatformConfiguration` - 平台配置
-- `auditInfo: AuditInfo` - 审计信息
+#### 领域事件
 
-**Business Rules**:
+- **UserAssignmentConflictEvent**: 用户分配冲突
 
-- 平台名称必须唯一
-- 平台版本必须遵循语义版本控制
-- 平台配置必须包含默认租户限制和功能开关
+---
 
-**Relationships**:
+### 3. DepartmentAggregate（部门聚合）
 
-- 一对多关系：Platform → Tenant
+**聚合根**: DepartmentAggregate  
+**实体**: Department  
+**边界**: 部门本身及其层级结构
 
-### 2. Tenant Entity
+#### 属性
+
+```typescript
+class DepartmentAggregate extends AggregateRoot<DepartmentId> {
+  private _department: Department;
+}
+```
+
+#### Department 实体
+
+```typescript
+class Department extends BaseEntity<DepartmentId> {
+  private _name: string;                    // 部门名称
+  private _code: string;                    // 部门代码
+  private _organizationId: OrganizationId;  // 组织ID
+  private _parentId: DepartmentId | null;   // 父部门ID
+  private _level: number;                   // 层级
+}
+```
+
+#### 业务规则
+
+1. 部门最多支持 8 层嵌套
+2. 部门不能是其自己的子部门（避免循环引用）
+
+---
+
+### 4. UserAggregate（用户聚合）
+
+**聚合根**: UserAggregate（待实现）  
+**实体**: User
+
+#### 属性
+
+```typescript
+class User extends BaseEntity<UserId> {
+  private _email: string;               // 邮箱
+  private _username: string;            // 用户名
+  private _displayName: string;         // 显示名称
+  private _type: UserTypeEnum;          // 用户类型
+  private _status: UserStatusEnum;      // 用户状态
+  private _firstName?: string;          // 名
+  private _lastName?: string;           // 姓
+  private _phone?: string;              // 电话
+  private _avatar?: string;             // 头像
+  private _timezone?: string;           // 时区
+  private _language?: string;           // 语言
+  private _organizationId?: OrganizationId;   // 组织ID
+  private _departmentId?: DepartmentId;       // 部门ID
+}
+```
+
+---
+
+## 🎯 值对象（Value Objects）
+
+### 租户相关
+
+- **TenantCode**: 租户代码（唯一）
+- **TenantName**: 租户名称
+- **TenantType**: 租户类型
+- **TenantStatus**: 租户状态
+- **TrialPeriodConfig**: 试用期配置
+
+### 组织相关
+
+- **OrganizationTypeEnum**: 组织类型枚举
+- **OrganizationStatusEnum**: 组织状态枚举
+
+### 用户相关
+
+- **UserTypeEnum**: 用户类型枚举
+- **UserStatusEnum**: 用户状态枚举
+- **UserOrganizationAssignment**: 用户组织分配
+- **UserDepartmentAssignment**: 用户部门分配
 
-**Purpose**: Represents independent customer units with their own data space, configuration, and resource limits.
+### 资源相关
+
+- **ResourceLimits**: 资源限制
+- **ResourceUsage**: 资源使用情况
+- **ResourceType**: 资源类型
 
-**Attributes**:
+### 权限相关
 
-- `id: TenantId` - 租户唯一标识
-- `code: TenantCode` - 租户代码（唯一标识）
-- `name: TenantName` - 租户名称
-- `type: TenantType` - 租户类型（FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM）
-- `status: TenantStatus` - 租户状态（TRIAL, ACTIVE, SUSPENDED, EXPIRED, DELETED）
-- `configuration: TenantConfiguration` - 租户配置
-- `resourceLimits: ResourceLimits` - 资源限制
-- `auditInfo: AuditInfo` - 审计信息
+- **RoleLevel**: 角色级别
+- **PermissionTemplate**: 权限模板
+- **CaslRule**: CASL 规则
+- **CaslCondition**: CASL 条件
 
-**Business Rules**:
+---
 
-- 租户代码必须唯一且不可修改
-- 租户名称必须通过审核流程
-- 租户类型决定资源限制和功能集
-- 租户状态转换必须遵循预定义规则
+## 🔗 关系图
 
-**Relationships**:
+```
+Platform (平台)
+    │
+    ├─ Tenant (租户) - 1:N
+    │   │
+    │   ├─ Organization (组织) - 1:N
+    │   │   │
+    │   │   ├─ Department (部门) - 1:N
+    │   │   │   │
+    │   │   │   └─ User (用户) - N:1
+    │   │   │
+    │   │   └─ User (用户) - N:1
+    │   │
+    │   ├─ User (用户) - N:1
+    │   │
+    │   └─ Role (角色) - 1:N
+    │       │
+    │       └─ CaslAbility (权限) - 1:N
+    │
+    └─ PlatformUser (平台用户) - 1:N
+```
 
-- 多对一关系：Tenant → Platform
-- 一对多关系：Tenant → Organization
+---
 
-### 3. Organization Entity
+## 📊 数据隔离层级
 
-**Purpose**: Represents horizontal management units within tenants responsible for specific functions.
+### 隔离级别
 
-**Attributes**:
+1. **Platform (平台级)**: 平台管理员数据
+2. **Tenant (租户级)**: 租户级数据（默认隔离级别）
+3. **Organization (组织级)**: 组织级数据
+4. **Department (部门级)**: 部门级数据
+5. **User (用户级)**: 用户级数据
 
-- `id: OrganizationId` - 组织唯一标识
-- `name: string` - 组织名称
-- `type: OrganizationType` - 组织类型（Committee, Project Team, Quality Group, Performance Group）
-- `description: string` - 组织描述
-- `tenantId: TenantId` - 所属租户
-- `auditInfo: AuditInfo` - 审计信息
+### 隔离字段
 
-**Business Rules**:
+所有实体都包含以下隔离字段：
+
+```typescript
+abstract class BaseEntity {
+  protected readonly _tenantId: TenantId;          // 必填
+  protected readonly _organizationId?: OrganizationId; // 可选
+  protected readonly _departmentId?: DepartmentId;     // 可选
+  protected readonly _userId?: UserId;                 // 可选
+  protected readonly _isShared: boolean;               // 是否共享
+  protected readonly _sharingLevel?: SharingLevel;     // 共享级别
+}
+```
 
-- 组织名称在同一租户内必须唯一
-- 组织类型决定管理权限和功能范围
-- 组织可以包含多个部门
+---
 
-**Relationships**:
+## 🔄 状态转换
+
+### Tenant 状态机
 
-- 多对一关系：Organization → Tenant
-- 一对多关系：Organization → Department
+```
+PENDING → ACTIVE → SUSPENDED → CANCELLED
+    ↓        ↓
+  EXPIRED  EXPIRED → DELETED
+```
+
+### Organization 状态机
+
+```
+INACTIVE → ACTIVE → INACTIVE
+```
 
-### 4. Department Entity
+### User 状态机
 
-**Purpose**: Represents vertical business execution units within organizations with hierarchical structure.
+```
+PENDING → ACTIVE → INACTIVE
+    ↓        ↓
+  LOCKED   SUSPENDED → DELETED
+```
 
-**Attributes**:
-
-- `id: DepartmentId` - 部门唯一标识
-- `name: string` - 部门名称
-- `code: string` - 部门代码
-- `parentId: DepartmentId | null` - 父部门ID
-- `level: number` - 部门层级（1-7）
-- `organizationId: OrganizationId` - 所属组织
-- `tenantId: TenantId` - 所属租户
-- `auditInfo: AuditInfo` - 审计信息
-
-**Business Rules**:
-
-- 部门层级不能超过7层
-- 部门代码在同一组织内必须唯一
-- 部门名称在同一组织内必须唯一
-- 部门删除必须处理子部门和用户分配
-
-**Relationships**:
-
-- 多对一关系：Department → Organization
-- 多对一关系：Department → Tenant
-- 自引用关系：Department → Department (parent-child)
-
-### 5. User Entity
-
-**Purpose**: Represents individual users with platform identity who can be assigned to multiple organizations and departments.
-
-**Attributes**:
-
-- `id: UserId` - 用户唯一标识
-- `username: string` - 用户名
-- `email: Email` - 邮箱地址
-- `status: UserStatus` - 用户状态（ACTIVE, INACTIVE, SUSPENDED, DELETED）
-- `profile: UserProfile` - 用户资料
-- `permissions: UserPermission[]` - 用户权限
-- `auditInfo: AuditInfo` - 审计信息
-
-**Business Rules**:
-
-- 用户名和邮箱必须唯一
-- 用户可以属于多个组织但每个组织只能属于一个部门
-- 用户权限基于角色和部门层级继承
-
-**Relationships**:
-
-- 多对多关系：User ↔ Organization
-- 多对多关系：User ↔ Department
-- 多对多关系：User ↔ UserRole
-
-### 6. Role Entity
-
-**Purpose**: Represents user roles defining permissions and access levels within the system hierarchy.
-
-**Attributes**:
-
-- `id: RoleId` - 角色唯一标识
-- `name: string` - 角色名称
-- `description: string` - 角色描述
-- `level: RoleLevel` - 角色层级（Platform, Tenant, Organization, Department, User）
-- `permissions: Permission[]` - 角色权限
-- `caslRules: CaslRule[]` - CASL权限规则
-- `tenantId: TenantId` - 所属租户
-- `auditInfo: AuditInfo` - 审计信息
-
-**Business Rules**:
-
-- 角色名称在同一租户内必须唯一
-- 角色层级决定权限继承关系
-- CASL权限规则定义角色的具体操作权限
-
-**Relationships**:
-
-- 多对一关系：Role → Tenant
-- 多对多关系：Role ↔ User
-- 一对多关系：Role → Permission
-- 一对多关系：Role → CaslRule
-
-### 7. CaslAbility Entity
-
-**Purpose**: Represents CASL permission abilities for users within specific contexts.
-
-**Attributes**:
-
-- `id: CaslAbilityId` - 权限能力唯一标识
-- `userId: UserId` - 用户ID
-- `subject: string` - 权限主体（Tenant, Organization, Department, User等）
-- `action: string` - 操作类型（create, read, update, delete, manage等）
-- `conditions: CaslCondition[]` - 权限条件
-- `context: IsolationContext` - 隔离上下文
-- `auditInfo: AuditInfo` - 审计信息
-
-**Business Rules**:
-
-- 权限能力基于用户角色和组织上下文动态生成
-- 权限条件必须符合隔离上下文规则
-- 权限能力变更必须记录审计日志
-
-**Relationships**:
-
-- 多对一关系：CaslAbility → User
-- 多对一关系：CaslAbility → Role
-
-## Value Objects
-
-### 1. TenantCode
-
-**Purpose**: 租户代码值对象，确保唯一性和格式正确性。
-
-**Attributes**:
-
-- `value: string` - 租户代码值
-
-**Validation Rules**:
-
-- 长度：3-20个字符
-- 格式：只能包含字母、数字、连字符
-- 唯一性：全局唯一
-
-### 2. TenantName
-
-**Purpose**: 租户名称值对象，支持审核流程。
-
-**Attributes**:
-
-- `value: string` - 租户名称值
-- `status: ApprovalStatus` - 审核状态
-
-**Validation Rules**:
-
-- 长度：2-100个字符
-- 不能包含敏感词汇
-- 需要通过审核流程
-
-### 3. TenantType
-
-**Purpose**: 租户类型枚举值对象。
-
-**Values**:
-
-- `FREE` - 免费版
-- `BASIC` - 基础版
-- `PROFESSIONAL` - 专业版
-- `ENTERPRISE` - 企业版
-- `CUSTOM` - 定制版
-
-### 4. TenantStatus
-
-**Purpose**: 租户状态枚举值对象。
-
-**Values**:
-
-- `TRIAL` - 试用期
-- `ACTIVE` - 活跃状态
-- `SUSPENDED` - 暂停状态
-- `EXPIRED` - 过期状态
-- `DELETED` - 已删除
-
-### 5. IsolationContext
-
-**Purpose**: 数据隔离上下文值对象。
-
-**Attributes**:
-
-- `platformId: PlatformId` - 平台ID
-- `tenantId: TenantId` - 租户ID
-- `organizationId: OrganizationId | null` - 组织ID
-- `departmentId: DepartmentId | null` - 部门ID
-- `userId: UserId | null` - 用户ID
-
-### 6. CaslRule
-
-**Purpose**: CASL权限规则值对象。
-
-**Attributes**:
-
-- `action: string` - 操作类型
-- `subject: string` - 权限主体
-- `conditions: object` - 权限条件
-- `inverted: boolean` - 是否反向规则
-
-**Validation Rules**:
-
-- 操作类型必须符合预定义的操作集合
-- 权限主体必须符合实体类型
-- 权限条件必须为有效的JSON对象
-
-### 7. CaslCondition
-
-**Purpose**: CASL权限条件值对象。
-
-**Attributes**:
-
-- `field: string` - 字段名
-- `operator: string` - 操作符
-- `value: any` - 条件值
-
-**Validation Rules**:
-
-- 字段名必须符合实体属性
-- 操作符必须符合预定义的操作符集合
-- 条件值必须符合字段类型
-
-### 8. RoleLevel
-
-**Purpose**: 角色层级枚举值对象。
-
-**Values**:
-
-- `PLATFORM` - 平台级角色
-- `TENANT` - 租户级角色
-- `ORGANIZATION` - 组织级角色
-- `DEPARTMENT` - 部门级角色
-- `USER` - 用户级角色
-
-## Aggregates
-
-### 1. TenantAggregate
-
-**Purpose**: 租户聚合根，管理租户的完整生命周期和业务规则。
-
-**Root Entity**: Tenant
-**Consistency Boundary**: 租户及其配置、资源限制、状态转换
-
-**Business Rules**:
-
-- 租户创建必须验证平台容量和资源可用性
-- 租户状态转换必须遵循预定义规则
-- 租户删除必须处理所有关联数据
-- 租户升级必须验证新限制和功能
-
-**Domain Events**:
-
-- `TenantCreated` - 租户创建事件
-- `TenantStatusChanged` - 租户状态变更事件
-- `TenantUpgraded` - 租户升级事件
-- `TenantDeleted` - 租户删除事件
-
-### 2. OrganizationAggregate
-
-**Purpose**: 组织聚合根，管理组织结构和权限。
-
-**Root Entity**: Organization
-**Consistency Boundary**: 组织及其部门、用户分配、权限设置
-
-**Business Rules**:
-
-- 组织创建必须验证租户权限
-- 组织删除必须处理部门层级结构
-- 组织权限变更必须影响所有子部门
-
-**Domain Events**:
-
-- `OrganizationCreated` - 组织创建事件
-- `OrganizationUpdated` - 组织更新事件
-- `OrganizationDeleted` - 组织删除事件
-
-### 3. DepartmentAggregate
-
-**Purpose**: 部门聚合根，管理部门层级结构和用户分配。
-
-**Root Entity**: Department
-**Consistency Boundary**: 部门及其子部门、用户分配、权限继承
-
-**Business Rules**:
-
-- 部门层级不能超过7层
-- 部门删除必须处理子部门和用户重新分配
-- 部门权限变更必须影响所有子部门
-
-**Domain Events**:
-
-- `DepartmentCreated` - 部门创建事件
-- `DepartmentMoved` - 部门移动事件
-- `DepartmentDeleted` - 部门删除事件
-
-## Data Isolation Strategy
-
-### 1. Platform Level Isolation
-
-- 平台数据与租户数据完全隔离
-- 平台管理数据仅平台管理员可访问
-- 例如：平台配置、全局统计、系统监控数据
-
-### 2. Tenant Level Isolation
-
-- 不同租户的数据完全隔离
-- 租户间数据不可跨访问
-- 支持企业租户、社群租户、团队租户、个人租户四种类型
-
-### 3. Organization Level Isolation
-
-- 同一租户内，不同组织的非共享数据相互隔离
-- 组织是租户内的横向管理单位
-- 组织间是平行关系，无从属关系
-
-### 4. Department Level Isolation
-
-- 同一组织内，不同部门的非共享数据相互隔离
-- 部门是纵向管理单位，具有层级关系，支持7层嵌套
-- 部门间遵循上下级关系，上级部门可访问下级部门的共享数据
-
-### 5. User Level Isolation
-
-- 用户私有数据仅该用户可访问
-- 即使在同一部门，用户私有数据也相互隔离
-
-## Data Classification
-
-### 1. Shared Data
-
-- 可以在特定层级内被所有下级访问
-- 必须明确定义共享级别
-- 共享数据对指定层级及其所有下级层级可见
-
-### 2. Non-Shared Data
-
-- 仅限特定层级访问，不可跨层级访问
-- 数据所有者层级决定访问权限
-- 非共享数据是默认状态，确保数据安全
-
-## Validation Rules
-
-### 1. Tenant Validation
-
-- 租户代码唯一性验证
-- 租户名称格式和内容验证
-- 租户类型和资源限制匹配验证
-- 租户状态转换规则验证
-
-### 2. Organization Validation
-
-- 组织名称唯一性验证
-- 组织类型和权限匹配验证
-- 组织创建权限验证
-
-### 3. Department Validation
-
-- 部门层级深度验证（最大7层）
-- 部门代码唯一性验证
-- 部门名称唯一性验证
-- 部门层级结构完整性验证
-
-### 4. User Validation
-
-- 用户名和邮箱唯一性验证
-- 用户权限和角色匹配验证
-- 用户多组织分配验证
-
-## Performance Considerations
-
-### 1. Indexing Strategy
-
-- 为所有隔离字段创建复合索引
-- 为查询频繁的字段创建单列索引
-- 为外键关系创建索引
-
-### 2. Caching Strategy
-
-- 租户配置信息缓存
-- 用户权限信息缓存
-- 组织部门结构缓存
-
-### 3. Query Optimization
-
-- 使用隔离上下文进行查询过滤
-- 避免跨租户数据查询
-- 优化层级结构查询
-
-## Security Considerations
-
-### 1. Data Access Control
-
-- 所有数据访问必须携带完整的隔离上下文
-- 系统自动根据隔离上下文过滤数据
-- 跨层级数据访问必须经过明确授权
-
-### 2. Audit Logging
-
-- 所有数据访问必须记录完整的隔离上下文
-- 跨层级数据访问必须触发审计事件
-- 数据访问拒绝必须记录原因和上下文
-
-### 3. Data Encryption
-
-- 敏感数据加密存储
-- 传输数据加密保护
-- 密钥管理和轮换策略
+---
+
+## 📝 验证规则
+
+### Tenant
+
+1. 租户代码必须唯一
+2. 租户名称不能为空
+3. 租户类型必须是有效的枚举值
+4. 试用期配置必须有效
+
+### Organization
+
+1. 组织名称不能为空
+2. 组织类型必须是有效的枚举值
+3. 组织层级不能超过限制
+
+### Department
+
+1. 部门名称不能为空
+2. 部门代码在组织内必须唯一
+3. 部门层级不能超过 8 层
+4. 不能形成循环引用
+
+### User
+
+1. 邮箱必须唯一
+2. 用户名必须唯一
+3. 显示名称不能为空
+
+---
+
+## 🔐 权限模型
+
+### 角色层级
+
+```
+PlatformAdmin (平台管理员)
+    ↓
+TenantAdmin (租户管理员)
+    ↓
+OrganizationAdmin (组织管理员)
+    ↓
+DepartmentAdmin (部门管理员)
+    ↓
+RegularUser (普通用户)
+```
+
+### CASL 权限
+
+使用 CASL 定义细粒度权限：
+
+```typescript
+interface CaslAbility {
+  userId: UserId;
+  roleId?: RoleId;
+  subject: string;      // 资源类型
+  action: string;       // 操作类型
+  conditions: CaslCondition[]; // 条件
+  context: IsolationContext;   // 隔离上下文
+}
+```
+
+---
+
+## 📈 资源管理
+
+### 资源限制
+
+```typescript
+interface ResourceLimits {
+  maxUsers: number;           // 最大用户数
+  maxOrganizations: number;   // 最大组织数
+  maxStorage: number;         // 最大存储
+  maxBandwidth: number;       // 最大带宽
+}
+```
+
+### 资源使用
+
+```typescript
+interface ResourceUsage {
+  currentUsers: number;       // 当前用户数
+  currentOrganizations: number; // 当前组织数
+  currentStorage: number;     // 当前存储
+  currentBandwidth: number;   // 当前带宽
+}
+```
+
+---
+
+## 🎯 总结
+
+libs/saas-core 数据模型支持：
+
+- ✅ 5 级数据隔离（Platform/Tenant/Organization/Department/User）
+- ✅ 多租户架构（8 个业务子域）
+- ✅ 完整的状态管理和业务规则
+- ✅ 细粒度的权限控制（CASL）
+- ✅ 资源限制和监控
+- ✅ 事件驱动的领域建模
