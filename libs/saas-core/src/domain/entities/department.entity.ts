@@ -15,8 +15,6 @@ export class Department extends BaseEntity<DepartmentId> {
   private _code: string;
   private _parentId: DepartmentId | null;
   private _level: number;
-  private _organizationId: OrganizationId;
-  private _tenantId: TenantId;
 
   /**
    * 创建部门实体
@@ -50,8 +48,6 @@ export class Department extends BaseEntity<DepartmentId> {
     );
     this._name = name;
     this._code = code;
-    this._organizationId = organizationId;
-    this._tenantId = tenantId;
     this._parentId = parentId;
     this._level = parentId ? 1 : 1; // 默认层级为1，后续需要根据父部门计算
   }
@@ -94,20 +90,16 @@ export class Department extends BaseEntity<DepartmentId> {
 
   /**
    * 获取所属组织ID
-   *
-   * @returns 所属组织ID
    */
   get organizationId(): OrganizationId {
-    return this._organizationId;
+    return super.organizationId as OrganizationId;
   }
 
   /**
    * 获取所属租户ID
-   *
-   * @returns 所属租户ID
    */
   get tenantId(): TenantId {
-    return this._tenantId;
+    return super.tenantId as TenantId;
   }
 
   /**

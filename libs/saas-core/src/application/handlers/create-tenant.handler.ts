@@ -28,10 +28,7 @@ export class CreateTenantHandler
         command.code,
         command.name,
         command.type,
-        command.description,
-        command.contactEmail,
-        command.contactPhone,
-        command.address,
+        command.tenantDescription,
       );
 
       return tenantAggregate;
