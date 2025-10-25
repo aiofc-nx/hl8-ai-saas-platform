@@ -5,8 +5,10 @@
  * @since 1.0.0
  */
 
-// TODO: 添加仓储导出
-// export * from "./tenant.repository.js";
+// 租户仓储
+export * from "./tenant.repository.js";
+
+// TODO: 添加其他仓储导出
 // export * from "./organization.repository.js";
 // export * from "./department.repository.js";
 // export * from "./user.repository.js";
