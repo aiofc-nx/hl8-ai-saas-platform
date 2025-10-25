@@ -42,6 +42,7 @@ Content-Type: application/json
 ```
 
 **Response**:
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -96,6 +97,7 @@ Content-Type: application/json
 ```
 
 **Response**:
+
 ```json
 {
   "accessToken": "new-access-token",

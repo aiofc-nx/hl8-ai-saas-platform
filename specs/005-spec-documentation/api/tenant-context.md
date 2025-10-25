@@ -81,6 +81,7 @@ interface IsolationContext {
 ### Automatic Propagation
 
 Context flows through:
+
 1. Middleware → validates and sets context
 2. Controller → receives context
 3. Service → uses context for operations

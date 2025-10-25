@@ -18,6 +18,7 @@ The API uses URL-based versioning following semantic versioning principles. Majo
 ```
 
 Examples:
+
 - `/api/v1/tenants` - Version 1
 - `/api/v2/tenants` - Version 2 (future)
 
