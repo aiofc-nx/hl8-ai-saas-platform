@@ -6,7 +6,7 @@ import { EntityId } from "@hl8/domain-kernel";
  * @description 表示平台的唯一标识符，确保全局唯一性
  * @since 1.0.0
  */
-export class PlatformId extends EntityId<"PlatformId"> {
+export class PlatformId extends EntityId<string> {
   /**
    * 私有构造函数 - 强制使用静态工厂方法
    */
