@@ -211,24 +211,31 @@ export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
 
     if (!validation.isValid) {
       // 发布用户分配冲突事件
-      this.addDomainEvent(
-        new UserAssignmentConflictEvent({
-          userId,
-          organizationId: this._organization.id,
-          departmentId,
+      this.apply(
+        this.createDomainEvent("UserAssignmentConflict", {
+          userId: userId.toString(),
+          organizationId: this._organization.id.toString(),
+          departmentId: departmentId?.toString(),
           conflictType: this.determineConflictType(validation.errors),
           conflictReason: validation.errors.join(", "),
-          existingAssignments: existingAssignments.filter((a) =>
-            a.userId.equals(userId),
-          ),
+          existingAssignments: existingAssignments
+            .filter((a) => a.userId.equals(userId))
+            .map((a) => ({
+              userId: a.userId.toString(),
+              organizationId: a.organizationId.toString(),
+              departmentId: a.departmentId.toString(),
+              assignedAt: new Date().toISOString(),
+              isTemporary: a.isTemporary,
+              expiresAt: a.expiresAt?.toISOString(),
+            })),
           attemptedAssignment: {
-            userId,
-            organizationId: this._organization.id,
-            departmentId,
-            assignedAt: new Date(),
+            userId: userId.toString(),
+            organizationId: this._organization.id.toString(),
+            departmentId: departmentId?.toString(),
+            assignedAt: new Date().toISOString(),
             isTemporary: false,
           },
-          conflictDetectedAt: new Date(),
+          conflictDetectedAt: new Date().toISOString(),
           metadata: { source: "automatic", reason: "assignment_conflict" },
         }),
       );
