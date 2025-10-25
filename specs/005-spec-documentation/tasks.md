@@ -361,10 +361,10 @@ All application layer components properly extend application-kernel base classes
 
 #### Use Case Alignment
 
-- [ ] T121 Update TenantCreationUseCase to extend BaseUseCase from @hl8/application-kernel
-- [ ] T122 Update PermissionManagementUseCase to extend BaseUseCase from @hl8/application-kernel
-- [ ] T123 Verify all use cases use IUseCaseContext from @hl8/application-kernel
-- [ ] T124 Verify all use cases implement executeUseCase() method
+- [x] T121 Update TenantCreationUseCase to extend BaseUseCase from @hl8/application-kernel
+- [x] T122 Update PermissionManagementUseCase to extend BaseUseCase from @hl8/application-kernel
+- [x] T123 Verify all use cases use IUseCaseContext from @hl8/application-kernel
+- [x] T124 Verify all use cases implement executeUseCase() method
 
 #### Application Integration
 

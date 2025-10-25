@@ -1,4 +1,4 @@
-import { BaseUseCase } from "@hl8/application-kernel";
+import { BaseUseCase, IUseCaseContext } from "@hl8/application-kernel";
 import { CreateTenantCommand } from "../commands/create-tenant.command.js";
 import { TenantAggregate } from "../../domain/aggregates/tenant.aggregate.js";
 import { TenantRepositoryImpl } from "../../infrastructure/repositories/tenant.repository.impl.js";
@@ -25,22 +25,19 @@ export class TenantCreationUseCase extends BaseUseCase<
    * 执行用例逻辑
    *
    * @param command - 创建租户命令
-   * @param _context - 用例执行上下文
+   * @param context - 用例执行上下文
    * @returns 租户聚合根
    * @throws {Error} 当用例执行失败时抛出错误
    */
   protected async executeUseCase(
     command: CreateTenantCommand,
-    _context: unknown,
+    context: IUseCaseContext,
   ): Promise<TenantAggregate> {
     try {
-      // 验证命令
-      command.validate();
-
       // 创建隔离上下文
       const platformId = new PlatformId("platform_001"); // TODO: 从配置或参数获取
       const tempTenantId = new TenantId("temp_tenant"); // TODO: 从配置或参数获取
-      const context = IsolationContext.createTenantLevel(
+      const isolationContext = IsolationContext.createTenantLevel(
         platformId,
         tempTenantId,
       );
@@ -53,11 +50,11 @@ export class TenantCreationUseCase extends BaseUseCase<
         command.code,
         command.name,
         command.type,
-        command.description,
+        command.tenantDescription,
       );
 
       // 保存到仓储
-      await this.tenantRepository.save(tenantAggregate, context);
+      await this.tenantRepository.save(tenantAggregate, isolationContext);
 
       return tenantAggregate;
     } catch (error) {

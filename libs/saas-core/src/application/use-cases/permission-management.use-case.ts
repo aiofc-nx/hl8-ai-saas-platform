@@ -1,4 +1,4 @@
-import { BaseUseCase } from "@hl8/application-kernel";
+import { BaseUseCase, IUseCaseContext } from "@hl8/application-kernel";
 import { UserId } from "../../domain/value-objects/user-id.vo.js";
 import { RoleId } from "../../domain/value-objects/role-id.vo.js";
 import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
@@ -40,13 +40,13 @@ export class PermissionManagementUseCase extends BaseUseCase<
    * 执行用例逻辑
    *
    * @param command - 权限分配命令
-   * @param _context - 用例执行上下文
+   * @param context - 用例执行上下文
    * @returns CASL权限能力实体
    * @throws {Error} 当用例执行失败时抛出错误
    */
   protected async executeUseCase(
     command: AssignPermissionCommand,
-    _context: unknown,
+    context: IUseCaseContext,
   ): Promise<CaslAbility> {
     try {
       // 验证命令
