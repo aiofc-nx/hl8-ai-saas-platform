@@ -5,11 +5,8 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
-import { OrganizationId } from "@hl8/domain-kernel";
-import { DepartmentId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, UserId, TenantId, OrganizationId, DepartmentId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 
 /**
  * 用户身份切换事件接口
@@ -49,9 +46,16 @@ export interface IUserIdentitySwitchedEvent {
  * });
  * ```
  */
-export class UserIdentitySwitchedEvent extends DomainEventBase implements IDomainEvent {
-  constructor(eventData: IUserIdentitySwitchedEvent) {
-    super("UserIdentitySwitchedEvent", eventData.userId.value);
+export class UserIdentitySwitchedEvent extends DomainEventBase {
+  public readonly eventData: IUserIdentitySwitchedEvent;
+
+  constructor(aggregateId: EntityId, eventData: IUserIdentitySwitchedEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
 
     this.eventData = eventData;
   }
@@ -254,12 +258,12 @@ export class UserIdentitySwitchedEvent extends DomainEventBase implements IDomai
    */
   getSummary(): string {
     const fromContext = this.fromTenantId
-      ? `tenant ${this.fromTenantId.value}`
+      ? `tenant ${this.fromTenantId.getValue()}`
       : "platform";
-    const toContext = `tenant ${this.toTenantId.value}`;
+    const toContext = `tenant ${this.toTenantId.getValue()}`;
     const reasonText = this.reason ? ` (${this.reason})` : "";
 
-    return `User ${this.userId.value} switched from ${fromContext} to ${toContext}${reasonText}`;
+    return `User ${this.userId.getValue()} switched from ${fromContext} to ${toContext}${reasonText}`;
   }
 
   /**
@@ -270,13 +274,13 @@ export class UserIdentitySwitchedEvent extends DomainEventBase implements IDomai
   getDetails(): Record<string, unknown> {
     return {
       eventType: "UserIdentitySwitchedEvent",
-      userId: this.userId.value,
-      fromTenantId: this.fromTenantId?.value,
-      toTenantId: this.toTenantId.value,
-      fromOrganizationId: this.fromOrganizationId?.value,
-      toOrganizationId: this.toOrganizationId?.value,
-      fromDepartmentId: this.fromDepartmentId?.value,
-      toDepartmentId: this.toDepartmentId?.value,
+      userId: this.userId.getValue(),
+      fromTenantId: this.fromTenantId?.getValue(),
+      toTenantId: this.toTenantId.getValue(),
+      fromOrganizationId: this.fromOrganizationId?.getValue(),
+      toOrganizationId: this.toOrganizationId?.getValue(),
+      fromDepartmentId: this.fromDepartmentId?.getValue(),
+      toDepartmentId: this.toDepartmentId?.getValue(),
       reason: this.reason,
       switchedAt: this.switchedAt.toISOString(),
       permissions: this.permissions,
@@ -322,20 +326,23 @@ export class UserIdentitySwitchedEvent extends DomainEventBase implements IDomai
     reason?: string,
     metadata: Record<string, unknown> = {},
   ): UserIdentitySwitchedEvent {
-    return new UserIdentitySwitchedEvent({
-      userId,
-      fromTenantId,
-      toTenantId,
-      fromOrganizationId,
-      toOrganizationId,
-      fromDepartmentId,
-      toDepartmentId,
-      reason,
-      switchedAt: new Date(),
-      permissions,
-      roles,
-      metadata,
-    });
+    return new UserIdentitySwitchedEvent(
+      userId, // aggregateId
+      {
+        userId,
+        fromTenantId,
+        toTenantId,
+        fromOrganizationId,
+        toOrganizationId,
+        fromDepartmentId,
+        toDepartmentId,
+        reason,
+        switchedAt: new Date(),
+        permissions,
+        roles,
+        metadata,
+      }
+    );
   }
 
   /**
