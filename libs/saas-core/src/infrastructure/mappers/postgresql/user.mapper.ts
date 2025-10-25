@@ -34,13 +34,13 @@ export class UserMapper {
    */
   static toDomain(entity: UserEntity): User {
     // 转换值对象
-    const userId = new UserId(entity.id);
-    const tenantId = new TenantId(entity.tenantId);
+    const userId = UserId.create(entity.id);
+    const tenantId = TenantId.create(entity.tenantId);
     const organizationId = entity.organizationId
-      ? new OrganizationId(entity.organizationId)
+      ? OrganizationId.create(entity.organizationId)
       : undefined;
     const departmentId = entity.departmentId
-      ? new DepartmentId(entity.departmentId)
+      ? DepartmentId.create(entity.departmentId)
       : undefined;
 
     // 转换枚举类型

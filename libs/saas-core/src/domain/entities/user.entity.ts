@@ -50,7 +50,7 @@ export enum UserTypeEnum {
  * ```typescript
  * const user = new User(
  *   new EntityId(),
- *   new TenantId(),
+ *   TenantId.create(),
  *   "john.doe@example.com",
  *   "John Doe",
  *   UserTypeEnum.USER,

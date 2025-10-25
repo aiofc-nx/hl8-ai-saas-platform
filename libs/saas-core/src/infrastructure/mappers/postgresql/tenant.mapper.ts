@@ -33,7 +33,7 @@ export class TenantMapper {
    */
   static toDomain(entity: TenantEntity): TenantAggregate {
     // 转换值对象
-    const tenantId = new TenantId(entity.id);
+    const tenantId = TenantId.create(entity.id);
     const code = new TenantCode(entity.code);
     const name = new TenantName(entity.name);
     const type = this.mapDbTypeToDomainType(entity.type);

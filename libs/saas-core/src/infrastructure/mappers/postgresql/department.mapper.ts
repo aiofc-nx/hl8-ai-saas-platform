@@ -28,10 +28,10 @@ export class DepartmentMapper {
    */
   static toDomain(entity: DepartmentEntity): Department {
     // 转换值对象
-    const departmentId = new DepartmentId(entity.id);
-    const organizationId = new OrganizationId(entity.organizationId);
-    const tenantId = new TenantId(entity.tenantId);
-    const parentId = entity.parentId ? new DepartmentId(entity.parentId) : null;
+    const departmentId = DepartmentId.create(entity.id);
+    const organizationId = OrganizationId.create(entity.organizationId);
+    const tenantId = TenantId.create(entity.tenantId);
+    const parentId = entity.parentId ? DepartmentId.create(entity.parentId) : null;
 
     // 创建审计信息
     const auditInfo: AuditInfo = {

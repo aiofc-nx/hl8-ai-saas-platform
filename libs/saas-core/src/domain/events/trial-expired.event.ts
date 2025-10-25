@@ -33,8 +33,8 @@ export interface ITrialExpiredEvent {
  * @example
  * ```typescript
  * const event = new TrialExpiredEvent({
- *   tenantId: new TenantId("tenant-123"),
- *   userId: new UserId("user-456"),
+ *   tenantId: TenantId.create("tenant-123"),
+ *   userId: UserId.create("user-456"),
  *   expiredAt: new Date(),
  *   trialStartDate: new Date("2024-01-01"),
  *   trialEndDate: new Date("2024-01-31"),
@@ -277,8 +277,8 @@ export class TrialExpiredEvent
    */
   static fromEventData(eventData: Record<string, unknown>): TrialExpiredEvent {
     return new TrialExpiredEvent({
-      tenantId: new TenantId(eventData.tenantId as string),
-      userId: new UserId(eventData.userId as string),
+      tenantId: TenantId.create(eventData.tenantId as string),
+      userId: UserId.create(eventData.userId as string),
       expiredAt: new Date(eventData.expiredAt as string),
       trialStartDate: new Date(eventData.trialStartDate as string),
       trialEndDate: new Date(eventData.trialEndDate as string),

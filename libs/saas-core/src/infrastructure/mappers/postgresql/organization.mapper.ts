@@ -35,10 +35,10 @@ export class OrganizationMapper {
    */
   static toDomain(entity: OrganizationEntity): OrganizationAggregate {
     // 转换值对象
-    const organizationId = new OrganizationId(entity.id);
-    const tenantId = new TenantId(entity.tenantId);
+    const organizationId = OrganizationId.create(entity.id);
+    const tenantId = TenantId.create(entity.tenantId);
     const parentId = entity.parentId
-      ? new OrganizationId(entity.parentId)
+      ? OrganizationId.create(entity.parentId)
       : undefined;
 
     // 转换枚举类型

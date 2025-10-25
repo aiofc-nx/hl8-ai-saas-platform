@@ -401,7 +401,7 @@ export class TenantAggregate extends AggregateRoot {
   }> {
     const info = await this._trialPeriodService.getTrialPeriodInfo(
       this._tenant.id,
-      new UserId(userId),
+      UserId.create(userId),
       this._tenant.createdAt,
       this._trialPeriodConfig,
     );
@@ -424,7 +424,7 @@ export class TenantAggregate extends AggregateRoot {
   async isTrialExpiringSoon(userId: string): Promise<boolean> {
     return await this._trialPeriodService.shouldSendReminder(
       this._tenant.id,
-      new UserId(userId),
+      UserId.create(userId),
       this._tenant.createdAt,
       this._trialPeriodConfig,
     );
@@ -443,7 +443,7 @@ export class TenantAggregate extends AggregateRoot {
   }> {
     const result = await this._trialPeriodService.handleTrialExpiration(
       this._tenant.id,
-      new UserId(userId),
+      UserId.create(userId),
       this._tenant.createdAt,
       this._trialPeriodConfig,
     );
@@ -455,7 +455,7 @@ export class TenantAggregate extends AggregateRoot {
     // 发布试用期过期事件
     const trialInfo = await this._trialPeriodService.getTrialPeriodInfo(
       this._tenant.id,
-      new UserId(userId),
+      UserId.create(userId),
       this._tenant.createdAt,
       this._trialPeriodConfig,
     );
@@ -485,7 +485,7 @@ export class TenantAggregate extends AggregateRoot {
   async sendTrialExpirationReminder(userId: string): Promise<boolean> {
     return await this._trialPeriodService.sendExpirationReminder(
       this._tenant.id,
-      new UserId(userId),
+      UserId.create(userId),
       this._tenant.createdAt,
       this._trialPeriodConfig,
     );
@@ -500,7 +500,7 @@ export class TenantAggregate extends AggregateRoot {
   async shouldCleanupTrialData(userId: string): Promise<boolean> {
     return await this._trialPeriodService.shouldCleanupTrialData(
       this._tenant.id,
-      new UserId(userId),
+      UserId.create(userId),
       this._tenant.createdAt,
       this._trialPeriodConfig,
     );
@@ -519,7 +519,7 @@ export class TenantAggregate extends AggregateRoot {
   }> {
     return await this._trialPeriodService.cleanupTrialData(
       this._tenant.id,
-      new UserId(userId),
+      UserId.create(userId),
       this._tenant.createdAt,
       this._trialPeriodConfig,
     );

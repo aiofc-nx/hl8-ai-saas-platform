@@ -41,7 +41,7 @@ export enum OrganizationTypeEnum {
  * ```typescript
  * const organization = new Organization(
  *   new EntityId(),
- *   new TenantId(),
+ *   TenantId.create(),
  *   "Acme Engineering",
  *   OrganizationTypeEnum.DEPARTMENT,
  *   OrganizationStatusEnum.ACTIVE

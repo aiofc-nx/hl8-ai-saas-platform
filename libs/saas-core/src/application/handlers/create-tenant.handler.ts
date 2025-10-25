@@ -29,7 +29,7 @@ export class CreateTenantHandler
 
     try {
       // 生成租户ID
-      const tenantId = new TenantId(
+      const tenantId = TenantId.create(
         `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       );
 

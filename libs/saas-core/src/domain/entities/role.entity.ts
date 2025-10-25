@@ -44,7 +44,7 @@ export enum RoleTypeEnum {
  * ```typescript
  * const role = new Role(
  *   new EntityId(),
- *   new TenantId(),
+ *   TenantId.create(),
  *   "Admin",
  *   "Administrator role with full access",
  *   new RoleLevel(RoleLevelEnum.ORGANIZATION),

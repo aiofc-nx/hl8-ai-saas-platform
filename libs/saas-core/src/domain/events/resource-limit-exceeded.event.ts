@@ -40,7 +40,7 @@ export interface IResourceLimitExceededEvent {
  * @example
  * ```typescript
  * const event = new ResourceLimitExceededEvent({
- *   tenantId: new TenantId("tenant-123"),
+ *   tenantId: TenantId.create("tenant-123"),
  *   resourceType: ResourceType.USERS,
  *   currentUsage: 1100,
  *   limitType: ResourceLimitType.HARD_LIMIT,

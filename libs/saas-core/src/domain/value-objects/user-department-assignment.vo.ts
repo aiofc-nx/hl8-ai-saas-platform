@@ -56,13 +56,13 @@ export interface IUserDepartmentAssignment {
  * @example
  * ```typescript
  * const assignment = new UserDepartmentAssignment({
- *   userId: new UserId("user-123"),
- *   organizationId: new OrganizationId("org-456"),
- *   departmentId: new DepartmentId("dept-789"),
+ *   userId: UserId.create("user-123"),
+ *   organizationId: OrganizationId.create("org-456"),
+ *   departmentId: DepartmentId.create("dept-789"),
  *   assignmentType: UserDepartmentAssignmentType.LEADER,
  *   status: UserDepartmentAssignmentStatus.ACTIVE,
  *   assignedAt: new Date(),
- *   assignedBy: new UserId("admin-101"),
+ *   assignedBy: UserId.create("admin-101"),
  *   permissions: ["read", "write", "manage"],
  *   metadata: { source: "manual", reason: "promotion" }
  * });

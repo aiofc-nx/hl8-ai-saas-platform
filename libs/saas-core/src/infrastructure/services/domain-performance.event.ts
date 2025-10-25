@@ -90,7 +90,7 @@ export interface IDomainPerformanceEvent {
  *   unit: "ms",
  *   level: PerformanceLevel.CRITICAL,
  *   threshold: { warning: 1000, critical: 5000 },
- *   context: { tenantId: new TenantId("tenant-123"), operation: "user-creation" },
+ *   context: { tenantId: TenantId.create("tenant-123"), operation: "user-creation" },
  *   timestamp: new Date(),
  *   description: "Execution time exceeded critical threshold",
  *   metadata: { source: "automatic", category: "performance_monitoring" }

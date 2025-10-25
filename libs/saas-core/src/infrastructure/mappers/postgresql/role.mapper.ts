@@ -37,12 +37,12 @@ export class RoleMapper {
   static toDomain(entity: RoleEntity): Role {
     // 转换值对象
     const roleId = new EntityId(entity.id);
-    const tenantId = new TenantId(entity.tenantId);
+    const tenantId = TenantId.create(entity.tenantId);
     const organizationId = entity.organizationId
-      ? new OrganizationId(entity.organizationId)
+      ? OrganizationId.create(entity.organizationId)
       : undefined;
     const departmentId = entity.departmentId
-      ? new DepartmentId(entity.departmentId)
+      ? DepartmentId.create(entity.departmentId)
       : undefined;
 
     // 转换枚举类型

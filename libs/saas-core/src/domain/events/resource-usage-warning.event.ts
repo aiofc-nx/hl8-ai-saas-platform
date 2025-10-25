@@ -46,7 +46,7 @@ export interface IResourceUsageWarningEvent {
  * @example
  * ```typescript
  * const event = new ResourceUsageWarningEvent({
- *   tenantId: new TenantId("tenant-123"),
+ *   tenantId: TenantId.create("tenant-123"),
  *   resourceType: ResourceType.USERS,
  *   currentUsage: 800,
  *   maxLimit: 1000,

@@ -59,13 +59,13 @@ export interface ITenantNameReviewRequest {
  * ```typescript
  * const request = new TenantNameReviewRequest({
  *   id: "review-123",
- *   tenantId: new TenantId("tenant-456"),
+ *   tenantId: TenantId.create("tenant-456"),
  *   requestedName: "新公司名称",
  *   currentName: "旧公司名称",
  *   requestType: TenantNameReviewRequestType.NAME_CHANGE,
  *   priority: TenantNameReviewRequestPriority.MEDIUM,
  *   reason: "公司更名",
- *   requestedBy: new UserId("user-789"),
+ *   requestedBy: UserId.create("user-789"),
  *   requestedAt: new Date(),
  *   metadata: { source: "manual", category: "business_change" }
  * });

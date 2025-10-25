@@ -43,7 +43,7 @@ export interface IResourceLimits {
  * @example
  * ```typescript
  * const limits = new ResourceLimits({
- *   tenantId: new TenantId("tenant-123"),
+ *   tenantId: TenantId.create("tenant-123"),
  *   resourceType: ResourceType.USERS,
  *   limits: {
  *     HARD_LIMIT: 1000,

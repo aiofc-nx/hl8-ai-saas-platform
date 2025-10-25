@@ -56,7 +56,7 @@ export interface ITenantNameReviewStatus {
  * const status = new TenantNameReviewStatus({
  *   status: TenantNameReviewStatusEnum.APPROVED,
  *   result: TenantNameReviewResult.APPROVED,
- *   reviewedBy: new UserId("reviewer-123"),
+ *   reviewedBy: UserId.create("reviewer-123"),
  *   reviewedAt: new Date(),
  *   comments: "名称符合要求",
  *   metadata: { source: "manual", category: "compliance" }

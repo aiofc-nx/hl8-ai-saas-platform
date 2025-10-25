@@ -38,9 +38,9 @@ export interface IUserIdentitySwitchedEvent {
  * @example
  * ```typescript
  * const event = new UserIdentitySwitchedEvent({
- *   userId: new UserId("user-123"),
- *   fromTenantId: new TenantId("tenant-1"),
- *   toTenantId: new TenantId("tenant-2"),
+ *   userId: UserId.create("user-123"),
+ *   fromTenantId: TenantId.create("tenant-1"),
+ *   toTenantId: TenantId.create("tenant-2"),
  *   reason: "User requested tenant switch",
  *   switchedAt: new Date(),
  *   permissions: ["user:read", "user:update"],

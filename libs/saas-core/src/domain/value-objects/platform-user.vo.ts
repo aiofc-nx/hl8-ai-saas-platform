@@ -58,13 +58,13 @@ interface PlatformUserProps {
  * @example
  * ```typescript
  * const platformUser = PlatformUser.create(
- *   new UserId("user-123"),
+ *   UserId.create("user-123"),
  *   "admin",
  *   "admin@platform.com",
  *   PlatformUserType.SUPER_ADMIN,
  *   ["platform:admin", "tenant:create", "tenant:delete"],
  *   ["super_admin"],
- *   [new TenantId("tenant-1"), new TenantId("tenant-2")]
+ *   [TenantId.create("tenant-1"), TenantId.create("tenant-2")]
  * );
  * ```
  */

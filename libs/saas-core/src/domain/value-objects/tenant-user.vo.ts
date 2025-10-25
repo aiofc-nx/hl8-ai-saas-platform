@@ -63,15 +63,15 @@ interface TenantUserProps {
  * @example
  * ```typescript
  * const tenantUser = TenantUser.create(
- *   new UserId("user-123"),
- *   new TenantId("tenant-456"),
+ *   UserId.create("user-123"),
+ *   TenantId.create("tenant-456"),
  *   "john.doe",
  *   "john.doe@company.com",
  *   TenantUserType.REGULAR_USER,
  *   ["user:read", "user:update"],
  *   ["user"],
- *   [new OrganizationId("org-1")],
- *   [new DepartmentId("dept-1")]
+ *   [OrganizationId.create("org-1")],
+ *   [DepartmentId.create("dept-1")]
  * );
  * ```
  */

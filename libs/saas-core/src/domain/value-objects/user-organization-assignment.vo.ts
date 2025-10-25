@@ -54,12 +54,12 @@ export interface IUserOrganizationAssignment {
  * @example
  * ```typescript
  * const assignment = new UserOrganizationAssignment({
- *   userId: new UserId("user-123"),
- *   organizationId: new OrganizationId("org-456"),
+ *   userId: UserId.create("user-123"),
+ *   organizationId: OrganizationId.create("org-456"),
  *   assignmentType: UserOrganizationAssignmentType.ADMIN,
  *   status: UserOrganizationAssignmentStatus.ACTIVE,
  *   assignedAt: new Date(),
- *   assignedBy: new UserId("admin-789"),
+ *   assignedBy: UserId.create("admin-789"),
  *   permissions: ["read", "write", "admin"],
  *   metadata: { source: "manual", reason: "promotion" }
  * });

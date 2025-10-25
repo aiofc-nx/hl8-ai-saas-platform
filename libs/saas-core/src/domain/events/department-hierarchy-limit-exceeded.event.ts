@@ -48,9 +48,9 @@ export interface IDepartmentHierarchyLimitExceededEvent {
  * @example
  * ```typescript
  * const event = new DepartmentHierarchyLimitExceededEvent({
- *   tenantId: new TenantId("tenant-123"),
- *   organizationId: new OrganizationId("org-456"),
- *   departmentId: new DepartmentId("dept-789"),
+ *   tenantId: TenantId.create("tenant-123"),
+ *   organizationId: OrganizationId.create("org-456"),
+ *   departmentId: DepartmentId.create("dept-789"),
  *   limitType: "MAX_CHILDREN",
  *   currentValue: 15,
  *   limitValue: 10,

@@ -61,9 +61,9 @@ export interface IUserAssignmentConflictEvent {
  * @example
  * ```typescript
  * const event = new UserAssignmentConflictEvent({
- *   userId: new UserId("user-123"),
- *   organizationId: new OrganizationId("org-456"),
- *   departmentId: new DepartmentId("dept-789"),
+ *   userId: UserId.create("user-123"),
+ *   organizationId: OrganizationId.create("org-456"),
+ *   departmentId: DepartmentId.create("dept-789"),
  *   conflictType: UserAssignmentConflictType.DUPLICATE_ASSIGNMENT,
  *   conflictReason: "用户已在该部门中",
  *   existingAssignments: [existingAssignment],
@@ -459,28 +459,28 @@ export class UserAssignmentConflictEvent
     eventData: Record<string, unknown>,
   ): UserAssignmentConflictEvent {
     return new UserAssignmentConflictEvent({
-      userId: new UserId(eventData.userId as string),
-      organizationId: new OrganizationId(eventData.organizationId as string),
-      departmentId: new DepartmentId(eventData.departmentId as string),
+      userId: UserId.create(eventData.userId as string),
+      organizationId: OrganizationId.create(eventData.organizationId as string),
+      departmentId: DepartmentId.create(eventData.departmentId as string),
       conflictType: eventData.conflictType as UserAssignmentConflictType,
       conflictReason: eventData.conflictReason as string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 动态解析事件数据，类型未知
       existingAssignments: (eventData.existingAssignments as any[]).map(
         (a) => ({
-          userId: new UserId(a.userId),
-          organizationId: new OrganizationId(a.organizationId),
-          departmentId: new DepartmentId(a.departmentId),
+          userId: UserId.create(a.userId),
+          organizationId: OrganizationId.create(a.organizationId),
+          departmentId: DepartmentId.create(a.departmentId),
           assignedAt: new Date(a.assignedAt),
           isTemporary: a.isTemporary,
           expiresAt: a.expiresAt ? new Date(a.expiresAt) : undefined,
         }),
       ),
       attemptedAssignment: {
-        userId: new UserId(eventData.attemptedAssignment.userId),
-        organizationId: new OrganizationId(
+        userId: UserId.create(eventData.attemptedAssignment.userId),
+        organizationId: OrganizationId.create(
           eventData.attemptedAssignment.organizationId,
         ),
-        departmentId: new DepartmentId(
+        departmentId: DepartmentId.create(
           eventData.attemptedAssignment.departmentId,
         ),
         assignedAt: new Date(eventData.attemptedAssignment.assignedAt),

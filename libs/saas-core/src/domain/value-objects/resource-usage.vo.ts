@@ -45,7 +45,7 @@ export interface IResourceUsage {
  * @example
  * ```typescript
  * const usage = new ResourceUsage({
- *   tenantId: new TenantId("tenant-123"),
+ *   tenantId: TenantId.create("tenant-123"),
  *   resourceType: ResourceType.USERS,
  *   currentUsage: 150,
  *   maxLimit: 200,

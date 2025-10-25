@@ -41,14 +41,14 @@ export interface ITenantNameReviewRequestedEvent {
  * @example
  * ```typescript
  * const event = new TenantNameReviewRequestedEvent({
- *   tenantId: new TenantId("tenant-123"),
+ *   tenantId: TenantId.create("tenant-123"),
  *   requestId: "review-456",
  *   requestedName: "新公司名称",
  *   currentName: "旧公司名称",
  *   requestType: TenantNameReviewRequestType.NAME_CHANGE,
  *   priority: TenantNameReviewRequestPriority.MEDIUM,
  *   reason: "公司更名",
- *   requestedBy: new UserId("user-789"),
+ *   requestedBy: UserId.create("user-789"),
  *   requestedAt: new Date(),
  *   metadata: { source: "manual", category: "business_change" }
  * });

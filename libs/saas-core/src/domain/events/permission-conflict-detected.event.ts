@@ -36,7 +36,7 @@ export interface IPermissionConflictDetectedEvent {
  * @example
  * ```typescript
  * const event = new PermissionConflictDetectedEvent({
- *   tenantId: new TenantId("tenant-123"),
+ *   tenantId: TenantId.create("tenant-123"),
  *   conflictType: PermissionConflictType.DUPLICATE_PERMISSION,
  *   severity: ConflictSeverity.MEDIUM,
  *   description: "Permission 'user:create' is duplicated across multiple templates",
