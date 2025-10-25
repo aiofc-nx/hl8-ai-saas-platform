@@ -9,6 +9,7 @@ import {
   AggregateRoot,
   TenantId,
   GenericEntityId,
+  UserId,
 } from "@hl8/domain-kernel";
 import { Tenant } from "../entities/index.js";
 import {
@@ -83,7 +84,8 @@ export class TenantAggregate extends AggregateRoot {
     super(id, platformTenantId);
 
     this._tenant = new Tenant(
-      id,
+      TenantId.create(id.toString()),
+      platformTenantId,
       code,
       name,
       type,
@@ -174,12 +176,12 @@ export class TenantAggregate extends AggregateRoot {
       this._tenant.updateStatus(new TenantStatus(TenantStatusEnum.ACTIVE));
 
       // 发布租户激活事件
-      this.addDomainEvent(
-        new TenantActivatedEvent(
-          this._tenant.id,
-          this._tenant.code,
-          this._tenant.name,
-        ),
+      this.apply(
+        this.createDomainEvent("TenantActivated", {
+          tenantId: this._tenant.id.toString(),
+          tenantCode: this._tenant.code.toString(),
+          tenantName: this._tenant.name.toString(),
+        }),
       );
     } else {
       throw new Error("只有待处理状态的租户才能被激活");
@@ -196,13 +198,13 @@ export class TenantAggregate extends AggregateRoot {
       this._tenant.updateStatus(new TenantStatus(TenantStatusEnum.SUSPENDED));
 
       // 发布租户暂停事件
-      this.addDomainEvent(
-        new TenantSuspendedEvent(
-          this._tenant.id,
-          this._tenant.code,
-          this._tenant.name,
+      this.apply(
+        this.createDomainEvent("TenantSuspended", {
+          tenantId: this._tenant.id.toString(),
+          tenantCode: this._tenant.code.toString(),
+          tenantName: this._tenant.name.toString(),
           reason,
-        ),
+        }),
       );
     } else {
       throw new Error("只有活跃状态的租户才能被暂停");
@@ -219,13 +221,13 @@ export class TenantAggregate extends AggregateRoot {
       this._tenant.updateStatus(new TenantStatus(TenantStatusEnum.ACTIVE));
 
       // 发布租户恢复事件
-      this.addDomainEvent(
-        new TenantResumedEvent(
-          this._tenant.id,
-          this._tenant.code,
-          this._tenant.name,
+      this.apply(
+        this.createDomainEvent("TenantResumed", {
+          tenantId: this._tenant.id.toString(),
+          tenantCode: this._tenant.code.toString(),
+          tenantName: this._tenant.name.toString(),
           reason,
-        ),
+        }),
       );
     } else {
       throw new Error("只有暂停状态的租户才能被恢复");
@@ -245,13 +247,13 @@ export class TenantAggregate extends AggregateRoot {
       this._tenant.updateStatus(new TenantStatus(TenantStatusEnum.CANCELLED));
 
       // 发布租户取消事件
-      this.addDomainEvent(
-        new TenantCancelledEvent(
-          this._tenant.id,
-          this._tenant.code,
-          this._tenant.name,
+      this.apply(
+        this.createDomainEvent("TenantCancelled", {
+          tenantId: this._tenant.id.toString(),
+          tenantCode: this._tenant.code.toString(),
+          tenantName: this._tenant.name.toString(),
           reason,
-        ),
+        }),
       );
     } else {
       throw new Error("只有活跃或暂停状态的租户才能被取消");
@@ -268,14 +270,14 @@ export class TenantAggregate extends AggregateRoot {
     this._tenant.upgradeType(newType);
 
     // 发布租户类型升级事件
-    this.addDomainEvent(
-      new TenantTypeUpgradedEvent(
-        this._tenant.id,
-        this._tenant.code,
-        this._tenant.name,
-        oldType,
-        newType,
-      ),
+    this.apply(
+      this.createDomainEvent("TenantTypeUpgraded", {
+        tenantId: this._tenant.id.toString(),
+        tenantCode: this._tenant.code.toString(),
+        tenantName: this._tenant.name.toString(),
+        oldType: oldType.toString(),
+        newType: newType.toString(),
+      }),
     );
   }
 
@@ -289,14 +291,14 @@ export class TenantAggregate extends AggregateRoot {
     this._tenant.downgradeType(newType);
 
     // 发布租户类型降级事件
-    this.addDomainEvent(
-      new TenantTypeDowngradedEvent(
-        this._tenant.id,
-        this._tenant.code,
-        this._tenant.name,
-        oldType,
-        newType,
-      ),
+    this.apply(
+      this.createDomainEvent("TenantTypeDowngraded", {
+        tenantId: this._tenant.id.toString(),
+        tenantCode: this._tenant.code.toString(),
+        tenantName: this._tenant.name.toString(),
+        oldType: oldType.toString(),
+        newType: newType.toString(),
+      }),
     );
   }
 
@@ -313,16 +315,16 @@ export class TenantAggregate extends AggregateRoot {
     this._tenant.updateSubscription(startDate, endDate);
 
     // 发布订阅更新事件
-    this.addDomainEvent(
-      new TenantSubscriptionUpdatedEvent(
-        this._tenant.id,
-        this._tenant.code,
-        this._tenant.name,
-        oldStartDate,
-        oldEndDate,
-        startDate,
-        endDate,
-      ),
+    this.apply(
+      this.createDomainEvent("TenantSubscriptionUpdated", {
+        tenantId: this._tenant.id.toString(),
+        tenantCode: this._tenant.code.toString(),
+        tenantName: this._tenant.name.toString(),
+        oldStartDate: oldStartDate?.toISOString(),
+        oldEndDate: oldEndDate?.toISOString(),
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      }),
     );
   }
 
@@ -336,14 +338,14 @@ export class TenantAggregate extends AggregateRoot {
     this._tenant.updateSettings(settings);
 
     // 发布设置更新事件
-    this.addDomainEvent(
-      new TenantSettingsUpdatedEvent(
-        this._tenant.id,
-        this._tenant.code,
-        this._tenant.name,
+    this.apply(
+      this.createDomainEvent("TenantSettingsUpdated", {
+        tenantId: this._tenant.id.toString(),
+        tenantCode: this._tenant.code.toString(),
+        tenantName: this._tenant.name.toString(),
         oldSettings,
         settings,
-      ),
+      }),
     );
   }
 
