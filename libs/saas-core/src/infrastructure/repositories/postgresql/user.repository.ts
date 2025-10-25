@@ -9,7 +9,7 @@ import { Injectable } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/core";
 import { IUserRepository } from "../../../domain/repositories/user.repository.js";
 import { User } from "../../../domain/entities/user.entity.js";
-import { UserId } from "../../../domain/value-objects/user-id.vo.js";
+import { UserId } from "@hl8/domain-kernel"";
 import { IsolationContext } from "../../../domain/value-objects/isolation-context.vo.js";
 import { UserEntity } from "../../entities/postgresql/user.entity.js";
 import { UserMapper } from "../../mappers/postgresql/user.mapper.js";

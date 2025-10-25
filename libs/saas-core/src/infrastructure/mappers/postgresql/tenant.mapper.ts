@@ -13,7 +13,7 @@ import {
   TenantType,
   TenantStatus,
 } from "../../domain/value-objects/index.js";
-import { TenantId } from "../../domain/value-objects/tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel"";
 import { EntityId } from "@hl8/domain-kernel";
 import { TenantEntity, TenantType as DbTenantType, TenantStatus as DbTenantStatus } from "../../entities/postgresql/tenant.entity.js";
 

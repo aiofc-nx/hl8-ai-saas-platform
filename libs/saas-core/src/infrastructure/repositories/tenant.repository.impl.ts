@@ -1,6 +1,6 @@
 import { AggregateRepositoryAdapter } from "@hl8/infrastructure-kernel";
 import { TenantAggregate } from "../../domain/aggregates/tenant.aggregate.js";
-import { TenantId } from "../../domain/value-objects/tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel"";
 import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
 
 /**

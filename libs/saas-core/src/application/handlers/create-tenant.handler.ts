@@ -2,7 +2,7 @@ import { CommandHandler } from "@hl8/application-kernel";
 import { CreateTenantCommand } from "../commands/create-tenant.command.js";
 import { TenantAggregate } from "../../domain/aggregates/tenant.aggregate.js";
 import { Tenant } from "../../domain/entities/tenant.entity.js";
-import { TenantId } from "../../domain/value-objects/tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel"";
 import { TenantStatus } from "../../domain/value-objects/tenant-status.vo.js";
 import { TenantStatusEnum } from "../../domain/value-objects/tenant-status.vo.js";
 import { AuditInfo } from "@hl8/domain-kernel";

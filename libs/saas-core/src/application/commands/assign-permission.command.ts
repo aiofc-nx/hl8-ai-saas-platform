@@ -1,7 +1,5 @@
 import { BaseCommand } from "@hl8/application-kernel";
-import { IsolationContext } from "@hl8/domain-kernel";
-import { UserId } from "../../domain/value-objects/user-id.vo.js";
-import { RoleId } from "../../domain/value-objects/role-id.vo.js";
+import { IsolationContext, UserId, RoleId } from "@hl8/domain-kernel";
 import { CaslCondition } from "../../domain/value-objects/casl-condition.vo.js";
 
 /**

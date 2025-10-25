@@ -6,10 +6,10 @@
  */
 
 import { User } from "../../../domain/entities/user.entity.js";
-import { UserId } from "../../../domain/value-objects/user-id.vo.js";
-import { TenantId } from "../../../domain/value-objects/tenant-id.vo.js";
-import { OrganizationId } from "../../../domain/value-objects/organization-id.vo.js";
-import { DepartmentId } from "../../../domain/value-objects/department-id.vo.js";
+import { UserId } from "@hl8/domain-kernel"";
+import { TenantId } from "@hl8/domain-kernel"";
+import { OrganizationId } from "@hl8/domain-kernel"";
+import { DepartmentId } from "@hl8/domain-kernel"";
 import { AuditInfo } from "@hl8/domain-kernel";
 import { UserTypeEnum, UserStatusEnum } from "../../../domain/entities/user.entity.js";
 import {

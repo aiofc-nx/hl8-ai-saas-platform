@@ -7,9 +7,9 @@
 
 import { Role } from "../../../domain/entities/role.entity.js";
 import { EntityId } from "@hl8/domain-kernel";
-import { TenantId } from "../../../domain/value-objects/tenant-id.vo.js";
-import { OrganizationId } from "../../../domain/value-objects/organization-id.vo.js";
-import { DepartmentId } from "../../../domain/value-objects/department-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel"";
+import { OrganizationId } from "@hl8/domain-kernel"";
+import { DepartmentId } from "@hl8/domain-kernel"";
 import { AuditInfo } from "@hl8/domain-kernel";
 import { RoleLevel } from "../../../domain/value-objects/index.js";
 import { RoleTypeEnum, RoleStatusEnum } from "../../../domain/entities/role.entity.js";

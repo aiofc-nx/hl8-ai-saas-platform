@@ -1,6 +1,6 @@
 import { BaseCommand } from "@hl8/application-kernel";
 import { IsolationContext } from "@hl8/domain-kernel";
-import { TenantId } from "../../domain/value-objects/tenant-id.vo.js";
+import { TenantId } from "@hl8/domain-kernel"";
 import { TenantName } from "../../domain/value-objects/tenant-name.vo.js";
 import { TenantType } from "../../domain/value-objects/tenant-type.vo.js";
 
