@@ -85,7 +85,13 @@
 - **@hl8/infrastructure-kernel** - 基础设施层核心
 - **@hl8/interface-kernel** - 接口层核心
 
-因此，在开发业务模块时，**必须优先使用**这些 kernel 提供的组件，而不是重新定义：
+以及其他基础库：
+- **@hl8/exceptions** - 异常处理
+- **@hl8/caching** - 缓存管理
+- **@hl8/config** - 配置管理
+- **@hl8/nestjs-fastify** - Fastify 集成和 logging
+
+因此，在开发业务模块时，**必须优先使用**这些 kernel 和基础库提供的组件，而不是重新定义：
 
 ### 1. Domain-Kernel 组件
 

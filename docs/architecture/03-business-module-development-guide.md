@@ -210,13 +210,17 @@ Business Module
 
 ### 3.3 优先使用 kernel 组件
 
-> **⚠️ 重要**: 业务模块的开发**必须基于** kernel 层提供的通用基础组件，包括：
+> **⚠️ 重要**: 业务模块的开发**必须基于**以下 kernel 和基础库提供的通用组件：
 > - **@hl8/domain-kernel** - 领域层核心
 > - **@hl8/application-kernel** - 应用层核心
 > - **@hl8/infrastructure-kernel** - 基础设施层核心
 > - **@hl8/interface-kernel** - 接口层核心
+> - **@hl8/exceptions** - 异常处理
+> - **@hl8/caching** - 缓存管理
+> - **@hl8/config** - 配置管理
+> - **@hl8/nestjs-fastify** - Fastify 集成和 logging
 > 
-> 因此，必须优先使用这些 kernel 提供的组件，而不是重新定义。
+> 因此，必须优先使用这些 kernel 和基础库提供的组件，而不是重新定义。
 
 #### 3.3.1 为什么必须基于 kernel 层？
 
