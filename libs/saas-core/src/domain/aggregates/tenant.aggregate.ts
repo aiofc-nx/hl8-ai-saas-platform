@@ -460,13 +460,13 @@ export class TenantAggregate extends AggregateRoot {
       this._trialPeriodConfig,
     );
 
-    this.addDomainEvent(
-      new TrialExpiredEvent({
-        tenantId: this._tenant.id,
-        userId: new UserId(userId),
-        expiredAt: new Date(),
-        trialStartDate: this._tenant.createdAt,
-        trialEndDate: trialInfo.endDate,
+    this.apply(
+      this.createDomainEvent("TrialExpired", {
+        tenantId: this._tenant.id.toString(),
+        userId,
+        expiredAt: new Date().toISOString(),
+        trialStartDate: this._tenant.createdAt?.toISOString(),
+        trialEndDate: trialInfo.endDate?.toISOString(),
         gracePeriodDays: this._trialPeriodConfig.gracePeriodDays,
         status: TrialPeriodStatus.EXPIRED,
         metadata: { source: "automatic", reason: "trial_expired" },
@@ -577,17 +577,17 @@ export class TenantAggregate extends AggregateRoot {
 
     if (!validation.isValid) {
       // 发布租户创建验证失败事件
-      this.addDomainEvent(
-        new TenantCreationValidationFailedEvent({
-          tenantCode: this._tenant.code,
-          tenantName: this._tenant.name,
-          tenantType: this._tenant.type,
+      this.apply(
+        this.createDomainEvent("TenantCreationValidationFailed", {
+          tenantCode: this._tenant.code.toString(),
+          tenantName: this._tenant.name.toString(),
+          tenantType: this._tenant.type.toString(),
           domain: this._tenant.domain,
           createdBy: this._tenant.createdBy,
           validationErrors: validation.errors,
           validationWarnings: validation.warnings,
           validationSuggestions: validation.suggestions,
-          failedAt: new Date(),
+          failedAt: new Date().toISOString(),
           metadata: { source: "automatic", reason: "validation_failed" },
         }),
       );
@@ -747,43 +747,52 @@ export class TenantAggregate extends AggregateRoot {
 
     // 发布相应的事件
     if (result.isOverHardLimit) {
-      this.addDomainEvent(
-        ResourceLimitExceededEvent.createHardLimitExceeded(
-          this._tenant.id,
+      this.apply(
+        this.createDomainEvent("ResourceLimitExceeded", {
+          tenantId: this._tenant.id.toString(),
           resourceType,
-          usage.currentUsage,
-          limits.getHardLimit(),
-          usage.currentUsage - limits.getHardLimit(),
-          limits.autoExpansion,
-          limits.getExpansionRecommendation(usage.currentUsage),
-          { source: "automatic", category: "resource_monitoring" },
-        ),
+          limitType: "HARD_LIMIT",
+          currentUsage: usage.currentUsage,
+          limitValue: limits.getHardLimit(),
+          exceededBy: usage.currentUsage - limits.getHardLimit(),
+          autoExpansionEnabled: limits.autoExpansion,
+          expansionRecommendation: limits.getExpansionRecommendation(
+            usage.currentUsage,
+          ),
+          metadata: { source: "automatic", category: "resource_monitoring" },
+        }),
       );
     } else if (result.isOverSoftLimit) {
-      this.addDomainEvent(
-        ResourceLimitExceededEvent.createSoftLimitExceeded(
-          this._tenant.id,
+      this.apply(
+        this.createDomainEvent("ResourceLimitExceeded", {
+          tenantId: this._tenant.id.toString(),
           resourceType,
-          usage.currentUsage,
-          limits.getSoftLimit(),
-          usage.currentUsage - limits.getSoftLimit(),
-          limits.autoExpansion,
-          limits.getExpansionRecommendation(usage.currentUsage),
-          { source: "automatic", category: "resource_monitoring" },
-        ),
+          limitType: "SOFT_LIMIT",
+          currentUsage: usage.currentUsage,
+          limitValue: limits.getSoftLimit(),
+          exceededBy: usage.currentUsage - limits.getSoftLimit(),
+          autoExpansionEnabled: limits.autoExpansion,
+          expansionRecommendation: limits.getExpansionRecommendation(
+            usage.currentUsage,
+          ),
+          metadata: { source: "automatic", category: "resource_monitoring" },
+        }),
       );
     } else if (result.isOverWarningLimit) {
-      this.addDomainEvent(
-        ResourceLimitExceededEvent.createWarningLimitExceeded(
-          this._tenant.id,
+      this.apply(
+        this.createDomainEvent("ResourceLimitExceeded", {
+          tenantId: this._tenant.id.toString(),
           resourceType,
-          usage.currentUsage,
-          limits.getWarningLimit(),
-          usage.currentUsage - limits.getWarningLimit(),
-          limits.autoExpansion,
-          limits.getExpansionRecommendation(usage.currentUsage),
-          { source: "automatic", category: "resource_monitoring" },
-        ),
+          limitType: "WARNING_LIMIT",
+          currentUsage: usage.currentUsage,
+          limitValue: limits.getWarningLimit(),
+          exceededBy: usage.currentUsage - limits.getWarningLimit(),
+          autoExpansionEnabled: limits.autoExpansion,
+          expansionRecommendation: limits.getExpansionRecommendation(
+            usage.currentUsage,
+          ),
+          metadata: { source: "automatic", category: "resource_monitoring" },
+        }),
       );
     }
 
@@ -906,21 +915,23 @@ export class TenantAggregate extends AggregateRoot {
 
     if (hasWarning) {
       // 发布资源使用警告事件
-      this.addDomainEvent(
-        ResourceUsageWarningEvent.create(
-          this._tenant.id,
+      this.apply(
+        this.createDomainEvent("ResourceUsageWarning", {
+          tenantId: this._tenant.id.toString(),
           resourceType,
-          usage.currentUsage,
-          usage.maxLimit,
-          usage.usagePercentage,
-          limits.expansionThreshold,
-          warningType!,
-          usage.getRemainingCapacity(),
-          trend.timeToLimit,
-          limits.autoExpansion,
-          limits.getExpansionRecommendation(usage.currentUsage),
-          { source: "automatic", category: "resource_monitoring" },
-        ),
+          currentUsage: usage.currentUsage,
+          maxLimit: usage.maxLimit,
+          usagePercentage: usage.usagePercentage,
+          expansionThreshold: limits.expansionThreshold,
+          warningType: warningType!,
+          remainingCapacity: usage.getRemainingCapacity(),
+          timeToLimit: trend.timeToLimit,
+          autoExpansionEnabled: limits.autoExpansion,
+          expansionRecommendation: limits.getExpansionRecommendation(
+            usage.currentUsage,
+          ),
+          metadata: { source: "automatic", category: "resource_monitoring" },
+        }),
       );
     }
 
