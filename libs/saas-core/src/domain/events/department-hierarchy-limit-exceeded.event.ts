@@ -65,7 +65,7 @@ export interface IDepartmentHierarchyLimitExceededEvent {
  * });
  * ```
  */
-export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase implements IDomainEventBase implements IDomainEvent {
+export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase implements IDomainEvent {
   public readonly eventData: Record<string, unknown>;
   public readonly eventType: string = "DepartmentHierarchyLimitExceededEvent";
   
