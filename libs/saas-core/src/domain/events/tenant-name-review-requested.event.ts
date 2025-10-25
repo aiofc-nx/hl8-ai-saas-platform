@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import {
@@ -54,7 +54,7 @@ export interface ITenantNameReviewRequestedEvent {
  * });
  * ```
  */
-export class TenantNameReviewRequestedEvent extends DomainEvent {
+export class TenantNameReviewRequestedEvent extends DomainEventBase implements IDomainEvent {
   constructor(eventData: ITenantNameReviewRequestedEvent) {
     super("TenantNameReviewRequestedEvent", eventData.tenantId.value);
 

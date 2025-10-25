@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import {
   PermissionConflictType,
@@ -48,7 +48,7 @@ export interface IPermissionConflictDetectedEvent {
  * });
  * ```
  */
-export class PermissionConflictDetectedEvent extends DomainEvent {
+export class PermissionConflictDetectedEvent extends DomainEventBase implements IDomainEvent {
   constructor(eventData: IPermissionConflictDetectedEvent) {
     super("PermissionConflictDetectedEvent", eventData.tenantId.value);
 

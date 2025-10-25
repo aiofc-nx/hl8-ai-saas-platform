@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantCode } from "../value-objects/tenant-code.vo.js";
 import { TenantName } from "../value-objects/tenant-name.vo.js";
 import { TenantType } from "../value-objects/tenant-type.vo.js";
@@ -49,7 +49,7 @@ export interface ITenantCreationValidationFailedEvent {
  * ```
  */
 export class TenantCreationValidationFailedEvent
-  extends DomainEvent
+  extends DomainEventBase implements IDomainEvent
   implements ITenantCreationValidationFailedEvent
 {
   public readonly tenantCode: TenantCode;

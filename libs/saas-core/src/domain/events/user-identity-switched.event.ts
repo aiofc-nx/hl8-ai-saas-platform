@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
@@ -49,7 +49,7 @@ export interface IUserIdentitySwitchedEvent {
  * });
  * ```
  */
-export class UserIdentitySwitchedEvent extends DomainEvent {
+export class UserIdentitySwitchedEvent extends DomainEventBase implements IDomainEvent {
   constructor(eventData: IUserIdentitySwitchedEvent) {
     super("UserIdentitySwitchedEvent", eventData.userId.value);
 

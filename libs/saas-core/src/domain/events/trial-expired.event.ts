@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import { TrialPeriodStatus } from "../services/trial-period.service.js";
@@ -45,7 +45,7 @@ export interface ITrialExpiredEvent {
  * ```
  */
 export class TrialExpiredEvent
-  extends DomainEvent
+  extends DomainEventBase implements IDomainEvent
   implements ITrialExpiredEvent
 {
   public readonly tenantId: TenantId;

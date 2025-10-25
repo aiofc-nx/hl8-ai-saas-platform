@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { ResourceType } from "../value-objects/resource-usage.vo.js";
 import { ResourceLimitType } from "../value-objects/resource-limits.vo.js";
@@ -61,7 +61,7 @@ export interface IResourceUsageWarningEvent {
  * });
  * ```
  */
-export class ResourceUsageWarningEvent extends DomainEvent {
+export class ResourceUsageWarningEvent extends DomainEventBase implements IDomainEvent {
   constructor(eventData: IResourceUsageWarningEvent) {
     super("ResourceUsageWarningEvent", eventData.tenantId.value);
 

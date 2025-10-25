@@ -1,4 +1,4 @@
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { TenantStatus } from "../value-objects/tenant-status.vo.js";
 

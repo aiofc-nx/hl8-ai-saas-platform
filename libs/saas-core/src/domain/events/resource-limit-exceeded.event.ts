@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { ResourceType } from "../value-objects/resource-usage.vo.js";
 import { ResourceLimitType } from "../value-objects/resource-limits.vo.js";
@@ -53,7 +53,7 @@ export interface IResourceLimitExceededEvent {
  * });
  * ```
  */
-export class ResourceLimitExceededEvent extends DomainEvent {
+export class ResourceLimitExceededEvent extends DomainEventBase implements IDomainEvent {
   constructor(eventData: IResourceLimitExceededEvent) {
     super("ResourceLimitExceededEvent", eventData.tenantId.value);
 

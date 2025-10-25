@@ -1,4 +1,4 @@
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import { RoleId } from "@hl8/domain-kernel";
 

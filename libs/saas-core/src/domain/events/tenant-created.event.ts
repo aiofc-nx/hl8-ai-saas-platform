@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import {
   TenantCode,
   TenantName,
@@ -30,7 +30,7 @@ import {
  * );
  * ```
  */
-export class TenantCreatedEvent extends DomainEvent {
+export class TenantCreatedEvent extends DomainEventBase implements IDomainEvent {
   public readonly tenantCode: TenantCode;
   public readonly tenantName: TenantName;
   public readonly tenantType: TenantType;

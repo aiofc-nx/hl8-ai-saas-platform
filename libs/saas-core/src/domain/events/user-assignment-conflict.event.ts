@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
 import { DepartmentId } from "@hl8/domain-kernel";
@@ -74,7 +74,7 @@ export interface IUserAssignmentConflictEvent {
  * ```
  */
 export class UserAssignmentConflictEvent
-  extends DomainEvent
+  extends DomainEventBase implements IDomainEvent
   implements IUserAssignmentConflictEvent
 {
   public readonly userId: UserId;

@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantCode, TenantName } from "../value-objects/index.js";
 
 /**
@@ -23,7 +23,7 @@ import { TenantCode, TenantName } from "../value-objects/index.js";
  * );
  * ```
  */
-export class TenantActivatedEvent extends DomainEvent {
+export class TenantActivatedEvent extends DomainEventBase implements IDomainEvent {
   public readonly tenantCode: TenantCode;
   public readonly tenantName: TenantName;
   public readonly activatedAt: Date;
