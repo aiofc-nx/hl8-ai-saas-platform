@@ -171,9 +171,9 @@ description: "Task list for SAAS Core Module Specification Documentation"
 - [X] T053 [P] [US6] Create tenant API contract in specs/005-spec-documentation/api/tenant-api.md
 - [ ] T054 [P] [US6] Create organization API contract in specs/005-spec-documentation/contracts/organization-api.md
 - [ ] T055 [P] [US6] Create department API contract in specs/005-spec-documentation/contracts/department-api.md
-- [ ] T056 [US6] Document API authentication and authorization in specs/005-spec-documentation/api/authentication.md
-- [ ] T057 [US6] Document API versioning strategy (semantic versioning) in specs/005-spec-documentation/api/versioning.md
-- [ ] T058 [US6] Document tenant context handling in specs/005-spec-documentation/api/tenant-context.md
+- [X] T056 [US6] Document API authentication and authorization in specs/005-spec-documentation/api/authentication.md
+- [X] T057 [US6] Document API versioning strategy (semantic versioning) in specs/005-spec-documentation/api/versioning.md
+- [X] T058 [US6] Document tenant context handling in specs/005-spec-documentation/api/tenant-context.md
 - [ ] T059 [US6] Document webhook notifications in specs/005-spec-documentation/api/webhooks.md
 - [ ] T060 [US6] Document event publishing in specs/005-spec-documentation/api/events.md
 - [ ] T061 [US6] Document third-party integration patterns in specs/005-spec-documentation/api/integration.md
