@@ -5,7 +5,8 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 import {
   TenantCode,
   TenantName,
@@ -30,7 +31,7 @@ import {
  * );
  * ```
  */
-export class TenantCreatedEvent extends DomainEventBase implements IDomainEvent {
+export class TenantCreatedEvent extends DomainEventBase {
   public readonly tenantCode: TenantCode;
   public readonly tenantName: TenantName;
   public readonly tenantType: TenantType;
@@ -52,7 +53,12 @@ export class TenantCreatedEvent extends DomainEventBase implements IDomainEvent 
     contactPhone?: string,
     address?: string,
   ) {
-    super(tenantId, "TenantCreated");
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      tenantId,
+      1
+    );
 
     this.tenantCode = tenantCode;
     this.tenantName = tenantName;
@@ -72,7 +78,7 @@ export class TenantCreatedEvent extends DomainEventBase implements IDomainEvent 
    */
   getEventData(): Record<string, unknown> {
     return {
-      tenantId: this.entityId.toString(),
+      tenantId: this.aggregateId.getValue(),
       tenantCode: this.tenantCode.toString(),
       tenantName: this.tenantName.toString(),
       tenantType: this.tenantType.toString(),
@@ -82,8 +88,8 @@ export class TenantCreatedEvent extends DomainEventBase implements IDomainEvent 
       contactPhone: this.contactPhone,
       address: this.address,
       createdAt: this.createdAt.toISOString(),
-      eventType: this.eventType,
-      eventId: this.eventId.toString(),
+      eventType: "TenantCreatedEvent",
+      eventId: this.eventId.getValue(),
       occurredAt: this.occurredAt.toISOString(),
     };
   }

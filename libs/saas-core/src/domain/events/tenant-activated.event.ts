@@ -5,7 +5,8 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 import { TenantCode, TenantName } from "../value-objects/index.js";
 
 /**
@@ -23,7 +24,7 @@ import { TenantCode, TenantName } from "../value-objects/index.js";
  * );
  * ```
  */
-export class TenantActivatedEvent extends DomainEventBase implements IDomainEvent {
+export class TenantActivatedEvent extends DomainEventBase {
   public readonly tenantCode: TenantCode;
   public readonly tenantName: TenantName;
   public readonly activatedAt: Date;
@@ -33,7 +34,12 @@ export class TenantActivatedEvent extends DomainEventBase implements IDomainEven
     tenantCode: TenantCode,
     tenantName: TenantName,
   ) {
-    super(tenantId, "TenantActivated");
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      tenantId,
+      1
+    );
 
     this.tenantCode = tenantCode;
     this.tenantName = tenantName;
@@ -47,12 +53,12 @@ export class TenantActivatedEvent extends DomainEventBase implements IDomainEven
    */
   getEventData(): Record<string, unknown> {
     return {
-      tenantId: this.entityId.toString(),
+      tenantId: this.aggregateId.getValue(),
       tenantCode: this.tenantCode.toString(),
       tenantName: this.tenantName.toString(),
       activatedAt: this.activatedAt.toISOString(),
-      eventType: this.eventType,
-      eventId: this.eventId.toString(),
+      eventType: "TenantActivatedEvent",
+      eventId: this.eventId.getValue(),
       occurredAt: this.occurredAt.toISOString(),
     };
   }
