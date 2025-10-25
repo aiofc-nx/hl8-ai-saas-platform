@@ -208,21 +208,31 @@ Business Module
 └── @hl8/exceptions            # 异常处理
 ```
 
-### 3.3 优先使用 domain-kernel 组件
+### 3.3 优先使用 kernel 组件
 
-> **⚠️ 重要**: 业务模块开发时，必须优先使用 `@hl8/domain-kernel` 提供的组件，而不是重新定义。
+> **⚠️ 重要**: 业务模块的开发**必须基于** kernel 层提供的通用基础组件，包括：
+> - **@hl8/domain-kernel** - 领域层核心
+> - **@hl8/application-kernel** - 应用层核心
+> - **@hl8/infrastructure-kernel** - 基础设施层核心
+> - **@hl8/interface-kernel** - 接口层核心
+> 
+> 因此，必须优先使用这些 kernel 提供的组件，而不是重新定义。
 
-#### 3.3.1 为什么必须使用 domain-kernel？
+#### 3.3.1 为什么必须基于 kernel 层？
 
-使用 domain-kernel 提供的组件有以下重要优势：
+业务模块开发必须基于 kernel 层，使用其提供的组件有以下重要优势：
 
-- **保证一致性**: 所有模块使用相同的基类，确保行为一致
+- **统一架构**: 所有业务模块基于相同的架构，确保一致性和可维护性
+- **保证一致性**: 使用相同的基类和接口，确保行为一致
 - **减少重复**: 避免在每个模块中重复定义相同的类
 - **简化维护**: 只需在一个地方维护和更新
 - **类型安全**: 统一的类型定义确保类型安全
 - **多租户支持**: 正确的数据隔离机制
+- **架构清晰**: 明确的分层架构，便于理解和扩展
 
-#### 3.3.2 必须使用的基类
+#### 3.3.2 Domain-Kernel 组件（领域层）
+
+**3.3.2.1 必须使用的基类**
 
 所有领域实体、聚合根和值对象都应该继承 domain-kernel 提供的基类：
 
@@ -250,7 +260,7 @@ export abstract class BaseEntity {
 }
 ```
 
-#### 3.3.3 必须使用的 ID 值对象
+**3.3.2.2 必须使用的 ID 值对象**
 
 所有实体 ID 都应该使用 domain-kernel 提供的 ID 值对象：
 
@@ -281,9 +291,64 @@ export class UserId extends BaseValueObject {
 }
 ```
 
-#### 3.3.4 必须使用的数据隔离机制
+**3.3.2.3 必须使用的数据隔离机制**
 
 所有涉及多租户数据访问的操作都必须使用 `IsolationContext`：
+
+#### 3.3.3 Application-Kernel 组件（应用层）
+
+**必须优先使用** `@hl8/application-kernel` 提供的以下组件：
+
+```typescript
+// ✅ 正确：使用 application-kernel 的基类
+import { 
+  BaseCommand, 
+  BaseQuery, 
+  BaseUseCase,
+  CommandHandler,
+  QueryHandler
+} from "@hl8/application-kernel";
+
+export class CreateUserCommand extends BaseCommand { ... }
+export class GetUserQuery extends BaseQuery { ... }
+export class CreateUserUseCase extends BaseUseCase { ... }
+export class CreateUserHandler implements CommandHandler { ... }
+```
+
+#### 3.3.4 Infrastructure-Kernel 组件（基础设施层）
+
+**必须优先使用** `@hl8/infrastructure-kernel` 提供的以下组件：
+
+```typescript
+// ✅ 正确：使用 infrastructure-kernel 的接口
+import { 
+  IDatabaseAdapter,
+  ICacheService,
+  IMessageBroker
+} from "@hl8/infrastructure-kernel";
+
+export class UserRepository implements IDatabaseAdapter { ... }
+export class RedisCacheService implements ICacheService { ... }
+export class RabbitMQBroker implements IMessageBroker { ... }
+```
+
+#### 3.3.5 Interface-Kernel 组件（接口层）
+
+**必须优先使用** `@hl8/interface-kernel` 提供的以下组件：
+
+```typescript
+// ✅ 正确：使用 interface-kernel 的基类和守卫
+import { 
+  RestController,
+  AuthenticationGuard,
+  AuthorizationGuard
+} from "@hl8/interface-kernel";
+
+export class UserController extends RestController {
+  @Get()
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  public async getUsers() { ... }
+}
 
 ```typescript
 // ✅ 正确：使用 IsolationContext

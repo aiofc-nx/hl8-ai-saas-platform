@@ -76,9 +76,20 @@
 
 ## ⚠️ 重要提示
 
-### 优先使用 domain-kernel 组件
+### 业务模块开发必须基于 kernel 层
 
-在开发业务模块时，**必须优先使用** `@hl8/domain-kernel` 提供的以下组件，而不是重新定义：
+业务模块的开发**必须基于** kernel 层提供的通用基础组件，包括：
+
+- **@hl8/domain-kernel** - 领域层核心
+- **@hl8/application-kernel** - 应用层核心
+- **@hl8/infrastructure-kernel** - 基础设施层核心
+- **@hl8/interface-kernel** - 接口层核心
+
+因此，在开发业务模块时，**必须优先使用**这些 kernel 提供的组件，而不是重新定义：
+
+### 1. Domain-Kernel 组件
+
+**必须优先使用** `@hl8/domain-kernel` 提供的以下组件：
 
 #### 基类和接口
 ```typescript
@@ -108,13 +119,53 @@ import {
 } from "@hl8/domain-kernel";
 ```
 
-**为什么这样做？**
-- ✅ 保证整个系统的一致性
-- ✅ 减少重复代码
-- ✅ 简化维护工作
-- ✅ 确保多租户数据隔离的正确性
+### 2. Application-Kernel 组件
 
-详见：[业务模块开发指南 - 优先使用 domain-kernel 组件](./03-business-module-development-guide.md#33-优先使用-domain-kernel-组件)
+**必须优先使用** `@hl8/application-kernel` 提供的以下组件：
+
+```typescript
+import { 
+  BaseCommand, 
+  BaseQuery, 
+  BaseUseCase,
+  CommandHandler,
+  QueryHandler
+} from "@hl8/application-kernel";
+```
+
+### 3. Infrastructure-Kernel 组件
+
+**必须优先使用** `@hl8/infrastructure-kernel` 提供的以下组件：
+
+```typescript
+import { 
+  IDatabaseAdapter,
+  ICacheService,
+  IMessageBroker
+} from "@hl8/infrastructure-kernel";
+```
+
+### 4. Interface-Kernel 组件
+
+**必须优先使用** `@hl8/interface-kernel` 提供的以下组件：
+
+```typescript
+import { 
+  RestController,
+  AuthenticationGuard,
+  AuthorizationGuard
+} from "@hl8/interface-kernel";
+```
+
+**为什么这样做？**
+- ✅ **统一架构** - 所有业务模块基于相同的架构
+- ✅ **保证一致性** - 使用相同的基类和接口，确保行为一致
+- ✅ **减少重复** - 避免在每个模块中重复定义相同的类
+- ✅ **简化维护** - 只需在一个地方维护和更新
+- ✅ **类型安全** - 统一的类型定义确保类型安全
+- ✅ **多租户支持** - 正确的数据隔离机制
+
+详见：[业务模块开发指南 - 优先使用 kernel 组件](./03-business-module-development-guide.md#33-优先使用-kernel-组件)
 
 ---
 
