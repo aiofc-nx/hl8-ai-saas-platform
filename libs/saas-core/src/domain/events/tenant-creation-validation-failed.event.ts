@@ -274,7 +274,7 @@ export class TenantCreationValidationFailedEvent extends DomainEventBase {
    * @returns 事件ID
    */
   getEventId(): string {
-    return `tenant-creation-validation-failed-${this.tenantCode.value}-${this.failedAt.getTime()}`;
+    return this.eventId.getValue();
   }
 
   /**
@@ -283,7 +283,7 @@ export class TenantCreationValidationFailedEvent extends DomainEventBase {
    * @returns 聚合根ID
    */
   getAggregateId(): string {
-    return this.tenantCode.value;
+    return this.aggregateId.getValue();
   }
 
   /**
@@ -349,18 +349,23 @@ export class TenantCreationValidationFailedEvent extends DomainEventBase {
     validationSuggestions?: readonly string[],
     metadata: Record<string, unknown> = {},
   ): TenantCreationValidationFailedEvent {
-    return new TenantCreationValidationFailedEvent({
-      tenantCode,
-      tenantName,
-      tenantType,
-      domain,
-      createdBy,
-      validationErrors,
-      validationWarnings,
-      validationSuggestions,
-      failedAt: new Date(),
-      metadata,
-    });
+    // 需要创建一个聚合根ID，这里使用一个临时ID
+    const aggregateId = GenericEntityId.create(randomUUID());
+    return new TenantCreationValidationFailedEvent(
+      aggregateId,
+      {
+        tenantCode,
+        tenantName,
+        tenantType,
+        domain,
+        createdBy,
+        validationErrors,
+        validationWarnings,
+        validationSuggestions,
+        failedAt: new Date(),
+        metadata,
+      }
+    );
   }
 
   /**
@@ -372,17 +377,21 @@ export class TenantCreationValidationFailedEvent extends DomainEventBase {
   static fromEventData(
     eventData: Record<string, unknown>,
   ): TenantCreationValidationFailedEvent {
-    return new TenantCreationValidationFailedEvent({
-      tenantCode: new TenantCode(eventData.tenantCode as string),
-      tenantName: new TenantName(eventData.tenantName as string),
-      tenantType: eventData.tenantType as TenantType,
-      domain: eventData.domain as string,
-      createdBy: eventData.createdBy as string,
-      validationErrors: eventData.validationErrors as string[],
-      validationWarnings: eventData.validationWarnings as string[],
-      validationSuggestions: eventData.validationSuggestions as string[],
-      failedAt: new Date(eventData.failedAt as string),
-      metadata: eventData.metadata as Record<string, unknown>,
-    });
+    const aggregateId = GenericEntityId.create(randomUUID());
+    return new TenantCreationValidationFailedEvent(
+      aggregateId,
+      {
+        tenantCode: new TenantCode(eventData.tenantCode as string),
+        tenantName: new TenantName(eventData.tenantName as string),
+        tenantType: eventData.tenantType as TenantType,
+        domain: eventData.domain as string,
+        createdBy: eventData.createdBy as string,
+        validationErrors: eventData.validationErrors as string[],
+        validationWarnings: eventData.validationWarnings as string[],
+        validationSuggestions: eventData.validationSuggestions as string[],
+        failedAt: new Date(eventData.failedAt as string),
+        metadata: eventData.metadata as Record<string, unknown>,
+      }
+    );
   }
 }
