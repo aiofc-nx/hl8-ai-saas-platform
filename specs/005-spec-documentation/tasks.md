@@ -84,16 +84,16 @@ description: "Task list for SAAS Core Module Specification Documentation"
 
 ### Documentation for User Story 2
 
-- [ ] T021 [P] [US2] Document FREE tenant type in specs/005-spec-documentation/tenants/tenant-types.md
-- [ ] T022 [P] [US2] Document BASIC tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
-- [ ] T023 [P] [US2] Document PROFESSIONAL tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
-- [ ] T024 [P] [US2] Document ENTERPRISE tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
-- [ ] T025 [P] [US2] Document CUSTOM tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
-- [ ] T026 [US2] Create tenant creation workflow diagram in specs/005-spec-documentation/tenants/tenant-creation.md
-- [ ] T027 [US2] Document status transitions (TRIAL → ACTIVE → SUSPENDED → EXPIRED → DELETED) in specs/005-spec-documentation/tenants/tenant-status.md
-- [ ] T028 [US2] Document tenant upgrade paths between types in specs/005-spec-documentation/tenants/tenant-upgrades.md
-- [ ] T029 [US2] Create state machine diagram for tenant status transitions
-- [ ] T030 [US2] Document tenant deletion process and cleanup procedures
+- [X] T021 [P] [US2] Document FREE tenant type in specs/005-spec-documentation/tenants/tenant-types.md
+- [X] T022 [P] [US2] Document BASIC tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
+- [X] T023 [P] [US2] Document PROFESSIONAL tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
+- [X] T024 [P] [US2] Document ENTERPRISE tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
+- [X] T025 [P] [US2] Document CUSTOM tenant type resources and limits in specs/005-spec-documentation/tenants/tenant-types.md
+- [X] T026 [US2] Create tenant creation workflow diagram in specs/005-spec-documentation/tenants/tenant-creation.md
+- [X] T027 [US2] Document status transitions (TRIAL → ACTIVE → SUSPENDED → EXPIRED → DELETED) in specs/005-spec-documentation/tenants/tenant-status.md
+- [X] T028 [US2] Document tenant upgrade paths between types in specs/005-spec-documentation/tenants/tenant-upgrades.md
+- [X] T029 [US2] Create state machine diagram for tenant status transitions
+- [X] T030 [US2] Document tenant deletion process and cleanup procedures
 
 **Checkpoint**: User Story 2 documentation complete and validated
 
