@@ -163,6 +163,43 @@ import {
 } from "@hl8/interface-kernel";
 ```
 
+### 5. Exceptions 组件
+
+**必须优先使用** `@hl8/exceptions` 提供的异常类：
+
+```typescript
+import { 
+  DomainException,
+  BusinessException,
+  ValidationException,
+  NotFoundException
+} from "@hl8/exceptions";
+```
+
+### 6. Caching 组件
+
+**必须优先使用** `@hl8/caching` 提供的缓存服务：
+
+```typescript
+import { ICacheService } from "@hl8/caching";
+```
+
+### 7. Config 组件
+
+**必须优先使用** `@hl8/config` 提供的配置管理：
+
+```typescript
+import { ConfigService } from "@hl8/config";
+```
+
+### 8. NestJS-Fastify 组件（Logging）
+
+**必须优先使用** `@hl8/nestjs-fastify` 提供的 logging 组件：
+
+```typescript
+import { Logger } from "@hl8/nestjs-fastify";
+```
+
 **为什么这样做？**
 - ✅ **统一架构** - 所有业务模块基于相同的架构
 - ✅ **保证一致性** - 使用相同的基类和接口，确保行为一致
