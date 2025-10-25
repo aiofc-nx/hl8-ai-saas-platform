@@ -1,6 +1,16 @@
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel";
-import { RoleId } from "@hl8/domain-kernel";
+import { DomainEvent, EntityId, GenericEntityId, UserId, RoleId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
+
+/**
+ * 权限变更事件数据
+ */
+export interface IPermissionChangedEventData {
+  readonly userId: UserId;
+  readonly roleId: RoleId | null;
+  readonly changeType: "ADDED" | "REMOVED" | "UPDATED";
+  readonly permissions: string[];
+  readonly reason: string;
+}
 
 /**
  * 权限变更事件
@@ -8,29 +18,27 @@ import { RoleId } from "@hl8/domain-kernel";
  * @description 当用户权限发生变化时触发的事件
  * @since 1.0.0
  */
-export class PermissionChangedEvent implements DomainEvent {
-  public readonly eventId: string;
-  public readonly occurredOn: Date;
-  public readonly eventType: string = "PermissionChanged";
+export class PermissionChangedEvent extends DomainEvent {
+  public readonly eventData: IPermissionChangedEventData;
 
   /**
    * 创建权限变更事件
    *
-   * @param userId - 用户ID
-   * @param roleId - 角色ID
-   * @param changeType - 变更类型（ADDED, REMOVED, UPDATED）
-   * @param permissions - 权限列表
-   * @param reason - 变更原因
+   * @param aggregateId - 聚合根ID
+   * @param eventData - 事件数据
    */
   constructor(
-    public readonly userId: UserId,
-    public readonly roleId: RoleId | null,
-    public readonly changeType: "ADDED" | "REMOVED" | "UPDATED",
-    public readonly permissions: string[],
-    public readonly reason: string,
+    aggregateId: EntityId,
+    eventData: IPermissionChangedEventData,
   ) {
-    this.eventId = `permission-changed-${userId.getValue()}-${Date.now()}`;
-    this.occurredOn = new Date();
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
+    
+    this.eventData = eventData;
   }
 
   /**

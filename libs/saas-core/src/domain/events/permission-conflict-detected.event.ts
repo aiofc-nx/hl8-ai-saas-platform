@@ -5,15 +5,16 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
+import { DomainEvent, EntityId, GenericEntityId } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 import {
   PermissionConflictType,
   ConflictSeverity,
 } from "../services/permission-conflict-detector.service.js";
 
 /**
- * 权限冲突检测事件接口
+ * 权限冲突检测事件数据
  */
 export interface IPermissionConflictDetectedEvent {
   readonly tenantId: TenantId;
@@ -35,23 +36,32 @@ export interface IPermissionConflictDetectedEvent {
  *
  * @example
  * ```typescript
- * const event = new PermissionConflictDetectedEvent({
- *   tenantId: TenantId.create("tenant-123"),
- *   conflictType: PermissionConflictType.DUPLICATE_PERMISSION,
- *   severity: ConflictSeverity.MEDIUM,
- *   description: "Permission 'user:create' is duplicated across multiple templates",
- *   conflictingPermissions: ["user:create"],
- *   conflictingTemplates: ["Admin Template", "User Template"],
- *   suggestions: ["Consider consolidating permission into a single template"],
- *   detectedAt: new Date(),
- *   metadata: { source: "automatic", category: "permission_conflict" }
- * });
+ * const event = new PermissionConflictDetectedEvent(
+ *   GenericEntityId.generate(),
+ *   TenantId.create("tenant-123"),
+ *   {
+ *     conflictType: PermissionConflictType.DUPLICATE_PERMISSION,
+ *     severity: ConflictSeverity.MEDIUM,
+ *     description: "Permission conflict detected",
+ *     conflictingPermissions: ["user:create"],
+ *     suggestions: [],
+ *     detectedAt: new Date(),
+ *     metadata: {}
+ *   }
+ * );
  * ```
  */
-export class PermissionConflictDetectedEvent extends DomainEventBase implements IDomainEvent {
-  constructor(eventData: IPermissionConflictDetectedEvent) {
-    super("PermissionConflictDetectedEvent", eventData.tenantId.value);
+export class PermissionConflictDetectedEvent extends DomainEvent {
+  public readonly eventData: IPermissionConflictDetectedEvent;
 
+  constructor(aggregateId: EntityId, eventData: IPermissionConflictDetectedEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
+    
     this.eventData = eventData;
   }
 
