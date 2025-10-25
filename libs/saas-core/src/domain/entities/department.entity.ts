@@ -36,9 +36,18 @@ export class Department extends BaseEntity<DepartmentId> {
     organizationId: OrganizationId,
     tenantId: TenantId,
     parentId: DepartmentId | null = null,
-    auditInfo: AuditInfo,
+    auditInfo?: AuditInfo,
   ) {
-    super(id, auditInfo);
+    super(
+      id,
+      tenantId,
+      organizationId,
+      parentId || undefined, // departmentId for the parent
+      undefined, // userId
+      false, // isShared
+      undefined, // sharingLevel
+      auditInfo,
+    );
     this._name = name;
     this._code = code;
     this._organizationId = organizationId;

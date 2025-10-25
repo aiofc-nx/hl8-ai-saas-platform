@@ -22,6 +22,7 @@
 ### 2. 删除重复定义
 
 删除以下重复的本地 ID 值对象：
+
 - ✅ `tenant-id.vo.ts`
 - ✅ `organization-id.vo.ts`
 - ✅ `department-id.vo.ts`
@@ -37,6 +38,7 @@
 ### 4. 修复构造函数调用
 
 批量替换了约 60 个构造函数调用：
+
 - ✅ `new TenantId(...)` → `TenantId.create(...)`
 - ✅ `new UserId(...)` → `UserId.create(...)`
 - ✅ `new OrganizationId(...)` → `OrganizationId.create(...)`
@@ -62,6 +64,7 @@
 | 最终状态 | 1259* | - | 95% |
 
 \* 最终错误数量增加是由于修复了导入语句的双引号问题，导致其他错误被暴露出来。这些错误主要是：
+
 - 实体构造函数参数不匹配
 - 其他业务逻辑问题
 - 不相关的类型错误
