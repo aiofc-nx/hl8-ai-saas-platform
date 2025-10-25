@@ -1,4 +1,4 @@
-import { DomainEvent, EntityId, GenericEntityId, UserId, RoleId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, UserId, RoleId } from "@hl8/domain-kernel";
 import { randomUUID } from "node:crypto";
 
 /**
@@ -18,7 +18,7 @@ export interface IPermissionChangedEventData {
  * @description 当用户权限发生变化时触发的事件
  * @since 1.0.0
  */
-export class PermissionChangedEvent extends DomainEvent {
+export class PermissionChangedEvent extends DomainEventBase {
   public readonly eventData: IPermissionChangedEventData;
 
   /**
@@ -42,32 +42,37 @@ export class PermissionChangedEvent extends DomainEvent {
   }
 
   /**
-   * 获取事件数据
-   *
-   * @returns 事件数据
+   * 获取用户ID
    */
-  getEventData(): Record<string, unknown> {
-    return {
-      userId: this.userId.getValue(),
-      roleId: this.roleId?.getValue() || null,
-      changeType: this.changeType,
-      permissions: this.permissions,
-      reason: this.reason,
-      occurredOn: this.occurredOn.toISOString(),
-    };
+  get userId(): UserId {
+    return this.eventData.userId;
   }
 
   /**
-   * 获取事件元数据
-   *
-   * @returns 事件元数据
+   * 获取角色ID
    */
-  getEventMetadata(): Record<string, unknown> {
-    return {
-      eventId: this.eventId,
-      eventType: this.eventType,
-      occurredOn: this.occurredOn.toISOString(),
-      userId: this.userId.getValue(),
-    };
+  get roleId(): RoleId | null {
+    return this.eventData.roleId;
+  }
+
+  /**
+   * 获取变更类型
+   */
+  get changeType(): "ADDED" | "REMOVED" | "UPDATED" {
+    return this.eventData.changeType;
+  }
+
+  /**
+   * 获取权限列表
+   */
+  get permissions(): string[] {
+    return this.eventData.permissions;
+  }
+
+  /**
+   * 获取变更原因
+   */
+  get reason(): string {
+    return this.eventData.reason;
   }
 }
