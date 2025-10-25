@@ -1,6 +1,6 @@
 import { BaseQuery } from "@hl8/application-kernel";
 import { IsolationContext } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel"";
+import { UserId } from "@hl8/domain-kernel";
 
 /**
  * 权限检查查询参数

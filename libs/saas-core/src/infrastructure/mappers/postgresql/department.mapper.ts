@@ -6,9 +6,9 @@
  */
 
 import { Department } from "../../../domain/entities/department.entity.js";
-import { DepartmentId } from "@hl8/domain-kernel"";
-import { OrganizationId } from "@hl8/domain-kernel"";
-import { TenantId } from "@hl8/domain-kernel"";
+import { DepartmentId } from "@hl8/domain-kernel";
+import { OrganizationId } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
 import { AuditInfo } from "@hl8/domain-kernel";
 import { DepartmentEntity } from "../../entities/postgresql/department.entity.js";
 

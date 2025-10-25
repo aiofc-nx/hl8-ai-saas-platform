@@ -1,6 +1,6 @@
 import { BaseUseCase, IUseCaseContext } from "@hl8/application-kernel";
-import { UserId } from "@hl8/domain-kernel"";
-import { RoleId } from "@hl8/domain-kernel"";
+import { UserId } from "@hl8/domain-kernel";
+import { RoleId } from "@hl8/domain-kernel";
 import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
 import { CaslAbility } from "../../domain/entities/casl-ability.entity.js";
 import { CaslAbilityFactory } from "../../infrastructure/casl/casl-ability.factory.js";

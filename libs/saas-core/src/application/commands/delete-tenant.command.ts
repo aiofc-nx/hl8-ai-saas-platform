@@ -1,6 +1,5 @@
 import { BaseCommand } from "@hl8/application-kernel";
-import { IsolationContext } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel"";
+import { IsolationContext, TenantId } from "@hl8/domain-kernel";
 
 /**
  * 删除租户命令

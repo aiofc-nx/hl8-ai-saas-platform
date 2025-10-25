@@ -11,8 +11,8 @@ import {
   OrganizationTypeEnum,
   OrganizationStatusEnum,
 } from "../../../domain/entities/organization.entity.js";
-import { OrganizationId } from "@hl8/domain-kernel"";
-import { TenantId } from "@hl8/domain-kernel"";
+import { OrganizationId } from "@hl8/domain-kernel";
+import { TenantId } from "@hl8/domain-kernel";
 import {
   OrganizationEntity,
   OrganizationType as DbOrganizationType,

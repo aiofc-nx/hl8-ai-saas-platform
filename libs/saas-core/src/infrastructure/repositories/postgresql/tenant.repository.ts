@@ -10,7 +10,7 @@ import { EntityManager } from "@mikro-orm/core";
 import { FilterQuery } from "@mikro-orm/core";
 import { ITenantRepository } from "../../../domain/repositories/tenant.repository.js";
 import { TenantAggregate } from "../../../domain/aggregates/tenant.aggregate.js";
-import { TenantId } from "@hl8/domain-kernel"";
+import { TenantId } from "@hl8/domain-kernel";
 import { TenantCode } from "../../../domain/value-objects/tenant-code.vo.js";
 import { TenantName } from "../../../domain/value-objects/tenant-name.vo.js";
 import { TenantType } from "../../../domain/value-objects/tenant-type.vo.js";
