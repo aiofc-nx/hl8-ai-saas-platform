@@ -17,15 +17,15 @@
   the iteration process.
 -->
 
-**Language/Version**: TypeScript 5.9.2, Node.js >= 20, NestJS 11.x  
-**Primary Dependencies**: NestJS (existing), @hl8/domain-kernel (existing), @hl8/application-kernel (existing), @hl8/infrastructure-kernel (existing), @hl8/interface-kernel (existing), @hl8/nestjs-fastify (existing), @hl8/caching (existing), @hl8/database (existing), @hl8/messaging (existing), @hl8/config (existing), @hl8/exceptions (existing), @hl8/nestjs-isolation (existing), @casl/ability, @casl/prisma, @casl/mongoose  
-**Storage**: PostgreSQL with MikroORM (@hl8/database), Redis for caching (@hl8/caching), Event Store for event sourcing (@hl8/messaging)  
-**Testing**: Jest with ts-jest, unit tests (.spec.ts), integration tests, e2e tests  
-**Target Platform**: Linux server environment, Docker containerized  
-**Project Type**: Monorepo library module (libs/saas-core) with CASL permission system integration, extending existing NestJS infrastructure libraries  
-**Performance Goals**: Support 10,000+ concurrent tenants, <100ms tenant operations, 99.9% uptime, <50ms permission checks  
-**Constraints**: Must follow Clean Architecture + DDD + CQRS + ES + EDA patterns, 5-tier data isolation, Chinese documentation, CASL integration for all 8 subdomains, prioritize existing NestJS infrastructure libraries  
-**Scale/Scope**: Multi-tenant SAAS platform supporting 5 tenant types, 7-level department hierarchy, complex permission systems with CASL-based authorization
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: [single/web/mobile - determines source structure]  
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
@@ -106,124 +106,43 @@ specs/[###-feature]/
 -->
 
 ```
-libs/saas-core/
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
+├── services/
+├── cli/
+└── lib/
+
+tests/
+├── contract/
+├── integration/
+└── unit/
+
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
 ├── src/
-│   ├── domain/
-│   │   ├── entities/
-│   │   │   ├── platform.entity.ts
-│   │   │   ├── tenant.entity.ts
-│   │   │   ├── organization.entity.ts
-│   │   │   ├── department.entity.ts
-│   │   │   ├── user.entity.ts
-│   │   │   └── role.entity.ts
-│   │   ├── value-objects/
-│   │   │   ├── tenant-code.vo.ts
-│   │   │   ├── tenant-name.vo.ts
-│   │   │   ├── tenant-type.vo.ts
-│   │   │   ├── tenant-status.vo.ts
-│   │   │   ├── casl-rule.vo.ts
-│   │   │   ├── casl-condition.vo.ts
-│   │   │   └── role-level.vo.ts
-│   │   ├── aggregates/
-│   │   │   ├── tenant.aggregate.ts
-│   │   │   ├── organization.aggregate.ts
-│   │   │   ├── department.aggregate.ts
-│   │   │   └── user.aggregate.ts
-│   │   ├── services/
-│   │   │   ├── tenant-creation.service.ts
-│   │   │   ├── organization-management.service.ts
-│   │   │   ├── permission-verification.service.ts
-│   │   │   └── casl-ability.service.ts
-│   │   ├── events/
-│   │   │   ├── tenant-created.event.ts
-│   │   │   ├── organization-changed.event.ts
-│   │   │   ├── user-assigned.event.ts
-│   │   │   └── permission-changed.event.ts
-│   │   └── repositories/
-│   │       ├── tenant.repository.ts
-│   │       ├── organization.repository.ts
-│   │       ├── department.repository.ts
-│   │       └── user.repository.ts
-│   ├── application/
-│   │   ├── commands/
-│   │   │   ├── create-tenant.command.ts
-│   │   │   ├── update-tenant.command.ts
-│   │   │   ├── delete-tenant.command.ts
-│   │   │   └── assign-permission.command.ts
-│   │   ├── queries/
-│   │   │   ├── get-tenant.query.ts
-│   │   │   ├── list-tenants.query.ts
-│   │   │   ├── get-tenant-stats.query.ts
-│   │   │   └── check-permission.query.ts
-│   │   ├── handlers/
-│   │   │   ├── create-tenant.handler.ts
-│   │   │   ├── update-tenant.handler.ts
-│   │   │   ├── delete-tenant.handler.ts
-│   │   │   └── assign-permission.handler.ts
-│   │   ├── use-cases/
-│   │   │   ├── tenant-creation.use-case.ts
-│   │   │   ├── tenant-upgrade.use-case.ts
-│   │   │   ├── tenant-suspension.use-case.ts
-│   │   │   └── permission-management.use-case.ts
-│   │   └── abilities/
-│   │       ├── tenant.abilities.ts
-│   │       ├── organization.abilities.ts
-│   │       ├── department.abilities.ts
-│   │       └── user.abilities.ts
-│   ├── infrastructure/
-│   │   ├── repositories/
-│   │   │   ├── tenant.repository.impl.ts
-│   │   │   ├── organization.repository.impl.ts
-│   │   │   ├── department.repository.impl.ts
-│   │   │   └── user.repository.impl.ts
-│   │   ├── persistence/
-│   │   │   ├── tenant.entity.ts
-│   │   │   ├── organization.entity.ts
-│   │   │   ├── department.entity.ts
-│   │   │   └── user.entity.ts
-│   │   ├── events/
-│   │   │   ├── event-publisher.ts
-│   │   │   └── event-store.ts
-│   │   └── casl/
-│   │       ├── casl-ability.factory.ts
-│   │       ├── casl-ability.repository.ts
-│   │       └── casl-ability.service.ts
-│   ├── interface/
-│   │   ├── controllers/
-│   │   │   ├── tenant.controller.ts
-│   │   │   ├── organization.controller.ts
-│   │   │   ├── department.controller.ts
-│   │   │   └── permission.controller.ts
-│   │   ├── dto/
-│   │   │   ├── create-tenant.dto.ts
-│   │   │   ├── update-tenant.dto.ts
-│   │   │   ├── tenant-response.dto.ts
-│   │   │   └── permission.dto.ts
-│   │   └── guards/
-│   │       ├── tenant-isolation.guard.ts
-│   │       ├── permission.guard.ts
-│   │       └── casl-ability.guard.ts
-│   └── saas-core.module.ts
-├── tests/
-│   ├── unit/
-│   │   ├── domain/
-│   │   ├── application/
-│   │   ├── infrastructure/
-│   │   └── casl/
-│   ├── integration/
-│   │   ├── tenant-management.integration.spec.ts
-│   │   ├── organization-management.integration.spec.ts
-│   │   └── permission-system.integration.spec.ts
-│   └── e2e/
-│       ├── tenant-lifecycle.e2e.spec.ts
-│       ├── multi-tenant-security.e2e.spec.ts
-│       └── casl-permission.e2e.spec.ts
-├── package.json
-├── tsconfig.json
-└── README.md
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
+
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: Monorepo library module structure following Clean Architecture with four distinct layers (Domain, Application, Infrastructure, Interface) and integrated CASL permission system. The structure extends existing NestJS infrastructure libraries (@hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel, @hl8/nestjs-fastify, @hl8/caching, @hl8/database, @hl8/messaging, @hl8/config, @hl8/exceptions, @hl8/nestjs-isolation) and supports the 5-tier data isolation strategy, follows DDD principles with rich domain models, aggregates, and value objects, and includes comprehensive CASL integration for sophisticated permission management across all 8 subdomains. Each layer has clear responsibilities and dependencies flow inward only. The module follows NestJS module structure with saas-core.module.ts as the main module entry point.
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 

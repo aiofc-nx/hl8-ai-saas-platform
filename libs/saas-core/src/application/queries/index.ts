@@ -10,3 +10,7 @@ export {
   ListTenantsQuery,
   type ListTenantsQueryParams,
 } from "./list-tenants.query.js";
+export {
+  CheckPermissionQuery,
+  type CheckPermissionQueryParams,
+} from "./check-permission.query.js";

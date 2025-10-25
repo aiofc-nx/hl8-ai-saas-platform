@@ -7,3 +7,5 @@
 
 export { CreateTenantCommand } from "./create-tenant.command.js";
 export { UpdateTenantCommand } from "./update-tenant.command.js";
+export { DeleteTenantCommand } from "./delete-tenant.command.js";
+export { AssignPermissionCommand } from "./assign-permission.command.js";

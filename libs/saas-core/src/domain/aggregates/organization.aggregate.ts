@@ -2,7 +2,13 @@ import { AggregateRoot } from "@hl8/domain-kernel";
 import { Organization } from "../entities/organization.entity.js";
 import { OrganizationId } from "../value-objects/organization-id.vo.js";
 import { TenantId } from "../value-objects/tenant-id.vo.js";
+import { UserId } from "../value-objects/user-id.vo.js";
+import { DepartmentId } from "../value-objects/department-id.vo.js";
 import { type AuditInfo } from "@hl8/domain-kernel";
+import { UserAssignmentRules } from "../services/user-assignment-rules.service.js";
+import { UserAssignmentConflictEvent } from "../events/user-assignment-conflict.event.js";
+import { UserOrganizationAssignment } from "../value-objects/user-organization-assignment.vo.js";
+import { UserDepartmentAssignment } from "../value-objects/user-department-assignment.vo.js";
 
 /**
  * 组织聚合根
@@ -12,6 +18,7 @@ import { type AuditInfo } from "@hl8/domain-kernel";
  */
 export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
   private _organization: Organization;
+  private _userAssignmentRules: UserAssignmentRules;
 
   /**
    * 创建组织聚合根
@@ -21,6 +28,7 @@ export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
   constructor(organization: Organization) {
     super(organization.id);
     this._organization = organization;
+    this._userAssignmentRules = new UserAssignmentRules();
   }
 
   /**
@@ -159,5 +167,197 @@ export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
     // 这里应该重新构建组织实体
     // 实际实现中需要根据快照数据重建组织实体
     throw new Error("从快照加载数据的方法需要在具体实现中完成");
+  }
+
+  /**
+   * 验证用户分配
+   *
+   * @param userId - 用户ID
+   * @param departmentId - 部门ID
+   * @param existingAssignments - 现有分配列表
+   * @returns 验证结果
+   */
+  async validateUserAssignment(
+    userId: UserId,
+    departmentId: DepartmentId,
+    existingAssignments: readonly {
+      readonly userId: UserId;
+      readonly organizationId: OrganizationId;
+      readonly departmentId: DepartmentId;
+      readonly isTemporary: boolean;
+      readonly expiresAt?: Date;
+    }[],
+  ): Promise<{
+    readonly isValid: boolean;
+    readonly errors: readonly string[];
+    readonly warnings?: readonly string[];
+  }> {
+    const validation = await this._userAssignmentRules.validateUserAssignment(
+      userId,
+      this._organization.id,
+      departmentId,
+      existingAssignments,
+    );
+
+    if (!validation.isValid) {
+      // 发布用户分配冲突事件
+      this.addDomainEvent(
+        new UserAssignmentConflictEvent({
+          userId,
+          organizationId: this._organization.id,
+          departmentId,
+          conflictType: this.determineConflictType(validation.errors),
+          conflictReason: validation.errors.join(", "),
+          existingAssignments: existingAssignments.filter((a) =>
+            a.userId.equals(userId),
+          ),
+          attemptedAssignment: {
+            userId,
+            organizationId: this._organization.id,
+            departmentId,
+            assignedAt: new Date(),
+            isTemporary: false,
+          },
+          conflictDetectedAt: new Date(),
+          metadata: { source: "automatic", reason: "assignment_conflict" },
+        }),
+      );
+    }
+
+    return validation;
+  }
+
+  /**
+   * 检查用户是否可以分配到指定部门
+   *
+   * @param userId - 用户ID
+   * @param departmentId - 部门ID
+   * @param existingAssignments - 现有分配列表
+   * @returns 是否可以分配
+   */
+  async canAssignUserToDepartment(
+    userId: UserId,
+    departmentId: DepartmentId,
+    existingAssignments: readonly {
+      readonly userId: UserId;
+      readonly organizationId: OrganizationId;
+      readonly departmentId: DepartmentId;
+      readonly isTemporary: boolean;
+      readonly expiresAt?: Date;
+    }[],
+  ): Promise<boolean> {
+    return await this._userAssignmentRules.canAssignToDepartment(
+      userId,
+      this._organization.id,
+      departmentId,
+      existingAssignments,
+    );
+  }
+
+  /**
+   * 检查用户是否可以分配到指定组织
+   *
+   * @param userId - 用户ID
+   * @param existingAssignments - 现有分配列表
+   * @returns 是否可以分配
+   */
+  async canAssignUserToOrganization(
+    userId: UserId,
+    existingAssignments: readonly {
+      readonly userId: UserId;
+      readonly organizationId: OrganizationId;
+      readonly departmentId: DepartmentId;
+      readonly isTemporary: boolean;
+      readonly expiresAt?: Date;
+    }[],
+  ): Promise<boolean> {
+    return await this._userAssignmentRules.canAssignToOrganization(
+      userId,
+      this._organization.id,
+      existingAssignments,
+    );
+  }
+
+  /**
+   * 验证临时用户分配
+   *
+   * @param userId - 用户ID
+   * @param departmentId - 部门ID
+   * @param expiresAt - 过期时间
+   * @param existingAssignments - 现有分配列表
+   * @returns 验证结果
+   */
+  async validateTemporaryUserAssignment(
+    userId: UserId,
+    departmentId: DepartmentId,
+    expiresAt: Date,
+    existingAssignments: readonly {
+      readonly userId: UserId;
+      readonly organizationId: OrganizationId;
+      readonly departmentId: DepartmentId;
+      readonly isTemporary: boolean;
+      readonly expiresAt?: Date;
+    }[],
+  ): Promise<{
+    readonly isValid: boolean;
+    readonly errors: readonly string[];
+    readonly warnings?: readonly string[];
+  }> {
+    return await this._userAssignmentRules.validateTemporaryAssignment(
+      userId,
+      this._organization.id,
+      departmentId,
+      expiresAt,
+      existingAssignments,
+    );
+  }
+
+  /**
+   * 确定冲突类型
+   *
+   * @param errors - 错误信息列表
+   * @returns 冲突类型
+   */
+  private determineConflictType(errors: readonly string[]): string {
+    if (errors.some((e) => e.includes("已存在"))) {
+      return "DUPLICATE_ASSIGNMENT";
+    }
+    if (errors.some((e) => e.includes("跨组织"))) {
+      return "CROSS_ORGANIZATION_CONFLICT";
+    }
+    if (errors.some((e) => e.includes("跨部门"))) {
+      return "CROSS_DEPARTMENT_CONFLICT";
+    }
+    if (errors.some((e) => e.includes("单一部门"))) {
+      return "SINGLE_DEPARTMENT_VIOLATION";
+    }
+    if (errors.some((e) => e.includes("临时"))) {
+      return "TEMPORARY_ASSIGNMENT_CONFLICT";
+    }
+    if (errors.some((e) => e.includes("权限"))) {
+      return "PERMISSION_CONFLICT";
+    }
+    if (errors.some((e) => e.includes("角色"))) {
+      return "ROLE_CONFLICT";
+    }
+    return "UNKNOWN_CONFLICT";
+  }
+
+  /**
+   * 获取用户分配规则
+   *
+   * @returns 用户分配规则
+   */
+  getUserAssignmentRules(): UserAssignmentRules {
+    return this._userAssignmentRules;
+  }
+
+  /**
+   * 更新用户分配规则
+   *
+   * @param rules - 新的用户分配规则
+   */
+  updateUserAssignmentRules(rules: UserAssignmentRules): void {
+    this._userAssignmentRules = rules;
   }
 }

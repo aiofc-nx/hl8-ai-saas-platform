@@ -1,4 +1,4 @@
-import { UseCase } from "@hl8/application-kernel";
+import { BaseUseCase } from "@hl8/application-kernel";
 import { UserId } from "../../domain/value-objects/user-id.vo.js";
 import { RoleId } from "../../domain/value-objects/role-id.vo.js";
 import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
@@ -26,19 +26,28 @@ export interface AssignPermissionCommand {
  * @description 处理权限管理的业务用例
  * @since 1.0.0
  */
-export class PermissionManagementUseCase
-  implements UseCase<AssignPermissionCommand, CaslAbility>
-{
-  constructor(private readonly caslAbilityFactory: CaslAbilityFactory) {}
+export class PermissionManagementUseCase extends BaseUseCase<
+  AssignPermissionCommand,
+  CaslAbility
+> {
+  constructor(private readonly caslAbilityFactory: CaslAbilityFactory) {
+    super("PermissionManagementUseCase", "处理权限管理的业务用例", "1.0.0", [
+      "permission:assign",
+    ]);
+  }
 
   /**
-   * 执行权限分配用例
+   * 执行用例逻辑
    *
    * @param command - 权限分配命令
+   * @param _context - 用例执行上下文
    * @returns CASL权限能力实体
    * @throws {Error} 当用例执行失败时抛出错误
    */
-  async execute(command: AssignPermissionCommand): Promise<CaslAbility> {
+  protected async executeUseCase(
+    command: AssignPermissionCommand,
+    _context: unknown,
+  ): Promise<CaslAbility> {
     try {
       // 验证命令
       this.validateCommand(command);
@@ -86,14 +95,5 @@ export class PermissionManagementUseCase
     if (!command.context) {
       throw new Error("隔离上下文不能为空");
     }
-  }
-
-  /**
-   * 获取用例类型
-   *
-   * @returns 用例类型
-   */
-  getUseCaseType(): string {
-    return "PermissionManagementUseCase";
   }
 }

@@ -10,3 +10,6 @@ export * from "./dto/index.js";
 
 // 控制器
 export * from "./controllers/index.js";
+
+// 守卫
+export * from "./guards/index.js";

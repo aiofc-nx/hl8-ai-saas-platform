@@ -13,6 +13,22 @@ import {
   TenantType,
   TenantStatus,
 } from "../value-objects/index.js";
+import { TrialPeriodConfig } from "../value-objects/trial-period-config.vo.js";
+import {
+  TrialPeriodService,
+  TrialPeriodStatus,
+} from "../services/trial-period.service.js";
+import { TrialExpiredEvent } from "../events/trial-expired.event.js";
+import { TenantCreationRules } from "../services/tenant-creation-rules.service.js";
+import { TenantCreationValidationFailedEvent } from "../events/tenant-creation-validation-failed.event.js";
+import { ResourceMonitoringService } from "../services/resource-monitoring.service.js";
+import {
+  ResourceUsage,
+  ResourceType,
+} from "../value-objects/resource-usage.vo.js";
+import { ResourceLimits } from "../value-objects/resource-limits.vo.js";
+import { ResourceLimitExceededEvent } from "../events/resource-limit-exceeded.event.js";
+import { ResourceUsageWarningEvent } from "../events/resource-usage-warning.event.js";
 
 /**
  * 租户聚合根
@@ -33,6 +49,10 @@ import {
  */
 export class TenantAggregate extends AggregateRoot {
   private _tenant: Tenant;
+  private _trialPeriodService: TrialPeriodService;
+  private _trialPeriodConfig: TrialPeriodConfig;
+  private _tenantCreationRules: TenantCreationRules;
+  private _resourceMonitoringService: ResourceMonitoringService;
 
   constructor(
     id: EntityId,
@@ -47,6 +67,7 @@ export class TenantAggregate extends AggregateRoot {
     subscriptionStartDate?: Date,
     subscriptionEndDate?: Date,
     settings: Record<string, any> = {},
+    trialPeriodConfig?: TrialPeriodConfig,
   ) {
     super(id);
 
@@ -64,6 +85,12 @@ export class TenantAggregate extends AggregateRoot {
       subscriptionEndDate,
       settings,
     );
+
+    this._trialPeriodConfig =
+      trialPeriodConfig || TrialPeriodConfig.createDefault();
+    this._trialPeriodService = new TrialPeriodService(this._trialPeriodConfig);
+    this._tenantCreationRules = new TenantCreationRules();
+    this._resourceMonitoringService = new ResourceMonitoringService();
   }
 
   /**
@@ -344,5 +371,571 @@ export class TenantAggregate extends AggregateRoot {
    */
   toString(): string {
     return `TenantAggregate(${this._tenant.toString()})`;
+  }
+
+  /**
+   * 获取试用期信息
+   *
+   * @param userId - 用户ID
+   * @returns 试用期信息
+   */
+  async getTrialPeriodInfo(userId: string): Promise<{
+    readonly status: TrialPeriodStatus;
+    readonly daysRemaining: number;
+    readonly gracePeriodDays: number;
+    readonly isExpired: boolean;
+    readonly isInGracePeriod: boolean;
+  }> {
+    const info = await this._trialPeriodService.getTrialPeriodInfo(
+      this._tenant.id,
+      new UserId(userId),
+      this._tenant.createdAt,
+      this._trialPeriodConfig,
+    );
+
+    return {
+      status: info.status,
+      daysRemaining: info.daysRemaining,
+      gracePeriodDays: this._trialPeriodConfig.gracePeriodDays,
+      isExpired: info.status === TrialPeriodStatus.EXPIRED,
+      isInGracePeriod: info.status === TrialPeriodStatus.GRACE_PERIOD,
+    };
+  }
+
+  /**
+   * 检查试用期是否即将到期
+   *
+   * @param userId - 用户ID
+   * @returns 是否即将到期
+   */
+  async isTrialExpiringSoon(userId: string): Promise<boolean> {
+    return await this._trialPeriodService.shouldSendReminder(
+      this._tenant.id,
+      new UserId(userId),
+      this._tenant.createdAt,
+      this._trialPeriodConfig,
+    );
+  }
+
+  /**
+   * 处理试用期过期
+   *
+   * @param userId - 用户ID
+   * @returns 处理结果
+   */
+  async handleTrialExpiration(userId: string): Promise<{
+    readonly shouldSuspend: boolean;
+    readonly shouldNotify: boolean;
+    readonly gracePeriodDays: number;
+  }> {
+    const result = await this._trialPeriodService.handleTrialExpiration(
+      this._tenant.id,
+      new UserId(userId),
+      this._tenant.createdAt,
+      this._trialPeriodConfig,
+    );
+
+    if (result.shouldSuspend) {
+      this.suspend("试用期过期");
+    }
+
+    // 发布试用期过期事件
+    const trialInfo = await this._trialPeriodService.getTrialPeriodInfo(
+      this._tenant.id,
+      new UserId(userId),
+      this._tenant.createdAt,
+      this._trialPeriodConfig,
+    );
+
+    this.addDomainEvent(
+      new TrialExpiredEvent({
+        tenantId: this._tenant.id,
+        userId: new UserId(userId),
+        expiredAt: new Date(),
+        trialStartDate: this._tenant.createdAt,
+        trialEndDate: trialInfo.endDate,
+        gracePeriodDays: this._trialPeriodConfig.gracePeriodDays,
+        status: TrialPeriodStatus.EXPIRED,
+        metadata: { source: "automatic", reason: "trial_expired" },
+      }),
+    );
+
+    return result;
+  }
+
+  /**
+   * 发送试用期到期提醒
+   *
+   * @param userId - 用户ID
+   * @returns 是否发送成功
+   */
+  async sendTrialExpirationReminder(userId: string): Promise<boolean> {
+    return await this._trialPeriodService.sendExpirationReminder(
+      this._tenant.id,
+      new UserId(userId),
+      this._tenant.createdAt,
+      this._trialPeriodConfig,
+    );
+  }
+
+  /**
+   * 检查是否需要清理试用期数据
+   *
+   * @param userId - 用户ID
+   * @returns 是否需要清理
+   */
+  async shouldCleanupTrialData(userId: string): Promise<boolean> {
+    return await this._trialPeriodService.shouldCleanupTrialData(
+      this._tenant.id,
+      new UserId(userId),
+      this._tenant.createdAt,
+      this._trialPeriodConfig,
+    );
+  }
+
+  /**
+   * 清理试用期数据
+   *
+   * @param userId - 用户ID
+   * @returns 清理结果
+   */
+  async cleanupTrialData(userId: string): Promise<{
+    readonly success: boolean;
+    readonly cleanedData: readonly string[];
+    readonly errors: readonly string[];
+  }> {
+    return await this._trialPeriodService.cleanupTrialData(
+      this._tenant.id,
+      new UserId(userId),
+      this._tenant.createdAt,
+      this._trialPeriodConfig,
+    );
+  }
+
+  /**
+   * 获取试用期配置
+   *
+   * @returns 试用期配置
+   */
+  getTrialPeriodConfig(): TrialPeriodConfig {
+    return this._trialPeriodConfig;
+  }
+
+  /**
+   * 更新试用期配置
+   *
+   * @param config - 新的试用期配置
+   */
+  updateTrialPeriodConfig(config: TrialPeriodConfig): void {
+    this._trialPeriodConfig = config;
+    this._trialPeriodService = new TrialPeriodService(config);
+  }
+
+  /**
+   * 验证租户创建
+   *
+   * @param existingTenants - 现有租户列表
+   * @returns 验证结果
+   */
+  async validateTenantCreation(
+    existingTenants: readonly {
+      readonly code: string;
+      readonly name: string;
+      readonly type: TenantType;
+      readonly domain?: string;
+      readonly createdBy: string;
+    }[],
+  ): Promise<{
+    readonly isValid: boolean;
+    readonly errors: readonly string[];
+    readonly warnings?: readonly string[];
+    readonly suggestions?: readonly string[];
+  }> {
+    const validation = await this._tenantCreationRules.validateTenantCreation(
+      {
+        usercode: this._tenant.code,
+        name: this._tenant.name,
+        type: this._tenant.type,
+        domain: this._tenant.domain,
+        createdBy: this._tenant.createdBy,
+      },
+      existingTenants,
+    );
+
+    if (!validation.isValid) {
+      // 发布租户创建验证失败事件
+      this.addDomainEvent(
+        new TenantCreationValidationFailedEvent({
+          tenantCode: this._tenant.code,
+          tenantName: this._tenant.name,
+          tenantType: this._tenant.type,
+          domain: this._tenant.domain,
+          createdBy: this._tenant.createdBy,
+          validationErrors: validation.errors,
+          validationWarnings: validation.warnings,
+          validationSuggestions: validation.suggestions,
+          failedAt: new Date(),
+          metadata: { source: "automatic", reason: "validation_failed" },
+        }),
+      );
+    }
+
+    return validation;
+  }
+
+  /**
+   * 检查租户创建是否被允许
+   *
+   * @param existingTenants - 现有租户列表
+   * @returns 是否允许创建
+   */
+  async isTenantCreationAllowed(
+    existingTenants: readonly {
+      readonly code: string;
+      readonly name: string;
+      readonly type: TenantType;
+      readonly domain?: string;
+      readonly createdBy: string;
+    }[],
+  ): Promise<boolean> {
+    return await this._tenantCreationRules.isTenantCreationAllowed(
+      {
+        usercode: this._tenant.code,
+        name: this._tenant.name,
+        type: this._tenant.type,
+        domain: this._tenant.domain,
+        createdBy: this._tenant.createdBy,
+      },
+      existingTenants,
+    );
+  }
+
+  /**
+   * 获取租户创建建议
+   *
+   * @param existingTenants - 现有租户列表
+   * @returns 创建建议
+   */
+  async getTenantCreationSuggestions(
+    existingTenants: readonly {
+      readonly code: string;
+      readonly name: string;
+      readonly type: TenantType;
+      readonly domain?: string;
+      readonly createdBy: string;
+    }[],
+  ): Promise<{
+    readonly codeSuggestions: readonly string[];
+    readonly domainSuggestions: readonly string[];
+    readonly typeSuggestions: readonly TenantType[];
+  }> {
+    return await this._tenantCreationRules.getTenantCreationSuggestions(
+      {
+        usercode: this._tenant.code,
+        name: this._tenant.name,
+        type: this._tenant.type,
+        domain: this._tenant.domain,
+        createdBy: this._tenant.createdBy,
+      },
+      existingTenants,
+    );
+  }
+
+  /**
+   * 获取租户创建统计信息
+   *
+   * @param existingTenants - 现有租户列表
+   * @returns 统计信息
+   */
+  getTenantCreationStatistics(
+    existingTenants: readonly {
+      readonly code: string;
+      readonly name: string;
+      readonly type: TenantType;
+      readonly domain?: string;
+      readonly createdBy: string;
+    }[],
+  ): {
+    readonly totalTenants: number;
+    readonly tenantsByType: Record<TenantType, number>;
+    readonly tenantsByUser: Record<string, number>;
+    readonly tenantsByDomain: Record<string, number>;
+  } {
+    return this._tenantCreationRules.getTenantCreationStatistics(
+      existingTenants,
+    );
+  }
+
+  /**
+   * 获取资源使用情况
+   *
+   * @param resourceType - 资源类型
+   * @returns 资源使用情况
+   */
+  async getResourceUsage(resourceType: ResourceType): Promise<ResourceUsage> {
+    return await this._resourceMonitoringService.getResourceUsage(
+      this._tenant.id,
+      resourceType,
+    );
+  }
+
+  /**
+   * 更新资源使用情况
+   *
+   * @param resourceType - 资源类型
+   * @param currentUsage - 当前使用量
+   * @param maxLimit - 最大限制
+   * @returns 更新后的资源使用情况
+   */
+  async updateResourceUsage(
+    resourceType: ResourceType,
+    currentUsage: number,
+    maxLimit: number,
+  ): Promise<ResourceUsage> {
+    return await this._resourceMonitoringService.updateResourceUsage(
+      this._tenant.id,
+      resourceType,
+      currentUsage,
+      maxLimit,
+    );
+  }
+
+  /**
+   * 检查资源限制
+   *
+   * @param resourceType - 资源类型
+   * @param limits - 资源限制
+   * @returns 限制检查结果
+   */
+  async checkResourceLimits(
+    resourceType: ResourceType,
+    limits: ResourceLimits,
+  ): Promise<{
+    readonly isOverHardLimit: boolean;
+    readonly isOverSoftLimit: boolean;
+    readonly isOverWarningLimit: boolean;
+    readonly isOverEmergencyLimit: boolean;
+    readonly limitLevel:
+      | "NORMAL"
+      | "WARNING"
+      | "SOFT_LIMIT"
+      | "EMERGENCY"
+      | "HARD_LIMIT";
+    readonly percentage: number;
+    readonly remainingCapacity: number;
+    readonly needsExpansion: boolean;
+    readonly needsEmergencyExpansion: boolean;
+  }> {
+    const usage = await this.getResourceUsage(resourceType);
+    const result = await this._resourceMonitoringService.checkResourceLimits(
+      usage,
+      limits,
+    );
+
+    // 发布相应的事件
+    if (result.isOverHardLimit) {
+      this.addDomainEvent(
+        ResourceLimitExceededEvent.createHardLimitExceeded(
+          this._tenant.id,
+          resourceType,
+          usage.currentUsage,
+          limits.getHardLimit(),
+          usage.currentUsage - limits.getHardLimit(),
+          limits.autoExpansion,
+          limits.getExpansionRecommendation(usage.currentUsage),
+          { source: "automatic", category: "resource_monitoring" },
+        ),
+      );
+    } else if (result.isOverSoftLimit) {
+      this.addDomainEvent(
+        ResourceLimitExceededEvent.createSoftLimitExceeded(
+          this._tenant.id,
+          resourceType,
+          usage.currentUsage,
+          limits.getSoftLimit(),
+          usage.currentUsage - limits.getSoftLimit(),
+          limits.autoExpansion,
+          limits.getExpansionRecommendation(usage.currentUsage),
+          { source: "automatic", category: "resource_monitoring" },
+        ),
+      );
+    } else if (result.isOverWarningLimit) {
+      this.addDomainEvent(
+        ResourceLimitExceededEvent.createWarningLimitExceeded(
+          this._tenant.id,
+          resourceType,
+          usage.currentUsage,
+          limits.getWarningLimit(),
+          usage.currentUsage - limits.getWarningLimit(),
+          limits.autoExpansion,
+          limits.getExpansionRecommendation(usage.currentUsage),
+          { source: "automatic", category: "resource_monitoring" },
+        ),
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * 获取扩容建议
+   *
+   * @param resourceType - 资源类型
+   * @param limits - 资源限制
+   * @returns 扩容建议
+   */
+  async getExpansionRecommendation(
+    resourceType: ResourceType,
+    limits: ResourceLimits,
+  ): Promise<{
+    readonly recommendedLimit: number;
+    readonly expansionFactor: number;
+    readonly reason: string;
+    readonly urgency: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+    readonly estimatedCost: number;
+  }> {
+    const usage = await this.getResourceUsage(resourceType);
+    return await this._resourceMonitoringService.getExpansionRecommendation(
+      usage,
+      limits,
+    );
+  }
+
+  /**
+   * 监控资源使用趋势
+   *
+   * @param resourceType - 资源类型
+   * @param timeRange - 时间范围（小时）
+   * @returns 使用趋势
+   */
+  async monitorResourceTrend(
+    resourceType: ResourceType,
+    timeRange: number = 24,
+  ): Promise<{
+    readonly currentUsage: number;
+    readonly previousUsage: number;
+    readonly growth: number;
+    readonly growthPercentage: number;
+    readonly trend: "INCREASING" | "DECREASING" | "STABLE";
+    readonly projectedUsage: number;
+    readonly timeToLimit: number;
+  }> {
+    return await this._resourceMonitoringService.monitorResourceTrend(
+      this._tenant.id,
+      resourceType,
+      timeRange,
+    );
+  }
+
+  /**
+   * 获取资源使用统计
+   *
+   * @returns 资源使用统计
+   */
+  async getResourceStatistics(): Promise<{
+    readonly totalResources: number;
+    readonly resourcesByType: Record<ResourceType, number>;
+    readonly resourcesOverLimit: number;
+    readonly resourcesNearLimit: number;
+    readonly averageUsagePercentage: number;
+    readonly totalCost: number;
+  }> {
+    return await this._resourceMonitoringService.getResourceStatistics(
+      this._tenant.id,
+    );
+  }
+
+  /**
+   * 检查资源使用警告
+   *
+   * @param resourceType - 资源类型
+   * @param limits - 资源限制
+   * @returns 警告检查结果
+   */
+  async checkResourceWarnings(
+    resourceType: ResourceType,
+    limits: ResourceLimits,
+  ): Promise<{
+    readonly hasWarning: boolean;
+    readonly warningType?:
+      | "APPROACHING_LIMIT"
+      | "NEAR_LIMIT"
+      | "CRITICAL_THRESHOLD";
+    readonly warningLevel?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    readonly usagePercentage: number;
+    readonly remainingCapacity: number;
+    readonly estimatedTimeToLimit: number;
+  }> {
+    const usage = await this.getResourceUsage(resourceType);
+    const trend = await this.monitorResourceTrend(resourceType);
+
+    let hasWarning = false;
+    let warningType:
+      | "APPROACHING_LIMIT"
+      | "NEAR_LIMIT"
+      | "CRITICAL_THRESHOLD"
+      | undefined;
+    let warningLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | undefined;
+
+    if (usage.usagePercentage >= 95) {
+      hasWarning = true;
+      warningType = "CRITICAL_THRESHOLD";
+      warningLevel = "CRITICAL";
+    } else if (usage.usagePercentage >= 85) {
+      hasWarning = true;
+      warningType = "NEAR_LIMIT";
+      warningLevel = "HIGH";
+    } else if (usage.usagePercentage >= 75) {
+      hasWarning = true;
+      warningType = "APPROACHING_LIMIT";
+      warningLevel = "MEDIUM";
+    }
+
+    if (hasWarning) {
+      // 发布资源使用警告事件
+      this.addDomainEvent(
+        ResourceUsageWarningEvent.create(
+          this._tenant.id,
+          resourceType,
+          usage.currentUsage,
+          usage.maxLimit,
+          usage.usagePercentage,
+          limits.expansionThreshold,
+          warningType!,
+          usage.getRemainingCapacity(),
+          trend.timeToLimit,
+          limits.autoExpansion,
+          limits.getExpansionRecommendation(usage.currentUsage),
+          { source: "automatic", category: "resource_monitoring" },
+        ),
+      );
+    }
+
+    return {
+      hasWarning,
+      warningType,
+      warningLevel,
+      usagePercentage: usage.usagePercentage,
+      remainingCapacity: usage.getRemainingCapacity(),
+      estimatedTimeToLimit: trend.timeToLimit,
+    };
+  }
+
+  /**
+   * 获取资源监控服务
+   *
+   * @returns 资源监控服务
+   */
+  getResourceMonitoringService(): ResourceMonitoringService {
+    return this._resourceMonitoringService;
+  }
+
+  /**
+   * 更新资源监控服务
+   *
+   * @param service - 新的资源监控服务
+   */
+  updateResourceMonitoringService(service: ResourceMonitoringService): void {
+    this._resourceMonitoringService = service;
   }
 }

@@ -1,9 +1,9 @@
-import { CaslAbility } from "../../domain/entities/casl-ability.entity.js";
-import { CaslAbilityId } from "../../domain/value-objects/casl-ability-id.vo.js";
-import { UserId } from "../../domain/value-objects/user-id.vo.js";
-import { RoleId } from "../../domain/value-objects/role-id.vo.js";
-import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
-import { CaslCondition } from "../../domain/value-objects/casl-condition.vo.js";
+import { CaslAbility } from "../entities/casl-ability.entity.js";
+import { CaslAbilityId } from "../value-objects/casl-ability-id.vo.js";
+import { UserId } from "../value-objects/user-id.vo.js";
+import { RoleId } from "../value-objects/role-id.vo.js";
+import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import { CaslCondition } from "../value-objects/casl-condition.vo.js";
 import { AuditInfo } from "@hl8/domain-kernel";
 
 /**

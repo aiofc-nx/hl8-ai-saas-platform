@@ -1,350 +1,511 @@
-# Implementation Tasks: SAAS Core Module with CASL Permission System
+# Implementation Tasks: SAAS Core Kernel Alignment & Enhancements
 
-**Feature**: SAAS Core Module Specification Documentation  
+**Feature**: SAAS Core Kernel Alignment & Enhancements  
 **Branch**: `005-spec-documentation`  
 **Created**: 2024-12-19  
-**Total Tasks**: 140
+**Updated**: 2024-12-19  
+**Total Tasks**: 160
 
 ## Summary
 
-Implementation tasks for SAAS Core module with integrated CASL (Code Access Security Library) permission system following Clean Architecture + DDD + CQRS + Event Sourcing + Event-Driven Architecture patterns. Tasks are organized by user story priority (P1, P2, P3) and follow the domain >> application >> infrastructure >> interface development sequence with comprehensive CASL integration across all 8 subdomains.
+Comprehensive implementation tasks for SAAS Core module including domain layer enhancements, infrastructure kernel alignment, and application kernel alignment. Tasks are organized to ensure proper integration with existing kernel modules (domain-kernel, application-kernel, infrastructure-kernel) while completing domain layer functionality and aligning all layers to established patterns.
 
 ## Dependencies
 
-### User Story Completion Order
+### Phase Completion Order
 
-1. **User Story 1** (P1) - Multi-Tenant Architecture Documentation
-2. **User Story 2** (P1) - Tenant Lifecycle Management Documentation
-3. **User Story 3** (P1) - Organization and Department Structure Documentation
-4. **User Story 4** (P1) - Permission and Access Control Documentation
-5. **User Story 5** (P2) - Business Rules and Validation Documentation
-6. **User Story 6** (P2) - API and Integration Documentation
-7. **User Story 7** (P2) - Event-Driven Architecture Documentation
-8. **User Story 8** (P3) - Data Model and Entity Documentation
-9. **User Story 9** (P3) - Testing Strategy Documentation
-10. **User Story 10** (P3) - Deployment and Operations Documentation
+1. **Phase 1-3**: Domain Layer Enhancements (High, Medium, Low priority)
+2. **Phase 4**: Domain Layer Integration and Validation
+3. **Phase 5**: Domain Layer Testing and Quality Assurance
+4. **Phase 6**: Infrastructure Kernel Alignment
+5. **Phase 7**: Application Kernel Alignment
+6. **Phase 8**: Interface Kernel Alignment
+
+### Critical Dependencies
+
+- **Phase 6 (Infrastructure)** depends on Phase 4 (Domain Integration) completion
+- **Phase 7 (Application)** depends on Phase 6 (Infrastructure) completion
+- **Phase 8 (Interface)** depends on Phase 7 (Application) completion
+- **Phase 5 (Testing)** can run in parallel with Phase 6-8
 
 ### Parallel Execution Opportunities
 
-- **Domain Layer**: Value objects, entities, aggregates, and CASL entities can be developed in parallel
-- **Application Layer**: Commands, queries, handlers, and CASL abilities can be developed in parallel
-- **Infrastructure Layer**: Repository implementations, persistence entities, and CASL infrastructure can be developed in parallel
-- **Interface Layer**: Controllers, DTOs, guards, and CASL permission guards can be developed in parallel
-- **CASL Integration**: CASL permission system components can be developed in parallel across all layers
+- **Value Objects**: All value objects can be developed in parallel
+- **Domain Services**: Business logic services can be developed in parallel
+- **Domain Events**: Event definitions can be developed in parallel
+- **Business Rules**: Validation and constraint logic can be developed in parallel
+- **MikroORM Entities**: All entities can be developed in parallel
+- **Entity Mappers**: All mappers can be developed in parallel
+- **Commands**: All commands can be updated in parallel
+- **Queries**: All queries can be updated in parallel
+- **Handlers**: All handlers can be updated in parallel
+- **Controllers**: All controllers can be updated in parallel
+- **Guards**: All guards can be created in parallel
 
-## Phase 1: Project Setup
+## Phase 1: High Priority Domain Layer Enhancements
 
 ### Story Goal
 
-Initialize the SAAS Core module project structure and configuration following monorepo standards.
+Complete the core domain layer functionality to support essential business requirements including trial period management, tenant creation validation, and user-organization assignment rules.
 
 ### Independent Test Criteria
 
-Project can be built successfully with TypeScript compilation and all dependencies resolved.
+Domain layer supports all essential business rules and constraints defined in the business requirements document.
 
 ### Implementation Tasks
 
-- [x] T001 Create project structure per implementation plan in libs/saas-core/
-- [x] T002 Create package.json with TypeScript 5.9.2, Node.js >= 20, and CASL dependencies configuration
-- [x] T003 Create tsconfig.json extending monorepo root configuration
-- [x] T004 Create eslint.config.mjs extending root configuration
-- [x] T005 [P] Create README.md with project overview and CASL integration setup instructions
-- [x] T006 [P] Create .gitignore file with appropriate exclusions
-- [x] T007 [P] Create src/ directory structure with domain/, application/, infrastructure/, interface/ subdirectories
-- [x] T008 [P] Create tests/ directory structure with unit/, integration/, e2e/ subdirectories
-- [x] T009 [P] Install and configure CASL dependencies (@casl/ability, @casl/prisma, @casl/mongoose)
-- [x] T010 [P] Create CASL configuration and setup files
+#### Trial Period Management
 
-## Phase 2: Foundational Tasks
+- [x] T001 [P] [US1] Create TrialPeriodConfig value object in src/domain/value-objects/trial-period-config.vo.ts
+- [x] T002 [P] [US1] Create TrialPeriodService domain service in src/domain/services/trial-period.service.ts
+- [x] T003 [US1] Add trial period calculation logic to TenantAggregate in src/domain/aggregates/tenant.aggregate.ts
+- [x] T004 [US1] Create TrialExpiredEvent domain event in src/domain/events/trial-expired.event.ts
+- [x] T005 [US1] Create TrialExpirationHandler domain service in src/domain/services/trial-expiration.handler.service.ts
+
+#### Tenant Creation Business Rules
+
+- [x] T006 [P] [US1] Create TenantCodeValidator domain service in src/domain/services/tenant-code-validator.service.ts
+- [x] T007 [P] [US1] Create DomainValidator domain service in src/domain/services/domain-validator.service.ts
+- [x] T008 [US1] Add tenant creation validation logic to TenantAggregate in src/domain/aggregates/tenant.aggregate.ts
+- [x] T009 [US1] Create TenantCreationRules domain service in src/domain/services/tenant-creation-rules.service.ts
+- [x] T010 [US1] Create TenantCreationValidationFailedEvent domain event in src/domain/events/tenant-creation-validation-failed.event.ts
+
+#### User-Organization Assignment Rules
+
+- [x] T011 [P] [US1] Create UserAssignmentRules domain service in src/domain/services/user-assignment-rules.service.ts
+- [x] T012 [US1] Create UserOrganizationAssignment value object in src/domain/value-objects/user-organization-assignment.vo.ts
+- [x] T013 [US1] Create UserDepartmentAssignment value object in src/domain/value-objects/user-department-assignment.vo.ts
+- [x] T014 [US1] Add user assignment validation logic to OrganizationAggregate in src/domain/aggregates/organization.aggregate.ts
+- [x] T015 [US1] Create UserAssignmentConflictEvent domain event in src/domain/events/user-assignment-conflict.event.ts
+
+## Phase 2: Medium Priority Domain Layer Enhancements
 
 ### Story Goal
 
-Establish core infrastructure and shared components required for all user stories.
+Enhance the domain layer with advanced features including tenant name review, resource limit monitoring, and improved business rules.
 
 ### Independent Test Criteria
 
-Core infrastructure components are properly configured and can be imported by other modules.
+Domain layer supports advanced business features and provides comprehensive business rule validation.
 
 ### Implementation Tasks
 
-- [x] T011 [P] Integrate existing domain-kernel infrastructure for shared domain components
-- [x] T012 [P] Remove duplicate base components and leverage domain-kernel
-- [x] T013 [P] Configure domain-kernel dependencies in package.json
-- [x] T014 [P] Update project structure to extend domain-kernel
-- [x] T014A [P] Integrate existing application-kernel infrastructure for CQRS components
-- [x] T014B [P] Configure application-kernel dependencies and leverage BaseCommand/BaseQuery
-- [x] T014C [P] Update application layer structure to extend application-kernel
-- [x] T014D [P] Integrate existing infrastructure-kernel infrastructure for repository adapters
-- [x] T014E [P] Configure infrastructure-kernel dependencies and leverage BaseRepositoryAdapter
-- [x] T014F [P] Update infrastructure layer structure to extend infrastructure-kernel
-- [x] T014G [P] Integrate existing interface-kernel infrastructure for controllers and guards
-- [x] T014H [P] Configure interface-kernel dependencies and leverage controllers/guards/middleware
-- [x] T014I [P] Update interface layer structure to extend interface-kernel
-- [x] T014J [P] Integrate existing NestJS infrastructure libraries (@hl8/nestjs-fastify, @hl8/caching, @hl8/database, @hl8/messaging, @hl8/config, @hl8/exceptions, @hl8/nestjs-isolation)
-- [x] T014K [P] Configure NestJS infrastructure dependencies and prioritize existing libraries
-- [x] T014L [P] Update project structure to leverage existing NestJS infrastructure libraries
-- [ ] T015 [P] Configure MikroORM entities and database connection
-- [ ] T016 [P] Configure Redis caching setup
-- [ ] T017 [P] Configure event bus and event store infrastructure
-- [ ] T018 [P] Configure logging and monitoring infrastructure
-- [ ] T019 [P] Configure CASL ability factory and repository infrastructure
-- [ ] T020 [P] Create CASL permission context and isolation management
+#### Tenant Name Review System
 
-## Phase 3: User Story 1 - Multi-Tenant Architecture Documentation
+- [x] T016 [P] [US2] Create TenantNameReviewRequest value object in src/domain/value-objects/tenant-name-review-request.vo.ts
+- [x] T017 [P] [US2] Create TenantNameReviewStatus value object in src/domain/value-objects/tenant-name-review-status.vo.ts
+- [x] T018 [US2] Create TenantNameReviewService domain service in src/domain/services/tenant-name-review.service.ts
+- [x] T019 [US2] Create TenantNameReviewRules domain service in src/domain/services/tenant-name-review-rules.service.ts
+- [x] T020 [US2] Create TenantNameReviewRequestedEvent domain event in src/domain/events/tenant-name-review-requested.event.ts
+- [x] T021 [US2] Create TenantNameReviewCompletedEvent domain event in src/domain/events/tenant-name-review-completed.event.ts
 
-### Story Goal
+#### Resource Limit Monitoring
 
-Implement comprehensive multi-tenant architecture with 5-tier data isolation strategy.
+- [x] T022 [P] [US2] Create ResourceUsage value object in src/domain/value-objects/resource-usage.vo.ts
+- [x] T023 [P] [US2] Create ResourceLimits value object in src/domain/value-objects/resource-limits.vo.ts
+- [x] T024 [US2] Create ResourceMonitoringService domain service in src/domain/services/resource-monitoring.service.ts
+- [x] T025 [US2] Create ResourceLimitExceededEvent domain event in src/domain/events/resource-limit-exceeded.event.ts
+- [x] T026 [US2] Create ResourceUsageWarningEvent domain event in src/domain/events/resource-usage-warning.event.ts
+- [x] T027 [US2] Add resource monitoring logic to TenantAggregate in src/domain/aggregates/tenant.aggregate.ts
 
-### Independent Test Criteria
+#### Enhanced Permission Management
 
-Multi-tenant architecture supports Platform/Tenant/Organization/Department/User isolation levels with ROW_LEVEL_SECURITY as default strategy.
+- [x] T028 [P] [US2] Create PermissionTemplate value object in src/domain/value-objects/permission-template.vo.ts
+- [x] T029 [P] [US2] Create PermissionConflictDetector domain service in src/domain/services/permission-conflict-detector.service.ts
+- [x] T030 [US2] Create PermissionHierarchyManager domain service in src/domain/services/permission-hierarchy-manager.service.ts
+- [x] T031 [US2] Create PermissionTemplateService domain service in src/domain/services/permission-template.service.ts
+- [x] T032 [US2] Create PermissionConflictDetectedEvent domain event in src/domain/events/permission-conflict-detected.event.ts
 
-### Domain Layer Tasks
-
-- [x] T021 [US1] Create PlatformId value object in src/domain/value-objects/platform-id.vo.ts
-- [x] T022 [US1] Create TenantId value object in src/domain/value-objects/tenant-id.vo.ts
-- [x] T023 [US1] Create OrganizationId value object in src/domain/value-objects/organization-id.vo.ts
-- [x] T024 [US1] Create DepartmentId value object in src/domain/value-objects/department-id.vo.ts
-- [x] T025 [US1] Create UserId value object in src/domain/value-objects/user-id.vo.ts
-- [x] T026 [US1] Create IsolationContext value object in src/domain/value-objects/isolation-context.vo.ts
-- [x] T027 [US1] Create RoleId value object in src/domain/value-objects/role-id.vo.ts
-- [x] T028 [US1] Create CaslAbilityId value object in src/domain/value-objects/casl-ability-id.vo.ts
-- [x] T029 [US1] Create Platform entity in src/domain/entities/platform.entity.ts
-- [x] T030 [US1] Create Tenant entity in src/domain/entities/tenant.entity.ts
-- [x] T031 [US1] Create Organization entity in src/domain/entities/organization.entity.ts
-- [x] T032 [US1] Create Department entity in src/domain/entities/department.entity.ts
-- [x] T033 [US1] Create User entity in src/domain/entities/user.entity.ts
-- [x] T034 [US1] Create Role entity in src/domain/entities/role.entity.ts
-- [x] T035 [US1] Create CaslAbility entity in src/domain/entities/casl-ability.entity.ts
-
-### Application Layer Tasks
-
-- [x] T036 [US1] Create GetTenantQuery in src/application/queries/get-tenant.query.ts
-- [x] T037 [US1] Create ListTenantsQuery in src/application/queries/list-tenants.query.ts
-- [x] T038 [US1] Create GetTenantHandler in src/application/handlers/get-tenant.handler.ts
-- [x] T039 [US1] Create ListTenantsHandler in src/application/handlers/list-tenants.handler.ts
-- [ ] T040 [US1] Create CheckPermissionQuery in src/application/queries/check-permission.query.ts
-- [ ] T041 [US1] Create CheckPermissionHandler in src/application/handlers/check-permission.handler.ts
-
-### Infrastructure Layer Tasks
-
-- [ ] T042 [US1] Create TenantRepository interface in src/domain/repositories/tenant.repository.ts
-- [x] T043 [US1] Create TenantRepositoryImpl in src/infrastructure/repositories/tenant.repository.impl.ts
-- [ ] T044 [US1] Create TenantEntity in src/infrastructure/persistence/tenant.entity.ts
-- [ ] T045 [US1] Create OrganizationRepository interface in src/domain/repositories/organization.repository.ts
-- [ ] T046 [US1] Create OrganizationRepositoryImpl in src/infrastructure/repositories/organization.repository.impl.ts
-- [ ] T047 [US1] Create OrganizationEntity in src/infrastructure/persistence/organization.entity.ts
-- [ ] T048 [US1] Create CaslAbilityRepository interface in src/domain/repositories/casl-ability.repository.ts
-- [ ] T049 [US1] Create CaslAbilityRepositoryImpl in src/infrastructure/repositories/casl-ability.repository.impl.ts
-- [ ] T050 [US1] Create CaslAbilityEntity in src/infrastructure/persistence/casl-ability.entity.ts
-
-### Interface Layer Tasks
-
-- [ ] T051 [US1] Create TenantController in src/interface/controllers/tenant.controller.ts
-- [ ] T052 [US1] Create TenantIsolationGuard in src/interface/guards/tenant-isolation.guard.ts
-- [ ] T053 [US1] Create CaslAbilityGuard in src/interface/guards/casl-ability.guard.ts
-- [ ] T054 [US1] Create CreateTenantDto in src/interface/dto/create-tenant.dto.ts
-- [ ] T055 [US1] Create TenantResponseDto in src/interface/dto/tenant-response.dto.ts
-- [ ] T056 [US1] Create PermissionDto in src/interface/dto/permission.dto.ts
-
-## Phase 4: User Story 2 - Tenant Lifecycle Management Documentation
+## Phase 3: Low Priority Domain Layer Enhancements
 
 ### Story Goal
 
-Implement complete tenant lifecycle management including creation, status transitions, and deletion processes.
+Complete the domain layer with advanced features including department hierarchy configuration, platform user management, and performance optimizations.
 
 ### Independent Test Criteria
 
-Tenant lifecycle supports all 5 tenant types (FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM) with proper status transitions and resource limits.
-
-### Domain Layer Tasks
-
-- [ ] T057 [US2] Create TenantCode value object in src/domain/value-objects/tenant-code.vo.ts
-- [ ] T058 [US2] Create TenantName value object in src/domain/value-objects/tenant-name.vo.ts
-- [ ] T059 [US2] Create TenantType value object in src/domain/value-objects/tenant-type.vo.ts
-- [ ] T060 [US2] Create TenantStatus value object in src/domain/value-objects/tenant-status.vo.ts
-- [ ] T061 [US2] Create CaslRule value object in src/domain/value-objects/casl-rule.vo.ts
-- [ ] T062 [US2] Create CaslCondition value object in src/domain/value-objects/casl-condition.vo.ts
-- [ ] T063 [US2] Create RoleLevel value object in src/domain/value-objects/role-level.vo.ts
-- [x] T064 [US2] Create TenantAggregate in src/domain/aggregates/tenant.aggregate.ts
-- [x] T065 [US2] Create TenantCreatedEvent in src/domain/events/tenant-created.event.ts
-- [x] T066 [US2] Create TenantStatusChangedEvent in src/domain/events/tenant-status-changed.event.ts
-- [x] T067 [US2] Create TenantDeletedEvent in src/domain/events/tenant-deleted.event.ts
-- [x] T068 [US2] Create PermissionChangedEvent in src/domain/events/permission-changed.event.ts
-
-### Application Layer Tasks
-
-- [x] T069 [US2] Create CreateTenantCommand in src/application/commands/create-tenant.command.ts
-- [x] T070 [US2] Create UpdateTenantCommand in src/application/commands/update-tenant.command.ts
-- [ ] T071 [US2] Create DeleteTenantCommand in src/application/commands/delete-tenant.command.ts
-- [ ] T072 [US2] Create AssignPermissionCommand in src/application/commands/assign-permission.command.ts
-- [x] T073 [US2] Create CreateTenantHandler in src/application/handlers/create-tenant.handler.ts
-- [ ] T074 [US2] Create UpdateTenantHandler in src/application/handlers/update-tenant.handler.ts
-- [ ] T075 [US2] Create DeleteTenantHandler in src/application/handlers/delete-tenant.handler.ts
-- [ ] T076 [US2] Create AssignPermissionHandler in src/application/handlers/assign-permission.handler.ts
-- [x] T077 [US2] Create TenantCreationUseCase in src/application/use-cases/tenant-creation.use-case.ts
-- [x] T078 [US2] Create PermissionManagementUseCase in src/application/use-cases/permission-management.use-case.ts
-
-### Infrastructure Layer Tasks
-
-- [ ] T079 [US2] Create EventPublisher in src/infrastructure/events/event-publisher.ts
-- [ ] T080 [US2] Create EventStore in src/infrastructure/events/event-store.ts
-- [ ] T081 [US2] Create TenantCreatedEventHandler in src/infrastructure/events/tenant-created.event-handler.ts
-- [ ] T082 [US2] Create PermissionChangedEventHandler in src/infrastructure/events/permission-changed.event-handler.ts
-- [x] T083 [US2] Create CaslAbilityFactory in src/infrastructure/casl/casl-ability.factory.ts
-- [ ] T084 [US2] Create CaslAbilityService in src/infrastructure/casl/casl-ability.service.ts
-
-### Interface Layer Tasks
-
-- [x] T085 [US2] Create UpdateTenantDto in src/interface/dto/update-tenant.dto.ts
-- [ ] T086 [US2] Create TenantListResponseDto in src/interface/dto/tenant-list-response.dto.ts
-- [ ] T087 [US2] Create AssignPermissionDto in src/interface/dto/assign-permission.dto.ts
-
-## Phase 5: User Story 3 - Organization and Department Structure Documentation
-
-### Story Goal
-
-Implement hierarchical organization structure with 7-level department hierarchy and organization-department relationships.
-
-### Independent Test Criteria
-
-Organization and department structure supports 7-level department hierarchy with proper parent-child relationships and organization types.
-
-### Domain Layer Tasks
-
-- [ ] T088 [US3] Create OrganizationType value object in src/domain/value-objects/organization-type.vo.ts
-- [x] T089 [US3] Create OrganizationAggregate in src/domain/aggregates/organization.aggregate.ts
-- [x] T090 [US3] Create DepartmentAggregate in src/domain/aggregates/department.aggregate.ts
-- [ ] T091 [US3] Create OrganizationCreatedEvent in src/domain/events/organization-created.event.ts
-- [ ] T092 [US3] Create DepartmentCreatedEvent in src/domain/events/department-created.event.ts
-- [ ] T093 [US3] Create UserAssignedEvent in src/domain/events/user-assigned.event.ts
-
-### Application Layer Tasks
-
-- [ ] T094 [US3] Create CreateOrganizationCommand in src/application/commands/create-organization.command.ts
-- [ ] T095 [US3] Create CreateDepartmentCommand in src/application/commands/create-department.command.ts
-- [ ] T096 [US3] Create CreateOrganizationHandler in src/application/handlers/create-organization.handler.ts
-- [ ] T097 [US3] Create CreateDepartmentHandler in src/application/handlers/create-department.handler.ts
-- [ ] T098 [US3] Create TenantAbilities in src/application/abilities/tenant.abilities.ts
-- [ ] T099 [US3] Create OrganizationAbilities in src/application/abilities/organization.abilities.ts
-- [ ] T100 [US3] Create DepartmentAbilities in src/application/abilities/department.abilities.ts
-
-### Infrastructure Layer Tasks
-
-- [ ] T101 [US3] Create DepartmentRepository interface in src/domain/repositories/department.repository.ts
-- [ ] T102 [US3] Create DepartmentRepositoryImpl in src/infrastructure/repositories/department.repository.impl.ts
-- [ ] T103 [US3] Create DepartmentEntity in src/infrastructure/persistence/department.entity.ts
-- [ ] T104 [US3] Create UserRepository interface in src/domain/repositories/user.repository.ts
-- [ ] T105 [US3] Create UserRepositoryImpl in src/infrastructure/repositories/user.repository.impl.ts
-- [ ] T106 [US3] Create UserEntity in src/infrastructure/persistence/user.entity.ts
-
-### Interface Layer Tasks
-
-- [ ] T107 [US3] Create OrganizationController in src/interface/controllers/organization.controller.ts
-- [ ] T108 [US3] Create DepartmentController in src/interface/controllers/department.controller.ts
-- [ ] T109 [US3] Create PermissionController in src/interface/controllers/permission.controller.ts
-- [ ] T110 [US3] Create CreateOrganizationDto in src/interface/dto/create-organization.dto.ts
-- [ ] T111 [US3] Create CreateDepartmentDto in src/interface/dto/create-department.dto.ts
-- [ ] T112 [US3] Create UserAbilities in src/application/abilities/user.abilities.ts
-
-## Phase 6: User Story 4 - Permission and Access Control Documentation
-
-### Story Goal
-
-Implement permission and access control system with role hierarchies and multi-tenant security measures.
-
-### Independent Test Criteria
-
-Permission system supports PlatformAdmin → TenantAdmin → OrganizationAdmin → DepartmentAdmin → RegularUser hierarchy with proper inheritance and tenant isolation.
-
-### Domain Layer Tasks
-
-- [ ] T113 [US4] Create Permission value object in src/domain/value-objects/permission.vo.ts
-- [ ] T114 [US4] Create UserRole value object in src/domain/value-objects/user-role.vo.ts
-- [ ] T115 [US4] Create UserStatus value object in src/domain/value-objects/user-status.vo.ts
-- [ ] T116 [US4] Create PermissionVerificationService in src/domain/services/permission-verification.service.ts
-- [ ] T117 [US4] Create CaslAbilityService in src/domain/services/casl-ability.service.ts
-
-### Application Layer Tasks
-
-- [ ] T118 [US4] Create AssignUserRoleCommand in src/application/commands/assign-user-role.command.ts
-- [ ] T119 [US4] Create AssignUserRoleHandler in src/application/handlers/assign-user-role.handler.ts
-- [ ] T120 [US4] Create TenantUpgradeUseCase in src/application/use-cases/tenant-upgrade.use-case.ts
-- [ ] T121 [US4] Create TenantSuspensionUseCase in src/application/use-cases/tenant-suspension.use-case.ts
-
-### Infrastructure Layer Tasks
-
-- [ ] T122 [US4] Create PermissionGuard in src/interface/guards/permission.guard.ts
-
-### Interface Layer Tasks
-
-- [ ] T123 [US4] Create AssignUserRoleDto in src/interface/dto/assign-user-role.dto.ts
-
-## Phase 7: Polish & Cross-Cutting Concerns
-
-### Story Goal
-
-Complete the implementation with testing, documentation, and quality assurance.
-
-### Independent Test Criteria
-
-All components are properly tested, documented, and follow quality standards.
+Domain layer supports all advanced business features and provides optimal performance for complex scenarios.
 
 ### Implementation Tasks
 
-- [ ] T124 [P] Create unit tests for all domain entities and value objects
-- [ ] T125 [P] Create unit tests for all application handlers and use cases
-- [ ] T126 [P] Create integration tests for repository implementations
-- [ ] T127 [P] Create e2e tests for complete user workflows
-- [ ] T128 [P] Create unit tests for CASL permission system
-- [ ] T129 [P] Create integration tests for CASL permission system
-- [ ] T130 [P] Create e2e tests for CASL permission system
-- [ ] T131 [P] Create comprehensive API documentation
-- [ ] T132 [P] Create deployment and configuration documentation
-- [ ] T133 [P] Create troubleshooting and maintenance guides
-- [ ] T134 [P] Perform code quality review and refactoring
-- [ ] T135 [P] Create performance testing and optimization
-- [ ] T136 [P] Create security testing and validation
-- [ ] T137 [P] Create CASL permission system documentation
-- [ ] T138 [P] Create multi-tenant security testing
-- [ ] T139 [P] Create permission system performance testing
-- [ ] T140 [P] Create comprehensive testing documentation
+#### Department Hierarchy Configuration
+
+- [x] T033 [P] [US3] Create DepartmentLevelConfig value object in src/domain/value-objects/department-level-config.vo.ts
+- [x] T034 [P] [US3] Create DepartmentHierarchyManager domain service in src/domain/services/department-hierarchy-manager.service.ts
+- [x] T035 [US3] Create DepartmentLevelConfigService domain service in src/domain/services/department-level-config.service.ts
+- [ ] T036 [US3] Add department hierarchy validation logic to DepartmentAggregate in src/domain/aggregates/department.aggregate.ts
+- [x] T037 [US3] Create DepartmentHierarchyLimitExceededEvent domain event in src/domain/events/department-hierarchy-limit-exceeded.event.ts
+
+#### Platform User Management
+
+- [x] T038 [P] [US3] Create PlatformUser value object in src/domain/value-objects/platform-user.vo.ts
+- [x] T039 [P] [US3] Create TenantUser value object in src/domain/value-objects/tenant-user.vo.ts
+- [x] T040 [US3] Create UserIdentityManager domain service in src/domain/services/user-identity-manager.service.ts
+- [x] T041 [US3] Create UserTenantSwitcher domain service in src/domain/services/user-tenant-switcher.service.ts
+- [x] T042 [US3] Create UserIdentitySwitchedEvent domain event in src/domain/events/user-identity-switched.event.ts
+
+#### Performance Optimizations
+
+- [x] T043 [P] [US3] Create DomainCacheManager domain service in src/domain/services/domain-cache-manager.service.ts
+- [x] T044 [P] [US3] Create DomainQueryOptimizer domain service in src/domain/services/domain-query-optimizer.service.ts
+- [x] T045 [US3] Create DomainPerformanceMonitor domain service in src/domain/services/domain-performance-monitor.service.ts
+- [x] T046 [US3] Create DomainPerformanceEvent domain event in src/domain/events/domain-performance.event.ts
+
+## Phase 4: Domain Layer Integration and Validation
+
+### Story Goal
+
+Integrate all domain layer enhancements and ensure comprehensive business rule validation and domain event handling.
+
+### Independent Test Criteria
+
+All domain layer components work together seamlessly and support complete business workflows.
+
+### Implementation Tasks
+
+#### Domain Layer Integration
+
+- [x] T047 [P] [US4] Create DomainIntegrationService domain service in src/domain/services/domain-integration.service.ts
+- [x] T048 [US4] Create DomainValidationService domain service in src/domain/services/domain-validation.service.ts
+- [x] T049 [US4] Create DomainEventBus domain service in src/domain/services/domain-event-bus.service.ts
+- [x] T050 [US4] Create DomainBusinessRulesEngine domain service in src/domain/services/domain-business-rules-engine.service.ts
+
+#### Business Rules Validation
+
+- [x] T051 [P] [US4] Create TenantBusinessRules domain service in src/domain/services/tenant-business-rules.service.ts
+- [x] T052 [P] [US4] Create OrganizationBusinessRules domain service in src/domain/services/organization-business-rules.service.ts
+- [x] T053 [P] [US4] Create DepartmentBusinessRules domain service in src/domain/services/department-business-rules.service.ts
+- [x] T054 [P] [US4] Create UserBusinessRules domain service in src/domain/services/user-business-rules.service.ts
+- [x] T055 [US4] Create PermissionBusinessRules domain service in src/domain/services/permission-business-rules.service.ts
+
+#### Domain Event Handling
+
+- [x] T056 [P] [US4] Create DomainEventHandler domain service in src/domain/services/domain-event-handler.service.ts
+- [x] T057 [P] [US4] Create DomainEventPublisher domain service in src/domain/services/domain-event-publisher.service.ts
+- [x] T058 [US4] Create DomainEventSubscriber domain service in src/domain/services/domain-event-subscriber.service.ts
+- [x] T059 [US4] Create DomainEventStore domain service in src/domain/services/domain-event-store.service.ts
+
+## Phase 6: Infrastructure Kernel Alignment
+
+### Story Goal
+
+Align infrastructure layer code to extend and integrate with libs/infrastructure-kernel, ensuring all repositories, entities, and mappers properly implement the infrastructure kernel interfaces and base classes.
+
+### Independent Test Criteria
+
+All infrastructure layer components properly extend infrastructure-kernel base classes and integrate with existing kernel services (database, cache, isolation).
+
+### Implementation Tasks
+
+#### MikroORM Entities
+
+- [x] T086 [P] Create TenantEntity MikroORM entity in src/infrastructure/entities/tenant.entity.ts
+- [x] T087 [P] Create OrganizationEntity MikroORM entity in src/infrastructure/entities/organization.entity.ts
+- [x] T088 [P] Create DepartmentEntity MikroORM entity in src/infrastructure/entities/department.entity.ts
+- [x] T089 [P] Create UserEntity MikroORM entity in src/infrastructure/entities/user.entity.ts
+- [x] T090 [P] Create RoleEntity MikroORM entity in src/infrastructure/entities/role.entity.ts
+- [x] T091 Create entities index.ts in src/infrastructure/entities/index.ts
+
+#### Entity Mappers
+
+- [x] T092 [P] Create TenantMapper in src/infrastructure/mappers/tenant.mapper.ts with toDomain() and toEntity() methods
+- [ ] T093 [P] Create OrganizationMapper in src/infrastructure/mappers/organization.mapper.ts with toDomain() and toEntity() methods
+- [ ] T094 [P] Create DepartmentMapper in src/infrastructure/mappers/department.mapper.ts with toDomain() and toEntity() methods
+- [ ] T095 [P] Create UserMapper in src/infrastructure/mappers/user.mapper.ts with toDomain() and toEntity() methods
+- [ ] T096 [P] Create RoleMapper in src/infrastructure/mappers/role.mapper.ts with toDomain() and toEntity() methods
+- [ ] T097 Create mappers index.ts in src/infrastructure/mappers/index.ts
+
+#### Repository Implementation Updates
+
+- [ ] T098 Update TenantRepositoryImpl to extend AggregateRepositoryAdapter from @hl8/infrastructure-kernel
+- [ ] T099 Update TenantRepositoryImpl to use TenantMapper for domain/infrastructure conversion
+- [ ] T100 Update TenantRepositoryImpl to inject IDatabaseAdapter and ICacheService from @hl8/infrastructure-kernel
+- [ ] T101 Update other repository implementations to follow the same pattern (Organization, Department, User, Role)
+
+#### Infrastructure Integration
+
+- [ ] T102 Verify all repository implementations use IDatabaseAdapter from @hl8/infrastructure-kernel
+- [ ] T103 Verify all repository implementations use ICacheService from @hl8/infrastructure-kernel
+- [ ] T104 Verify all repository implementations use IsolationContext from @hl8/domain-kernel
+- [ ] T105 Test repository implementations with infrastructure-kernel base classes
+
+## Phase 6A: Multi-Database Support (PostgreSQL and MongoDB)
+
+### Story Goal
+
+Implement support for both PostgreSQL and MongoDB databases by creating database-specific implementations (entities, mappers, repositories) and a repository factory pattern to enable database switching.
+
+### Independent Test Criteria
+
+Both PostgreSQL and MongoDB databases are fully supported with complete implementations of all entities, mappers, and repositories. Repository factory can dynamically select database type based on configuration.
+
+### Implementation Tasks
+
+#### Phase 6A.1: Directory Restructuring
+
+- [x] T106 Create `entities/postgresql/` directory in src/infrastructure/entities/postgresql/
+- [x] T107 Create `entities/mongodb/` directory in src/infrastructure/entities/mongodb/
+- [x] T108 Create `mappers/postgresql/` directory in src/infrastructure/mappers/postgresql/
+- [x] T109 Create `mappers/mongodb/` directory in src/infrastructure/mappers/mongodb/
+- [x] T110 Create `repositories/postgresql/` directory in src/infrastructure/repositories/postgresql/
+- [x] T111 Create `repositories/mongodb/` directory in src/infrastructure/repositories/mongodb/
+
+#### Phase 6A.2: PostgreSQL Entities
+
+- [x] T112 [P] Move TenantEntity to src/infrastructure/entities/postgresql/tenant.entity.ts
+- [x] T113 [P] Move OrganizationEntity to src/infrastructure/entities/postgresql/organization.entity.ts
+- [x] T114 [P] Move DepartmentEntity to src/infrastructure/entities/postgresql/department.entity.ts
+- [x] T115 [P] Move UserEntity to src/infrastructure/entities/postgresql/user.entity.ts
+- [x] T116 [P] Move RoleEntity to src/infrastructure/entities/postgresql/role.entity.ts
+- [x] T117 Create PostgreSQL entities index.ts in src/infrastructure/entities/postgresql/index.ts
+
+#### Phase 6A.3: PostgreSQL Mappers
+
+- [x] T118 [P] Move TenantMapper to src/infrastructure/mappers/postgresql/tenant.mapper.ts
+- [ ] T119 [P] Create OrganizationMapper for PostgreSQL in src/infrastructure/mappers/postgresql/organization.mapper.ts
+- [ ] T120 [P] Create DepartmentMapper for PostgreSQL in src/infrastructure/mappers/postgresql/department.mapper.ts
+- [ ] T121 [P] Create UserMapper for PostgreSQL in src/infrastructure/mappers/postgresql/user.mapper.ts
+- [ ] T122 [P] Create RoleMapper for PostgreSQL in src/infrastructure/mappers/postgresql/role.mapper.ts
+- [x] T123 Create PostgreSQL mappers index.ts in src/infrastructure/mappers/postgresql/index.ts
+
+#### Phase 6A.4: PostgreSQL Repositories
+
+- [ ] T124 [P] Create PostgreSQL TenantRepository in src/infrastructure/repositories/postgresql/tenant.repository.ts
+- [ ] T125 [P] Create PostgreSQL OrganizationRepository in src/infrastructure/repositories/postgresql/organization.repository.ts
+- [ ] T126 [P] Create PostgreSQL DepartmentRepository in src/infrastructure/repositories/postgresql/department.repository.ts
+- [ ] T127 [P] Create PostgreSQL UserRepository in src/infrastructure/repositories/postgresql/user.repository.ts
+- [ ] T128 [P] Create PostgreSQL RoleRepository in src/infrastructure/repositories/postgresql/role.repository.ts
+- [ ] T129 Create PostgreSQL repositories index.ts in src/infrastructure/repositories/postgresql/index.ts
+
+#### Phase 6A.5: MongoDB Entities
+
+- [ ] T130 [P] Create TenantEntity for MongoDB in src/infrastructure/entities/mongodb/tenant.entity.ts
+- [ ] T131 [P] Create OrganizationEntity for MongoDB in src/infrastructure/entities/mongodb/organization.entity.ts
+- [ ] T132 [P] Create DepartmentEntity for MongoDB in src/infrastructure/entities/mongodb/department.entity.ts
+- [ ] T133 [P] Create UserEntity for MongoDB in src/infrastructure/entities/mongodb/user.entity.ts
+- [ ] T134 [P] Create RoleEntity for MongoDB in src/infrastructure/entities/mongodb/role.entity.ts
+- [ ] T135 Create MongoDB entities index.ts in src/infrastructure/entities/mongodb/index.ts
+
+#### Phase 6A.6: MongoDB Mappers
+
+- [ ] T136 [P] Create TenantMapper for MongoDB in src/infrastructure/mappers/mongodb/tenant.mapper.ts
+- [ ] T137 [P] Create OrganizationMapper for MongoDB in src/infrastructure/mappers/mongodb/organization.mapper.ts
+- [ ] T138 [P] Create DepartmentMapper for MongoDB in src/infrastructure/mappers/mongodb/department.mapper.ts
+- [ ] T139 [P] Create UserMapper for MongoDB in src/infrastructure/mappers/mongodb/user.mapper.ts
+- [ ] T140 [P] Create RoleMapper for MongoDB in src/infrastructure/mappers/mongodb/role.mapper.ts
+- [ ] T141 Create MongoDB mappers index.ts in src/infrastructure/mappers/mongodb/index.ts
+
+#### Phase 6A.7: MongoDB Repositories
+
+- [ ] T142 [P] Create MongoDB TenantRepository in src/infrastructure/repositories/mongodb/tenant.repository.ts
+- [ ] T143 [P] Create MongoDB OrganizationRepository in src/infrastructure/repositories/mongodb/organization.repository.ts
+- [ ] T144 [P] Create MongoDB DepartmentRepository in src/infrastructure/repositories/mongodb/department.repository.ts
+- [ ] T145 [P] Create MongoDB UserRepository in src/infrastructure/repositories/mongodb/user.repository.ts
+- [ ] T146 [P] Create MongoDB RoleRepository in src/infrastructure/repositories/mongodb/role.repository.ts
+- [ ] T147 Create MongoDB repositories index.ts in src/infrastructure/repositories/mongodb/index.ts
+
+#### Phase 6A.8: Repository Factory
+
+- [ ] T148 Create DatabaseConfig interface in src/infrastructure/interfaces/database-config.interface.ts
+- [ ] T149 Create RepositoryFactory in src/infrastructure/factories/repository.factory.ts
+- [ ] T150 Implement TenantRepository factory method in RepositoryFactory
+- [ ] T151 Implement OrganizationRepository factory method in RepositoryFactory
+- [ ] T152 Implement DepartmentRepository factory method in RepositoryFactory
+- [ ] T153 Implement UserRepository factory method in RepositoryFactory
+- [ ] T154 Implement RoleRepository factory method in RepositoryFactory
+
+#### Phase 6A.9: Testing and Integration
+
+- [ ] T155 Create unit tests for PostgreSQL entity mapping in test/entities/postgresql/
+- [ ] T156 Create unit tests for MongoDB entity mapping in test/entities/mongodb/
+- [ ] T157 Create unit tests for repository factory in test/factories/
+- [ ] T158 Create integration tests for PostgreSQL in test/integration/postgresql/
+- [ ] T159 Create integration tests for MongoDB in test/integration/mongodb/
+- [ ] T160 Create database switching integration test in test/integration/database-switching/
+
+## Phase 7: Application Kernel Alignment
+
+### Story Goal
+
+Align application layer code to extend and integrate with libs/application-kernel, ensuring all commands, queries, handlers, and use cases properly implement the application kernel interfaces and base classes.
+
+### Independent Test Criteria
+
+All application layer components properly extend application-kernel base classes and integrate with existing kernel services (context management, event bus, transaction manager).
+
+### Implementation Tasks
+
+#### Command Alignment
+
+- [ ] T106 [P] Update CreateTenantCommand to extend BaseCommand from @hl8/application-kernel
+- [ ] T107 [P] Update UpdateTenantCommand to extend BaseCommand from @hl8/application-kernel
+- [ ] T108 [P] Update DeleteTenantCommand to extend BaseCommand from @hl8/application-kernel
+- [ ] T109 [P] Update AssignPermissionCommand to extend BaseCommand from @hl8/application-kernel
+- [ ] T110 Verify all commands use IsolationContext from @hl8/domain-kernel
+
+#### Query Alignment
+
+- [ ] T111 [P] Update GetTenantQuery to extend BaseQuery from @hl8/application-kernel
+- [ ] T112 [P] Update ListTenantsQuery to extend BaseQuery from @hl8/application-kernel
+- [ ] T113 [P] Update CheckPermissionQuery to extend BaseQuery from @hl8/application-kernel
+- [ ] T114 Verify all queries use IsolationContext from @hl8/domain-kernel
+
+#### Handler Alignment
+
+- [ ] T115 [P] Update CreateTenantHandler to implement CommandHandler interface from @hl8/application-kernel
+- [ ] T116 [P] Update UpdateTenantHandler to implement CommandHandler interface from @hl8/application-kernel
+- [ ] T117 [P] Update DeleteTenantHandler to implement CommandHandler interface from @hl8/application-kernel
+- [ ] T118 [P] Update GetTenantHandler to implement QueryHandler interface from @hl8/application-kernel
+- [ ] T119 [P] Update ListTenantsHandler to implement QueryHandler interface from @hl8/application-kernel
+- [ ] T120 Update all handlers to implement execute() method signature from kernel interfaces
+
+#### Use Case Alignment
+
+- [ ] T121 Update TenantCreationUseCase to extend BaseUseCase from @hl8/application-kernel
+- [ ] T122 Update PermissionManagementUseCase to extend BaseUseCase from @hl8/application-kernel
+- [ ] T123 Verify all use cases use IUseCaseContext from @hl8/application-kernel
+- [ ] T124 Verify all use cases implement executeUseCase() method
+
+#### Application Integration
+
+- [ ] T125 Verify all components use IUseCaseContext from @hl8/application-kernel
+- [ ] T126 Verify all components use IEventBus from @hl8/application-kernel where appropriate
+- [ ] T127 Verify all components use ITransactionManager from @hl8/application-kernel where appropriate
+- [ ] T128 Test application layer with application-kernel base classes
+
+## Phase 8: Interface Kernel Alignment
+
+### Story Goal
+
+Align interface layer code to extend and integrate with libs/interface-kernel, ensuring all controllers, guards, and decorators properly implement the interface kernel interfaces and base classes.
+
+### Independent Test Criteria
+
+All interface layer components properly extend interface-kernel base classes and integrate with existing kernel services (authentication, authorization, validation, rate limiting, monitoring).
+
+### Implementation Tasks
+
+#### Base Controller
+
+- [ ] T129 [P] Create BaseController extending RestController from @hl8/interface-kernel in src/interface/controllers/base.controller.ts
+- [ ] T130 Update all existing controllers to extend BaseController
+- [ ] T131 Verify all controllers inject interface-kernel services
+
+#### Service Integration
+
+- [ ] T132 Import InterfaceKernelModule in saas-core.module.ts
+- [ ] T133 [P] Inject AuthenticationService in all controllers that require authentication
+- [ ] T134 [P] Inject AuthorizationService in all controllers that require authorization
+- [ ] T135 [P] Inject ValidationService in all controllers for request validation
+- [ ] T136 [P] Configure RateLimitService for all controllers
+- [ ] T137 [P] Configure MonitoringService for all controllers
+
+#### Guards and Decorators
+
+- [ ] T138 [P] Extend AuthGuard from @hl8/interface-kernel in src/interface/guards/auth.guard.ts
+- [ ] T139 [P] Extend RolesGuard from @hl8/interface-kernel in src/interface/guards/roles.guard.ts
+- [ ] T140 [P] Create CASL-based authorization guard in src/interface/guards/casl.guard.ts
+- [ ] T141 [P] Use shared decorators from @hl8/interface-kernel (@CurrentUser, @ApiResponse, etc.)
+- [ ] T142 Update guards index.ts to export all guards
+
+#### Module Integration
+
+- [ ] T143 Verify InterfaceKernelModule is properly registered in saas-core.module.ts
+- [ ] T144 Configure JWT authentication with interface-kernel
+- [ ] T145 Configure rate limiting with interface-kernel
+- [ ] T146 Configure monitoring with interface-kernel
+- [ ] T147 Test authentication flow with interface-kernel
+- [ ] T148 Test authorization checks with interface-kernel
+- [ ] T149 Test rate limiting with interface-kernel
+- [ ] T150 Test monitoring with interface-kernel
+
+## Phase 5: Domain Layer Testing and Quality Assurance
+
+### Story Goal
+
+Ensure comprehensive testing and quality assurance for all domain layer enhancements.
+
+### Independent Test Criteria
+
+All domain layer components are thoroughly tested and meet quality standards.
+
+### Implementation Tasks
+
+#### Unit Testing
+
+- [ ] T060 [P] [US5] Create unit tests for TrialPeriodConfig value object in src/domain/value-objects/trial-period-config.vo.spec.ts
+- [ ] T061 [P] [US5] Create unit tests for TenantCodeValidator domain service in src/domain/services/tenant-code-validator.service.spec.ts
+- [ ] T062 [P] [US5] Create unit tests for UserAssignmentRules domain service in src/domain/services/user-assignment-rules.service.spec.ts
+- [ ] T063 [P] [US5] Create unit tests for TenantNameReviewService domain service in src/domain/services/tenant-name-review.service.spec.ts
+- [ ] T064 [P] [US5] Create unit tests for ResourceMonitoringService domain service in src/domain/services/resource-monitoring.service.spec.ts
+- [ ] T065 [P] [US5] Create unit tests for DepartmentHierarchyManager domain service in src/domain/services/department-hierarchy-manager.service.spec.ts
+- [ ] T066 [P] [US5] Create unit tests for UserIdentityManager domain service in src/domain/services/user-identity-manager.service.spec.ts
+- [ ] T067 [P] [US5] Create unit tests for DomainIntegrationService domain service in src/domain/services/domain-integration.service.spec.ts
+
+#### Integration Testing
+
+- [ ] T068 [P] [US5] Create integration tests for domain layer business rules in test/integration/domain-business-rules.integration.spec.ts
+- [ ] T069 [P] [US5] Create integration tests for domain event handling in test/integration/domain-events.integration.spec.ts
+- [ ] T070 [P] [US5] Create integration tests for domain validation in test/integration/domain-validation.integration.spec.ts
+- [ ] T071 [P] [US5] Create integration tests for domain performance in test/integration/domain-performance.integration.spec.ts
+
+#### Quality Assurance
+
+- [ ] T072 [P] [US5] Perform code quality review for all domain layer enhancements
+- [ ] T073 [P] [US5] Create comprehensive domain layer documentation
+- [ ] T074 [P] [US5] Validate business rules completeness and accuracy
+- [ ] T075 [P] [US5] Perform domain layer performance testing
+- [ ] T076 [P] [US5] Create domain layer troubleshooting guide
+- [ ] T077 [P] [US5] Validate domain layer security and isolation
+- [ ] T078 [P] [US5] Create domain layer maintenance documentation
+- [ ] T079 [P] [US5] Perform domain layer stress testing
+- [ ] T080 [P] [US5] Create domain layer monitoring and alerting
+- [ ] T081 [P] [US5] Validate domain layer compliance with business requirements
+- [ ] T082 [P] [US5] Create domain layer best practices guide
+- [ ] T083 [P] [US5] Perform domain layer security audit
+- [ ] T084 [P] [US5] Create domain layer deployment guide
+- [ ] T085 [P] [US5] Finalize domain layer implementation and validation
 
 ## Implementation Strategy
 
 ### MVP Scope
 
-**Minimum Viable Product**: User Story 1 (Multi-Tenant Architecture Documentation) provides the core foundation for the SAAS Core module with integrated CASL permission system.
+**Minimum Viable Product**: Phases 1-3 (Domain Layer Enhancements) + Phase 4 (Integration) provide the essential domain layer functionality to support core business requirements. Phases 6-7 (Kernel Alignment) ensure proper integration with existing infrastructure.
 
 ### Incremental Delivery
 
-1. **Phase 1-2**: Project setup and foundational infrastructure with CASL integration
-2. **Phase 3**: Multi-tenant architecture implementation with CASL permission system (MVP)
-3. **Phase 4**: Tenant lifecycle management with CASL permission management
-4. **Phase 5**: Organization and department structure with CASL abilities
-5. **Phase 6**: Permission and access control with CASL integration
-6. **Phase 7**: Testing, documentation, and quality assurance for CASL permission system
+1. **Phase 1-3**: Domain layer enhancements (High, Medium, Low priority)
+2. **Phase 4**: Integration and validation of all domain enhancements
+3. **Phase 5**: Testing and quality assurance (can run in parallel with 6-8)
+4. **Phase 6**: Infrastructure kernel alignment (entities, mappers, repositories)
+5. **Phase 7**: Application kernel alignment (commands, queries, handlers, use cases)
+6. **Phase 8**: Interface kernel alignment (controllers, guards, decorators)
 
 ### Development Approach
 
-- **Domain-First**: Start with domain layer (entities, value objects, aggregates) including CASL entities
-- **Application Layer**: Implement use cases, commands, queries, handlers, and CASL abilities
-- **Infrastructure Layer**: Implement repository patterns, persistence, and CASL infrastructure
-- **Interface Layer**: Implement controllers, DTOs, guards, and CASL permission guards
-- **Testing**: Unit tests for domain logic, integration tests for infrastructure, e2e tests for complete workflows, CASL permission testing
+- **Domain-First**: Focus on domain layer enhancements and business rule implementation
+- **Kernel Integration**: Align all layers with existing kernel modules for consistency
+- **Business Rules**: Implement comprehensive business rule validation and constraint logic
+- **Domain Events**: Ensure proper domain event handling for all business operations
+- **Entity Mapping**: Proper separation between domain and infrastructure entities
+- **Testing**: Comprehensive unit and integration testing for all components
+- **Quality Assurance**: Thorough testing and validation of business requirements compliance
 
 ### Quality Assurance
 
 - **Code Quality**: ESLint, TypeScript strict mode, TSDoc documentation
-- **Testing**: 80% coverage for core business logic, 90% for critical paths, comprehensive CASL permission testing
-- **Performance**: <100ms tenant operations, <50ms permission checks, support 10,000+ concurrent tenants
-- **Security**: Multi-tenant data isolation, audit logging, access control, CASL permission validation
+- **Testing**: 80% coverage for core business logic, 90% for critical paths
+- **Performance**: Optimized domain layer operations and business rule validation
+- **Security**: Proper domain validation and business rule enforcement
+- **Compliance**: Full compliance with business requirements and kernel architecture patterns
+- **Kernel Alignment**: All components properly extend/integrate with kernel modules
 
 ### Risk Mitigation
 
-- **Complexity Management**: Clear architectural boundaries and documentation, CASL permission system complexity management
-- **Performance Issues**: Proper indexing and caching strategies, CASL permission check optimization
-- **Data Consistency**: Transactions and event sourcing for consistency, CASL permission consistency
-- **Security Vulnerabilities**: Proper isolation and access controls, CASL permission validation and security
-- **CASL Integration Risks**: Proper CASL configuration, permission rule validation, and performance optimization
+- **Complexity Management**: Clear domain boundaries and comprehensive documentation
+- **Kernel Dependency**: Proper versioning and compatibility with kernel modules
+- **Migration Path**: Incremental alignment to avoid breaking existing functionality
+- **Business Rules**: Thorough validation and testing of all business rules
+- **Performance Issues**: Optimized domain operations and efficient business rule validation
+- **Data Consistency**: Proper domain validation and business rule enforcement
+- **Security Vulnerabilities**: Comprehensive domain validation and business rule security

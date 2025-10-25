@@ -16,3 +16,12 @@ export * from "./aggregates/index.js";
 
 // 领域事件
 export * from "./events/index.js";
+
+// 仓储接口
+export * from "./repositories/index.js";
+
+// 领域工厂
+export * from "./factories/index.js";
+
+// 领域服务
+export * from "./services/index.js";

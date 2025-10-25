@@ -11,3 +11,10 @@ export {
   ListTenantsHandler,
   type ListTenantsResult,
 } from "./list-tenants.handler.js";
+export { UpdateTenantHandler } from "./update-tenant.handler.js";
+export { DeleteTenantHandler } from "./delete-tenant.handler.js";
+export { AssignPermissionHandler } from "./assign-permission.handler.js";
+export {
+  CheckPermissionHandler,
+  type CheckPermissionResult,
+} from "./check-permission.handler.js";
