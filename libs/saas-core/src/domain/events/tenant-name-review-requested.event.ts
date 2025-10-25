@@ -5,13 +5,12 @@
  * @since 1.0.0
  */
 
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
-import { UserId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId, UserId } from "@hl8/domain-kernel";
 import {
   TenantNameReviewRequestType,
   TenantNameReviewRequestPriority,
 } from "../value-objects/tenant-name-review-request.vo.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * 租户名称审核请求事件接口
@@ -54,9 +53,16 @@ export interface ITenantNameReviewRequestedEvent {
  * });
  * ```
  */
-export class TenantNameReviewRequestedEvent extends DomainEventBase implements IDomainEvent {
-  constructor(eventData: ITenantNameReviewRequestedEvent) {
-    super("TenantNameReviewRequestedEvent", eventData.tenantId.value);
+export class TenantNameReviewRequestedEvent extends DomainEventBase {
+  public readonly eventData: ITenantNameReviewRequestedEvent;
+
+  constructor(aggregateId: EntityId, eventData: ITenantNameReviewRequestedEvent) {
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
 
     this.eventData = eventData;
   }
@@ -229,13 +235,13 @@ export class TenantNameReviewRequestedEvent extends DomainEventBase implements I
         ? "高优先级"
         : "普通";
     const assignedText = this.isAssigned()
-      ? `，已分配给 ${this.assignedTo?.value}`
+      ? `，已分配给 ${this.assignedTo?.getValue()}`
       : "，待分配";
     const deadlineText = this.hasDeadline()
       ? `，截止时间 ${this.deadline?.toISOString()}`
       : "";
 
-    return `租户 ${this.tenantId.value} 的租户名称审核请求已创建，请求名称: "${this.requestedName}"，类型: ${this.requestType}，优先级: ${priorityText}${assignedText}${deadlineText}`;
+    return `租户 ${this.tenantId.getValue()} 的租户名称审核请求已创建，请求名称: "${this.requestedName}"，类型: ${this.requestType}，优先级: ${priorityText}${assignedText}${deadlineText}`;
   }
 
   /**
@@ -246,16 +252,16 @@ export class TenantNameReviewRequestedEvent extends DomainEventBase implements I
   getDetails(): Record<string, unknown> {
     return {
       eventType: "TenantNameReviewRequestedEvent",
-      tenantId: this.tenantId.value,
+      tenantId: this.tenantId.getValue(),
       requestId: this.requestId,
       requestedName: this.requestedName,
       currentName: this.currentName,
       requestType: this.requestType,
       priority: this.priority,
       reason: this.reason,
-      requestedBy: this.requestedBy.value,
+      requestedBy: this.requestedBy.getValue(),
       requestedAt: this.requestedAt.toISOString(),
-      assignedTo: this.assignedTo?.value,
+      assignedTo: this.assignedTo?.getValue(),
       assignedAt: this.assignedAt?.toISOString(),
       deadline: this.deadline?.toISOString(),
       isAssigned: this.isAssigned(),
@@ -297,21 +303,24 @@ export class TenantNameReviewRequestedEvent extends DomainEventBase implements I
     deadline?: Date,
     metadata: Record<string, unknown> = {},
   ): TenantNameReviewRequestedEvent {
-    return new TenantNameReviewRequestedEvent({
-      tenantId,
-      requestId,
-      requestedName,
-      currentName,
-      requestType,
-      priority,
-      reason,
-      requestedBy,
-      requestedAt: new Date(),
-      assignedTo,
-      assignedAt,
-      deadline,
-      metadata,
-    });
+    return new TenantNameReviewRequestedEvent(
+      tenantId, // aggregateId
+      {
+        tenantId,
+        requestId,
+        requestedName,
+        currentName,
+        requestType,
+        priority,
+        reason,
+        requestedBy,
+        requestedAt: new Date(),
+        assignedTo,
+        assignedAt,
+        deadline,
+        metadata,
+      }
+    );
   }
 
   /**
