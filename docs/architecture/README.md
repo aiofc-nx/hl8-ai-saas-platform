@@ -74,6 +74,50 @@
 
 **适用对象**: 开发人员、新团队成员
 
+## ⚠️ 重要提示
+
+### 优先使用 domain-kernel 组件
+
+在开发业务模块时，**必须优先使用** `@hl8/domain-kernel` 提供的以下组件，而不是重新定义：
+
+#### 基类和接口
+```typescript
+import { 
+  BaseEntity, 
+  AggregateRoot, 
+  BaseValueObject 
+} from "@hl8/domain-kernel";
+```
+
+#### ID 值对象
+```typescript
+import { 
+  TenantId, 
+  OrganizationId, 
+  DepartmentId, 
+  UserId,
+  GenericEntityId 
+} from "@hl8/domain-kernel";
+```
+
+#### 数据隔离机制
+```typescript
+import { 
+  IsolationContext, 
+  SharingLevel 
+} from "@hl8/domain-kernel";
+```
+
+**为什么这样做？**
+- ✅ 保证整个系统的一致性
+- ✅ 减少重复代码
+- ✅ 简化维护工作
+- ✅ 确保多租户数据隔离的正确性
+
+详见：[业务模块开发指南 - 优先使用 domain-kernel 组件](./03-business-module-development-guide.md#33-优先使用-domain-kernel-组件)
+
+---
+
 ## 🏗️ 架构特点
 
 ### 混合架构模式

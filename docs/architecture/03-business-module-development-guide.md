@@ -208,6 +208,209 @@ Business Module
 └── @hl8/exceptions            # 异常处理
 ```
 
+### 3.3 优先使用 domain-kernel 组件
+
+> **⚠️ 重要**: 业务模块开发时，必须优先使用 `@hl8/domain-kernel` 提供的组件，而不是重新定义。
+
+#### 3.3.1 为什么必须使用 domain-kernel？
+
+使用 domain-kernel 提供的组件有以下重要优势：
+
+- **保证一致性**: 所有模块使用相同的基类，确保行为一致
+- **减少重复**: 避免在每个模块中重复定义相同的类
+- **简化维护**: 只需在一个地方维护和更新
+- **类型安全**: 统一的类型定义确保类型安全
+- **多租户支持**: 正确的数据隔离机制
+
+#### 3.3.2 必须使用的基类
+
+所有领域实体、聚合根和值对象都应该继承 domain-kernel 提供的基类：
+
+```typescript
+// ✅ 正确：使用 domain-kernel 的基类
+import { BaseEntity, AggregateRoot, BaseValueObject } from "@hl8/domain-kernel";
+
+export class User extends BaseEntity {
+  // ...
+}
+
+export class OrderAggregate extends AggregateRoot {
+  // ...
+}
+
+export class Email extends BaseValueObject {
+  // ...
+}
+```
+
+```typescript
+// ❌ 错误：自己定义基类
+export abstract class BaseEntity {
+  // ... 重复定义
+}
+```
+
+#### 3.3.3 必须使用的 ID 值对象
+
+所有实体 ID 都应该使用 domain-kernel 提供的 ID 值对象：
+
+```typescript
+// ✅ 正确：使用 domain-kernel 的 ID 值对象
+import { 
+  TenantId, 
+  OrganizationId, 
+  DepartmentId, 
+  UserId,
+  GenericEntityId 
+} from "@hl8/domain-kernel";
+
+export class User extends BaseEntity {
+  constructor(
+    id: UserId,
+    // ...
+  ) {
+    super(id);
+  }
+}
+```
+
+```typescript
+// ❌ 错误：自己定义 ID 值对象
+export class UserId extends BaseValueObject {
+  // ... 重复定义
+}
+```
+
+#### 3.3.4 必须使用的数据隔离机制
+
+所有涉及多租户数据访问的操作都必须使用 `IsolationContext`：
+
+```typescript
+// ✅ 正确：使用 IsolationContext
+import { IsolationContext, SharingLevel } from "@hl8/domain-kernel";
+
+export class UserRepository {
+  public async findByTenant(
+    tenantId: TenantId,
+    context: IsolationContext
+  ): Promise<User[]> {
+    // 使用 context 进行数据隔离
+    return this.query({
+      tenantId: context.tenantId.value,
+      organizationId: context.organizationId?.value,
+      departmentId: context.departmentId?.value,
+    });
+  }
+}
+```
+
+```typescript
+// ❌ 错误：不使用 IsolationContext
+export class UserRepository {
+  public async findByTenant(tenantId: string): Promise<User[]> {
+    // 没有使用隔离机制
+  }
+}
+```
+
+#### 3.3.5 完整的导入示例
+
+以下是一个完整的实体实现示例，展示如何正确使用 domain-kernel 的组件：
+
+```typescript
+import { 
+  BaseEntity, 
+  EntityId,
+  TenantId,
+  OrganizationId,
+  UserId,
+  IsolationContext,
+  SharingLevel
+} from "@hl8/domain-kernel";
+
+/**
+ * 用户实体
+ * 
+ * @description 用户实体，继承 BaseEntity
+ */
+export class User extends BaseEntity {
+  private _email: Email;
+  private _organizationId: OrganizationId | null;
+  
+  constructor(
+    id: UserId,
+    tenantId: TenantId,
+    email: Email,
+    organizationId?: OrganizationId
+  ) {
+    super(id, tenantId);
+    this._email = email;
+    this._organizationId = organizationId || null;
+  }
+
+  public get email(): Email {
+    return this._email;
+  }
+
+  public get organizationId(): OrganizationId | null {
+    return this._organizationId;
+  }
+
+  /**
+   * 分配组织
+   */
+  public assignToOrganization(organizationId: OrganizationId): void {
+    this._organizationId = organizationId;
+    this.updateTimestamp();
+  }
+}
+```
+
+#### 3.3.6 错误示例和常见问题
+
+**问题 1: 重复定义 ID 值对象**
+
+```typescript
+// ❌ 错误：自己定义 TenantId
+export class TenantId extends BaseValueObject {
+  constructor(private readonly value: string) {
+    super();
+  }
+}
+
+// ✅ 正确：从 domain-kernel 导入
+import { TenantId } from "@hl8/domain-kernel";
+```
+
+**问题 2: 不使用 IsolationContext**
+
+```typescript
+// ❌ 错误：直接传递 ID
+public async findUsers(tenantId: string): Promise<User[]> {
+  return this.repository.find({ tenantId });
+}
+
+// ✅ 正确：使用 IsolationContext
+public async findUsers(context: IsolationContext): Promise<User[]> {
+  return this.repository.find({
+    tenantId: context.tenantId.value,
+  });
+}
+```
+
+**问题 3: 自己实现 BaseEntity**
+
+```typescript
+// ❌ 错误：自己实现 BaseEntity
+export abstract class BaseEntity {
+  protected readonly _id: EntityId;
+  // ... 重复实现
+}
+
+// ✅ 正确：使用 domain-kernel 的 BaseEntity
+import { BaseEntity } from "@hl8/domain-kernel";
+```
+
 ---
 
 ## 4. 开发流程
