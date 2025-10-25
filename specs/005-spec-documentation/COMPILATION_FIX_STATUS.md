@@ -103,6 +103,7 @@
 ### 继续修复隔离上下文错误
 
 需要修复的文件：
+
 - `src/domain/aggregates/*.ts` - 查找更多 IsolationContext 使用
 - `src/application/use-cases/*.ts` - 继续修复
 

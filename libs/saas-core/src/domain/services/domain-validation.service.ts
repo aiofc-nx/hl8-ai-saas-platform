@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
 import { DepartmentId } from "@hl8/domain-kernel";
@@ -130,7 +130,7 @@ export interface ValidationInfo {
  * ```
  */
 @Injectable()
-export class DomainValidationService extends DomainService {
+export class DomainValidationService extends BaseDomainService {
   private readonly validationRules: Map<string, ValidationRule> = new Map();
   private readonly validationHistory: Array<{
     readonly timestamp: Date;

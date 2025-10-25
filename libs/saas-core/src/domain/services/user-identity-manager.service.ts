@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
@@ -63,13 +63,18 @@ export interface UserIdentityValidationResult {
  * ```
  */
 @Injectable()
-export class UserIdentityManager extends DomainService {
+export class UserIdentityManager extends BaseDomainService {
   private readonly platformUsers: Map<string, PlatformUser> = new Map();
   private readonly tenantUsers: Map<string, TenantUser> = new Map();
 
   constructor() {
     super();
-    this.setContext("UserIdentityManager");
+  }
+
+  // 实现基类的抽象方法
+  async execute(input: unknown): Promise<unknown> {
+    // 这个方法在这个服务中不使用，但必须实现
+    return input;
   }
 
   /**

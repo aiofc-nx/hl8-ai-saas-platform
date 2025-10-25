@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
@@ -61,7 +61,7 @@ export interface UserTenantSwitchResult {
  * ```
  */
 @Injectable()
-export class UserTenantSwitcher extends DomainService {
+export class UserTenantSwitcher extends BaseDomainService {
   private readonly activeContexts: Map<
     string,
     {

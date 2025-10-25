@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import {
   DepartmentLevelConfig,
   DepartmentLevelType,
@@ -47,7 +47,7 @@ export interface DepartmentLevelConfigQuery {
  * ```
  */
 @Injectable()
-export class DepartmentLevelConfigService extends DomainService {
+export class DepartmentLevelConfigService extends BaseDomainService {
   private readonly configs: Map<number, DepartmentLevelConfig> = new Map();
 
   constructor() {

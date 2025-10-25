@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import {
   PermissionTemplate,
   PermissionTemplateType,
@@ -58,7 +58,7 @@ export interface PermissionInheritanceResult {
  * ```
  */
 @Injectable()
-export class PermissionHierarchyManager extends DomainService {
+export class PermissionHierarchyManager extends BaseDomainService {
   private readonly hierarchyRules: Map<
     PermissionHierarchyLevel,
     PermissionHierarchyLevel[]

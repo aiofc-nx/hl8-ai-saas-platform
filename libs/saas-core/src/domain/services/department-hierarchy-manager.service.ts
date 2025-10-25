@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import {
   DepartmentLevelConfig,
   DepartmentLevelType,
@@ -58,7 +58,7 @@ export interface DepartmentHierarchyValidationResult {
  * ```
  */
 @Injectable()
-export class DepartmentHierarchyManager extends DomainService {
+export class DepartmentHierarchyManager extends BaseDomainService {
   constructor() {
     super();
     this.setContext("DepartmentHierarchyManager");

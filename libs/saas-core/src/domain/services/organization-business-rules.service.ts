@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
@@ -91,7 +91,7 @@ export interface OrganizationBusinessRule {
  * ```
  */
 @Injectable()
-export class OrganizationBusinessRules extends DomainService {
+export class OrganizationBusinessRules extends BaseDomainService {
   private readonly rules: Map<string, OrganizationBusinessRule> = new Map();
   private readonly executionHistory: Array<{
     readonly timestamp: Date;

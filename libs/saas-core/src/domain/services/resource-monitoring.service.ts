@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import {
   ResourceUsage,
@@ -31,7 +31,7 @@ import {
  * ```
  */
 @Injectable()
-export class ResourceMonitoringService extends DomainService {
+export class ResourceMonitoringService extends BaseDomainService {
   constructor() {
     super();
     this.setContext("ResourceMonitoringService");

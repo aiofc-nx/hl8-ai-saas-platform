@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
 import { DepartmentId } from "@hl8/domain-kernel";
@@ -93,7 +93,7 @@ export interface IntegrationReport {
  * ```
  */
 @Injectable()
-export class DomainIntegrationService extends DomainService {
+export class DomainIntegrationService extends BaseDomainService {
   private readonly components: Map<string, IntegrationComponent> = new Map();
   private readonly dependencies: Map<string, string[]> = new Map();
   private readonly integrationHistory: Array<{

@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { PermissionTemplate } from "../value-objects/permission-template.vo.js";
 
 /**
@@ -70,7 +70,7 @@ export interface PermissionConflict {
  * ```
  */
 @Injectable()
-export class PermissionConflictDetector extends DomainService {
+export class PermissionConflictDetector extends BaseDomainService {
   constructor() {
     super();
     this.setContext("PermissionConflictDetector");

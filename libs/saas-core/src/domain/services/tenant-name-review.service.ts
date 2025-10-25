@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { UserId } from "@hl8/domain-kernel";
 import {
@@ -39,7 +39,7 @@ import {
  * ```
  */
 @Injectable()
-export class TenantNameReviewService extends DomainService {
+export class TenantNameReviewService extends BaseDomainService {
   constructor() {
     super();
     this.setContext("TenantNameReviewService");

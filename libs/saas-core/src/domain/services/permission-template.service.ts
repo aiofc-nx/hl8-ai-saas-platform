@@ -6,7 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
-import { DomainService } from "@hl8/domain-kernel";
+import { BaseDomainService } from "@hl8/domain-kernel";
 import {
   PermissionTemplate,
   PermissionTemplateType,
@@ -43,7 +43,7 @@ export interface PermissionTemplateQuery {
  * ```
  */
 @Injectable()
-export class PermissionTemplateService extends DomainService {
+export class PermissionTemplateService extends BaseDomainService {
   private readonly templates: Map<string, PermissionTemplate> = new Map();
 
   constructor() {
