@@ -1,6 +1,6 @@
-import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
-import { TenantId } from "@hl8/domain-kernel";
+import { DomainEventBase, EntityId, GenericEntityId, TenantId } from "@hl8/domain-kernel";
 import { TenantStatus } from "../value-objects/tenant-status.vo.js";
+import { randomUUID } from "node:crypto";
 
 /**
  * 租户状态变更事件
@@ -8,11 +8,7 @@ import { TenantStatus } from "../value-objects/tenant-status.vo.js";
  * @description 当租户状态发生变化时触发的事件
  * @since 1.0.0
  */
-export class TenantStatusChangedEvent implements DomainEvent {
-  public readonly eventId: string;
-  public readonly occurredOn: Date;
-  public readonly eventType: string = "TenantStatusChanged";
-
+export class TenantStatusChangedEvent extends DomainEventBase {
   /**
    * 创建租户状态变更事件
    *
@@ -22,13 +18,18 @@ export class TenantStatusChangedEvent implements DomainEvent {
    * @param reason - 变更原因
    */
   constructor(
+    aggregateId: EntityId,
     public readonly tenantId: TenantId,
     public readonly oldStatus: TenantStatus,
     public readonly newStatus: TenantStatus,
     public readonly reason: string,
   ) {
-    this.eventId = `tenant-status-changed-${tenantId.getValue()}-${Date.now()}`;
-    this.occurredOn = new Date();
+    super(
+      GenericEntityId.create(randomUUID()),
+      new Date(),
+      aggregateId,
+      1
+    );
   }
 
   /**
@@ -42,21 +43,7 @@ export class TenantStatusChangedEvent implements DomainEvent {
       oldStatus: this.oldStatus.getValue(),
       newStatus: this.newStatus.getValue(),
       reason: this.reason,
-      occurredOn: this.occurredOn.toISOString(),
-    };
-  }
-
-  /**
-   * 获取事件元数据
-   *
-   * @returns 事件元数据
-   */
-  getEventMetadata(): Record<string, unknown> {
-    return {
-      eventId: this.eventId,
-      eventType: this.eventType,
-      occurredOn: this.occurredOn.toISOString(),
-      tenantId: this.tenantId.getValue(),
+      occurredOn: this.occurredAt.toISOString(),
     };
   }
 }
