@@ -224,7 +224,7 @@ export class Department extends BaseEntity<DepartmentId> {
    */
   canMoveTo(newParentId: DepartmentId | null): boolean {
     // 不能移动到自己的子部门下（避免循环引用）
-    if (newParentId && newParentId.equals(this._id)) {
+    if (newParentId && newParentId.equals(this.id)) {
       return false;
     }
 
