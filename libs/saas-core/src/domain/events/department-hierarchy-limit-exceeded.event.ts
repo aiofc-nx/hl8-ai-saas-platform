@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { DomainEvent } from "@hl8/domain-kernel";
+import { DomainEvent as IDomainEvent, DomainEventBase } from "@hl8/domain-kernel";
 import { TenantId } from "@hl8/domain-kernel";
 import { OrganizationId } from "@hl8/domain-kernel";
 import { DepartmentId } from "@hl8/domain-kernel";
@@ -65,11 +65,16 @@ export interface IDepartmentHierarchyLimitExceededEvent {
  * });
  * ```
  */
-export class DepartmentHierarchyLimitExceededEvent extends DomainEvent {
+export class DepartmentHierarchyLimitExceededEvent extends DomainEventBase implements IDomainEvent {
+  public readonly eventData: Record<string, unknown>;
+  public readonly eventType: string = "DepartmentHierarchyLimitExceededEvent";
+  
   constructor(eventData: IDepartmentHierarchyLimitExceededEvent) {
-    super("DepartmentHierarchyLimitExceededEvent", eventData.tenantId.value);
+    const { GenericEntityId } = require("@hl8/domain-kernel");
+    const eventId = GenericEntityId.generate();
+    super(eventId, new Date(), eventData.tenantId as any, 0);
 
-    this.eventData = eventData;
+    this.eventData = eventData as unknown as Record<string, unknown>;
   }
 
   /**
