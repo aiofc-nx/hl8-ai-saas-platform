@@ -107,14 +107,14 @@ description: "Task list for SAAS Core Module Specification Documentation"
 
 ### Documentation for User Story 3
 
-- [ ] T031 [US3] Document 7-level department hierarchy in specs/005-spec-documentation/organizations/department-hierarchy.md
-- [ ] T032 [P] [US3] Document Committee organization type in specs/005-spec-documentation/organizations/organization-types.md
-- [ ] T033 [P] [US3] Document Project Team organization type in specs/005-spec-documentation/organizations/organization-types.md
-- [ ] T034 [P] [US3] Document Quality Group organization type in specs/005-spec-documentation/organizations/organization-types.md
-- [ ] T035 [P] [US3] Document Performance Group organization type in specs/005-spec-documentation/organizations/organization-types.md
-- [ ] T036 [US3] Create department nesting examples and diagrams
-- [ ] T037 [US3] Document parent-child relationship rules for departments
-- [ ] T038 [US3] Document user assignment rules (multiple organizations, single department) in specs/005-spec-documentation/organizations/user-assignment.md
+- [X] T031 [US3] Document 7-level department hierarchy in specs/005-spec-documentation/organizations/department-hierarchy.md
+- [X] T032 [P] [US3] Document Committee organization type in specs/005-spec-documentation/organizations/organization-types.md
+- [X] T033 [P] [US3] Document Project Team organization type in specs/005-spec-documentation/organizations/organization-types.md
+- [X] T034 [P] [US3] Document Quality Group organization type in specs/005-spec-documentation/organizations/organization-types.md
+- [X] T035 [P] [US3] Document Performance Group organization type in specs/005-spec-documentation/organizations/organization-types.md
+- [X] T036 [US3] Create department nesting examples and diagrams
+- [X] T037 [US3] Document parent-child relationship rules for departments
+- [X] T038 [US3] Document user assignment rules (multiple organizations, single department) in specs/005-spec-documentation/organizations/user-assignment.md
 
 **Checkpoint**: User Story 3 documentation complete and validated
 
