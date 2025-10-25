@@ -255,7 +255,7 @@ export class Role extends BaseEntity<EntityId> {
   updateName(name: string): void {
     this.validateName(name);
     this._name = name;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -266,7 +266,7 @@ export class Role extends BaseEntity<EntityId> {
   updateDescription(description: string): void {
     this.validateDescription(description);
     this._description = description;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -276,7 +276,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   updateLevel(level: RoleLevel): void {
     this._level = level;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -286,7 +286,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   updateStatus(status: RoleStatusEnum): void {
     this._status = status;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -297,7 +297,7 @@ export class Role extends BaseEntity<EntityId> {
   addPermission(permission: string): void {
     if (!this._permissions.includes(permission)) {
       this._permissions.push(permission);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 
@@ -310,7 +310,7 @@ export class Role extends BaseEntity<EntityId> {
     const index = this._permissions.indexOf(permission);
     if (index > -1) {
       this._permissions.splice(index, 1);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 
@@ -325,7 +325,7 @@ export class Role extends BaseEntity<EntityId> {
         this._permissions.push(permission);
       }
     });
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -340,7 +340,7 @@ export class Role extends BaseEntity<EntityId> {
         this._permissions.splice(index, 1);
       }
     });
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -350,7 +350,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   setPermissions(permissions: string[]): void {
     this._permissions = [...permissions];
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -361,7 +361,7 @@ export class Role extends BaseEntity<EntityId> {
   addInheritedRole(roleId: string): void {
     if (!this._inheritedRoles.includes(roleId)) {
       this._inheritedRoles.push(roleId);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 
@@ -374,7 +374,7 @@ export class Role extends BaseEntity<EntityId> {
     const index = this._inheritedRoles.indexOf(roleId);
     if (index > -1) {
       this._inheritedRoles.splice(index, 1);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 
@@ -385,7 +385,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   setInheritedRoles(roleIds: string[]): void {
     this._inheritedRoles = [...roleIds];
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -395,7 +395,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   setDefault(isDefault: boolean): void {
     this._isDefault = isDefault;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -405,7 +405,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   updateSettings(settings: Record<string, any>): void {
     this._settings = { ...this._settings, ...settings };
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -415,7 +415,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   updateMetadata(metadata: Record<string, any>): void {
     this._metadata = { ...this._metadata, ...metadata };
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -436,7 +436,7 @@ export class Role extends BaseEntity<EntityId> {
    */
   setSetting(key: string, value: unknown): void {
     this._settings[key] = value;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**

@@ -368,7 +368,7 @@ export class User extends BaseEntity<UserId> {
     this.validateEmail(email);
     this._email = email;
     this._emailVerified = false;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -379,7 +379,7 @@ export class User extends BaseEntity<UserId> {
   updateUsername(username: string): void {
     this.validateUsername(username);
     this._username = username;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -390,7 +390,7 @@ export class User extends BaseEntity<UserId> {
   updateDisplayName(displayName: string): void {
     this.validateDisplayName(displayName);
     this._displayName = displayName;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -408,7 +408,7 @@ export class User extends BaseEntity<UserId> {
     this._firstName = firstName;
     this._lastName = lastName;
     this._phone = phone;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -418,7 +418,7 @@ export class User extends BaseEntity<UserId> {
    */
   updateAvatar(avatar: string): void {
     this._avatar = avatar;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -430,7 +430,7 @@ export class User extends BaseEntity<UserId> {
   updatePreferences(timezone?: string, language?: string): void {
     this._timezone = timezone;
     this._language = language;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -440,7 +440,7 @@ export class User extends BaseEntity<UserId> {
    */
   updateStatus(status: UserStatusEnum): void {
     this._status = status;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -450,7 +450,7 @@ export class User extends BaseEntity<UserId> {
    */
   setPasswordHash(passwordHash: string): void {
     this._passwordHash = passwordHash;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -458,7 +458,7 @@ export class User extends BaseEntity<UserId> {
    */
   verifyEmail(): void {
     this._emailVerified = true;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -466,7 +466,7 @@ export class User extends BaseEntity<UserId> {
    */
   verifyPhone(): void {
     this._phoneVerified = true;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -474,7 +474,7 @@ export class User extends BaseEntity<UserId> {
    */
   enableTwoFactor(): void {
     this._twoFactorEnabled = true;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -482,7 +482,7 @@ export class User extends BaseEntity<UserId> {
    */
   disableTwoFactor(): void {
     this._twoFactorEnabled = false;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -490,7 +490,7 @@ export class User extends BaseEntity<UserId> {
    */
   updateLastLogin(): void {
     this._lastLoginAt = new Date();
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -501,7 +501,7 @@ export class User extends BaseEntity<UserId> {
   addRole(role: string): void {
     if (!this._roles.includes(role)) {
       this._roles.push(role);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 
@@ -514,7 +514,7 @@ export class User extends BaseEntity<UserId> {
     const index = this._roles.indexOf(role);
     if (index > -1) {
       this._roles.splice(index, 1);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 
@@ -526,7 +526,7 @@ export class User extends BaseEntity<UserId> {
   addPermission(permission: string): void {
     if (!this._permissions.includes(permission)) {
       this._permissions.push(permission);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 
@@ -539,7 +539,7 @@ export class User extends BaseEntity<UserId> {
     const index = this._permissions.indexOf(permission);
     if (index > -1) {
       this._permissions.splice(index, 1);
-      this.markAsModified();
+      this.updateTimestamp();
     }
   }
 

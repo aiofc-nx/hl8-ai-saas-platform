@@ -231,7 +231,7 @@ export class Organization extends BaseEntity<OrganizationId> {
   updateName(name: string): void {
     this.validateName(name);
     this._name = name;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -241,7 +241,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    */
   updateDescription(description: string): void {
     this._description = description;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -251,7 +251,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    */
   updateStatus(status: OrganizationStatusEnum): void {
     this._status = status;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -266,7 +266,7 @@ export class Organization extends BaseEntity<OrganizationId> {
     this._parentId = parentId;
     this._level = this._level + 1;
     this._path = this.generatePath();
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -276,7 +276,7 @@ export class Organization extends BaseEntity<OrganizationId> {
     this._parentId = undefined;
     this._level = 1;
     this._path = this.generatePath();
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -286,7 +286,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    */
   updateSettings(settings: Record<string, any>): void {
     this._settings = { ...this._settings, ...settings };
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -296,7 +296,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    */
   updateMetadata(metadata: Record<string, any>): void {
     this._metadata = { ...this._metadata, ...metadata };
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -317,7 +317,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    */
   setSetting(key: string, value: unknown): void {
     this._settings[key] = value;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
@@ -338,7 +338,7 @@ export class Organization extends BaseEntity<OrganizationId> {
    */
   setMetadata(key: string, value: unknown): void {
     this._metadata[key] = value;
-    this.markAsModified();
+    this.updateTimestamp();
   }
 
   /**
