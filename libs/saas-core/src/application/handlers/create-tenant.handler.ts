@@ -1,11 +1,6 @@
 import { CommandHandler } from "@hl8/application-kernel";
 import { CreateTenantCommand } from "../commands/create-tenant.command.js";
 import { TenantAggregate } from "../../domain/aggregates/tenant.aggregate.js";
-import { Tenant } from "../../domain/entities/tenant.entity.js";
-import { TenantId } from "@hl8/domain-kernel";
-import { TenantStatus } from "../../domain/value-objects/tenant-status.vo.js";
-import { TenantStatusEnum } from "../../domain/value-objects/tenant-status.vo.js";
-import { AuditInfo } from "@hl8/domain-kernel";
 
 /**
  * 创建租户命令处理器
@@ -28,37 +23,16 @@ export class CreateTenantHandler
     this.validateCommand(command);
 
     try {
-      // 生成租户ID
-      const tenantId = TenantId.create(
-        `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      );
-
-      // 创建租户实体
-      const tenant = new Tenant(
-        tenantId,
+      // 使用静态工厂方法创建租户聚合根
+      const tenantAggregate = TenantAggregate.create(
         command.code,
         command.name,
         command.type,
-        new TenantStatus(TenantStatusEnum.TRIAL),
-        {
-          description: command.description || "",
-          settings: {},
-          resourceLimits: command.type.getResourceLimits(),
-        },
-        command.type.getResourceLimits(),
-        new AuditInfo({
-          createdBy: command.createdBy || "system",
-          createdAt: new Date(),
-          updatedBy: command.createdBy || "system",
-          updatedAt: new Date(),
-        }),
+        command.description,
+        command.contactEmail,
+        command.contactPhone,
+        command.address,
       );
-
-      // 创建租户聚合根
-      const tenantAggregate = new TenantAggregate(tenant);
-
-      // 应用租户创建事件
-      tenantAggregate.createTenant(command.createdBy || "system");
 
       return tenantAggregate;
     } catch (error) {

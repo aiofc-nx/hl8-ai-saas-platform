@@ -43,10 +43,9 @@ export class TenantCreationUseCase extends BaseUseCase<
     context: IUseCaseContext,
   ): Promise<TenantAggregate> {
     // 创建隔离上下文
-    const platformId = new PlatformId("platform_001"); // TODO: 从配置或参数获取
-    const tempTenantId = TenantId.create("temp_tenant"); // TODO: 从配置或参数获取
-    const isolationContext = IsolationContext.createTenantLevel(
-      platformId,
+    const platformId = PlatformId.create("platform_001"); // TODO: 从配置或参数获取
+    const tempTenantId = TenantId.generate(); // 生成临时租户ID
+    const isolationContext = IsolationContext.tenant(
       tempTenantId,
     );
 
