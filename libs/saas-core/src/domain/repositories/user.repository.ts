@@ -6,8 +6,7 @@
  */
 
 import { User } from "../entities/user.entity.js";
-import { UserId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import { UserId, IsolationContext } from "@hl8/domain-kernel";
 
 /**
  * 用户仓储接口

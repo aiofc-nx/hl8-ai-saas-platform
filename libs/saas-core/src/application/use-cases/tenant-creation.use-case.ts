@@ -7,7 +7,7 @@ import {
 import { CreateTenantCommand } from "../commands/create-tenant.command.js";
 import { TenantAggregate } from "../../domain/aggregates/tenant.aggregate.js";
 import { TenantRepositoryImpl } from "../../infrastructure/repositories/tenant.repository.impl.js";
-import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { PlatformId } from "../../domain/value-objects/platform-id.vo.js";
 import { TenantId } from "@hl8/domain-kernel";
 

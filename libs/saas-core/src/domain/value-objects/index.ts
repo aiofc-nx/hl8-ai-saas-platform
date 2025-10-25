@@ -21,7 +21,7 @@ export { CaslAbilityId } from "./casl-ability-id.vo.js";
 export {
   IsolationContext,
   type IsolationContextData,
-} from "./isolation-context.vo.js";
+} from "@hl8/domain-kernel";
 
 // 租户相关值对象
 export { TenantCode } from "./tenant-code.vo.js";

@@ -10,7 +10,7 @@ import { EntityManager } from "@mikro-orm/core";
 import { IRoleRepository } from "../../../domain/repositories/role.repository.js";
 import { Role } from "../../../domain/entities/role.entity.js";
 import { RoleId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../../../domain/value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { RoleEntity } from "../../entities/postgresql/role.entity.js";
 import { RoleMapper } from "../../mappers/postgresql/role.mapper.js";
 

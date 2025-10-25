@@ -7,7 +7,7 @@
 
 import { DepartmentAggregate } from "../aggregates/department.aggregate.js";
 import { DepartmentId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 /**
  * 部门仓储接口

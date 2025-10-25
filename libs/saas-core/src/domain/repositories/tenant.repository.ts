@@ -11,7 +11,7 @@ import { TenantCode } from "../value-objects/tenant-code.vo.js";
 import { TenantName } from "../value-objects/tenant-name.vo.js";
 import { TenantType } from "../value-objects/tenant-type.vo.js";
 import { TenantStatus } from "../value-objects/tenant-status.vo.js";
-import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 /**
  * 租户仓储接口

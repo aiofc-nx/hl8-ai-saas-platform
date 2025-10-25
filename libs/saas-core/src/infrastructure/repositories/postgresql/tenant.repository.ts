@@ -15,7 +15,7 @@ import { TenantCode } from "../../../domain/value-objects/tenant-code.vo.js";
 import { TenantName } from "../../../domain/value-objects/tenant-name.vo.js";
 import { TenantType } from "../../../domain/value-objects/tenant-type.vo.js";
 import { TenantStatus } from "../../../domain/value-objects/tenant-status.vo.js";
-import { IsolationContext } from "../../../domain/value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { TenantEntity } from "../../entities/postgresql/tenant.entity.js";
 import { TenantMapper } from "../../mappers/postgresql/tenant.mapper.js";
 

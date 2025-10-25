@@ -10,7 +10,7 @@ import { EntityManager } from "@mikro-orm/core";
 import { IUserRepository } from "../../../domain/repositories/user.repository.js";
 import { User } from "../../../domain/entities/user.entity.js";
 import { UserId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../../../domain/value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { UserEntity } from "../../entities/postgresql/user.entity.js";
 import { UserMapper } from "../../mappers/postgresql/user.mapper.js";
 

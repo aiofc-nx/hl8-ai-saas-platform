@@ -2,7 +2,7 @@ import { CaslAbility } from "../entities/casl-ability.entity.js";
 import { CaslAbilityId } from "../value-objects/casl-ability-id.vo.js";
 import { UserId } from "@hl8/domain-kernel";
 import { RoleId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { CaslCondition } from "../value-objects/casl-condition.vo.js";
 import { AuditInfo } from "@hl8/domain-kernel";
 

@@ -10,7 +10,7 @@ import { EntityManager, FilterQuery } from "@mikro-orm/core";
 import { IOrganizationRepository } from "../../../domain/repositories/organization.repository.js";
 import { OrganizationAggregate } from "../../../domain/aggregates/organization.aggregate.js";
 import { OrganizationId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../../../domain/value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { OrganizationEntity } from "../../entities/postgresql/organization.entity.js";
 import { OrganizationMapper } from "../../mappers/postgresql/organization.mapper.js";
 

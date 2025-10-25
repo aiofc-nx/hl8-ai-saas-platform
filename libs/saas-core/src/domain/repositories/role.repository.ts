@@ -7,7 +7,7 @@
 
 import { Role } from "../entities/role.entity.js";
 import { RoleId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 /**
  * 角色仓储接口

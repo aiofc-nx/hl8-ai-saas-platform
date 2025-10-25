@@ -10,7 +10,7 @@ import { EntityManager } from "@mikro-orm/core";
 import { IDepartmentRepository } from "../../../domain/repositories/department.repository.js";
 import { DepartmentAggregate } from "../../../domain/aggregates/department.aggregate.js";
 import { DepartmentId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../../../domain/value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 import { DepartmentEntity } from "../../entities/postgresql/department.entity.js";
 import { DepartmentMapper } from "../../mappers/postgresql/department.mapper.js";
 

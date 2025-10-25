@@ -7,7 +7,7 @@
 
 import { OrganizationAggregate } from "../aggregates/organization.aggregate.js";
 import { OrganizationId } from "@hl8/domain-kernel";
-import { IsolationContext } from "../value-objects/isolation-context.vo.js";
+import { IsolationContext } from "@hl8/domain-kernel";
 
 /**
  * 组织仓储接口
