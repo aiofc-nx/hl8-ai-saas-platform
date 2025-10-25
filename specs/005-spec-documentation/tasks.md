@@ -368,10 +368,10 @@ All application layer components properly extend application-kernel base classes
 
 #### Application Integration
 
-- [ ] T125 Verify all components use IUseCaseContext from @hl8/application-kernel
-- [ ] T126 Verify all components use IEventBus from @hl8/application-kernel where appropriate
-- [ ] T127 Verify all components use ITransactionManager from @hl8/application-kernel where appropriate
-- [ ] T128 Test application layer with application-kernel base classes
+- [x] T125 Verify all components use IUseCaseContext from @hl8/application-kernel
+- [x] T126 Verify all components use IEventBus from @hl8/application-kernel where appropriate
+- [x] T127 Verify all components use ITransactionManager from @hl8/application-kernel where appropriate
+- [x] T128 Test application layer with application-kernel base classes
 
 ## Phase 8: Interface Kernel Alignment
 
