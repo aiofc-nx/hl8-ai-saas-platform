@@ -1,4 +1,7 @@
-import { AggregateRoot } from "@hl8/domain-kernel";
+import {
+  AggregateRoot,
+  TenantId as KernelTenantId,
+} from "@hl8/domain-kernel";
 import { Department } from "../entities/department.entity.js";
 import { DepartmentId } from "../value-objects/department-id.vo.js";
 import { OrganizationId } from "../value-objects/organization-id.vo.js";
@@ -20,7 +23,13 @@ export class DepartmentAggregate extends AggregateRoot<DepartmentId> {
    * @param department - 部门实体
    */
   constructor(department: Department) {
-    super(department.id);
+    // 创建 platform-level tenantId
+    const platformTenantId = KernelTenantId.create(
+      "00000000-0000-0000-0000-000000000000",
+    );
+    // 将 DepartmentId 转换为 domain-kernel 的 DepartmentId
+    const departmentKernelId = department.id as unknown as DepartmentId;
+    super(departmentKernelId, platformTenantId);
     this._department = department;
   }
 

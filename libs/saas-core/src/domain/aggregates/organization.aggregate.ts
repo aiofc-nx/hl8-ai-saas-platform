@@ -1,4 +1,7 @@
-import { AggregateRoot } from "@hl8/domain-kernel";
+import {
+  AggregateRoot,
+  TenantId as KernelTenantId,
+} from "@hl8/domain-kernel";
 import { Organization } from "../entities/organization.entity.js";
 import { OrganizationId } from "../value-objects/organization-id.vo.js";
 import { TenantId } from "../value-objects/tenant-id.vo.js";
@@ -26,7 +29,14 @@ export class OrganizationAggregate extends AggregateRoot<OrganizationId> {
    * @param organization - 组织实体
    */
   constructor(organization: Organization) {
-    super(organization.id);
+    // 创建 platform-level tenantId
+    const platformTenantId = KernelTenantId.create(
+      "00000000-0000-0000-0000-000000000000",
+    );
+    // 将 OrganizationId 转换为 domain-kernel 的 OrganizationId
+    // 注意：这里我们需要将 organization.id 转换为正确的 ID
+    const organizationKernelId = organization.id as unknown as OrganizationId;
+    super(organizationKernelId, platformTenantId);
     this._organization = organization;
     this._userAssignmentRules = new UserAssignmentRules();
   }
