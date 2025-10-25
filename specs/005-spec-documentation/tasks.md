@@ -337,11 +337,11 @@ All application layer components properly extend application-kernel base classes
 
 #### Command Alignment
 
-- [ ] T106 [P] Update CreateTenantCommand to extend BaseCommand from @hl8/application-kernel
-- [ ] T107 [P] Update UpdateTenantCommand to extend BaseCommand from @hl8/application-kernel
-- [ ] T108 [P] Update DeleteTenantCommand to extend BaseCommand from @hl8/application-kernel
-- [ ] T109 [P] Update AssignPermissionCommand to extend BaseCommand from @hl8/application-kernel
-- [ ] T110 Verify all commands use IsolationContext from @hl8/domain-kernel
+- [x] T106 [P] Update CreateTenantCommand to extend BaseCommand from @hl8/application-kernel
+- [x] T107 [P] Update UpdateTenantCommand to extend BaseCommand from @hl8/application-kernel
+- [x] T108 [P] Update DeleteTenantCommand to extend BaseCommand from @hl8/application-kernel
+- [x] T109 [P] Update AssignPermissionCommand to extend BaseCommand from @hl8/application-kernel
+- [x] T110 Verify all commands use IsolationContext from @hl8/domain-kernel
 
 #### Query Alignment
 
