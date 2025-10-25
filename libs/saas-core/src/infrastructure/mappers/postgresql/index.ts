@@ -11,7 +11,9 @@ export * from "./tenant.mapper.js";
 // 组织映射器
 export * from "./organization.mapper.js";
 
+// 部门映射器
+export * from "./department.mapper.js";
+
 // TODO: 添加其他映射器
-// export * from "./department.mapper.js";
 // export * from "./user.mapper.js";
 // export * from "./role.mapper.js";
