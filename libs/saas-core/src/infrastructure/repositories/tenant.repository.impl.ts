@@ -1,4 +1,4 @@
-import { BaseRepositoryAdapter } from "@hl8/infrastructure-kernel";
+import { AggregateRepositoryAdapter } from "@hl8/infrastructure-kernel";
 import { TenantAggregate } from "../../domain/aggregates/tenant.aggregate.js";
 import { TenantId } from "../../domain/value-objects/tenant-id.vo.js";
 import { IsolationContext } from "../../domain/value-objects/isolation-context.vo.js";
@@ -9,9 +9,8 @@ import { IsolationContext } from "../../domain/value-objects/isolation-context.v
  * @description 租户聚合根的仓储实现，提供数据持久化操作
  * @since 1.0.0
  */
-export class TenantRepositoryImpl extends BaseRepositoryAdapter<
-  TenantAggregate,
-  TenantId
+export class TenantRepositoryImpl extends AggregateRepositoryAdapter<
+  TenantAggregate
 > {
   /**
    * 根据ID获取租户聚合根
