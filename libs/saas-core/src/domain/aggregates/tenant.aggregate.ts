@@ -5,14 +5,16 @@
  * @since 1.0.0
  */
 
-import { AggregateRoot, TenantId } from "@hl8/domain-kernel";
+import { AggregateRoot, TenantId, EntityId } from "@hl8/domain-kernel";
 import { Tenant } from "../entities/index.js";
 import {
   TenantCode,
   TenantName,
   TenantType,
   TenantStatus,
+  TenantStatusEnum,
 } from "../value-objects/index.js";
+import { TenantCreatedEvent } from "../events/tenant-created.event.js";
 import { TrialPeriodConfig } from "../value-objects/trial-period-config.vo.js";
 import {
   TrialPeriodService,
@@ -142,18 +144,18 @@ export class TenantAggregate extends AggregateRoot {
     );
 
     // 发布租户创建事件
-    aggregate.addDomainEvent(
-      new TenantCreatedEvent(
-        id,
-        code,
-        name,
-        type,
-        status,
+    aggregate.apply(
+      aggregate.createDomainEvent("TenantCreated", {
+        tenantId: id.toString(),
+        tenantCode: code.toString(),
+        tenantName: name.toString(),
+        tenantType: type.toString(),
+        tenantStatus: status.toString(),
         description,
         contactEmail,
         contactPhone,
         address,
-      ),
+      }),
     );
 
     return aggregate;
@@ -971,5 +973,15 @@ export class TenantAggregate extends AggregateRoot {
       snapshot.tenantCreationRules as TenantCreationRules;
     this._resourceMonitoringService =
       snapshot.resourceMonitoringService as ResourceMonitoringService;
+  }
+
+  /**
+   * 辅助方法：发布领域事件
+   * @deprecated 请直接使用 this.apply(this.createDomainEvent(...))
+   */
+  protected addDomainEvent(event: unknown): void {
+    // 这是一个兼容性方法，实际项目中应该移除所有对 addDomainEvent 的调用
+    // 并直接使用 this.apply(this.createDomainEvent(...))
+    console.warn("addDomainEvent is deprecated, use apply(createDomainEvent(...)) instead");
   }
 }
