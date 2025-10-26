@@ -1,0 +1,730 @@
+# SAAS Core Module GraphQL Schema
+# 多租户SAAS平台核心模块GraphQL Schema，基于Clean Architecture + DDD + CQRS + ES + EDA混合架构模式
+
+scalar DateTime
+scalar JSON
+scalar UUID
+
+# 分页输入
+input PaginationInput {
+  page: Int = 1
+  limit: Int = 20
+}
+
+# 分页信息
+type PaginationInfo {
+  page: Int!
+  limit: Int!
+  total: Int!
+  totalPages: Int!
+  hasNext: Boolean!
+  hasPrev: Boolean!
+}
+
+# 排序输入
+input SortInput {
+  field: String!
+  direction: SortDirection!
+}
+
+enum SortDirection {
+  ASC
+  DESC
+}
+
+# 平台相关
+type Platform {
+  id: UUID!
+  name: String!
+  description: String
+  settings: JSON
+  status: PlatformStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum PlatformStatus {
+  ACTIVE
+  INACTIVE
+}
+
+input PlatformUpdateInput {
+  name: String
+  description: String
+  settings: JSON
+}
+
+# 租户相关
+type Tenant {
+  id: UUID!
+  name: String!
+  code: String!
+  type: TenantType!
+  status: TenantStatus!
+  settings: JSON
+  resourceLimits: ResourceLimits!
+  resourceUsage: ResourceUsage!
+  trialConfig: TrialPeriodConfig
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  organizations: [Organization!]!
+  users: [User!]!
+}
+
+enum TenantType {
+  FREE
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+  CUSTOM
+}
+
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  DELETED
+}
+
+type TenantListResponse {
+  data: [Tenant!]!
+  pagination: PaginationInfo!
+}
+
+input TenantCreateInput {
+  name: String!
+  code: String!
+  type: TenantType!
+  settings: JSON
+  resourceLimits: ResourceLimitsInput
+  trialConfig: TrialPeriodConfigInput
+}
+
+input TenantUpdateInput {
+  name: String
+  settings: JSON
+  resourceLimits: ResourceLimitsInput
+}
+
+input TenantFilterInput {
+  type: TenantType
+  status: TenantStatus
+  name: String
+}
+
+# 组织相关
+type Organization {
+  id: UUID!
+  tenantId: UUID!
+  name: String!
+  type: OrganizationType!
+  description: String
+  isShared: Boolean!
+  settings: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  departments: [Department!]!
+  users: [User!]!
+}
+
+enum OrganizationType {
+  Committee
+  ProjectTeam
+  QualityGroup
+  PerformanceGroup
+}
+
+type OrganizationListResponse {
+  data: [Organization!]!
+  pagination: PaginationInfo!
+}
+
+input OrganizationCreateInput {
+  name: String!
+  type: OrganizationType!
+  description: String
+  isShared: Boolean = false
+  settings: JSON
+}
+
+input OrganizationUpdateInput {
+  name: String
+  description: String
+  isShared: Boolean
+  settings: JSON
+}
+
+input OrganizationFilterInput {
+  type: OrganizationType
+  isShared: Boolean
+  name: String
+}
+
+# 部门相关
+type Department {
+  id: UUID!
+  organizationId: UUID!
+  name: String!
+  level: Int!
+  parentId: UUID
+  path: String!
+  description: String
+  settings: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  parent: Department
+  children: [Department!]!
+  users: [User!]!
+}
+
+type DepartmentListResponse {
+  data: [Department!]!
+  pagination: PaginationInfo!
+}
+
+input DepartmentCreateInput {
+  name: String!
+  level: Int!
+  parentId: UUID
+  description: String
+  settings: JSON
+}
+
+input DepartmentUpdateInput {
+  name: String
+  description: String
+  settings: JSON
+}
+
+input DepartmentFilterInput {
+  level: Int
+  parentId: UUID
+  name: String
+}
+
+# 用户相关
+type User {
+  id: UUID!
+  tenantId: UUID!
+  username: String!
+  email: String!
+  profile: UserProfile
+  status: UserStatus!
+  type: UserType!
+  source: UserSource!
+  affiliation: UserAffiliation!
+  organizations: [UserOrganizationAssignment!]!
+  departments: [UserDepartmentAssignment!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+  DELETED
+}
+
+enum UserType {
+  Admin
+  Manager
+  Member
+  Guest
+}
+
+enum UserSource {
+  Internal
+  External
+  Imported
+  Invited
+}
+
+enum UserAffiliation {
+  Employee
+  Contractor
+  Partner
+  Customer
+}
+
+type UserProfile {
+  firstName: String
+  lastName: String
+  displayName: String
+  avatar: String
+  phone: String
+  timezone: String
+  language: String
+}
+
+type UserOrganizationAssignment {
+  organizationId: UUID!
+  role: String!
+  assignedAt: DateTime!
+}
+
+type UserDepartmentAssignment {
+  departmentId: UUID!
+  role: String!
+  assignedAt: DateTime!
+}
+
+type UserListResponse {
+  data: [User!]!
+  pagination: PaginationInfo!
+}
+
+input UserCreateInput {
+  username: String!
+  email: String!
+  profile: UserProfileInput
+  type: UserType!
+  source: UserSource = Internal
+  affiliation: UserAffiliation = Employee
+}
+
+input UserUpdateInput {
+  username: String
+  email: String
+  profile: UserProfileInput
+  status: UserStatus
+  type: UserType
+}
+
+input UserProfileInput {
+  firstName: String
+  lastName: String
+  displayName: String
+  avatar: String
+  phone: String
+  timezone: String
+  language: String
+}
+
+input UserFilterInput {
+  status: UserStatus
+  type: UserType
+  source: UserSource
+  affiliation: UserAffiliation
+  organizationId: UUID
+  departmentId: UUID
+  username: String
+  email: String
+}
+
+# 权限相关
+type Permission {
+  id: UUID!
+  userId: UUID!
+  resource: String!
+  action: PermissionAction!
+  conditions: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum PermissionAction {
+  create
+  read
+  update
+  delete
+  manage
+}
+
+type PermissionListResponse {
+  data: [Permission!]!
+  pagination: PaginationInfo!
+}
+
+input PermissionAssignInput {
+  userId: UUID!
+  resource: String!
+  action: PermissionAction!
+  conditions: JSON
+}
+
+input PermissionFilterInput {
+  userId: UUID
+  resource: String
+  action: PermissionAction
+}
+
+# 资源相关
+type ResourceLimits {
+  maxUsers: Int!
+  maxStorage: Int!
+  maxOrganizations: Int!
+  maxApiCalls: Int!
+}
+
+type ResourceUsage {
+  currentUsers: Int!
+  currentStorage: Int!
+  currentOrganizations: Int!
+  currentApiCalls: Int!
+  lastUpdated: DateTime!
+}
+
+type ResourceUsageResponse {
+  limits: ResourceLimits!
+  usage: ResourceUsage!
+  utilization: ResourceUtilization!
+}
+
+type ResourceUtilization {
+  users: Float!
+  storage: Float!
+  organizations: Float!
+  apiCalls: Float!
+}
+
+input ResourceLimitsInput {
+  maxUsers: Int
+  maxStorage: Int
+  maxOrganizations: Int
+  maxApiCalls: Int
+}
+
+# 试用期配置
+type TrialPeriodConfig {
+  enabled: Boolean!
+  duration: Int!
+  startDate: DateTime
+  endDate: DateTime
+}
+
+input TrialPeriodConfigInput {
+  enabled: Boolean
+  duration: Int
+  startDate: DateTime
+  endDate: DateTime
+}
+
+# 查询根类型
+type Query {
+  # 平台查询
+  platform: Platform
+
+  # 租户查询
+  tenants(
+    pagination: PaginationInput
+    filter: TenantFilterInput
+    sort: SortInput
+  ): TenantListResponse!
+  tenant(id: UUID!): Tenant
+
+  # 组织查询
+  organizations(
+    tenantId: UUID!
+    pagination: PaginationInput
+    filter: OrganizationFilterInput
+    sort: SortInput
+  ): OrganizationListResponse!
+  organization(id: UUID!): Organization
+
+  # 部门查询
+  departments(
+    organizationId: UUID!
+    pagination: PaginationInput
+    filter: DepartmentFilterInput
+    sort: SortInput
+  ): DepartmentListResponse!
+  department(id: UUID!): Department
+
+  # 用户查询
+  users(
+    tenantId: UUID!
+    pagination: PaginationInput
+    filter: UserFilterInput
+    sort: SortInput
+  ): UserListResponse!
+  user(id: UUID!): User
+
+  # 权限查询
+  permissions(
+    tenantId: UUID!
+    pagination: PaginationInput
+    filter: PermissionFilterInput
+    sort: SortInput
+  ): PermissionListResponse!
+  permission(id: UUID!): Permission
+
+  # 资源监控
+  resourceUsage(tenantId: UUID!, period: String = "month"): ResourceUsageResponse!
+}
+
+# 变更根类型
+type Mutation {
+  # 平台变更
+  updatePlatform(input: PlatformUpdateInput!): Platform!
+
+  # 租户变更
+  createTenant(input: TenantCreateInput!): Tenant!
+  updateTenant(id: UUID!, input: TenantUpdateInput!): Tenant!
+  deleteTenant(id: UUID!): Boolean!
+
+  # 组织变更
+  createOrganization(
+    tenantId: UUID!
+    input: OrganizationCreateInput!
+  ): Organization!
+  updateOrganization(
+    id: UUID!
+    input: OrganizationUpdateInput!
+  ): Organization!
+  deleteOrganization(id: UUID!): Boolean!
+
+  # 部门变更
+  createDepartment(
+    organizationId: UUID!
+    input: DepartmentCreateInput!
+  ): Department!
+  updateDepartment(
+    id: UUID!
+    input: DepartmentUpdateInput!
+  ): Department!
+  deleteDepartment(id: UUID!): Boolean!
+
+  # 用户变更
+  createUser(tenantId: UUID!, input: UserCreateInput!): User!
+  updateUser(id: UUID!, input: UserUpdateInput!): User!
+  deleteUser(id: UUID!): Boolean!
+
+  # 权限变更
+  assignPermission(input: PermissionAssignInput!): Permission!
+  revokePermission(id: UUID!): Boolean!
+}
+
+# 订阅根类型
+type Subscription {
+  # 租户事件
+  tenantCreated: Tenant!
+  tenantUpdated: Tenant!
+  tenantDeleted: UUID!
+
+  # 组织事件
+  organizationCreated: Organization!
+  organizationUpdated: Organization!
+  organizationDeleted: UUID!
+
+  # 部门事件
+  departmentCreated: Department!
+  departmentUpdated: Department!
+  departmentDeleted: UUID!
+
+  # 用户事件
+  userCreated: User!
+  userUpdated: User!
+  userDeleted: UUID!
+
+  # 权限事件
+  permissionAssigned: Permission!
+  permissionRevoked: UUID!
+
+  # 资源事件
+  resourceUsageUpdated(tenantId: UUID!): ResourceUsageResponse!
+}
+
+# 错误类型
+type Error {
+  code: String!
+  message: String!
+  details: JSON
+  timestamp: DateTime!
+  path: String!
+  method: String!
+}
+
+# 联合类型
+union TenantResult = Tenant | Error
+union OrganizationResult = Organization | Error
+union DepartmentResult = Department | Error
+union UserResult = User | Error
+union PermissionResult = Permission | Error
+
+# 接口类型
+interface Node {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# 实现接口的类型
+type Tenant implements Node {
+  id: UUID!
+  name: String!
+  code: String!
+  type: TenantType!
+  status: TenantStatus!
+  settings: JSON
+  resourceLimits: ResourceLimits!
+  resourceUsage: ResourceUsage!
+  trialConfig: TrialPeriodConfig
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  organizations: [Organization!]!
+  users: [User!]!
+}
+
+type Organization implements Node {
+  id: UUID!
+  tenantId: UUID!
+  name: String!
+  type: OrganizationType!
+  description: String
+  isShared: Boolean!
+  settings: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  departments: [Department!]!
+  users: [User!]!
+}
+
+type Department implements Node {
+  id: UUID!
+  organizationId: UUID!
+  name: String!
+  level: Int!
+  parentId: UUID
+  path: String!
+  description: String
+  settings: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  parent: Department
+  children: [Department!]!
+  users: [User!]!
+}
+
+type User implements Node {
+  id: UUID!
+  tenantId: UUID!
+  username: String!
+  email: String!
+  profile: UserProfile
+  status: UserStatus!
+  type: UserType!
+  source: UserSource!
+  affiliation: UserAffiliation!
+  organizations: [UserOrganizationAssignment!]!
+  departments: [UserDepartmentAssignment!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Permission implements Node {
+  id: UUID!
+  userId: UUID!
+  resource: String!
+  action: PermissionAction!
+  conditions: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# 输入验证指令
+directive @validate(
+  min: Int
+  max: Int
+  pattern: String
+  required: Boolean
+) on INPUT_FIELD_DEFINITION
+
+# 权限指令
+directive @requireAuth on FIELD_DEFINITION
+directive @requirePermission(
+  resource: String!
+  action: String!
+) on FIELD_DEFINITION
+
+# 缓存指令
+directive @cache(
+  ttl: Int
+  key: String
+) on FIELD_DEFINITION
+
+# 审计指令
+directive @audit on FIELD_DEFINITION
+
+# 示例查询
+"""
+查询示例：
+
+# 获取租户列表
+query GetTenants($pagination: PaginationInput, $filter: TenantFilterInput) {
+  tenants(pagination: $pagination, filter: $filter) {
+    data {
+      id
+      name
+      code
+      type
+      status
+      resourceLimits {
+        maxUsers
+        maxStorage
+      }
+      resourceUsage {
+        currentUsers
+        currentStorage
+      }
+    }
+    pagination {
+      page
+      limit
+      total
+      totalPages
+    }
+  }
+}
+
+# 获取组织详情
+query GetOrganization($id: UUID!) {
+  organization(id: $id) {
+    id
+    name
+    type
+    description
+    isShared
+    departments {
+      id
+      name
+      level
+      path
+    }
+    users {
+      id
+      username
+      email
+      type
+    }
+  }
+}
+
+# 创建租户
+mutation CreateTenant($input: TenantCreateInput!) {
+  createTenant(input: $input) {
+    id
+    name
+    code
+    type
+    status
+    resourceLimits {
+      maxUsers
+      maxStorage
+    }
+  }
+}
+
+# 订阅租户事件
+subscription OnTenantCreated {
+  tenantCreated {
+    id
+    name
+    code
+    type
+    status
+  }
+}
+"""
