@@ -51,13 +51,10 @@ ORDER BY created_at DESC;
 
 ```typescript
 // Access user's own data
-const userData = await userPreferenceService.get(
-  userId,
-  context
-);
+const userData = await userPreferenceService.get(userId, context);
 
 // Check permission for department data
-if (ability.can('read', 'Department')) {
+if (ability.can("read", "Department")) {
   const depts = await departmentService.findAll(context);
 }
 ```
@@ -75,7 +72,7 @@ const context = IsolationContext.createUserLevel(
   tenantId,
   organizationId,
   departmentId,
-  userId
+  userId,
 );
 
 const profile = await userService.getProfile(userId, context);
@@ -89,8 +86,8 @@ const preferences = await userService.getPreferences(userId, context);
 const canAccess = await permissionService.can(
   userId,
   organizationId,
-  'read',
-  'Organization'
+  "read",
+  "Organization",
 );
 
 if (canAccess) {
@@ -115,9 +112,9 @@ if (canAccess) {
 // User opts into data sharing
 await userService.updatePrivacySettings({
   userId,
-  shareProfile: true,      // Share with organization
-  shareActivity: false,    // Keep activity private
-  sharePreferences: true   // Share preferences
+  shareProfile: true, // Share with organization
+  shareActivity: false, // Keep activity private
+  sharePreferences: true, // Share preferences
 });
 ```
 

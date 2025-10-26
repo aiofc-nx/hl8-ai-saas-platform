@@ -197,7 +197,7 @@ export class RoleLevel extends BaseValueObject<RoleLevelEnum> {
    * @param other - 其他值对象
    * @returns 是否等于指定级别
    */
-  equals(other?: BaseValueObject): boolean {
+  equals(other?: BaseValueObject<unknown>): boolean {
     if (!other || !(other instanceof RoleLevel)) {
       return false;
     }

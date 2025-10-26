@@ -25,32 +25,32 @@ The platform implements 5 distinct role types, each with specific permissions an
 ```typescript
 interface PlatformAdminPermissions {
   // Platform Management
-  'platform:manage': ['all'];
-  'platform:configure': ['all'];
-  'platform:monitor': ['all'];
-  
+  "platform:manage": ["all"];
+  "platform:configure": ["all"];
+  "platform:monitor": ["all"];
+
   // Tenant Management
-  'tenant:create': ['all'];
-  'tenant:update': ['all'];
-  'tenant:delete': ['all'];
-  'tenant:view': ['all'];
-  'tenant:suspend': ['all'];
-  'tenant:activate': ['all'];
-  
+  "tenant:create": ["all"];
+  "tenant:update": ["all"];
+  "tenant:delete": ["all"];
+  "tenant:view": ["all"];
+  "tenant:suspend": ["all"];
+  "tenant:activate": ["all"];
+
   // System Operations
-  'system:configure': ['all'];
-  'system:monitor': ['all'];
-  'system:backup': ['all'];
-  'system:maintenance': ['all'];
-  
+  "system:configure": ["all"];
+  "system:monitor": ["all"];
+  "system:backup": ["all"];
+  "system:maintenance": ["all"];
+
   // Cross-tenant Operations
-  'data:view': ['all'];
-  'data:export': ['all'];
-  'audit:view': ['all'];
-  
+  "data:view": ["all"];
+  "data:export": ["all"];
+  "audit:view": ["all"];
+
   // User Management (all tenants)
-  'user:view': ['all'];
-  'user:manage': ['all'];
+  "user:view": ["all"];
+  "user:manage": ["all"];
 }
 ```
 
@@ -79,49 +79,49 @@ interface PlatformAdminPermissions {
 ```typescript
 interface TenantAdminPermissions {
   // Inherited (read-only)
-  'platform:read': ['all'];
-  'system:read': ['all'];
-  
+  "platform:read": ["all"];
+  "system:read": ["all"];
+
   // Tenant Management
-  'tenant:update': ['own'];
-  'tenant:configure': ['own'];
-  'tenant:view': ['own'];
-  
+  "tenant:update": ["own"];
+  "tenant:configure": ["own"];
+  "tenant:view": ["own"];
+
   // Organization Management
-  'organization:create': ['all'];
-  'organization:update': ['all'];
-  'organization:delete': ['all'];
-  'organization:view': ['all'];
-  
+  "organization:create": ["all"];
+  "organization:update": ["all"];
+  "organization:delete": ["all"];
+  "organization:view": ["all"];
+
   // Department Management (tenant-wide)
-  'department:create': ['all'];
-  'department:update': ['all'];
-  'department:delete': ['all'];
-  'department:view': ['all'];
-  
+  "department:create": ["all"];
+  "department:update": ["all"];
+  "department:delete": ["all"];
+  "department:view": ["all"];
+
   // User Management (tenant-wide)
-  'user:create': ['all'];
-  'user:update': ['all'];
-  'user:delete': ['all'];
-  'user:view': ['all'];
-  'user:invite': ['all'];
-  
+  "user:create": ["all"];
+  "user:update": ["all"];
+  "user:delete": ["all"];
+  "user:view": ["all"];
+  "user:invite": ["all"];
+
   // Role Management
-  'role:create': ['all'];
-  'role:update': ['all'];
-  'role:assign': ['all'];
-  
+  "role:create": ["all"];
+  "role:update": ["all"];
+  "role:assign": ["all"];
+
   // Data Access
-  'data:view': ['all'];
-  'data:export': ['all'];
-  
+  "data:view": ["all"];
+  "data:export": ["all"];
+
   // Billing & Subscription
-  'billing:view': ['all'];
-  'billing:update': ['all'];
-  
+  "billing:view": ["all"];
+  "billing:update": ["all"];
+
   // Reporting
-  'report:view': ['all'];
-  'report:generate': ['all'];
+  "report:view": ["all"];
+  "report:generate": ["all"];
 }
 ```
 
@@ -151,43 +151,43 @@ interface TenantAdminPermissions {
 ```typescript
 interface OrganizationAdminPermissions {
   // Inherited (read-only)
-  'tenant:read': ['all'];
-  'platform:read': ['all'];
-  
+  "tenant:read": ["all"];
+  "platform:read": ["all"];
+
   // Organization Management
-  'organization:update': ['own'];
-  'organization:configure': ['own'];
-  'organization:view': ['own'];
-  
+  "organization:update": ["own"];
+  "organization:configure": ["own"];
+  "organization:view": ["own"];
+
   // Department Management (in organization)
-  'department:create': ['all'];
-  'department:update': ['all'];
-  'department:delete': ['all'];
-  'department:view': ['all'];
-  
+  "department:create": ["all"];
+  "department:update": ["all"];
+  "department:delete": ["all"];
+  "department:view": ["all"];
+
   // User Management (in organization)
-  'user:create': ['all'];
-  'user:update': ['all'];
-  'user:assign': ['all'];
-  'user:view': ['all'];
-  'user:invite': ['all'];
-  
+  "user:create": ["all"];
+  "user:update": ["all"];
+  "user:assign": ["all"];
+  "user:view": ["all"];
+  "user:invite": ["all"];
+
   // Role Assignment (within organization)
-  'role:assign': ['all'];
-  
+  "role:assign": ["all"];
+
   // Data Access (organization-wide)
-  'data:view': ['all'];
-  'data:create': ['all'];
-  'data:update': ['all'];
-  'data:export': ['all'];
-  
+  "data:view": ["all"];
+  "data:create": ["all"];
+  "data:update": ["all"];
+  "data:export": ["all"];
+
   // Reporting (organization)
-  'report:view': ['all'];
-  'report:generate': ['all'];
-  
+  "report:view": ["all"];
+  "report:generate": ["all"];
+
   // Team Management
-  'team:create': ['all'];
-  'team:manage': ['all'];
+  "team:create": ["all"];
+  "team:manage": ["all"];
 }
 ```
 
@@ -217,39 +217,39 @@ interface OrganizationAdminPermissions {
 ```typescript
 interface DepartmentAdminPermissions {
   // Inherited (read-only)
-  'organization:read': ['all'];
-  'department:read': ['all'];
-  
+  "organization:read": ["all"];
+  "department:read": ["all"];
+
   // Department Management
-  'department:update': ['own'];
-  'department:configure': ['own'];
-  
+  "department:update": ["own"];
+  "department:configure": ["own"];
+
   // User Management (in department)
-  'user:assign': ['all'];
-  'user:update': ['all'];
-  'user:view': ['all'];
-  'user:invite': ['all'];
-  
+  "user:assign": ["all"];
+  "user:update": ["all"];
+  "user:view": ["all"];
+  "user:invite": ["all"];
+
   // Department Data Access
-  'data:view': ['all'];
-  'data:create': ['all'];
-  'data:update': ['all'];
-  'data:delete': ['own'];
-  'data:export': ['all'];
-  
+  "data:view": ["all"];
+  "data:create": ["all"];
+  "data:update": ["all"];
+  "data:delete": ["own"];
+  "data:export": ["all"];
+
   // Team Management
-  'team:manage': ['all'];
-  'team:view': ['all'];
-  
+  "team:manage": ["all"];
+  "team:view": ["all"];
+
   // Document Management
-  'document:create': ['all'];
-  'document:update': ['all'];
-  'document:delete': ['own'];
-  
+  "document:create": ["all"];
+  "document:update": ["all"];
+  "document:delete": ["own"];
+
   // Task Management
-  'task:create': ['all'];
-  'task:assign': ['all'];
-  'task:update': ['all'];
+  "task:create": ["all"];
+  "task:assign": ["all"];
+  "task:update": ["all"];
 }
 ```
 
@@ -279,39 +279,39 @@ interface DepartmentAdminPermissions {
 ```typescript
 interface RegularUserPermissions {
   // Inherited (read-only)
-  'department:read': ['all'];
-  
+  "department:read": ["all"];
+
   // Own Profile Management
-  'profile:view': ['own'];
-  'profile:update': ['own'];
-  'profile:delete': ['own'];
-  
+  "profile:view": ["own"];
+  "profile:update": ["own"];
+  "profile:delete": ["own"];
+
   // Own Data Management
-  'data:view': ['own'];
-  'data:create': ['own'];
-  'data:update': ['own'];
-  'data:delete': ['own'];
-  
+  "data:view": ["own"];
+  "data:create": ["own"];
+  "data:update": ["own"];
+  "data:delete": ["own"];
+
   // Shared Resources
-  'data:view': ['shared'];
-  'document:view': ['shared'];
-  'document:create': ['shared'];
-  'document:comment': ['shared'];
-  
+  "data:view": ["shared"];
+  "document:view": ["shared"];
+  "document:create": ["shared"];
+  "document:comment": ["shared"];
+
   // Collaboration
-  'team:view': ['all'];
-  'team:join': ['invited'];
-  'comment:create': ['all'];
-  'comment:view': ['all'];
-  
+  "team:view": ["all"];
+  "team:join": ["invited"];
+  "comment:create": ["all"];
+  "comment:view": ["all"];
+
   // Tasks
-  'task:view': ['assigned'];
-  'task:update': ['assigned'];
-  'task:complete': ['assigned'];
-  
+  "task:view": ["assigned"];
+  "task:update": ["assigned"];
+  "task:complete": ["assigned"];
+
   // Notifications
-  'notification:view': ['all'];
-  'notification:update': ['own'];
+  "notification:view": ["all"];
+  "notification:update": ["own"];
 }
 ```
 
@@ -335,20 +335,25 @@ interface RegularUserPermissions {
 interface RoleAssignmentRules {
   // One role per level
   oneRolePerLevel: true;
-  
+
   // Multiple roles allowed (different levels)
   allowMultipleRoles: true;
-  
+
   // System roles cannot be assigned
-  systemRoles: ['PlatformAdmin'];
-  
+  systemRoles: ["PlatformAdmin"];
+
   // Assignment permissions
   canAssign: {
-    PlatformAdmin: ['all'],
-    TenantAdmin: ['TenantAdmin', 'OrganizationAdmin', 'DepartmentAdmin', 'RegularUser'],
-    OrganizationAdmin: ['OrganizationAdmin', 'DepartmentAdmin', 'RegularUser'],
-    DepartmentAdmin: ['DepartmentAdmin', 'RegularUser'],
-    RegularUser: []
+    PlatformAdmin: ["all"];
+    TenantAdmin: [
+      "TenantAdmin",
+      "OrganizationAdmin",
+      "DepartmentAdmin",
+      "RegularUser",
+    ];
+    OrganizationAdmin: ["OrganizationAdmin", "DepartmentAdmin", "RegularUser"];
+    DepartmentAdmin: ["DepartmentAdmin", "RegularUser"];
+    RegularUser: [];
   };
 }
 ```
@@ -359,26 +364,21 @@ interface RoleAssignmentRules {
 async function assignRole(
   userId: UserId,
   roleType: RoleType,
-  scope: { tenantId?, organizationId?, departmentId? },
-  assignedBy: UserId
+  scope: { tenantId?; organizationId?; departmentId? },
+  assignedBy: UserId,
 ) {
   // 1. Validate assignment permissions
   const assigner = await getUserWithRoles(assignedBy);
   if (!canAssignRole(assigner, roleType)) {
-    throw new Error('Insufficient permissions to assign role');
+    throw new Error("Insufficient permissions to assign role");
   }
-  
+
   // 2. Validate scope
   validateRoleScope(roleType, scope);
-  
+
   // 3. Create role assignment
-  const assignment = RoleAssignment.create(
-    userId,
-    roleType,
-    scope,
-    assignedBy
-  );
-  
+  const assignment = RoleAssignment.create(userId, roleType, scope, assignedBy);
+
   // 4. Save
   await roleAssignmentRepo.save(assignment);
 }

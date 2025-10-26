@@ -1,4 +1,9 @@
-import { BaseEntity, AuditInfo, IPartialAuditInfo, TenantId } from "@hl8/domain-kernel";
+import {
+  BaseEntity,
+  AuditInfo,
+  IPartialAuditInfo,
+  TenantId,
+} from "@hl8/domain-kernel";
 import { PlatformId } from "../value-objects/platform-id.vo.js";
 
 /**
@@ -52,7 +57,9 @@ export class Platform extends BaseEntity<PlatformId> {
     configuration: PlatformConfiguration,
     auditInfo?: IPartialAuditInfo,
   ) {
-    const platformTenantId = TenantId.create("00000000-0000-0000-0000-000000000000");
+    const platformTenantId = TenantId.create(
+      "00000000-0000-0000-0000-000000000000",
+    );
     super(
       id,
       platformTenantId,

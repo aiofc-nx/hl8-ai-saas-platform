@@ -20,17 +20,17 @@ The permission system uses a hierarchical inheritance model where each role leve
 ```typescript
 // TenantAdmin inherits from PlatformAdmin
 interface TenantAdminInheritance {
-  from: 'PlatformAdmin';
+  from: "PlatformAdmin";
   permissions: {
-    'platform:*': ['read']; // Read-only platform access
-    'system:*': ['read'];   // Read-only system access
+    "platform:*": ["read"]; // Read-only platform access
+    "system:*": ["read"]; // Read-only system access
   };
-  
+
   // Plus own permissions
   own: {
-    'tenant:*': ['manage'];
-    'organization:*': ['manage'];
-    'department:*': ['manage'];
+    "tenant:*": ["manage"];
+    "organization:*": ["manage"];
+    "department:*": ["manage"];
   };
 }
 ```
@@ -42,18 +42,18 @@ interface TenantAdminInheritance {
 ```typescript
 // OrganizationAdmin inherits from TenantAdmin
 interface OrganizationAdminInheritance {
-  from: 'TenantAdmin';
-  
+  from: "TenantAdmin";
+
   // Inherited (scoped to tenant)
   inherited: {
-    'tenant:*': ['read'];        // Read tenant info
-    'organization:*': ['read'];   // Read all organizations in tenant
+    "tenant:*": ["read"]; // Read tenant info
+    "organization:*": ["read"]; // Read all organizations in tenant
   };
-  
+
   // Own (scoped to own organization)
   own: {
-    'organization:*': ['manage']; // Manage own organization only
-    'department:*': ['manage'];
+    "organization:*": ["manage"]; // Manage own organization only
+    "department:*": ["manage"];
   };
 }
 ```
@@ -65,17 +65,17 @@ interface OrganizationAdminInheritance {
 ```typescript
 // DepartmentAdmin inherits from OrganizationAdmin
 interface DepartmentAdminInheritance {
-  from: 'OrganizationAdmin';
-  
+  from: "OrganizationAdmin";
+
   inherited: {
-    'organization:view': ['read'];
-    'organization:config': ['read'];
-    'department:view': ['read'];  // View all departments
+    "organization:view": ["read"];
+    "organization:config": ["read"];
+    "department:view": ["read"]; // View all departments
   };
-  
+
   own: {
-    'department:*': ['manage'];  // Manage own department
-    'user:*': ['manage'];
+    "department:*": ["manage"]; // Manage own department
+    "user:*": ["manage"];
   };
 }
 ```
@@ -100,9 +100,9 @@ All inherited permissions are read-only unless explicitly granted.
 ```typescript
 // TenantAdmin inherits from PlatformAdmin
 const inheritedPermissions = {
-  'platform:read': ['all'],  // ✅ Can read
-  'platform:write': [],      // ❌ Cannot write (not inherited)
-  'tenant:manage': ['own']   // ✅ Own permission (not inherited)
+  "platform:read": ["all"], // ✅ Can read
+  "platform:write": [], // ❌ Cannot write (not inherited)
+  "tenant:manage": ["own"], // ✅ Own permission (not inherited)
 };
 ```
 
@@ -115,14 +115,14 @@ Inherited permissions are automatically scoped to the child's level.
 interface ScopedInheritance {
   // Inherited from TenantAdmin (read-only, tenant-scoped)
   inherited: {
-    'tenant:read': ['tenant-scope'], // Only own tenant
-    'organization:read': ['tenant-scope'], // All orgs in tenant
+    "tenant:read": ["tenant-scope"]; // Only own tenant
+    "organization:read": ["tenant-scope"]; // All orgs in tenant
   };
-  
+
   // Own permissions (organization-scoped)
   own: {
-    'organization:manage': ['org-scope'], // Own org only
-    'department:manage': ['org-scope'],
+    "organization:manage": ["org-scope"]; // Own org only
+    "department:manage": ["org-scope"];
   };
 }
 ```
@@ -143,15 +143,15 @@ function resolvePermissions(role: Role): PermissionSet {
   return {
     // 1. System permissions (hardcoded)
     ...getSystemPermissions(role),
-    
+
     // 2. Inherited permissions (from parent)
     ...getInheritedPermissions(role),
-    
+
     // 3. Own role permissions
     ...getRolePermissions(role),
-    
+
     // 4. Custom permissions (user-specific)
-    ...getCustomPermissions(role, userId)
+    ...getCustomPermissions(role, userId),
   };
 }
 ```
@@ -162,11 +162,11 @@ Deny permissions always override allow permissions.
 
 ```typescript
 interface PermissionOverride {
-  allowed: ['tenant:read', 'tenant:write'];
-  denied: ['tenant:write'];  // Overrides allowed
-  
+  allowed: ["tenant:read", "tenant:write"];
+  denied: ["tenant:write"]; // Overrides allowed
+
   // Result: Can read but cannot write
-  effective: ['tenant:read'];
+  effective: ["tenant:read"];
 }
 ```
 
@@ -177,39 +177,39 @@ interface PermissionOverride {
 ### Defining Inheritance
 
 ```typescript
-import { defineAbility, PureAbility } from '@casl/ability';
+import { defineAbility, PureAbility } from "@casl/ability";
 
 // Base ability (PlatformAdmin)
 const baseAbility = defineAbility((can) => {
-  can('manage', 'all'); // Platform-wide access
+  can("manage", "all"); // Platform-wide access
 });
 
 // TenantAdmin ability (inherits from base)
 const tenantAdminAbility = defineAbility((can, cannot) => {
   // Inherit read-only from parent
-  can('read', 'platform');
-  can('read', 'system');
-  
+  can("read", "platform");
+  can("read", "system");
+
   // Own permissions
-  can('manage', 'tenant', { id: 'OWN_TENANT' });
-  can('manage', 'organization');
-  can('manage', 'department');
-  can('manage', 'user');
-  
+  can("manage", "tenant", { id: "OWN_TENANT" });
+  can("manage", "organization");
+  can("manage", "department");
+  can("manage", "user");
+
   // Explicit denial
-  cannot('delete', 'tenant'); // Override inheritance
+  cannot("delete", "tenant"); // Override inheritance
 });
 
 // OrganizationAdmin ability
 const orgAdminAbility = defineAbility((can) => {
   // Inherit from TenantAdmin (read-only)
-  can('read', 'tenant');
-  can('read', 'organization');
-  
+  can("read", "tenant");
+  can("read", "organization");
+
   // Own permissions
-  can('manage', 'organization', { id: 'OWN_ORG' });
-  can('manage', 'department');
-  can('manage', 'user');
+  can("manage", "organization", { id: "OWN_ORG" });
+  can("manage", "department");
+  can("manage", "user");
 });
 ```
 
@@ -221,15 +221,15 @@ const orgAdminAbility = defineAbility((can) => {
 
 ```typescript
 // PlatformAdmin
-can('manage', 'all');
+can("manage", "all");
 
 // TenantAdmin (inherits PlatformAdmin)
-can('read', 'platform');  // Inherited (read-only)
-can('manage', 'tenant');  // Own
+can("read", "platform"); // Inherited (read-only)
+can("manage", "tenant"); // Own
 
 // OrganizationAdmin (inherits TenantAdmin)
-can('read', 'tenant');    // Inherited from TenantAdmin (read-only)
-can('manage', 'organization'); // Own
+can("read", "tenant"); // Inherited from TenantAdmin (read-only)
+can("manage", "organization"); // Own
 ```
 
 ### Example 2: Multi-Level Inheritance
@@ -251,18 +251,18 @@ PlatformAdmin
 
 ```typescript
 // Level 1: PlatformAdmin
-can('manage', 'all');
+can("manage", "all");
 
 // Level 2: TenantAdmin
-can('read', 'platform');
-can('manage', 'tenant', { tenantId: 'OWN_TENANT' });
-can('manage', 'organization', { tenantId: 'OWN_TENANT' });
+can("read", "platform");
+can("manage", "tenant", { tenantId: "OWN_TENANT" });
+can("manage", "organization", { tenantId: "OWN_TENANT" });
 
 // Level 3: OrganizationAdmin (inherits TenantAdmin)
-can('read', 'tenant');                           // Inherited
-can('read', 'organization', { tenantId: 'OWN_TENANT' }); // Inherited
-can('manage', 'organization', { orgId: 'OWN_ORG' });     // Own
-can('manage', 'department', { orgId: 'OWN_ORG' });       // Own
+can("read", "tenant"); // Inherited
+can("read", "organization", { tenantId: "OWN_TENANT" }); // Inherited
+can("manage", "organization", { orgId: "OWN_ORG" }); // Own
+can("manage", "department", { orgId: "OWN_ORG" }); // Own
 ```
 
 ---
@@ -272,7 +272,7 @@ can('manage', 'department', { orgId: 'OWN_ORG' });       // Own
 ### Rule Priority
 
 1. **Explicit deny** (highest priority)
-2. **Explicit allow** 
+2. **Explicit allow**
 3. **Inherited deny**
 4. **Inherited allow** (lowest priority)
 
@@ -280,14 +280,14 @@ can('manage', 'department', { orgId: 'OWN_ORG' });       // Own
 // Example: TenantAdmin
 const permissions = {
   inherited: {
-    'tenant:write': ['allow']  // From PlatformAdmin
+    "tenant:write": ["allow"], // From PlatformAdmin
   },
   own: {
-    'tenant:delete': ['deny']  // Explicit deny
+    "tenant:delete": ["deny"], // Explicit deny
   },
   custom: {
-    'tenant:write': ['deny']   // Custom deny (overrides inherited allow)
-  }
+    "tenant:write": ["deny"], // Custom deny (overrides inherited allow)
+  },
 };
 
 // Resolution:

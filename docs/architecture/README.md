@@ -101,32 +101,25 @@
 #### 基类和接口
 
 ```typescript
-import { 
-  BaseEntity, 
-  AggregateRoot, 
-  BaseValueObject 
-} from "@hl8/domain-kernel";
+import { BaseEntity, AggregateRoot, BaseValueObject } from "@hl8/domain-kernel";
 ```
 
 #### ID 值对象
 
 ```typescript
-import { 
-  TenantId, 
-  OrganizationId, 
-  DepartmentId, 
+import {
+  TenantId,
+  OrganizationId,
+  DepartmentId,
   UserId,
-  GenericEntityId 
+  GenericEntityId,
 } from "@hl8/domain-kernel";
 ```
 
 #### 数据隔离机制
 
 ```typescript
-import { 
-  IsolationContext, 
-  SharingLevel 
-} from "@hl8/domain-kernel";
+import { IsolationContext, SharingLevel } from "@hl8/domain-kernel";
 ```
 
 ### 2. Application-Kernel 组件
@@ -134,12 +127,12 @@ import {
 **必须优先使用** `@hl8/application-kernel` 提供的以下组件：
 
 ```typescript
-import { 
-  BaseCommand, 
-  BaseQuery, 
+import {
+  BaseCommand,
+  BaseQuery,
   BaseUseCase,
   CommandHandler,
-  QueryHandler
+  QueryHandler,
 } from "@hl8/application-kernel";
 ```
 
@@ -148,10 +141,10 @@ import {
 **必须优先使用** `@hl8/infrastructure-kernel` 提供的以下组件：
 
 ```typescript
-import { 
+import {
   IDatabaseAdapter,
   ICacheService,
-  IMessageBroker
+  IMessageBroker,
 } from "@hl8/infrastructure-kernel";
 ```
 
@@ -160,10 +153,10 @@ import {
 **必须优先使用** `@hl8/interface-kernel` 提供的以下组件：
 
 ```typescript
-import { 
+import {
   RestController,
   AuthenticationGuard,
-  AuthorizationGuard
+  AuthorizationGuard,
 } from "@hl8/interface-kernel";
 ```
 
@@ -172,11 +165,11 @@ import {
 **必须优先使用** `@hl8/exceptions` 提供的异常类：
 
 ```typescript
-import { 
+import {
   DomainException,
   BusinessException,
   ValidationException,
-  NotFoundException
+  NotFoundException,
 } from "@hl8/exceptions";
 ```
 

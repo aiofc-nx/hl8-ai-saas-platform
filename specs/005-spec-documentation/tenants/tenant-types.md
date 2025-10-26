@@ -13,15 +13,15 @@ The SAAS platform supports 5 tenant types, each with specific resource limits, f
 
 ## Tenant Type Comparison
 
-| Feature | FREE | BASIC | PROFESSIONAL | ENTERPRISE | CUSTOM |
-|---------|------|-------|--------------|------------|--------|
-| **Price** | Free | $99/mo | $299/mo | $999/mo | Custom |
-| **Users** | 10 | 50 | 200 | Unlimited | Custom |
-| **Organizations** | 2 | 10 | 50 | Unlimited | Custom |
-| **Storage** | 1 GB | 10 GB | 100 GB | 500 GB | Custom |
-| **API Calls** | 1K/day | 10K/day | 100K/day | Unlimited | Custom |
-| **Support** | Community | Email | Email+Chat | 24/7 Phone | Custom |
-| **SLA** | None | 99% | 99.5% | 99.9% | Custom |
+| Feature           | FREE      | BASIC   | PROFESSIONAL | ENTERPRISE | CUSTOM |
+| ----------------- | --------- | ------- | ------------ | ---------- | ------ |
+| **Price**         | Free      | $99/mo  | $299/mo      | $999/mo    | Custom |
+| **Users**         | 10        | 50      | 200          | Unlimited  | Custom |
+| **Organizations** | 2         | 10      | 50           | Unlimited  | Custom |
+| **Storage**       | 1 GB      | 10 GB   | 100 GB       | 500 GB     | Custom |
+| **API Calls**     | 1K/day    | 10K/day | 100K/day     | Unlimited  | Custom |
+| **Support**       | Community | Email   | Email+Chat   | 24/7 Phone | Custom |
+| **SLA**           | None      | 99%     | 99.5%        | 99.9%      | Custom |
 
 ---
 
@@ -285,10 +285,10 @@ interface UpgradeRule {
 
 ```typescript
 interface OveragePolicy {
-  resource: 'users' | 'storage' | 'api_calls';
-  action: 'block' | 'charge' | 'warn';
+  resource: "users" | "storage" | "api_calls";
+  action: "block" | "charge" | "warn";
   chargeRate?: number; // Per unit cost
-  billingCycle: 'monthly' | 'annual';
+  billingCycle: "monthly" | "annual";
 }
 ```
 

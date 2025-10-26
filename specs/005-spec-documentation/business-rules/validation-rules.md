@@ -32,29 +32,30 @@ interface TenantCodeValidation {
 async function validateTenantCode(code: string): Promise<ValidationResult> {
   // 1. Length check
   if (code.length < 3 || code.length > 20) {
-    return { valid: false, error: 'Code must be 3-20 characters' };
+    return { valid: false, error: "Code must be 3-20 characters" };
   }
-  
+
   // 2. Pattern check
   if (!/^[a-z0-9][a-z0-9_-]*[a-z0-9]$/.test(code)) {
-    return { 
-      valid: false, 
-      error: 'Code must be alphanumeric with dashes/underscores, starting and ending with alphanumeric' 
+    return {
+      valid: false,
+      error:
+        "Code must be alphanumeric with dashes/underscores, starting and ending with alphanumeric",
     };
   }
-  
+
   // 3. Forbidden words check
-  const forbidden = ['admin', 'root', 'system', 'platform'];
+  const forbidden = ["admin", "root", "system", "platform"];
   if (forbidden.includes(code.toLowerCase())) {
-    return { valid: false, error: 'Code is reserved and cannot be used' };
+    return { valid: false, error: "Code is reserved and cannot be used" };
   }
-  
+
   // 4. Uniqueness check
   const exists = await tenantRepo.existsByCode(code);
   if (exists) {
-    return { valid: false, error: 'Code already exists' };
+    return { valid: false, error: "Code already exists" };
   }
-  
+
   return { valid: true };
 }
 ```
@@ -81,38 +82,38 @@ interface TenantNameValidation {
 async function validateTenantName(name: string): Promise<ValidationResult> {
   // 1. Length check
   if (name.length < 2 || name.length > 100) {
-    return { valid: false, error: 'Name must be 2-100 characters' };
+    return { valid: false, error: "Name must be 2-100 characters" };
   }
-  
+
   // 2. Pattern check
   if (!/^[\w\s\.&()-]+$/.test(name)) {
-    return { 
-      valid: false, 
-      error: 'Name contains invalid characters' 
+    return {
+      valid: false,
+      error: "Name contains invalid characters",
     };
   }
-  
+
   // 3. Restricted words check
   const restricted = await getRestrictedWords();
   for (const word of restricted) {
     if (name.toLowerCase().includes(word.toLowerCase())) {
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         error: `Name contains restricted word: ${word}`,
-        requiresApproval: true
+        requiresApproval: true,
       };
     }
   }
-  
+
   // 4. Approval check (if needed)
   if (requiresApproval(name)) {
-    return { 
-      valid: true, 
-      warning: 'Name requires manual approval',
-      requiresApproval: true
+    return {
+      valid: true,
+      warning: "Name requires manual approval",
+      requiresApproval: true,
     };
   }
-  
+
   return { valid: true };
 }
 ```
@@ -194,29 +195,29 @@ interface PasswordValidation {
 function validatePassword(password: string): ValidationResult {
   // Length
   if (password.length < 8 || password.length > 128) {
-    return { valid: false, error: 'Password must be 8-128 characters' };
+    return { valid: false, error: "Password must be 8-128 characters" };
   }
-  
+
   // Required characters
   if (!/[A-Z]/.test(password)) {
-    return { valid: false, error: 'Password must contain uppercase letter' };
+    return { valid: false, error: "Password must contain uppercase letter" };
   }
   if (!/[a-z]/.test(password)) {
-    return { valid: false, error: 'Password must contain lowercase letter' };
+    return { valid: false, error: "Password must contain lowercase letter" };
   }
   if (!/[0-9]/.test(password)) {
-    return { valid: false, error: 'Password must contain number' };
+    return { valid: false, error: "Password must contain number" };
   }
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    return { valid: false, error: 'Password must contain special character' };
+    return { valid: false, error: "Password must contain special character" };
   }
-  
+
   // Forbidden patterns
-  const forbidden = ['123456', 'password', 'qwerty'];
-  if (forbidden.some(p => password.toLowerCase().includes(p))) {
-    return { valid: false, error: 'Password is too common' };
+  const forbidden = ["123456", "password", "qwerty"];
+  if (forbidden.some((p) => password.toLowerCase().includes(p))) {
+    return { valid: false, error: "Password is too common" };
   }
-  
+
   return { valid: true };
 }
 ```
@@ -229,21 +230,21 @@ function validatePassword(password: string): ValidationResult {
 
 ```typescript
 async function validateUserCreation(
-  tenantId: TenantId
+  tenantId: TenantId,
 ): Promise<ValidationResult> {
   const tenant = await tenantRepo.findById(tenantId);
   const limits = getTenantLimits(tenant.type);
   const currentUsers = await userRepo.countByTenant(tenantId);
-  
+
   if (currentUsers >= limits.maxUsers && limits.maxUsers !== -1) {
     return {
       valid: false,
       error: `User limit reached: ${currentUsers}/${limits.maxUsers}`,
       currentUsage: currentUsers,
-      limit: limits.maxUsers
+      limit: limits.maxUsers,
     };
   }
-  
+
   return { valid: true };
 }
 ```
@@ -253,29 +254,31 @@ async function validateUserCreation(
 ```typescript
 async function validateStorageQuota(
   tenantId: TenantId,
-  fileSizeMB: number
+  fileSizeMB: number,
 ): Promise<ValidationResult> {
   const tenant = await tenantRepo.findById(tenantId);
   const limits = getTenantLimits(tenant.type);
-  
+
   // Check file size
   if (fileSizeMB > limits.maxFileSizeMB) {
     return {
       valid: false,
-      error: `File too large: ${fileSizeMB}MB (max: ${limits.maxFileSizeMB}MB)`
+      error: `File too large: ${fileSizeMB}MB (max: ${limits.maxFileSizeMB}MB)`,
     };
   }
-  
+
   // Check total storage
   const currentStorage = await storageService.getUsedStorage(tenantId);
-  if (currentStorage + fileSizeMB > limits.maxStorageGB * 1024 && 
-      limits.maxStorageGB !== -1) {
+  if (
+    currentStorage + fileSizeMB > limits.maxStorageGB * 1024 &&
+    limits.maxStorageGB !== -1
+  ) {
     return {
       valid: false,
-      error: `Storage quota exceeded: ${currentStorage}MB/${limits.maxStorageGB * 1024}MB`
+      error: `Storage quota exceeded: ${currentStorage}MB/${limits.maxStorageGB * 1024}MB`,
     };
   }
-  
+
   return { valid: true };
 }
 ```

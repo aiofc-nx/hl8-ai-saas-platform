@@ -17,7 +17,12 @@ Audit logging is essential for security, compliance, and operational visibility.
 
 ```typescript
 interface AuthenticationAuditEvent {
-  event: 'login_success' | 'login_failure' | 'logout' | 'token_refresh' | 'mfa_challenge';
+  event:
+    | "login_success"
+    | "login_failure"
+    | "logout"
+    | "token_refresh"
+    | "mfa_challenge";
   userId?: UserId;
   username?: string;
   ipAddress: string;
@@ -29,6 +34,7 @@ interface AuthenticationAuditEvent {
 ```
 
 **Logged Events**:
+
 - Successful login
 - Failed login attempts
 - Token refresh
@@ -40,7 +46,11 @@ interface AuthenticationAuditEvent {
 
 ```typescript
 interface AuthorizationAuditEvent {
-  event: 'permission_granted' | 'permission_denied' | 'role_assigned' | 'role_revoked';
+  event:
+    | "permission_granted"
+    | "permission_denied"
+    | "role_assigned"
+    | "role_revoked";
   userId: UserId;
   tenantId: TenantId;
   action: string;
@@ -51,6 +61,7 @@ interface AuthorizationAuditEvent {
 ```
 
 **Logged Events**:
+
 - Permission checks
 - Role assignments
 - Permission denied events
@@ -61,7 +72,12 @@ interface AuthorizationAuditEvent {
 
 ```typescript
 interface DataAccessAuditEvent {
-  event: 'data_read' | 'data_created' | 'data_updated' | 'data_deleted' | 'data_exported';
+  event:
+    | "data_read"
+    | "data_created"
+    | "data_updated"
+    | "data_deleted"
+    | "data_exported";
   userId: UserId;
   tenantId: TenantId;
   resource: string;
@@ -73,6 +89,7 @@ interface DataAccessAuditEvent {
 ```
 
 **Logged Events**:
+
 - Data reads (sensitive data)
 - Data modifications
 - Data deletions
@@ -83,7 +100,12 @@ interface DataAccessAuditEvent {
 
 ```typescript
 interface AdministrativeAuditEvent {
-  event: 'config_changed' | 'user_created' | 'user_deleted' | 'role_modified' | 'policy_changed';
+  event:
+    | "config_changed"
+    | "user_created"
+    | "user_deleted"
+    | "role_modified"
+    | "policy_changed";
   userId: UserId;
   targetType: string;
   targetId: string;
@@ -93,6 +115,7 @@ interface AdministrativeAuditEvent {
 ```
 
 **Logged Events**:
+
 - Configuration changes
 - User management
 - Role modifications
@@ -103,8 +126,12 @@ interface AdministrativeAuditEvent {
 
 ```typescript
 interface SecurityAuditEvent {
-  event: 'security_violation' | 'suspicious_activity' | 'breach_attempt' | 'data_leak_detected';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  event:
+    | "security_violation"
+    | "suspicious_activity"
+    | "breach_attempt"
+    | "data_leak_detected";
+  severity: "low" | "medium" | "high" | "critical";
   userId?: UserId;
   tenantId?: TenantId;
   description: string;
@@ -114,6 +141,7 @@ interface SecurityAuditEvent {
 ```
 
 **Logged Events**:
+
 - Security violations
 - Suspicious patterns
 - Intrusion attempts
@@ -133,35 +161,35 @@ interface AuditLogEntry {
   timestamp: Date;
   eventType: EventType;
   eventCategory: EventCategory;
-  
+
   // Actor
   userId: UserId;
   username: string;
   userRoles: string[];
-  
+
   // Context
   tenantId?: TenantId;
   organizationId?: OrganizationId;
   departmentId?: DepartmentId;
-  
+
   // Action
   action: string;
   resource: string;
   resourceId?: string;
-  
+
   // Result
   success: boolean;
   statusCode?: number;
-  
+
   // Request context
   ipAddress: string;
   userAgent: string;
   sessionId: string;
-  
+
   // Changes
   changes?: Record<string, { old: any; new: any }>;
   fieldsAccessed?: string[];
-  
+
   // Metadata
   metadata?: Record<string, any>;
 }
@@ -176,29 +204,29 @@ CREATE TABLE audit_logs (
   timestamp TIMESTAMP NOT NULL,
   event_type VARCHAR(50) NOT NULL,
   event_category VARCHAR(50) NOT NULL,
-  
+
   user_id UUID NOT NULL,
   username VARCHAR(255) NOT NULL,
   user_roles TEXT[],
-  
+
   tenant_id UUID,
   organization_id UUID,
   department_id UUID,
-  
+
   action VARCHAR(100) NOT NULL,
   resource VARCHAR(100) NOT NULL,
   resource_id UUID,
-  
+
   success BOOLEAN NOT NULL,
   status_code INT,
-  
+
   ip_address INET NOT NULL,
   user_agent TEXT,
   session_id UUID,
-  
+
   changes JSONB,
   fields_accessed TEXT[],
-  
+
   metadata JSONB
 );
 
@@ -214,7 +242,6 @@ CREATE INDEX idx_audit_logs_event_type ON audit_logs(event_type);
 ```typescript
 @Injectable()
 export class AuditLogService {
-  
   async log(event: AuditLogEntry): Promise<void> {
     // 1. Create audit log entry
     const entry = AuditLogEntry.create(
@@ -223,30 +250,30 @@ export class AuditLogService {
       userId,
       action,
       resource,
-      context
+      context,
     );
-    
+
     // 2. Enrich with request context
     entry.enrichWithRequest(request);
-    
+
     // 3. Save to database
     await this.auditLogRepo.save(entry);
-    
+
     // 4. Send to external systems (if configured)
     await this.sendToExternalSystems(entry);
-    
+
     // 5. Alert on critical events
     if (this.isCriticalEvent(entry)) {
       await this.alertService.sendAlert(entry);
     }
   }
-  
+
   private async sendToExternalSystems(entry: AuditLogEntry): Promise<void> {
     // Send to SIEM (Security Information and Event Management)
     if (this.config.siemEnabled) {
       await this.siemClient.send(entry);
     }
-    
+
     // Send to analytics
     if (this.config.analyticsEnabled) {
       await this.analyticsClient.send(entry);
@@ -267,7 +294,7 @@ export class AuditLogService {
 async function getUserAuditLogs(
   userId: UserId,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<AuditLogEntry[]> {
   return this.auditLogRepo.findByUser(userId, startDate, endDate);
 }
@@ -280,8 +307,8 @@ async function anonymizeUserAuditLogs(userId: UserId): Promise<void> {
   // Anonymize user data in audit logs
   await this.auditLogRepo.updateByUser(userId, {
     userId: null,
-    username: '[DELETED]',
-    ipAddress: '0.0.0.0'
+    username: "[DELETED]",
+    ipAddress: "0.0.0.0",
   });
 }
 ```
@@ -302,16 +329,16 @@ async function anonymizeUserAuditLogs(userId: UserId): Promise<void> {
 ```typescript
 interface AuditLogRetention {
   online: {
-    period: '90 days'; // Keep in primary database
+    period: "90 days"; // Keep in primary database
     enabled: true;
   };
   archive: {
-    period: '7 years'; // Move to cold storage
-    format: 'parquet';
-    compression: 'gzip';
+    period: "7 years"; // Move to cold storage
+    format: "parquet";
+    compression: "gzip";
   };
   deletion: {
-    period: '10 years'; // Permanently delete
+    period: "10 years"; // Permanently delete
   };
 }
 ```
@@ -322,17 +349,17 @@ interface AuditLogRetention {
 async function archiveAuditLogs(): Promise<void> {
   // 1. Find logs older than retention period
   const logsToArchive = await this.auditLogRepo.findOlderThan(
-    Date.now() - 90 * 24 * 60 * 60 * 1000
+    Date.now() - 90 * 24 * 60 * 60 * 1000,
   );
-  
+
   // 2. Export to archival format
   const archiveFile = await this.exportLogs(logsToArchive);
-  
+
   // 3. Upload to cold storage
-  await this.storageService.upload(archiveFile, 'audit-logs');
-  
+  await this.storageService.upload(archiveFile, "audit-logs");
+
   // 4. Delete from primary database
-  await this.auditLogRepo.deleteMany(logsToArchive.map(l => l.id));
+  await this.auditLogRepo.deleteMany(logsToArchive.map((l) => l.id));
 }
 ```
 
@@ -343,27 +370,26 @@ async function archiveAuditLogs(): Promise<void> {
 ### Query API
 
 ```typescript
-@Controller('api/audit-logs')
+@Controller("api/audit-logs")
 export class AuditLogController {
-  
   @Get()
   async query(
-    @Query('userId') userId?: string,
-    @Query('tenantId') tenantId?: string,
-    @Query('eventType') eventType?: string,
-    @Query('startDate') startDate?: Date,
-    @Query('endDate') endDate?: Date,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 50
+    @Query("userId") userId?: string,
+    @Query("tenantId") tenantId?: string,
+    @Query("eventType") eventType?: string,
+    @Query("startDate") startDate?: Date,
+    @Query("endDate") endDate?: Date,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 50,
   ) {
     const filter = AuditLogFilter.create({
       userId,
       tenantId,
       eventType,
       startDate,
-      endDate
+      endDate,
     });
-    
+
     return this.auditLogService.query(filter, page, limit);
   }
 }

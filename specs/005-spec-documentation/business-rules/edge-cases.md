@@ -32,14 +32,15 @@ Request 2: Failure with error "Tenant code already exists"
 ```
 
 **Implementation**:
+
 ```typescript
 async function createTenant(data: CreateTenantDto): Promise<Tenant> {
   // Check if code exists
   const exists = await tenantRepo.existsByCode(data.code);
   if (exists) {
-    throw new ConflictException('Tenant code already exists');
+    throw new ConflictException("Tenant code already exists");
   }
-  
+
   // Create tenant (database constraint ensures uniqueness)
   return tenantRepo.create(data);
 }
@@ -51,22 +52,22 @@ async function createTenant(data: CreateTenantDto): Promise<Tenant> {
 
 ```typescript
 async function generateTenantCode(): Promise<string> {
-  const base = 'tenant-';
+  const base = "tenant-";
   let attempts = 0;
-  let code = '';
-  
+  let code = "";
+
   do {
     code = `${base}${generateRandomString(8)}`;
     const exists = await tenantRepo.existsByCode(code);
-    
+
     if (!exists) {
       return code;
     }
-    
+
     attempts++;
   } while (attempts < 100);
-  
-  throw new Error('Failed to generate unique tenant code');
+
+  throw new Error("Failed to generate unique tenant code");
 }
 ```
 
@@ -80,21 +81,21 @@ async function suspendTenant(tenantId: TenantId): Promise<void> {
   const tenant = await tenantRepo.findById(tenantId);
   tenant.suspend();
   await tenantRepo.save(tenant);
-  
+
   // 2. Notify active users
   const activeUsers = await sessionService.getActiveUsers(tenantId);
   for (const user of activeUsers) {
     await notifyUser(user, {
-      type: 'tenant_suspended',
-      message: 'Your tenant has been suspended',
-      redirectTo: '/suspended'
+      type: "tenant_suspended",
+      message: "Your tenant has been suspended",
+      redirectTo: "/suspended",
     });
   }
-  
+
   // 3. Queue background jobs for cleanup
   await queueBackgroundJob({
-    type: 'suspend_tenant_cleanup',
-    tenantId: tenantId.value
+    type: "suspend_tenant_cleanup",
+    tenantId: tenantId.value,
   });
 }
 ```
@@ -106,28 +107,28 @@ async function suspendTenant(tenantId: TenantId): Promise<void> {
 ```typescript
 async function upgradeTenant(
   tenantId: TenantId,
-  newType: TenantType
+  newType: TenantType,
 ): Promise<UpgradeResult> {
   const tenant = await tenantRepo.findById(tenantId);
   const newLimits = getTenantLimits(newType);
-  
+
   // Check resource usage
   const usage = await getResourceUsage(tenantId);
   const violations = checkLimitsViolations(usage, newLimits);
-  
+
   if (violations.length > 0) {
     return {
       canUpgrade: false,
       violations,
       actionRequired: true,
-      suggestedActions: generateActionPlan(violations)
+      suggestedActions: generateActionPlan(violations),
     };
   }
-  
+
   // Proceed with upgrade
   return {
     canUpgrade: true,
-    actions: await executeUpgrade(tenantId, newType)
+    actions: await executeUpgrade(tenantId, newType),
   };
 }
 ```
@@ -143,19 +144,19 @@ async function upgradeTenant(
 ```typescript
 async function setOrganizationParent(
   organizationId: OrganizationId,
-  parentId: OrganizationId
+  parentId: OrganizationId,
 ): Promise<void> {
   // Prevent self-parent
   if (organizationId.equals(parentId)) {
-    throw new Error('Organization cannot be its own parent');
+    throw new Error("Organization cannot be its own parent");
   }
-  
+
   // Check for circular reference
   const parentChain = await getParentChain(parentId);
   if (parentChain.includes(organizationId.value)) {
-    throw new Error('Circular reference detected');
+    throw new Error("Circular reference detected");
   }
-  
+
   // Set parent
   const org = await orgRepo.findById(organizationId);
   org.setParent(parentId);
@@ -170,21 +171,21 @@ async function setOrganizationParent(
 ```typescript
 async function mergeOrganizations(
   sourceId: OrganizationId,
-  targetId: OrganizationId
+  targetId: OrganizationId,
 ): Promise<MergeResult> {
   const source = await orgRepo.findById(sourceId);
   const target = await orgRepo.findById(targetId);
-  
+
   // Check for conflicts
   const conflicts = await detectConflicts(source, target);
   if (conflicts.length > 0) {
     return {
       canMerge: false,
       conflicts,
-      resolutionRequired: true
+      resolutionRequired: true,
     };
   }
-  
+
   // Execute merge
   await executeMerge(source, target);
   return { canMerge: true, merged: true };
@@ -202,22 +203,22 @@ async function mergeOrganizations(
 ```typescript
 async function createDepartment(
   data: CreateDepartmentDto,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<Department> {
   // Calculate depth
   let depth = 0;
   let currentId = data.parentId;
-  
+
   while (currentId) {
     const parent = await deptRepo.findById(currentId, context);
     depth++;
     currentId = parent.parentId;
-    
+
     if (depth >= MAX_DEPARTMENT_DEPTH) {
-      throw new Error('Maximum department depth reached');
+      throw new Error("Maximum department depth reached");
     }
   }
-  
+
   // Create department
   return deptRepo.create(data, context);
 }
@@ -230,19 +231,21 @@ async function createDepartment(
 ```typescript
 async function deleteDepartment(
   departmentId: DepartmentId,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<void> {
   const department = await deptRepo.findById(departmentId, context);
   const userCount = await userRepo.countByDepartment(departmentId, context);
-  
+
   if (userCount > 0) {
     // Option 1: Require user reassignment first
-    throw new Error(`Cannot delete department with ${userCount} users. Reassign users first.`);
-    
+    throw new Error(
+      `Cannot delete department with ${userCount} users. Reassign users first.`,
+    );
+
     // Option 2: Auto-reassign to parent or root
     // await reassignUsers(departmentId, department.parentId);
   }
-  
+
   await deptRepo.delete(departmentId, context);
 }
 ```
@@ -263,7 +266,7 @@ interface UserOrganizationContext {
     role: RoleType;
     departmentId?: DepartmentId;
   }>;
-  
+
   getEffectiveRole(organizationId: OrganizationId): RoleType {
     const assignment = this.organizations.find(
       o => o.organizationId.equals(organizationId)
@@ -286,19 +289,19 @@ async function getUserContext(userId: UserId): Promise<UserOrganizationContext> 
 async function assignUserToOrganization(
   userId: UserId,
   organizationId: OrganizationId,
-  role: RoleType
+  role: RoleType,
 ): Promise<void> {
   // Check if already assigned
   const exists = await userOrgRepo.exists(userId, organizationId);
   if (exists) {
-    throw new ConflictException('User already assigned to organization');
+    throw new ConflictException("User already assigned to organization");
   }
-  
+
   // Create assignment (database constraint ensures uniqueness)
   await userOrgRepo.create({
     userId,
     organizationId,
-    role
+    role,
   });
 }
 ```
@@ -314,18 +317,18 @@ async function assignUserToOrganization(
 ```typescript
 async function checkRateLimit(
   tenantId: TenantId,
-  endpoint: string
+  endpoint: string,
 ): Promise<void> {
   const limits = getTenantLimits(await getTenantType(tenantId));
   const key = `rate-limit:${tenantId.value}:${endpoint}`;
-  
+
   // Get current count
-  const count = await cache.get(key) || 0;
-  
+  const count = (await cache.get(key)) || 0;
+
   if (count >= limits.maxApiCallsPerMinute) {
-    throw new RateLimitExceededException('API rate limit exceeded');
+    throw new RateLimitExceededException("API rate limit exceeded");
   }
-  
+
   // Increment and set TTL
   await cache.set(key, count + 1, 60); // 60 second TTL
 }
@@ -339,27 +342,27 @@ async function checkRateLimit(
 async function uploadFile(
   tenantId: TenantId,
   file: File,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<FileMetadata> {
   // Pre-check: Verify quota before starting upload
   const tenant = await tenantRepo.findById(tenantId);
   const limits = getTenantLimits(tenant.type);
-  
+
   const currentStorage = await storageService.getUsedStorage(tenantId);
   if (currentStorage + file.size > limits.maxStorageGB * 1024) {
-    throw new QuotaExceededException('Storage quota exceeded');
+    throw new QuotaExceededException("Storage quota exceeded");
   }
-  
+
   // Upload file (check again after upload for safety)
   const metadata = await storageService.upload(file, context);
-  
+
   const finalStorage = await storageService.getUsedStorage(tenantId);
   if (finalStorage > limits.maxStorageGB * 1024) {
     // Rollback upload
     await storageService.delete(metadata.id);
-    throw new QuotaExceededException('Storage quota exceeded during upload');
+    throw new QuotaExceededException("Storage quota exceeded during upload");
   }
-  
+
   return metadata;
 }
 ```
@@ -378,21 +381,21 @@ const ALLOWED_TRANSITIONS = {
   [TenantStatus.ACTIVE]: [TenantStatus.SUSPENDED, TenantStatus.EXPIRED],
   [TenantStatus.SUSPENDED]: [TenantStatus.ACTIVE, TenantStatus.DELETED],
   [TenantStatus.EXPIRED]: [TenantStatus.ACTIVE, TenantStatus.DELETED],
-  [TenantStatus.DELETED]: [] // Terminal state
+  [TenantStatus.DELETED]: [], // Terminal state
 };
 
 async function transitionStatus(
   tenant: Tenant,
-  newStatus: TenantStatus
+  newStatus: TenantStatus,
 ): Promise<void> {
   const allowed = ALLOWED_TRANSITIONS[tenant.status];
-  
+
   if (!allowed.includes(newStatus)) {
     throw new Error(
-      `Invalid status transition from ${tenant.status} to ${newStatus}`
+      `Invalid status transition from ${tenant.status} to ${newStatus}`,
     );
   }
-  
+
   tenant.transitionToStatus(newStatus);
   await tenantRepo.save(tenant);
 }
@@ -406,25 +409,25 @@ async function transitionStatus(
 async function updateTenantStatus(
   tenantId: TenantId,
   newStatus: TenantStatus,
-  updatedBy: UserId
+  updatedBy: UserId,
 ): Promise<void> {
   // Use optimistic locking
   const tenant = await tenantRepo.findById(tenantId);
   const originalVersion = tenant.version;
-  
+
   try {
     // Attempt update with version check
     const updated = await tenantRepo.updateWithVersion(
       tenantId,
       { status: newStatus },
-      originalVersion
+      originalVersion,
     );
-    
+
     return updated;
   } catch (error) {
-    if (error.code === 'VERSION_CONFLICT') {
+    if (error.code === "VERSION_CONFLICT") {
       throw new ConflictException(
-        'Tenant status was modified by another operation'
+        "Tenant status was modified by another operation",
       );
     }
     throw error;

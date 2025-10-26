@@ -54,15 +54,12 @@ WHERE tenant_id = 'tenant_123'
 ```typescript
 // Organization filtering in application
 export class DepartmentRepository {
-  async findByOrganization(
-    organizationId: OrganizationId,
-    tenantId: TenantId
-  ) {
+  async findByOrganization(organizationId: OrganizationId, tenantId: TenantId) {
     return this.db
       .select()
-      .from('departments')
-      .where('tenant_id', '=', tenantId.value)
-      .where('organization_id', '=', organizationId.value);
+      .from("departments")
+      .where("tenant_id", "=", tenantId.value)
+      .where("organization_id", "=", organizationId.value);
   }
 }
 ```
@@ -81,7 +78,7 @@ const organization = new Organization(
   name,
   OrganizationTypeEnum.COMMITTEE,
   OrganizationStatusEnum.ACTIVE,
-  false  // isShared = false (private)
+  false, // isShared = false (private)
 );
 
 // Only accessible within the organization
@@ -98,8 +95,8 @@ const organization = new Organization(
   name,
   OrganizationTypeEnum.PROJECT_TEAM,
   OrganizationStatusEnum.ACTIVE,
-  true,  // isShared = true (shared)
-  SharingLevel.TENANT_LEVEL  // Sharing level
+  true, // isShared = true (shared)
+  SharingLevel.TENANT_LEVEL, // Sharing level
 );
 
 // Accessible across all organizations in tenant
@@ -117,7 +114,7 @@ await documentService.create(docData, organization);
 const context = IsolationContext.createOrganizationLevel(
   platformId,
   tenantId,
-  organizationId
+  organizationId,
 );
 
 const departments = await departmentService.findAll(context);
@@ -130,8 +127,8 @@ const departments = await departmentService.findAll(context);
 // Access shared organizations
 const sharedDocs = await documentService.findShared({
   tenantId,
-  organizationId,  // Current organization
-  includeShared: true  // Include shared documents
+  organizationId, // Current organization
+  includeShared: true, // Include shared documents
 });
 
 // Returns: current org docs + shared docs

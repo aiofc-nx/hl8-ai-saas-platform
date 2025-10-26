@@ -47,28 +47,28 @@ Level 1: PlatformAdmin (Platform Level)
 ```typescript
 interface PlatformAdminPermissions {
   // Platform Management
-  'platform:manage': ['all']; // Full platform access
-  
+  "platform:manage": ["all"]; // Full platform access
+
   // Tenant Management
-  'tenant:create': ['all'];
-  'tenant:update': ['all'];
-  'tenant:delete': ['all'];
-  'tenant:view': ['all'];
-  'tenant:suspend': ['all'];
-  'tenant:activate': ['all'];
-  
+  "tenant:create": ["all"];
+  "tenant:update": ["all"];
+  "tenant:delete": ["all"];
+  "tenant:view": ["all"];
+  "tenant:suspend": ["all"];
+  "tenant:activate": ["all"];
+
   // System Management
-  'system:configure': ['all'];
-  'system:monitor': ['all'];
-  'system:backup': ['all'];
-  
+  "system:configure": ["all"];
+  "system:monitor": ["all"];
+  "system:backup": ["all"];
+
   // User Management (all tenants)
-  'user:view': ['all'];
-  'user:manage': ['all'];
-  
+  "user:view": ["all"];
+  "user:manage": ["all"];
+
   // Data Access (cross-tenant)
-  'data:view': ['all'];
-  'data:export': ['all'];
+  "data:view": ["all"];
+  "data:export": ["all"];
 }
 ```
 
@@ -101,37 +101,37 @@ interface PlatformAdminPermissions {
 ```typescript
 interface TenantAdminPermissions {
   // Inherit from parent: All platform-level permissions
-  'platform:*': ['read']; // Read-only platform data
-  
+  "platform:*": ["read"]; // Read-only platform data
+
   // Tenant Management
-  'tenant:update': ['own']; // Update own tenant only
-  'tenant:configure': ['own'];
-  
+  "tenant:update": ["own"]; // Update own tenant only
+  "tenant:configure": ["own"];
+
   // Organization Management
-  'organization:create': ['all'];
-  'organization:update': ['all'];
-  'organization:delete': ['all'];
-  'organization:view': ['all'];
-  
+  "organization:create": ["all"];
+  "organization:update": ["all"];
+  "organization:delete": ["all"];
+  "organization:view": ["all"];
+
   // User Management (tenant-wide)
-  'user:create': ['all'];
-  'user:update': ['all'];
-  'user:delete': ['all'];
-  'user:view': ['all'];
-  
+  "user:create": ["all"];
+  "user:update": ["all"];
+  "user:delete": ["all"];
+  "user:view": ["all"];
+
   // Department Management
-  'department:create': ['all'];
-  'department:update': ['all'];
-  'department:delete': ['all'];
-  'department:view': ['all'];
-  
+  "department:create": ["all"];
+  "department:update": ["all"];
+  "department:delete": ["all"];
+  "department:view": ["all"];
+
   // Data Access (tenant-wide)
-  'data:view': ['all'];
-  'data:export': ['all'];
-  
+  "data:view": ["all"];
+  "data:export": ["all"];
+
   // Billing & Subscription
-  'billing:view': ['all'];
-  'billing:update': ['all'];
+  "billing:view": ["all"];
+  "billing:update": ["all"];
 }
 ```
 
@@ -164,33 +164,33 @@ interface TenantAdminPermissions {
 ```typescript
 interface OrganizationAdminPermissions {
   // Inherit from parent: Tenant-level permissions (read-only)
-  'tenant:*': ['read'];
-  'user:view': ['all'];
-  
+  "tenant:*": ["read"];
+  "user:view": ["all"];
+
   // Organization Management
-  'organization:update': ['own']; // Update own organization only
-  'organization:configure': ['own'];
-  'organization:view': ['own'];
-  
+  "organization:update": ["own"]; // Update own organization only
+  "organization:configure": ["own"];
+  "organization:view": ["own"];
+
   // Department Management (in organization)
-  'department:create': ['all'];
-  'department:update': ['all'];
-  'department:delete': ['all'];
-  'department:view': ['all'];
-  
+  "department:create": ["all"];
+  "department:update": ["all"];
+  "department:delete": ["all"];
+  "department:view": ["all"];
+
   // User Management (in organization)
-  'user:create': ['all'];
-  'user:update': ['all'];
-  'user:assign': ['all'];
-  'user:view': ['all'];
-  
+  "user:create": ["all"];
+  "user:update": ["all"];
+  "user:assign": ["all"];
+  "user:view": ["all"];
+
   // Data Access (organization-wide)
-  'data:view': ['all'];
-  'data:export': ['all'];
-  
+  "data:view": ["all"];
+  "data:export": ["all"];
+
   // Reporting (organization)
-  'report:view': ['all'];
-  'report:generate': ['all'];
+  "report:view": ["all"];
+  "report:generate": ["all"];
 }
 ```
 
@@ -223,28 +223,28 @@ interface OrganizationAdminPermissions {
 ```typescript
 interface DepartmentAdminPermissions {
   // Inherit from parent: Organization-level permissions (read-only)
-  'organization:*': ['read'];
-  'department:view': ['all'];
-  
+  "organization:*": ["read"];
+  "department:view": ["all"];
+
   // Department Management
-  'department:update': ['own']; // Update own department only
-  'department:configure': ['own'];
-  
+  "department:update": ["own"]; // Update own department only
+  "department:configure": ["own"];
+
   // User Management (in department)
-  'user:assign': ['all'];
-  'user:update': ['all'];
-  'user:view': ['all'];
-  'user:invite': ['all'];
-  
+  "user:assign": ["all"];
+  "user:update": ["all"];
+  "user:view": ["all"];
+  "user:invite": ["all"];
+
   // Department Data Access
-  'data:view': ['all'];
-  'data:create': ['all'];
-  'data:update': ['all'];
-  'data:delete': ['own'];
-  
+  "data:view": ["all"];
+  "data:create": ["all"];
+  "data:update": ["all"];
+  "data:delete": ["own"];
+
   // Team Management
-  'team:manage': ['all'];
-  'team:view': ['all'];
+  "team:manage": ["all"];
+  "team:view": ["all"];
 }
 ```
 
@@ -277,28 +277,28 @@ interface DepartmentAdminPermissions {
 ```typescript
 interface RegularUserPermissions {
   // Inherit from parent: Department-level permissions (read-only)
-  'department:*': ['read'];
-  
+  "department:*": ["read"];
+
   // Own Profile Management
-  'profile:view': ['own'];
-  'profile:update': ['own'];
-  'profile:delete': ['own'];
-  
+  "profile:view": ["own"];
+  "profile:update": ["own"];
+  "profile:delete": ["own"];
+
   // Own Data Management
-  'data:view': ['own'];
-  'data:create': ['own'];
-  'data:update': ['own'];
-  'data:delete': ['own'];
-  
+  "data:view": ["own"];
+  "data:create": ["own"];
+  "data:update": ["own"];
+  "data:delete": ["own"];
+
   // Shared Resources
-  'data:view': ['shared'];
-  'document:view': ['shared'];
-  'document:create': ['shared'];
-  
+  "data:view": ["shared"];
+  "document:view": ["shared"];
+  "document:create": ["shared"];
+
   // Collaboration
-  'team:view': ['all'];
-  'comment:create': ['all'];
-  'comment:view': ['all'];
+  "team:view": ["all"];
+  "comment:create": ["all"];
+  "comment:view": ["all"];
 }
 ```
 
@@ -358,52 +358,52 @@ RegularUser
 ### Role Ability Mapping
 
 ```typescript
-import { defineAbility, PureAbility } from '@casl/ability';
+import { defineAbility, PureAbility } from "@casl/ability";
 
 // PlatformAdmin abilities
 const platformAdminAbility = defineAbility((can, cannot) => {
   // Platform-wide access
-  can('manage', 'all');
-  can('access', 'platform');
-  can('manage', 'tenant');
-  can('manage', 'system');
+  can("manage", "all");
+  can("access", "platform");
+  can("manage", "tenant");
+  can("manage", "system");
 });
 
 // TenantAdmin abilities
 const tenantAdminAbility = defineAbility((can, cannot) => {
   // Tenant-wide access
-  can('read', 'platform');
-  can('manage', 'tenant', { id: 'OWN_TENANT' });
-  can('manage', 'organization');
-  can('manage', 'department');
-  can('manage', 'user');
+  can("read", "platform");
+  can("manage", "tenant", { id: "OWN_TENANT" });
+  can("manage", "organization");
+  can("manage", "department");
+  can("manage", "user");
 });
 
 // OrganizationAdmin abilities
 const organizationAdminAbility = defineAbility((can, cannot) => {
   // Organization-wide access
-  can('read', 'tenant');
-  can('manage', 'organization', { id: 'OWN_ORG' });
-  can('manage', 'department');
-  can('manage', 'user');
+  can("read", "tenant");
+  can("manage", "organization", { id: "OWN_ORG" });
+  can("manage", "department");
+  can("manage", "user");
 });
 
 // DepartmentAdmin abilities
 const departmentAdminAbility = defineAbility((can, cannot) => {
   // Department-wide access
-  can('read', 'organization');
-  can('manage', 'department', { id: 'OWN_DEPT' });
-  can('manage', 'user');
-  can('read', 'data');
+  can("read", "organization");
+  can("manage", "department", { id: "OWN_DEPT" });
+  can("manage", "user");
+  can("read", "data");
 });
 
 // RegularUser abilities
 const regularUserAbility = defineAbility((can, cannot) => {
   // User-level access
-  can('read', 'department');
-  can('manage', 'profile', { userId: 'OWN_ID' });
-  can('manage', 'data', { userId: 'OWN_ID' });
-  can('read', 'shared');
+  can("read", "department");
+  can("manage", "profile", { userId: "OWN_ID" });
+  can("manage", "data", { userId: "OWN_ID" });
+  can("read", "shared");
 });
 ```
 

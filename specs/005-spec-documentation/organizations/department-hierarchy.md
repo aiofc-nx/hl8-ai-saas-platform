@@ -95,16 +95,16 @@ interface DepartmentLevelRules {
 async function createChildDepartment(
   parentDepartmentId: DepartmentId,
   departmentData: CreateDepartmentDto,
-  context: IsolationContext
+  context: IsolationContext,
 ) {
   // 1. Validate parent exists
   const parent = await departmentRepo.findById(parentDepartmentId, context);
-  
+
   // 2. Check hierarchy depth
   if (parent.level >= 7) {
-    throw new Error('Maximum hierarchy depth reached (7 levels)');
+    throw new Error("Maximum hierarchy depth reached (7 levels)");
   }
-  
+
   // 3. Create child department
   const child = DepartmentAggregate.create(
     departmentId.generate(),
@@ -114,20 +114,20 @@ async function createChildDepartment(
     departmentData.name,
     departmentData.code,
     departmentData.description,
-    departmentData.managerId
+    departmentData.managerId,
   );
-  
+
   // 4. Calculate level
   const childLevel = parent.level + 1;
   child.setLevel(childLevel);
-  
+
   // 5. Build path
   const path = `${parent.path}/${child.code}`;
   child.setPath(path);
-  
+
   // 6. Save
   await departmentRepo.save(child, context);
-  
+
   return child;
 }
 ```
@@ -138,35 +138,35 @@ async function createChildDepartment(
 async function moveDepartment(
   departmentId: DepartmentId,
   newParentId: DepartmentId | null,
-  context: IsolationContext
+  context: IsolationContext,
 ) {
   // 1. Get department to move
   const department = await departmentRepo.findById(departmentId, context);
-  
+
   // 2. Check for circular reference
   if (newParentId) {
     await validateNoCircularReference(departmentId, newParentId);
   }
-  
+
   // 3. Calculate new level
   let newLevel = 1; // Root level
   if (newParentId) {
     const newParent = await departmentRepo.findById(newParentId, context);
     const parentLevel = newParent.level;
     newLevel = parentLevel + 1;
-    
+
     // Check max depth
     if (newLevel > 7) {
-      throw new Error('Moving would exceed maximum depth (7 levels)');
+      throw new Error("Moving would exceed maximum depth (7 levels)");
     }
   }
-  
+
   // 4. Update department and all descendants
   await updateDepartmentAndDescendants(departmentId, newParentId, newLevel);
-  
+
   // 5. Update paths
   await updateDepartmentPaths(departmentId);
-  
+
   return department;
 }
 ```
@@ -191,20 +191,20 @@ interface UserDepartmentAssignment {
 
 // Example: User in multiple organizations
 const userAssignments = {
-  userId: 'user-123',
+  userId: "user-123",
   assignments: [
     {
-      tenantId: 'tenant-abc',
-      organizationId: 'org-engineering',
-      departmentId: 'dept-backend' // Engineering org
+      tenantId: "tenant-abc",
+      organizationId: "org-engineering",
+      departmentId: "dept-backend", // Engineering org
     },
     {
-      tenantId: 'tenant-abc',
-      organizationId: 'org-product',
-      departmentId: 'dept-mobile-apps' // Product org
-    }
+      tenantId: "tenant-abc",
+      organizationId: "org-product",
+      departmentId: "dept-mobile-apps", // Product org
+    },
     // Cannot have two departments in same organization
-  ]
+  ],
 };
 ```
 
@@ -215,15 +215,15 @@ async function assignUserToDepartment(
   userId: UserId,
   organizationId: OrganizationId,
   departmentId: DepartmentId,
-  context: IsolationContext
+  context: IsolationContext,
 ) {
   // 1. Check if user already has a department in this organization
   const existingAssignment = await userRepo.findDepartmentAssignment(
     userId,
     organizationId,
-    context
+    context,
   );
-  
+
   if (existingAssignment) {
     // Update existing assignment
     await updateDepartmentAssignment(userId, departmentId, context);
@@ -231,20 +231,20 @@ async function assignUserToDepartment(
     // Create new assignment
     await createDepartmentAssignment(userId, departmentId, context);
   }
-  
+
   // 2. Validate department exists in organization
   const department = await departmentRepo.findById(departmentId, context);
   if (!department.organizationId.equals(organizationId)) {
-    throw new Error('Department not in specified organization');
+    throw new Error("Department not in specified organization");
   }
-  
+
   // 3. Create assignment
   const assignment = UserDepartmentAssignment.create(
     userId,
     organizationId,
-    departmentId
+    departmentId,
   );
-  
+
   await assignmentRepo.save(assignment, context);
 }
 ```
@@ -264,30 +264,26 @@ interface DepartmentTreeNode {
 
 async function getDepartmentTree(
   organizationId: OrganizationId,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<DepartmentTreeNode> {
   const rootDepartments = await departmentRepo.findRootDepartments(
     organizationId,
-    context
+    context,
   );
-  
+
   async function buildTree(dept: Department): Promise<DepartmentTreeNode> {
     const children = await departmentRepo.findByParentId(dept.id, context);
     const userCount = await userRepo.countByDepartment(dept.id, context);
-    
+
     return {
       department: dept,
-      children: await Promise.all(
-        children.map(child => buildTree(child))
-      ),
-      userCount
+      children: await Promise.all(children.map((child) => buildTree(child))),
+      userCount,
     };
   }
-  
+
   // Return array of trees (multiple root departments)
-  return Promise.all(
-    rootDepartments.map(root => buildTree(root))
-  );
+  return Promise.all(rootDepartments.map((root) => buildTree(root)));
 }
 ```
 
@@ -295,25 +291,25 @@ async function getDepartmentTree(
 
 ```typescript
 async function getDepartmentPath(
-  departmentId: DepartmentId
+  departmentId: DepartmentId,
 ): Promise<Department[]> {
   const path: Department[] = [];
   let currentId: DepartmentId | null = departmentId;
-  
+
   // Traverse up the hierarchy
   while (currentId) {
     const dept = await departmentRepo.findById(currentId);
     path.unshift(dept); // Add to beginning
-    
+
     currentId = dept.parentId;
   }
-  
+
   return path;
 }
 
 // Example: Get path string
 function getPathString(path: Department[]): string {
-  return path.map(dept => dept.name).join(' > ');
+  return path.map((dept) => dept.name).join(" > ");
 }
 // Result: "Engineering > Backend Engineering > API Services > Authentication Team"
 ```
@@ -376,11 +372,11 @@ CREATE TABLE departments (
   description TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  
+
   FOREIGN KEY (tenant_id) REFERENCES tenants(id),
   FOREIGN KEY (organization_id) REFERENCES organizations(id),
   FOREIGN KEY (manager_id) REFERENCES users(id),
-  
+
   UNIQUE (tenant_id, organization_id, code)
 );
 

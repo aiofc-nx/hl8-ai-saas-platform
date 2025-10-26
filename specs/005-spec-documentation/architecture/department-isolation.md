@@ -72,7 +72,7 @@ const context = IsolationContext.createDepartmentLevel(
   platformId,
   tenantId,
   organizationId,
-  departmentId
+  departmentId,
 );
 
 const dept = await departmentService.findById(departmentId, context);
@@ -82,10 +82,7 @@ const dept = await departmentService.findById(departmentId, context);
 
 ```typescript
 // Get department tree
-const tree = await departmentService.getTree(
-  organizationId,
-  tenantId
-);
+const tree = await departmentService.getTree(organizationId, tenantId);
 
 // Returns: Hierarchical structure
 // {
@@ -106,7 +103,7 @@ const tree = await departmentService.getTree(
 const subs = await departmentService.findChildren(
   departmentId,
   tenantId,
-  organizationId
+  organizationId,
 );
 
 // Get full path
@@ -161,7 +158,7 @@ WHERE tenant_id = 'tenant_123'
 await userService.assignToDepartment(
   userId,
   organizationId,
-  departmentId  // Single department per organization
+  departmentId, // Single department per organization
 );
 ```
 
@@ -179,7 +176,7 @@ const rootDept = await departmentService.create({
   organizationId,
   tenantId,
   level: 1,
-  parentId: null
+  parentId: null,
 });
 
 // Create sub-department (level 2)
@@ -189,7 +186,7 @@ const subDept = await departmentService.create({
   organizationId,
   tenantId,
   level: 2,
-  parentId: rootDept.id
+  parentId: rootDept.id,
 });
 ```
 
@@ -197,11 +194,7 @@ const subDept = await departmentService.create({
 
 ```typescript
 // Move department to new parent
-await departmentService.move(
-  departmentId,
-  newParentId,
-  context
-);
+await departmentService.move(departmentId, newParentId, context);
 
 // Auto-updates: path, level, all descendants
 ```

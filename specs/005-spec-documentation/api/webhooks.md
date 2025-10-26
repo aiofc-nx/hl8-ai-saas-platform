@@ -20,6 +20,7 @@ POST /api/v1/webhooks
 ```
 
 **Request**:
+
 ```json
 {
   "url": "https://example.com/webhook",
@@ -29,6 +30,7 @@ POST /api/v1/webhooks
 ```
 
 **Response** (201):
+
 ```json
 {
   "id": "webhook-123",

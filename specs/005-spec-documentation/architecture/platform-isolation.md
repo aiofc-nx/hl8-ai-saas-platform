@@ -84,7 +84,7 @@ CREATE TABLE platform.settings (
 export class PlatformContext {
   private readonly isPlatformUser: boolean;
   private readonly platformAdminId: string;
-  
+
   // Platform operations never access tenant data
   async getPlatformSettings() {
     // Access platform schema only
@@ -123,9 +123,7 @@ export class PlatformContext {
 
 ```typescript
 // Platform admin can access platform data
-const platformContext = IsolationContext.createPlatformLevel(
-  platformAdminId
-);
+const platformContext = IsolationContext.createPlatformLevel(platformAdminId);
 
 // Create tenant
 await tenantService.create(newTenantData, platformContext);
@@ -138,9 +136,7 @@ await platformService.updateSettings(settings, platformContext);
 
 ```typescript
 // Tenant users cannot access platform data
-const tenantContext = IsolationContext.createTenantLevel(
-  tenantId
-);
+const tenantContext = IsolationContext.createTenantLevel(tenantId);
 
 // This will fail - tenant users cannot access platform
 await platformService.getSettings(tenantContext);

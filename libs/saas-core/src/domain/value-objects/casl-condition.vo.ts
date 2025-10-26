@@ -140,7 +140,7 @@ export class CaslCondition extends BaseValueObject<{
    *
    * @returns 值
    */
-  get value(): unknown {
+  get conditionValue(): unknown {
     return this.value.value;
   }
 
@@ -151,31 +151,36 @@ export class CaslCondition extends BaseValueObject<{
    * @returns 是否匹配
    */
   evaluate(targetValue: unknown): boolean {
+    const conditionValue = this.conditionValue;
     switch (this.operator) {
       case CaslConditionOperatorEnum.EQUALS:
-        return targetValue === this.value;
+        return targetValue === conditionValue;
       case CaslConditionOperatorEnum.NOT_EQUALS:
-        return targetValue !== this.value;
+        return targetValue !== conditionValue;
       case CaslConditionOperatorEnum.GREATER_THAN:
-        return targetValue > this.value;
+        return targetValue > conditionValue;
       case CaslConditionOperatorEnum.GREATER_THAN_OR_EQUALS:
-        return targetValue >= this.value;
+        return targetValue >= conditionValue;
       case CaslConditionOperatorEnum.LESS_THAN:
-        return targetValue < this.value;
+        return targetValue < conditionValue;
       case CaslConditionOperatorEnum.LESS_THAN_OR_EQUALS:
-        return targetValue <= this.value;
+        return targetValue <= conditionValue;
       case CaslConditionOperatorEnum.IN:
-        return Array.isArray(this.value) && this.value.includes(targetValue);
+        return (
+          Array.isArray(conditionValue) && conditionValue.includes(targetValue)
+        );
       case CaslConditionOperatorEnum.NOT_IN:
-        return Array.isArray(this.value) && !this.value.includes(targetValue);
+        return (
+          Array.isArray(conditionValue) && !conditionValue.includes(targetValue)
+        );
       case CaslConditionOperatorEnum.EXISTS:
-        return this.value
+        return conditionValue
           ? targetValue !== undefined && targetValue !== null
           : targetValue === undefined || targetValue === null;
       case CaslConditionOperatorEnum.REGEX:
         return (
           typeof targetValue === "string" &&
-          new RegExp(this.value).test(targetValue)
+          new RegExp(conditionValue as string).test(targetValue)
         );
       default:
         return false;
@@ -199,7 +204,7 @@ export class CaslCondition extends BaseValueObject<{
    * @returns 条件字符串
    */
   toString(): string {
-    return `${this.field} ${this.operator} ${JSON.stringify(this.value)}`;
+    return `${this.field} ${this.operator} ${JSON.stringify(this.conditionValue)}`;
   }
 
   /**

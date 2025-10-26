@@ -46,12 +46,12 @@ X-Department-Id: <department-id>      # 可选
 
 #### 请求参数
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| code | string | ✅ | 租户代码，3-20个字符 |
-| name | string | ✅ | 租户名称，2-100个字符 |
-| type | enum | ✅ | 租户类型（FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM） |
-| description | string | ❌ | 租户描述 |
+| 字段        | 类型   | 必填 | 说明                                                      |
+| ----------- | ------ | ---- | --------------------------------------------------------- |
+| code        | string | ✅   | 租户代码，3-20个字符                                      |
+| name        | string | ✅   | 租户名称，2-100个字符                                     |
+| type        | enum   | ✅   | 租户类型（FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM） |
+| description | string | ❌   | 租户描述                                                  |
 
 #### 响应示例
 
@@ -87,12 +87,12 @@ X-Department-Id: <department-id>      # 可选
 
 #### 请求参数
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| page | number | ❌ | 页码，默认1 |
-| limit | number | ❌ | 每页数量，默认10 |
-| type | enum | ❌ | 租户类型筛选 |
-| status | enum | ❌ | 租户状态筛选 |
+| 参数   | 类型   | 必填 | 说明             |
+| ------ | ------ | ---- | ---------------- |
+| page   | number | ❌   | 页码，默认1      |
+| limit  | number | ❌   | 每页数量，默认10 |
+| type   | enum   | ❌   | 租户类型筛选     |
+| status | enum   | ❌   | 租户状态筛选     |
 
 #### 响应示例
 
@@ -129,9 +129,9 @@ X-Department-Id: <department-id>      # 可选
 
 #### 路径参数
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| tenantId | string (UUID) | ✅ | 租户ID |
+| 参数     | 类型          | 必填 | 说明   |
+| -------- | ------------- | ---- | ------ |
+| tenantId | string (UUID) | ✅   | 租户ID |
 
 #### 响应示例
 
@@ -166,9 +166,9 @@ X-Department-Id: <department-id>      # 可选
 
 #### 路径参数
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| tenantId | string (UUID) | ✅ | 租户ID |
+| 参数     | 类型          | 必填 | 说明   |
+| -------- | ------------- | ---- | ------ |
+| tenantId | string (UUID) | ✅   | 租户ID |
 
 #### 请求示例
 
@@ -181,10 +181,10 @@ X-Department-Id: <department-id>      # 可选
 
 #### 请求参数
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| name | string | ❌ | 新的租户名称 |
-| description | string | ❌ | 新的租户描述 |
+| 字段        | 类型   | 必填 | 说明         |
+| ----------- | ------ | ---- | ------------ |
+| name        | string | ❌   | 新的租户名称 |
+| description | string | ❌   | 新的租户描述 |
 
 #### 响应示例
 
@@ -220,9 +220,9 @@ X-Department-Id: <department-id>      # 可选
 
 #### 路径参数
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| tenantId | string (UUID) | ✅ | 租户ID |
+| 参数     | 类型          | 必填 | 说明   |
+| -------- | ------------- | ---- | ------ |
+| tenantId | string (UUID) | ✅   | 租户ID |
 
 #### 响应示例
 
@@ -280,16 +280,16 @@ X-Department-Id: <department-id>      # 可选
 
 ```typescript
 interface Tenant {
-  id: string;                    // 租户ID (UUID)
-  code: string;                  // 租户代码
-  name: string;                  // 租户名称
-  type: TenantType;              // 租户类型
-  status: TenantStatus;          // 租户状态
-  description?: string;          // 描述
-  createdAt: Date;               // 创建时间
-  updatedAt: Date;               // 更新时间
-  createdBy: string;             // 创建者
-  updatedBy: string;             // 更新者
+  id: string; // 租户ID (UUID)
+  code: string; // 租户代码
+  name: string; // 租户名称
+  type: TenantType; // 租户类型
+  status: TenantStatus; // 租户状态
+  description?: string; // 描述
+  createdAt: Date; // 创建时间
+  updatedAt: Date; // 更新时间
+  createdBy: string; // 创建者
+  updatedBy: string; // 更新者
 }
 ```
 
@@ -297,11 +297,11 @@ interface Tenant {
 
 ```typescript
 enum TenantType {
-  FREE = "FREE",                  // 免费版
-  BASIC = "BASIC",               // 基础版
+  FREE = "FREE", // 免费版
+  BASIC = "BASIC", // 基础版
   PROFESSIONAL = "PROFESSIONAL", // 专业版
-  ENTERPRISE = "ENTERPRISE",     // 企业版
-  CUSTOM = "CUSTOM"              // 定制版
+  ENTERPRISE = "ENTERPRISE", // 企业版
+  CUSTOM = "CUSTOM", // 定制版
 }
 ```
 
@@ -309,11 +309,11 @@ enum TenantType {
 
 ```typescript
 enum TenantStatus {
-  PENDING = "PENDING",           // 待处理
-  ACTIVE = "ACTIVE",             // 活跃
-  SUSPENDED = "SUSPENDED",       // 暂停
-  EXPIRED = "EXPIRED",           // 过期
-  DELETED = "DELETED"            // 已删除
+  PENDING = "PENDING", // 待处理
+  ACTIVE = "ACTIVE", // 活跃
+  SUSPENDED = "SUSPENDED", // 暂停
+  EXPIRED = "EXPIRED", // 过期
+  DELETED = "DELETED", // 已删除
 }
 ```
 
@@ -338,14 +338,14 @@ enum TenantStatus {
 
 ### 常见错误码
 
-| 状态码 | 错误类型 | 说明 |
-|--------|---------|------|
-| 400 | ValidationError | 请求参数验证失败 |
-| 401 | Unauthorized | 未认证 |
-| 403 | Forbidden | 权限不足 |
-| 404 | NotFound | 资源不存在 |
-| 409 | Conflict | 资源冲突（如代码已存在） |
-| 500 | InternalError | 服务器内部错误 |
+| 状态码 | 错误类型        | 说明                     |
+| ------ | --------------- | ------------------------ |
+| 400    | ValidationError | 请求参数验证失败         |
+| 401    | Unauthorized    | 未认证                   |
+| 403    | Forbidden       | 权限不足                 |
+| 404    | NotFound        | 资源不存在               |
+| 409    | Conflict        | 资源冲突（如代码已存在） |
+| 500    | InternalError   | 服务器内部错误           |
 
 ---
 

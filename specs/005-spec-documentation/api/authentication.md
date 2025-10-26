@@ -20,7 +20,7 @@ sequenceDiagram
     participant C as Client
     participant A as Auth API
     participant D as Database
-    
+
     C->>A: POST /auth/login
     A->>D: Verify credentials
     D-->>A: User validated

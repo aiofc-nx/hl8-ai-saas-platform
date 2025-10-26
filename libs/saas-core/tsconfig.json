@@ -1,29 +1,15 @@
 {
-  "extends": "../../packages/typescript-config/nestjs.json",
+  "extends": "@repo/typescript-config/nestjs.json",
   "compilerOptions": {
+    "allowJs": false,
+    "esModuleInterop": true,
+    "incremental": false,
     "baseUrl": ".",
     "rootDir": "./src",
-    "outDir": "./dist",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "composite": true,
-    "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "outDir": "./dist"
   },
   "include": ["src/**/*.ts"],
-  "exclude": [
-    "node_modules",
-    "test",
-    "dist",
-    "**/*.js",
-    "**/*.js.map",
-    "**/*.spec.ts",
-    "**/*.test.ts"
-  ],
+  "exclude": ["node_modules", "test", "dist", "**/*.js", "**/*.js.map"],
   "references": [
     {
       "path": "../domain-kernel"

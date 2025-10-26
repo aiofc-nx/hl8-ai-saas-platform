@@ -51,14 +51,11 @@ CREATE POLICY tenant_isolation_policy ON organizations
 export class DatabaseContext {
   async withTenantContext<T>(
     tenantId: TenantId,
-    operation: () => Promise<T>
+    operation: () => Promise<T>,
   ): Promise<T> {
     // Set context for RLS
-    await this.db.query(
-      `SET app.current_tenant_id = $1`,
-      [tenantId.value]
-    );
-    
+    await this.db.query(`SET app.current_tenant_id = $1`, [tenantId.value]);
+
     try {
       return await operation();
     } finally {
@@ -75,13 +72,10 @@ export class DatabaseContext {
 // Use within transaction
 await db.transaction(async (trx) => {
   // Set tenant context
-  await trx.raw(
-    `SET LOCAL app.current_tenant_id = $1`,
-    [tenantId.value]
-  );
-  
+  await trx.raw(`SET LOCAL app.current_tenant_id = $1`, [tenantId.value]);
+
   // All queries now filtered by tenant_id automatically
-  const orgs = await trx('organizations').select();
+  const orgs = await trx("organizations").select();
   // Only returns organizations for this tenant
 });
 ```
@@ -113,9 +107,9 @@ CREATE POLICY dept_hierarchy_policy ON documents
     AND (
       department_id = current_setting('app.current_department_id')::uuid
       OR department_id IN (
-        SELECT id FROM departments 
+        SELECT id FROM departments
         WHERE path LIKE (
-          SELECT path || '/%' FROM departments 
+          SELECT path || '/%' FROM departments
           WHERE id = current_setting('app.current_department_id')::uuid
         )
       )
@@ -161,12 +155,12 @@ CREATE INDEX idx_users_tenant_org_dept ON users(tenant_id, organization_id, depa
 
 ```sql
 -- Analyze RLS policy performance
-EXPLAIN ANALYZE 
+EXPLAIN ANALYZE
 SELECT * FROM organizations;
 
 -- Ensure index is used for tenant filtering
 EXPLAIN (FORMAT JSON)
-SELECT * FROM organizations 
+SELECT * FROM organizations
 WHERE tenant_id = '123-456-789';
 ```
 
@@ -179,7 +173,7 @@ WHERE tenant_id = '123-456-789';
 ```sql
 -- Test tenant isolation
 SET app.current_tenant_id = 'tenant-1';
-INSERT INTO organizations (id, tenant_id, name) 
+INSERT INTO organizations (id, tenant_id, name)
 VALUES ('org-1', 'tenant-1', 'Org 1');
 
 SET app.current_tenant_id = 'tenant-2';
@@ -193,14 +187,14 @@ SELECT * FROM organizations;  -- Should return org-1
 
 ```typescript
 // Test RLS in application
-describe('RLS Isolation', () => {
-  it('should isolate tenant data', async () => {
-    const tenant1Context = await createTenantContext('tenant-1');
-    const tenant2Context = await createTenantContext('tenant-2');
-    
+describe("RLS Isolation", () => {
+  it("should isolate tenant data", async () => {
+    const tenant1Context = await createTenantContext("tenant-1");
+    const tenant2Context = await createTenantContext("tenant-2");
+
     // Create org in tenant 1
-    await orgService.create({ name: 'Org 1' }, tenant1Context);
-    
+    await orgService.create({ name: "Org 1" }, tenant1Context);
+
     // Query from tenant 2 should not see tenant 1 data
     const orgs = await orgService.findAll(tenant2Context);
     expect(orgs).toHaveLength(0);
@@ -241,7 +235,7 @@ SELECT COUNT(*) FROM organizations;
 
 ```sql
 -- Check RLS usage
-SELECT 
+SELECT
   schemaname,
   tablename,
   rowsecurity
@@ -253,7 +247,7 @@ WHERE tablename IN ('organizations', 'departments', 'users');
 
 ```sql
 -- Show all policies on a table
-SELECT * FROM pg_policies 
+SELECT * FROM pg_policies
 WHERE tablename = 'organizations';
 
 -- Check current context

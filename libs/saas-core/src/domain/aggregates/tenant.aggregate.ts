@@ -19,23 +19,18 @@ import {
   TenantStatus,
   TenantStatusEnum,
 } from "../value-objects/index.js";
-import { TenantCreatedEvent } from "../events/tenant-created.event.js";
 import { TrialPeriodConfig } from "../value-objects/trial-period-config.vo.js";
 import {
   TrialPeriodService,
   TrialPeriodStatus,
 } from "../services/trial-period.service.js";
-import { TrialExpiredEvent } from "../events/trial-expired.event.js";
 import { TenantCreationRules } from "../services/tenant-creation-rules.service.js";
-import { TenantCreationValidationFailedEvent } from "../events/tenant-creation-validation-failed.event.js";
 import { ResourceMonitoringService } from "../services/resource-monitoring.service.js";
 import {
   ResourceUsage,
   ResourceType,
 } from "../value-objects/resource-usage.vo.js";
 import { ResourceLimits } from "../value-objects/resource-limits.vo.js";
-import { ResourceLimitExceededEvent } from "../events/resource-limit-exceeded.event.js";
-import { ResourceUsageWarningEvent } from "../events/resource-usage-warning.event.js";
 
 /**
  * 租户聚合根
@@ -73,7 +68,7 @@ export class TenantAggregate extends AggregateRoot {
     address?: string,
     subscriptionStartDate?: Date,
     subscriptionEndDate?: Date,
-    settings: Record<string, any> = {},
+    settings: Record<string, unknown> = {},
     trialPeriodConfig?: TrialPeriodConfig,
   ) {
     // 租户本身作为聚合根，使用平台级别的 tenantId
@@ -333,7 +328,7 @@ export class TenantAggregate extends AggregateRoot {
    *
    * @param settings - 新的设置
    */
-  updateSettings(settings: Record<string, any>): void {
+  updateSettings(settings: Record<string, unknown>): void {
     const oldSettings = this._tenant.settings;
     this._tenant.updateSettings(settings);
 
@@ -566,10 +561,9 @@ export class TenantAggregate extends AggregateRoot {
   }> {
     const validation = await this._tenantCreationRules.validateTenantCreation(
       {
-        usercode: this._tenant.code,
+        code: this._tenant.code,
         name: this._tenant.name,
         type: this._tenant.type,
-        domain: this._tenant.domain,
         createdBy: this._tenant.createdBy,
       },
       existingTenants,
@@ -582,7 +576,6 @@ export class TenantAggregate extends AggregateRoot {
           tenantCode: this._tenant.code.toString(),
           tenantName: this._tenant.name.toString(),
           tenantType: this._tenant.type.toString(),
-          domain: this._tenant.domain,
           createdBy: this._tenant.createdBy,
           validationErrors: validation.errors,
           validationWarnings: validation.warnings,
@@ -613,10 +606,9 @@ export class TenantAggregate extends AggregateRoot {
   ): Promise<boolean> {
     return await this._tenantCreationRules.isTenantCreationAllowed(
       {
-        usercode: this._tenant.code,
+        code: this._tenant.code,
         name: this._tenant.name,
         type: this._tenant.type,
-        domain: this._tenant.domain,
         createdBy: this._tenant.createdBy,
       },
       existingTenants,
@@ -644,10 +636,9 @@ export class TenantAggregate extends AggregateRoot {
   }> {
     return await this._tenantCreationRules.getTenantCreationSuggestions(
       {
-        usercode: this._tenant.code,
+        code: this._tenant.code,
         name: this._tenant.name,
         type: this._tenant.type,
-        domain: this._tenant.domain,
         createdBy: this._tenant.createdBy,
       },
       existingTenants,
@@ -670,7 +661,7 @@ export class TenantAggregate extends AggregateRoot {
     }[],
   ): {
     readonly totalTenants: number;
-    readonly tenantsByType: Record<TenantType, number>;
+    readonly tenantsByType: Record<string, number>;
     readonly tenantsByUser: Record<string, number>;
     readonly tenantsByDomain: Record<string, number>;
   } {
@@ -986,7 +977,8 @@ export class TenantAggregate extends AggregateRoot {
   protected loadFromSnapshot(snapshot: Record<string, unknown>): void {
     this._tenant = snapshot.tenant as Tenant;
     this._trialPeriodConfig = snapshot.trialPeriodConfig as TrialPeriodConfig;
-    this._trialPeriodService = snapshot.trialPeriodService as TrialPeriodService;
+    this._trialPeriodService =
+      snapshot.trialPeriodService as TrialPeriodService;
     this._tenantCreationRules =
       snapshot.tenantCreationRules as TenantCreationRules;
     this._resourceMonitoringService =
@@ -997,9 +989,11 @@ export class TenantAggregate extends AggregateRoot {
    * 辅助方法：发布领域事件
    * @deprecated 请直接使用 this.apply(this.createDomainEvent(...))
    */
-  protected addDomainEvent(event: unknown): void {
+  protected addDomainEvent(_event: unknown): void {
     // 这是一个兼容性方法，实际项目中应该移除所有对 addDomainEvent 的调用
     // 并直接使用 this.apply(this.createDomainEvent(...))
-    console.warn("addDomainEvent is deprecated, use apply(createDomainEvent(...)) instead");
+    console.warn(
+      "addDomainEvent is deprecated, use apply(createDomainEvent(...)) instead",
+    );
   }
 }

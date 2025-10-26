@@ -89,14 +89,14 @@ const command = new CreateTenantCommand(
   new TenantName("示例租户"),
   new TenantType(TenantTypeEnum.ENTERPRISE),
   "租户描述",
-  "user_001"
+  "user_001",
 );
 
 // 2. 执行用例
 const useCase = new TenantCreationUseCase(
   tenantRepository,
   eventBus,
-  transactionManager
+  transactionManager,
 );
 
 const tenantAggregate = await useCase.execute(command, context);
@@ -109,10 +109,7 @@ import { GetTenantQuery } from "@hl8/saas-core/application";
 import { TenantId } from "@hl8/domain-kernel";
 
 // 1. 创建查询
-const query = new GetTenantQuery(
-  TenantId.create("tenant_id"),
-  "user_001"
-);
+const query = new GetTenantQuery(TenantId.create("tenant_id"), "user_001");
 
 // 2. 执行查询
 const tenant = await tenantQueryHandler.execute(query);
@@ -128,7 +125,7 @@ const command = new UpdateTenantCommand(
   TenantId.create("tenant_id"),
   new TenantName("新名称"),
   undefined, // 不更新类型
-  "新描述"
+  "新描述",
 );
 
 // 2. 执行用例
@@ -163,7 +160,7 @@ export default {
   },
   mongodb: {
     // MongoDB 配置（可选）
-  }
+  },
 };
 ```
 
@@ -174,7 +171,7 @@ export default {
 export default {
   defaultStrategy: "ROW_LEVEL_SECURITY",
   database: "postgresql", // 默认数据库
-  supportMongoDB: true,    // 是否支持 MongoDB
+  supportMongoDB: true, // 是否支持 MongoDB
 };
 ```
 
@@ -236,7 +233,7 @@ const ability = await caslAbilityFactory.createForUser(
   userId,
   tenantId,
   organizationId,
-  departmentId
+  departmentId,
 );
 
 // 检查权限
@@ -274,10 +271,7 @@ eventBus.publish(new TenantCreatedEvent(...));
 
 ```typescript
 // ✅ 正确
-const context = IsolationContext.createTenantLevel(
-  platformId,
-  tenantId
-);
+const context = IsolationContext.createTenantLevel(platformId, tenantId);
 
 // ❌ 错误 - 不传递上下文
 await repository.findById(id);
@@ -303,7 +297,7 @@ A: 创建新的 Use Case 类，继承 `BaseUseCase` 或 `BaseCommandUseCase`：
 export class YourUseCase extends BaseUseCase<Request, Response> {
   protected async executeUseCase(
     request: Request,
-    context: IUseCaseContext
+    context: IUseCaseContext,
   ): Promise<Response> {
     // 实现业务逻辑
   }

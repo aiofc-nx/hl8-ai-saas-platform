@@ -20,6 +20,7 @@ POST /api/v1/organizations
 ```
 
 **Request**:
+
 ```json
 {
   "code": "ENG",
@@ -30,6 +31,7 @@ POST /api/v1/organizations
 ```
 
 **Response** (201):
+
 ```json
 {
   "id": "org-123",
@@ -49,6 +51,7 @@ GET /api/v1/organizations?parentId=org-123
 ```
 
 **Response** (200):
+
 ```json
 {
   "organizations": [...],
@@ -65,6 +68,7 @@ GET /api/v1/organizations/:id
 ```
 
 **Response** (200):
+
 ```json
 {
   "id": "org-123",

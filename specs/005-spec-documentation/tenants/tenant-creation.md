@@ -30,6 +30,7 @@ interface RegistrationRequest {
 ```
 
 **Process**:
+
 1. User provides email, password, and display name
 2. System validates email format and password strength
 3. System checks if email already exists
@@ -38,6 +39,7 @@ interface RegistrationRequest {
 6. System creates platform user account
 
 **Events**:
+
 - `PlatformUserCreatedEvent`
 - `EmailVerificationSentEvent`
 - `EmailVerifiedEvent`
@@ -52,8 +54,8 @@ interface RegistrationRequest {
 ```typescript
 // Tenant application
 interface TenantApplication {
-  tenantCode: string;  // Unique tenant code
-  tenantName: string;  // Display name
+  tenantCode: string; // Unique tenant code
+  tenantName: string; // Display name
   tenantType: TenantType;
   contactEmail: string;
   contactPhone?: string;
@@ -63,6 +65,7 @@ interface TenantApplication {
 ```
 
 **Validation Rules**:
+
 - Tenant code must be unique across platform
 - Tenant code must be 3-20 characters
 - Tenant code must be alphanumeric with dashes/underscores
@@ -70,6 +73,7 @@ interface TenantApplication {
 - Contact email must be valid and verified
 
 **Process**:
+
 1. User submits tenant application
 2. System validates tenant code uniqueness
 3. System validates business rules
@@ -77,6 +81,7 @@ interface TenantApplication {
 5. System triggers validation process
 
 **Events**:
+
 - `TenantApplicationSubmittedEvent`
 - `TenantCodeValidationEvent`
 
@@ -94,45 +99,46 @@ interface ValidationCheck {
   name: string;
   description: string;
   check: (application: TenantApplication) => Promise<ValidationResult>;
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
 }
 
 const validationChecks: ValidationCheck[] = [
   {
-    name: 'UniqueTenantCode',
-    description: 'Verify tenant code is unique',
+    name: "UniqueTenantCode",
+    description: "Verify tenant code is unique",
     check: async (app) => {
       const exists = await tenantRepo.existsByCode(app.tenantCode);
-      return { valid: !exists, error: exists ? 'Code already exists' : null };
+      return { valid: !exists, error: exists ? "Code already exists" : null };
     },
-    severity: 'error'
+    severity: "error",
   },
   {
-    name: 'ValidTenantType',
-    description: 'Verify tenant type is valid',
+    name: "ValidTenantType",
+    description: "Verify tenant type is valid",
     check: async (app) => {
       const valid = Object.values(TenantTypeEnum).includes(app.tenantType);
-      return { valid, error: valid ? null : 'Invalid tenant type' };
+      return { valid, error: valid ? null : "Invalid tenant type" };
     },
-    severity: 'error'
+    severity: "error",
   },
   {
-    name: 'NameApproval',
-    description: 'Check tenant name against approval rules',
+    name: "NameApproval",
+    description: "Check tenant name against approval rules",
     check: async (app) => {
       const needsApproval = containsRestrictedWords(app.tenantName);
       if (needsApproval) {
         await nameReviewService.requestReview(app.tenantName);
-        return { valid: true, warning: 'Name requires manual review' };
+        return { valid: true, warning: "Name requires manual review" };
       }
       return { valid: true, error: null };
     },
-    severity: 'warning'
-  }
+    severity: "warning",
+  },
 ];
 ```
 
 **Process**:
+
 1. Run all validation checks in parallel
 2. Collect validation results
 3. If all critical checks pass, approve automatically
@@ -140,6 +146,7 @@ const validationChecks: ValidationCheck[] = [
 5. If warnings exist, flag for review
 
 **Events**:
+
 - `TenantValidationStartedEvent`
 - `TenantValidationCompletedEvent`
 - `TenantValidationFailedEvent`
@@ -161,46 +168,47 @@ async function createTenant(application: TenantApplication) {
     application.tenantCode,
     application.tenantName,
     application.tenantType,
-    application.description
+    application.description,
   );
-  
+
   // 2. Save tenant
   await tenantRepo.save(tenant, platformContext);
-  
+
   // 3. Initialize tenant resources
   await initializeTenantResources(tenant);
-  
+
   // 4. Set tenant status to PENDING
   tenant.markAsPending();
-  
+
   // 5. Save updated tenant
   await tenantRepo.save(tenant, platformContext);
-  
+
   return tenant;
 }
 
 async function initializeTenantResources(tenant: TenantAggregate) {
   // Create default organization
   const defaultOrg = await createDefaultOrganization(tenant);
-  
+
   // Create default roles
   const defaultRoles = await createDefaultRoles(tenant);
-  
+
   // Create default admin user
   const adminUser = await createAdminUser(tenant);
-  
+
   // Create default settings
   const defaultSettings = await createDefaultSettings(tenant);
-  
+
   // Publish events
   await eventBus.publishAll([
     ...tenant.pullEvents(),
-    new TenantResourcesInitializedEvent(tenant.id)
+    new TenantResourcesInitializedEvent(tenant.id),
   ]);
 }
 ```
 
 **Events**:
+
 - `TenantCreatedEvent`
 - `TenantResourcesInitializedEvent`
 - `DefaultOrganizationCreatedEvent`
@@ -220,8 +228,10 @@ async function initializeTenantResources(tenant: TenantAggregate) {
 
 ```typescript
 // Automatic activation for free/basic tenants
-if (tenant.type === TenantTypeEnum.FREE || 
-    tenant.type === TenantTypeEnum.BASIC) {
+if (
+  tenant.type === TenantTypeEnum.FREE ||
+  tenant.type === TenantTypeEnum.BASIC
+) {
   await tenant.activate();
   await tenantRepo.save(tenant, context);
   await sendWelcomeEmail(tenant);
@@ -232,14 +242,17 @@ if (tenant.type === TenantTypeEnum.FREE ||
 
 ```typescript
 // Requires approval for professional/enterprise
-if (tenant.type === TenantTypeEnum.PROFESSIONAL ||
-    tenant.type === TenantTypeEnum.ENTERPRISE) {
+if (
+  tenant.type === TenantTypeEnum.PROFESSIONAL ||
+  tenant.type === TenantTypeEnum.ENTERPRISE
+) {
   await sendActivationApprovalRequest(tenant);
   // Wait for manual approval
 }
 ```
 
 **Process**:
+
 1. Check tenant type and activation rules
 2. If auto-activate, activate immediately
 3. If manual, send approval request
@@ -248,6 +261,7 @@ if (tenant.type === TenantTypeEnum.PROFESSIONAL ||
 6. Trigger onboarding workflow
 
 **Events**:
+
 - `TenantActivatedEvent`
 - `WelcomeEmailSentEvent`
 - `OnboardingWorkflowStartedEvent`

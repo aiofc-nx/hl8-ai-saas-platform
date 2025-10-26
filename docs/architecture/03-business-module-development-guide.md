@@ -245,12 +245,12 @@ Business Module
 
 #### 数据库选择建议
 
-| 数据类型 | 推荐数据库 | 说明 |
-|---------|----------|------|
-| 用户、订单、产品等核心业务数据 | PostgreSQL | 需要 ACID 保证 |
-| 日志、审计记录 | MongoDB | 非结构化，写多读少 |
-| 配置、缓存数据 | PostgreSQL | 需要查询和索引 |
-| 文件、图片元数据 | MongoDB | 灵活的结构 |
+| 数据类型                       | 推荐数据库 | 说明               |
+| ------------------------------ | ---------- | ------------------ |
+| 用户、订单、产品等核心业务数据 | PostgreSQL | 需要 ACID 保证     |
+| 日志、审计记录                 | MongoDB    | 非结构化，写多读少 |
+| 配置、缓存数据                 | PostgreSQL | 需要查询和索引     |
+| 文件、图片元数据               | MongoDB    | 灵活的结构         |
 
 #### 实现要求
 
@@ -330,12 +330,12 @@ export abstract class BaseEntity {
 
 ```typescript
 // ✅ 正确：使用 domain-kernel 的 ID 值对象
-import { 
-  TenantId, 
-  OrganizationId, 
-  DepartmentId, 
+import {
+  TenantId,
+  OrganizationId,
+  DepartmentId,
   UserId,
-  GenericEntityId 
+  GenericEntityId,
 } from "@hl8/domain-kernel";
 
 export class User extends BaseEntity {
@@ -365,9 +365,9 @@ export class UserId extends BaseValueObject {
 
 ```typescript
 // ✅ 正确：使用 application-kernel 的基类
-import { 
-  BaseCommand, 
-  BaseQuery, 
+import {
+  BaseCommand,
+  BaseQuery,
   BaseUseCase,
   CommandHandler,
   QueryHandler
@@ -385,7 +385,7 @@ export class CreateUserHandler implements CommandHandler { ... }
 
 ```typescript
 // ✅ 正确：使用 infrastructure-kernel 的接口
-import { 
+import {
   IDatabaseAdapter,
   ICacheService,
   IMessageBroker
@@ -402,7 +402,7 @@ export class RabbitMQBroker implements IMessageBroker { ... }
 
 ```typescript
 // ✅ 正确：使用 interface-kernel 的基类和守卫
-import { 
+import {
   RestController,
   AuthenticationGuard,
   AuthorizationGuard
@@ -421,11 +421,11 @@ export class UserController extends RestController {
 
 ```typescript
 // ✅ 正确：使用 exceptions 库的异常类
-import { 
+import {
   DomainException,
   BusinessException,
   ValidationException,
-  NotFoundException
+  NotFoundException,
 } from "@hl8/exceptions";
 
 export class UserService {
@@ -457,16 +457,16 @@ import { ICacheService } from "@hl8/caching";
 @Injectable()
 export class UserService {
   constructor(private readonly cacheService: ICacheService) {}
-  
+
   public async getUser(id: string): Promise<User> {
     const cacheKey = `user:${id}`;
     let user = await this.cacheService.get<User>(cacheKey);
-    
+
     if (!user) {
       user = await this.userRepository.findById(id);
       await this.cacheService.set(cacheKey, user, 3600);
     }
-    
+
     return user;
   }
 }
@@ -483,10 +483,12 @@ import { ConfigService } from "@hl8/config";
 @Injectable()
 export class DatabaseService {
   constructor(private readonly configService: ConfigService) {}
-  
+
   public getConnectionString(): string {
-    return this.configService.get("DATABASE_URL") || 
-           this.configService.get("database.url");
+    return (
+      this.configService.get("DATABASE_URL") ||
+      this.configService.get("database.url")
+    );
   }
 }
 ```
@@ -502,10 +504,10 @@ import { Logger } from "@hl8/nestjs-fastify";
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
-  
+
   public async createUser(data: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user: ${data.email}`);
-    
+
     try {
       const user = await this.userRepository.create(data);
       this.logger.log(`User created successfully: ${user.id}`);
@@ -531,7 +533,7 @@ import { IsolationContext, SharingLevel } from "@hl8/domain-kernel";
 export class UserRepository {
   public async findByTenant(
     tenantId: TenantId,
-    context: IsolationContext
+    context: IsolationContext,
   ): Promise<User[]> {
     // 使用 context 进行数据隔离
     return this.query({
@@ -557,30 +559,30 @@ export class UserRepository {
 以下是一个完整的实体实现示例，展示如何正确使用 domain-kernel 的组件：
 
 ```typescript
-import { 
-  BaseEntity, 
+import {
+  BaseEntity,
   EntityId,
   TenantId,
   OrganizationId,
   UserId,
   IsolationContext,
-  SharingLevel
+  SharingLevel,
 } from "@hl8/domain-kernel";
 
 /**
  * 用户实体
- * 
+ *
  * @description 用户实体，继承 BaseEntity
  */
 export class User extends BaseEntity {
   private _email: Email;
   private _organizationId: OrganizationId | null;
-  
+
   constructor(
     id: UserId,
     tenantId: TenantId,
     email: Email,
-    organizationId?: OrganizationId
+    organizationId?: OrganizationId,
   ) {
     super(id, tenantId);
     this._email = email;

@@ -26,7 +26,7 @@ libs/saas-core 模块实现了多租户 SAAS 平台的核心业务域，包含�
 class TenantAggregate extends AggregateRoot {
   // 核心实体
   private _tenant: Tenant;
-  
+
   // 服务依赖
   private _trialPeriodService: TrialPeriodService;
   private _trialPeriodConfig: TrialPeriodConfig;
@@ -39,16 +39,16 @@ class TenantAggregate extends AggregateRoot {
 
 ```typescript
 class Tenant extends BaseEntity<TenantId> {
-  private _code: TenantCode;              // 租户代码
-  private _name: TenantName;              // 租户名称
-  private _type: TenantType;              // 租户类型
-  private _status: TenantStatus;          // 租户状态
-  private _description?: string;          // 描述
-  private _contactEmail?: string;         // 联系邮箱
-  private _contactPhone?: string;         // 联系电话
-  private _address?: string;              // 地址
-  private _subscriptionStartDate?: Date;  // 订阅开始日期
-  private _subscriptionEndDate?: Date;    // 订阅结束日期
+  private _code: TenantCode; // 租户代码
+  private _name: TenantName; // 租户名称
+  private _type: TenantType; // 租户类型
+  private _status: TenantStatus; // 租户状态
+  private _description?: string; // 描述
+  private _contactEmail?: string; // 联系邮箱
+  private _contactPhone?: string; // 联系电话
+  private _address?: string; // 地址
+  private _subscriptionStartDate?: Date; // 订阅开始日期
+  private _subscriptionEndDate?: Date; // 订阅结束日期
   private _settings: Record<string, any>; // 设置
 }
 ```
@@ -97,17 +97,17 @@ class OrganizationAggregate extends AggregateRoot<OrganizationId> {
 
 ```typescript
 class Organization extends BaseEntity<OrganizationId> {
-  private _name: string;                     // 组织名称
-  private _description?: string;             // 描述
-  private _type: OrganizationTypeEnum;       // 组织类型
-  private _status: OrganizationStatusEnum;   // 组织状态
-  private _parentId?: OrganizationId;        // 父组织ID
-  private _level: number;                    // 层级
-  private _path: string;                     // 路径
+  private _name: string; // 组织名称
+  private _description?: string; // 描述
+  private _type: OrganizationTypeEnum; // 组织类型
+  private _status: OrganizationStatusEnum; // 组织状态
+  private _parentId?: OrganizationId; // 父组织ID
+  private _level: number; // 层级
+  private _path: string; // 路径
   private _settings: Record<string, unknown>; // 设置
   private _metadata: Record<string, unknown>; // 元数据
-  private _isShared: boolean;                // 是否共享
-  private _sharingLevel?: SharingLevel;      // 共享级别
+  private _isShared: boolean; // 是否共享
+  private _sharingLevel?: SharingLevel; // 共享级别
 }
 ```
 
@@ -142,11 +142,11 @@ class DepartmentAggregate extends AggregateRoot<DepartmentId> {
 
 ```typescript
 class Department extends BaseEntity<DepartmentId> {
-  private _name: string;                    // 部门名称
-  private _code: string;                    // 部门代码
-  private _organizationId: OrganizationId;  // 组织ID
-  private _parentId: DepartmentId | null;   // 父部门ID
-  private _level: number;                   // 层级
+  private _name: string; // 部门名称
+  private _code: string; // 部门代码
+  private _organizationId: OrganizationId; // 组织ID
+  private _parentId: DepartmentId | null; // 父部门ID
+  private _level: number; // 层级
 }
 ```
 
@@ -166,19 +166,19 @@ class Department extends BaseEntity<DepartmentId> {
 
 ```typescript
 class User extends BaseEntity<UserId> {
-  private _email: string;               // 邮箱
-  private _username: string;            // 用户名
-  private _displayName: string;         // 显示名称
-  private _type: UserTypeEnum;          // 用户类型
-  private _status: UserStatusEnum;      // 用户状态
-  private _firstName?: string;          // 名
-  private _lastName?: string;           // 姓
-  private _phone?: string;              // 电话
-  private _avatar?: string;             // 头像
-  private _timezone?: string;           // 时区
-  private _language?: string;           // 语言
-  private _organizationId?: OrganizationId;   // 组织ID
-  private _departmentId?: DepartmentId;       // 部门ID
+  private _email: string; // 邮箱
+  private _username: string; // 用户名
+  private _displayName: string; // 显示名称
+  private _type: UserTypeEnum; // 用户类型
+  private _status: UserStatusEnum; // 用户状态
+  private _firstName?: string; // 名
+  private _lastName?: string; // 姓
+  private _phone?: string; // 电话
+  private _avatar?: string; // 头像
+  private _timezone?: string; // 时区
+  private _language?: string; // 语言
+  private _organizationId?: OrganizationId; // 组织ID
+  private _departmentId?: DepartmentId; // 部门ID
 }
 ```
 
@@ -263,12 +263,12 @@ Platform (平台)
 
 ```typescript
 abstract class BaseEntity {
-  protected readonly _tenantId: TenantId;          // 必填
+  protected readonly _tenantId: TenantId; // 必填
   protected readonly _organizationId?: OrganizationId; // 可选
-  protected readonly _departmentId?: DepartmentId;     // 可选
-  protected readonly _userId?: UserId;                 // 可选
-  protected readonly _isShared: boolean;               // 是否共享
-  protected readonly _sharingLevel?: SharingLevel;     // 共享级别
+  protected readonly _departmentId?: DepartmentId; // 可选
+  protected readonly _userId?: UserId; // 可选
+  protected readonly _isShared: boolean; // 是否共享
+  protected readonly _sharingLevel?: SharingLevel; // 共享级别
 }
 ```
 
@@ -354,10 +354,10 @@ RegularUser (普通用户)
 interface CaslAbility {
   userId: UserId;
   roleId?: RoleId;
-  subject: string;      // 资源类型
-  action: string;       // 操作类型
+  subject: string; // 资源类型
+  action: string; // 操作类型
   conditions: CaslCondition[]; // 条件
-  context: IsolationContext;   // 隔离上下文
+  context: IsolationContext; // 隔离上下文
 }
 ```
 
@@ -369,10 +369,10 @@ interface CaslAbility {
 
 ```typescript
 interface ResourceLimits {
-  maxUsers: number;           // 最大用户数
-  maxOrganizations: number;   // 最大组织数
-  maxStorage: number;         // 最大存储
-  maxBandwidth: number;       // 最大带宽
+  maxUsers: number; // 最大用户数
+  maxOrganizations: number; // 最大组织数
+  maxStorage: number; // 最大存储
+  maxBandwidth: number; // 最大带宽
 }
 ```
 
@@ -380,10 +380,10 @@ interface ResourceLimits {
 
 ```typescript
 interface ResourceUsage {
-  currentUsers: number;       // 当前用户数
+  currentUsers: number; // 当前用户数
   currentOrganizations: number; // 当前组织数
-  currentStorage: number;     // 当前存储
-  currentBandwidth: number;   // 当前带宽
+  currentStorage: number; // 当前存储
+  currentBandwidth: number; // 当前带宽
 }
 ```
 

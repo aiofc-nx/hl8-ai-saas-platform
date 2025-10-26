@@ -53,13 +53,13 @@ interface Snapshot {
 async function replayEvents(aggregateId: string): Promise<Aggregate> {
   const events = await eventStore.getEvents(aggregateId);
   const snapshot = await snapshotStore.getLatest(aggregateId);
-  
+
   let aggregate = snapshot ? reconstructFromSnapshot(snapshot) : createNew();
-  
+
   for (const event of events) {
     aggregate.apply(event);
   }
-  
+
   return aggregate;
 }
 ```

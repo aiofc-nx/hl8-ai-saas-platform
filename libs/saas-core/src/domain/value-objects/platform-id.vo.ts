@@ -1,4 +1,5 @@
 import { EntityId } from "@hl8/domain-kernel";
+import { randomUUID } from "node:crypto";
 
 /**
  * 平台ID值对象
@@ -14,7 +15,6 @@ export class PlatformId extends EntityId<"PlatformId"> {
    */
   private constructor(value: string) {
     super(value, "PlatformId");
-    this.validate(value);
   }
 
   /**
@@ -38,28 +38,7 @@ export class PlatformId extends EntityId<"PlatformId"> {
    * @returns PlatformId 实例
    */
   static generate(): PlatformId {
-    const { randomUUID } = require("node:crypto");
     return new PlatformId(randomUUID());
-  }
-
-  /**
-   * 验证平台ID值
-   *
-   * @param value - 平台ID值
-   * @throws {Error} 当平台ID格式无效时抛出错误
-   */
-  private validate(value: string): void {
-    if (!value || typeof value !== "string") {
-      throw new Error("平台ID必须是非空字符串");
-    }
-
-    if (value.length < 3 || value.length > 50) {
-      throw new Error("平台ID长度必须在3-50个字符之间");
-    }
-
-    if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-      throw new Error("平台ID只能包含字母、数字、连字符和下划线");
-    }
   }
 
   /**

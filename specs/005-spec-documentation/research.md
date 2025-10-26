@@ -103,7 +103,9 @@ export class TenantCreationUseCase extends BaseUseCase {
     private readonly transactionManager?: ITransactionManager,
   ) {}
 
-  protected async publishDomainEvents(aggregate: TenantAggregate): Promise<void> {
+  protected async publishDomainEvents(
+    aggregate: TenantAggregate,
+  ): Promise<void> {
     if (!this.eventBus) {
       return; // ⚠️ 如果没有 eventBus 就直接返回，不发布事件
     }
@@ -116,11 +118,13 @@ export class TenantCreationUseCase extends BaseUseCase {
 ```
 
 **问题**:
+
 1. ✅ 已正确注入 IEventBus
 2. ✅ 已正确使用 pullEvents() 和 publishAll()
 3. ⚠️ 但缺少对所有用例的全面审查
 
 **建议**:
+
 - [ ] 检查所有用例是否正确使用 IEventBus
 - [ ] 确保所有领域事件都被正确发布
 
@@ -210,7 +214,7 @@ export abstract class BaseCommandUseCase<
 > extends BaseUseCase<TRequest, TResponse> {
   protected readonly eventBus?: IEventBus;
   protected readonly transactionManager?: ITransactionManager;
-  
+
   // 提供了 publishDomainEvents 方法
   protected async publishDomainEvents(aggregateRoot: {
     getUncommittedEvents(): unknown[];
@@ -228,6 +232,7 @@ export abstract class BaseCommandUseCase<
 3. 但当前实现使用 `pullEvents()` 而不是 `getUncommittedEvents()`
 
 **建议**:
+
 - [ ] 评估是否应该迁移到 `BaseCommandUseCase`
 - [ ] 确认 `pullEvents()` vs `getUncommittedEvents()` 的差异
 
@@ -237,17 +242,17 @@ export abstract class BaseCommandUseCase<
 
 ## 📊 对齐状态汇总
 
-| 方面 | 状态 | 完成度 | 备注 |
-|------|------|--------|------|
-| 四层架构结构 | ✅ | 100% | 完全符合 |
-| 领域层基类继承 | ✅ | 100% | 完全符合 |
-| 应用层 CQRS 模式 | ✅ | 100% | 完全符合 |
-| 数据隔离机制 | ✅ | 100% | 完全符合 |
-| 数据库支持策略 | ✅ | 100% | PostgreSQL 默认，MongoDB 可选 |
-| IEventBus 集成 | ⚠️ | 30% | 需要全面审查 |
-| ITransactionManager 集成 | ✅ | 100% | 完全符合 |
-| 事件发布机制 | ✅ | 100% | 完全符合 |
-| BaseCommandUseCase 使用 | ⚠️ | 待评估 | 需要进一步研究 |
+| 方面                     | 状态 | 完成度 | 备注                          |
+| ------------------------ | ---- | ------ | ----------------------------- |
+| 四层架构结构             | ✅   | 100%   | 完全符合                      |
+| 领域层基类继承           | ✅   | 100%   | 完全符合                      |
+| 应用层 CQRS 模式         | ✅   | 100%   | 完全符合                      |
+| 数据隔离机制             | ✅   | 100%   | 完全符合                      |
+| 数据库支持策略           | ✅   | 100%   | PostgreSQL 默认，MongoDB 可选 |
+| IEventBus 集成           | ⚠️   | 30%    | 需要全面审查                  |
+| ITransactionManager 集成 | ✅   | 100%   | 完全符合                      |
+| 事件发布机制             | ✅   | 100%   | 完全符合                      |
+| BaseCommandUseCase 使用  | ⚠️   | 待评估 | 需要进一步研究                |
 
 **总体完成度**: **90%**
 

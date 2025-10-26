@@ -45,14 +45,14 @@ User: John Doe
 
 ```typescript
 const assignment = {
-  userId: 'user-123',
-  tenantId: 'tenant-abc',
+  userId: "user-123",
+  tenantId: "tenant-abc",
   organizations: [
     {
-      organizationId: 'org-engineering',
-      departmentId: 'dept-backend'
-    }
-  ]
+      organizationId: "org-engineering",
+      departmentId: "dept-backend",
+    },
+  ],
 };
 ```
 
@@ -68,18 +68,18 @@ User: Jane Smith
 
 ```typescript
 const assignment = {
-  userId: 'user-456',
-  tenantId: 'tenant-abc',
+  userId: "user-456",
+  tenantId: "tenant-abc",
   organizations: [
     {
-      organizationId: 'org-engineering',
-      departmentId: 'dept-frontend'
+      organizationId: "org-engineering",
+      departmentId: "dept-frontend",
     },
     {
-      organizationId: 'org-product',
-      departmentId: 'dept-mobile'
-    }
-  ]
+      organizationId: "org-product",
+      departmentId: "dept-mobile",
+    },
+  ],
 };
 ```
 
@@ -93,14 +93,14 @@ User: Bob Johnson
 
 ```typescript
 const assignment = {
-  userId: 'user-789',
-  tenantId: 'tenant-abc',
+  userId: "user-789",
+  tenantId: "tenant-abc",
   organizations: [
     {
-      organizationId: 'org-engineering',
-      departmentId: null // Can exist without department
-    }
-  ]
+      organizationId: "org-engineering",
+      departmentId: null, // Can exist without department
+    },
+  ],
 };
 ```
 
@@ -115,37 +115,37 @@ async function addUserToOrganization(
   userId: UserId,
   organizationId: OrganizationId,
   departmentId?: DepartmentId,
-  context: IsolationContext
+  context: IsolationContext,
 ) {
   // 1. Validate organization exists
   const organization = await organizationRepo.findById(organizationId, context);
-  
+
   // 2. Validate department if provided
   if (departmentId) {
     const department = await departmentRepo.findById(departmentId, context);
     if (!department.organizationId.equals(organizationId)) {
-      throw new Error('Department not in organization');
+      throw new Error("Department not in organization");
     }
   }
-  
+
   // 3. Check for existing assignment
   const existing = await userOrgRepo.findByUserAndOrganization(
     userId,
     organizationId,
-    context
+    context,
   );
-  
+
   if (existing) {
-    throw new Error('User already in organization');
+    throw new Error("User already in organization");
   }
-  
+
   // 4. Create assignment
   const assignment = UserOrganizationAssignment.create(
     userId,
     organizationId,
-    departmentId
+    departmentId,
   );
-  
+
   await userOrgRepo.save(assignment, context);
 }
 ```
@@ -157,25 +157,25 @@ async function updateDepartmentAssignment(
   userId: UserId,
   organizationId: OrganizationId,
   newDepartmentId: DepartmentId,
-  context: IsolationContext
+  context: IsolationContext,
 ) {
   // 1. Get existing assignment
   const assignment = await userOrgRepo.findByUserAndOrganization(
     userId,
     organizationId,
-    context
+    context,
   );
-  
+
   if (!assignment) {
-    throw new Error('User not in organization');
+    throw new Error("User not in organization");
   }
-  
+
   // 2. Validate new department
   const department = await departmentRepo.findById(newDepartmentId, context);
   if (!department.organizationId.equals(organizationId)) {
-    throw new Error('Department not in organization');
+    throw new Error("Department not in organization");
   }
-  
+
   // 3. Update assignment
   assignment.changeDepartment(newDepartmentId);
   await userOrgRepo.save(assignment, context);
@@ -188,30 +188,30 @@ async function updateDepartmentAssignment(
 async function removeUserFromOrganization(
   userId: UserId,
   organizationId: OrganizationId,
-  context: IsolationContext
+  context: IsolationContext,
 ) {
   // 1. Get assignment
   const assignment = await userOrgRepo.findByUserAndOrganization(
     userId,
     organizationId,
-    context
+    context,
   );
-  
+
   if (!assignment) {
-    throw new Error('User not in organization');
+    throw new Error("User not in organization");
   }
-  
+
   // 2. Check if user can be removed
   const userRoles = await roleRepo.findByUserAndOrganization(
     userId,
     organizationId,
-    context
+    context,
   );
-  
-  if (userRoles.some(role => role.isSystemRole)) {
-    throw new Error('Cannot remove user with system role');
+
+  if (userRoles.some((role) => role.isSystemRole)) {
+    throw new Error("Cannot remove user with system role");
   }
-  
+
   // 3. Delete assignment
   await userOrgRepo.delete(assignment, context);
 }
@@ -233,30 +233,30 @@ interface OrganizationAssignmentValidation {
 async function validateOrganizationAssignment(
   userId: UserId,
   organizationId: OrganizationId,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<ValidationResult> {
   // Check organization exists
   const organization = await organizationRepo.findById(organizationId, context);
   if (!organization) {
-    return { valid: false, error: 'Organization not found' };
+    return { valid: false, error: "Organization not found" };
   }
-  
+
   // Check tenant match
   const user = await userRepo.findById(userId, context);
   if (!user.tenantId.equals(organization.tenantId)) {
-    return { valid: false, error: 'Different tenants' };
+    return { valid: false, error: "Different tenants" };
   }
-  
+
   // Check not already assigned
   const existing = await userOrgRepo.findByUserAndOrganization(
     userId,
     organizationId,
-    context
+    context,
   );
   if (existing) {
-    return { valid: false, error: 'Already assigned' };
+    return { valid: false, error: "Already assigned" };
   }
-  
+
   return { valid: true };
 }
 ```
@@ -268,29 +268,29 @@ async function validateDepartmentAssignment(
   userId: UserId,
   organizationId: OrganizationId,
   departmentId: DepartmentId,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<ValidationResult> {
   // Check department exists
   const department = await departmentRepo.findById(departmentId, context);
   if (!department) {
-    return { valid: false, error: 'Department not found' };
+    return { valid: false, error: "Department not found" };
   }
-  
+
   // Check department in organization
   if (!department.organizationId.equals(organizationId)) {
-    return { valid: false, error: 'Department not in organization' };
+    return { valid: false, error: "Department not in organization" };
   }
-  
+
   // Check user in organization
   const assignment = await userOrgRepo.findByUserAndOrganization(
     userId,
     organizationId,
-    context
+    context,
   );
   if (!assignment) {
-    return { valid: false, error: 'User not in organization' };
+    return { valid: false, error: "User not in organization" };
   }
-  
+
   return { valid: true };
 }
 ```
@@ -304,27 +304,27 @@ async function validateDepartmentAssignment(
 ```typescript
 async function getUserOrganizations(
   userId: UserId,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<OrganizationWithDepartment[]> {
   const assignments = await userOrgRepo.findByUser(userId, context);
-  
+
   return Promise.all(
     assignments.map(async (assignment) => {
       const org = await organizationRepo.findById(
         assignment.organizationId,
-        context
+        context,
       );
-      
+
       const dept = assignment.departmentId
         ? await departmentRepo.findById(assignment.departmentId, context)
         : null;
-      
+
       return {
         organization: org,
         department: dept,
-        assignedAt: assignment.createdAt
+        assignedAt: assignment.createdAt,
       };
-    })
+    }),
   );
 }
 ```
@@ -335,27 +335,28 @@ async function getUserOrganizations(
 async function getOrganizationUsers(
   organizationId: OrganizationId,
   includeDepartments: boolean,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<UserWithDepartment[]> {
   const assignments = await userOrgRepo.findByOrganization(
     organizationId,
-    context
+    context,
   );
-  
+
   return Promise.all(
     assignments.map(async (assignment) => {
       const user = await userRepo.findById(assignment.userId, context);
-      
-      const dept = includeDepartments && assignment.departmentId
-        ? await departmentRepo.findById(assignment.departmentId, context)
-        : null;
-      
+
+      const dept =
+        includeDepartments && assignment.departmentId
+          ? await departmentRepo.findById(assignment.departmentId, context)
+          : null;
+
       return {
         user,
         department: dept,
-        assignedAt: assignment.createdAt
+        assignedAt: assignment.createdAt,
       };
-    })
+    }),
   );
 }
 ```
@@ -365,14 +366,14 @@ async function getOrganizationUsers(
 ```typescript
 async function getDepartmentUsers(
   departmentId: DepartmentId,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<User[]> {
   const assignments = await userOrgRepo.findByDepartment(departmentId, context);
-  
+
   return Promise.all(
-    assignments.map(assignment =>
-      userRepo.findById(assignment.userId, context)
-    )
+    assignments.map((assignment) =>
+      userRepo.findById(assignment.userId, context),
+    ),
   );
 }
 ```
@@ -391,18 +392,18 @@ CREATE TABLE user_organization_assignments (
   department_id UUID,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  
+
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
   FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
-  
+
   UNIQUE (user_id, organization_id)
 );
 
 -- Indexes
 CREATE INDEX idx_user_org_user_id ON user_organization_assignments(user_id);
 CREATE INDEX idx_user_org_org_id ON user_organization_assignments(organization_id);
-CREATE INDEX idx_user_org_dept_id ON user_organization_assignments(department_id) 
+CREATE INDEX idx_user_org_dept_id ON user_organization_assignments(department_id)
   WHERE department_id IS NOT NULL;
 ```
 

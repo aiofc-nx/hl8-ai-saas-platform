@@ -20,6 +20,7 @@ POST /api/v1/departments
 ```
 
 **Request**:
+
 ```json
 {
   "code": "DEV",
@@ -30,6 +31,7 @@ POST /api/v1/departments
 ```
 
 **Response** (201):
+
 ```json
 {
   "id": "dept-123",

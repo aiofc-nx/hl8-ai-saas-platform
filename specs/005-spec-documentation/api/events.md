@@ -17,7 +17,7 @@ The platform uses an event-driven architecture for loose coupling and scalabilit
 
 ```typescript
 interface TenantCreatedEvent {
-  type: 'tenant.created';
+  type: "tenant.created";
   tenantId: string;
   timestamp: Date;
   data: TenantData;
@@ -28,7 +28,7 @@ interface TenantCreatedEvent {
 
 ```typescript
 interface OrganizationCreatedEvent {
-  type: 'organization.created';
+  type: "organization.created";
   organizationId: string;
   tenantId: string;
   timestamp: Date;
@@ -40,9 +40,7 @@ interface OrganizationCreatedEvent {
 ## Publishing Events
 
 ```typescript
-await eventBus.publish(
-  new TenantCreatedEvent(tenantData)
-);
+await eventBus.publish(new TenantCreatedEvent(tenantData));
 ```
 
 ---
@@ -50,7 +48,7 @@ await eventBus.publish(
 ## Event Subscription
 
 ```typescript
-eventBus.subscribe('tenant.created', async (event) => {
+eventBus.subscribe("tenant.created", async (event) => {
   // Handle event
 });
 ```

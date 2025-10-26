@@ -32,6 +32,7 @@ SET app.current_tenant_id = 'tenant-123';
 ```
 
 **Benefits**:
+
 - Automatic data filtering
 - Protection against SQL injection
 - Performance optimized with indexes
@@ -46,9 +47,9 @@ SET app.current_tenant_id = 'tenant-123';
 const context = IsolationContext.createTenantLevel(
   platformId,
   tenantId,
-  organizationId,  // Optional
-  departmentId,     // Optional
-  userId            // Optional
+  organizationId, // Optional
+  departmentId, // Optional
+  userId, // Optional
 );
 
 // All operations use context
@@ -57,6 +58,7 @@ await userService.findAll(context);
 ```
 
 **Validation Rules**:
+
 - All operations validate tenant ID
 - Cross-tenant operations are rejected
 - Context is immutable once created
@@ -67,26 +69,25 @@ await userService.findAll(context);
 **Tenant Header Validation** ensures every API request is tied to a tenant.
 
 ```typescript
-@Controller('api/organizations')
+@Controller("api/organizations")
 export class OrganizationController {
-  
   @Post()
   async create(
-    @Headers('x-tenant-id') tenantId: string,
-    @Body() dto: CreateOrganizationDto
+    @Headers("x-tenant-id") tenantId: string,
+    @Body() dto: CreateOrganizationDto,
   ) {
     // Validate tenant header
     const tenant = await this.validateTenant(tenantId);
-    
+
     // Create context
     const context = IsolationContext.createTenantLevel(
       platformId,
       tenant.id,
       null, // No org yet
       null,
-      currentUserId
+      currentUserId,
     );
-    
+
     // Execute operation
     return this.organizationService.create(dto, context);
   }
@@ -104,16 +105,13 @@ export class OrganizationController {
 ```typescript
 async function validateTenantAccess(
   requestedTenantId: TenantId,
-  context: IsolationContext
+  context: IsolationContext,
 ): Promise<void> {
   if (!requestedTenantId.equals(context.tenantId)) {
-    throw new SecurityException(
-      'Cross-tenant access attempted',
-      {
-        requestedTenantId: requestedTenantId.value,
-        contextTenantId: context.tenantId.value
-      }
-    );
+    throw new SecurityException("Cross-tenant access attempted", {
+      requestedTenantId: requestedTenantId.value,
+      contextTenantId: context.tenantId.value,
+    });
   }
 }
 ```
@@ -124,10 +122,9 @@ async function validateTenantAccess(
 export class OrganizationRepository {
   async findAll(context: IsolationContext): Promise<Organization[]> {
     // Automatically filter by tenant_id
-    return this.db.query(
-      'SELECT * FROM organizations WHERE tenant_id = $1',
-      [context.tenantId.value]
-    );
+    return this.db.query("SELECT * FROM organizations WHERE tenant_id = $1", [
+      context.tenantId.value,
+    ]);
   }
 }
 ```
@@ -139,16 +136,16 @@ export class OrganizationService {
   async update(
     id: OrganizationId,
     data: UpdateOrganizationDto,
-    context: IsolationContext
+    context: IsolationContext,
   ): Promise<Organization> {
     // Get organization
     const org = await this.orgRepo.findById(id, context);
-    
+
     // Validate tenant match
     if (!org.tenantId.equals(context.tenantId)) {
-      throw new SecurityException('Tenant mismatch');
+      throw new SecurityException("Tenant mismatch");
     }
-    
+
     // Update
     return this.orgRepo.update(org, data, context);
   }
@@ -159,8 +156,8 @@ export class OrganizationService {
 
 ```typescript
 interface SecurityEvent {
-  type: 'cross_tenant_access' | 'unauthorized_access' | 'suspicious_activity';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "cross_tenant_access" | "unauthorized_access" | "suspicious_activity";
+  severity: "low" | "medium" | "high" | "critical";
   userId: UserId;
   tenantId: TenantId;
   action: string;
@@ -174,11 +171,11 @@ async function logSecurityEvent(event: SecurityEvent) {
     ...event,
     sessionId: currentSessionId,
     ipAddress: request.ip,
-    userAgent: request.headers['user-agent']
+    userAgent: request.headers["user-agent"],
   });
-  
+
   // Alert on critical events
-  if (event.severity === 'critical') {
+  if (event.severity === "critical") {
     await alertingService.sendAlert(event);
   }
 }
@@ -205,6 +202,7 @@ ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 ```
 
 **Security Features**:
+
 - Automatic tenant filtering
 - No application code changes needed
 - Database-level enforcement
@@ -224,6 +222,7 @@ CREATE TABLE tenant_def456.organizations (...);
 ```
 
 **Security Features**:
+
 - Schema-level isolation
 - No tenant_id column needed
 - Better resource isolation
@@ -244,6 +243,7 @@ CREATE TABLE organizations (...);
 ```
 
 **Security Features**:
+
 - Complete physical isolation
 - Maximum security
 - Independent backup/recovery
@@ -288,6 +288,7 @@ CREATE TABLE organizations (...);
 ### Audit Requirements
 
 All security events are logged:
+
 - Authentication attempts
 - Authorization failures
 - Data access (who, what, when)
@@ -320,7 +321,7 @@ await service.create(data);
 ```typescript
 // Always validate tenant ID in operations
 if (!entity.tenantId.equals(context.tenantId)) {
-  throw new SecurityException('Tenant mismatch');
+  throw new SecurityException("Tenant mismatch");
 }
 ```
 
@@ -328,7 +329,7 @@ if (!entity.tenantId.equals(context.tenantId)) {
 
 ```typescript
 // ✅ Good: Prepared statement (prevents SQL injection)
-const query = 'SELECT * FROM users WHERE tenant_id = $1';
+const query = "SELECT * FROM users WHERE tenant_id = $1";
 await db.query(query, [tenantId]);
 
 // ❌ Bad: String concatenation
@@ -341,10 +342,10 @@ await db.query(query);
 ```typescript
 // Log all security-related events
 await auditLog.log({
-  event: 'cross_tenant_access_attempt',
+  event: "cross_tenant_access_attempt",
   userId,
   tenantId,
-  details: { attemptedTenant: otherTenantId }
+  details: { attemptedTenant: otherTenantId },
 });
 ```
 

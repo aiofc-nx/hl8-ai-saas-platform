@@ -5,7 +5,7 @@
  * @since 1.0.0
  */
 
-import { BaseValueObject } from "./base-value-object.js";
+import { BaseValueObject } from "@hl8/domain-kernel";
 
 /**
  * 租户名称值对象

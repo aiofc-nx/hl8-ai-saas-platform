@@ -2,7 +2,7 @@
 
 **Date**: 2024-12-19  
 **Feature**: Multi-Database Support for PostgreSQL and MongoDB  
-**Status**: Draft  
+**Status**: Draft
 
 ## Summary
 
@@ -76,7 +76,7 @@ export class TenantRepositoryImpl extends AggregateRepositoryAdapter<TenantAggre
 #### Task 1.1: Create PostgreSQL Directory Structure
 
 - [ ] Create `database/postgresql/entities/` directory
-- [ ] Create `database/postgresql/mappers/` directory  
+- [ ] Create `database/postgresql/mappers/` directory
 - [ ] Create `database/postgresql/repositories/` directory
 
 #### Task 1.2: Move Existing PostgreSQL Code

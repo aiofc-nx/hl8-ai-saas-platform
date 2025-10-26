@@ -170,43 +170,43 @@ graph TD
     A[Request with Headers] --> B{Authentication}
     B -->|Valid| C{Extract Context}
     B -->|Invalid| Z[401 Unauthorized]
-    
+
     C --> D[Tenant ID]
     C --> E[Organization ID]
     C --> F[Department ID]
     C --> G[User ID]
-    
+
     D --> H{Platform Admin?}
     H -->|Yes| I[Platform Context]
     H -->|No| J{Tenant Valid?}
-    
+
     J -->|Yes| K[Set Tenant Context]
     J -->|No| AA[403 Forbidden]
-    
+
     K --> L{Organization Provided?}
     L -->|Yes| M[Set Org Context]
     L -->|No| N[Tenant Level Access]
-    
+
     M --> O{Department Provided?}
     O -->|Yes| P[Set Dept Context]
     O -->|No| Q[Organization Level Access]
-    
+
     P --> R{User Provided?}
     R -->|Yes| S[Set User Context]
     R -->|No| T[Department Level Access]
-    
+
     S --> U[User Level Access]
-    
+
     I --> V[Query with RLS]
     N --> V
     Q --> V
     T --> V
     U --> V
-    
+
     V --> W{Check Permissions}
     W -->|Allowed| X[Execute Query]
     W -->|Denied| Y[403 Forbidden]
-    
+
     X --> AB[Return Data]
 ```
 
@@ -269,13 +269,13 @@ graph TD
 
 ## Isolation Boundary Summary
 
-| Level | Scope | Isolation Mechanism | Access Control |
-|-------|-------|---------------------|----------------|
-| **Platform** | Platform-wide data | Separate schema/database | Platform admins only |
-| **Tenant** | Tenant-specific data | RLS with `tenant_id` | Tenant admins + users |
-| **Organization** | Organization data | `organization_id` filtering | Org admins + members |
-| **Department** | Department data | `department_id` filtering + hierarchy | Dept admins + members |
-| **User** | User-private data | `user_id` filtering + permissions | User only + admins |
+| Level            | Scope                | Isolation Mechanism                   | Access Control        |
+| ---------------- | -------------------- | ------------------------------------- | --------------------- |
+| **Platform**     | Platform-wide data   | Separate schema/database              | Platform admins only  |
+| **Tenant**       | Tenant-specific data | RLS with `tenant_id`                  | Tenant admins + users |
+| **Organization** | Organization data    | `organization_id` filtering           | Org admins + members  |
+| **Department**   | Department data      | `department_id` filtering + hierarchy | Dept admins + members |
+| **User**         | User-private data    | `user_id` filtering + permissions     | User only + admins    |
 
 ---
 

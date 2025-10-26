@@ -25,7 +25,7 @@ This plan aims to align the `libs/saas-core` module with the architecture design
 **Project Type**: Monorepo business module (lib)  
 **Performance Goals**: <200ms p95 API response time  
 **Constraints**: Must support 5-tier data isolation (Platform/Tenant/Organization/Department/User)  
-**Scale/Scope**: Support for 10k+ tenants with multi-tenant data isolation  
+**Scale/Scope**: Support for 10k+ tenants with multi-tenant data isolation
 
 ## Constitution Check
 

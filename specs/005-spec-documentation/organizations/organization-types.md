@@ -13,15 +13,15 @@ Organizations are horizontal management units within a tenant that provide flexi
 
 ## Organization Type Comparison
 
-| Type | Purpose | Sharing | Hierarchy | Use Case |
-|------|---------|---------|-----------|----------|
-| **COMPANY** | Main business entity | Private | Single level | Primary company structure |
-| **DIVISION** | Business unit | Private | Multi-level | Large organizations, subsidiaries |
-| **PROJECT_TEAM** | Project collaboration | Shared | Single level | Cross-functional teams |
-| **DEPARTMENT** | Functional unit | Private | Single level | Traditional departments |
-| **COMMITTEE** | Governance body | Shared | Single level | Board, committees |
-| **WORKGROUP** | Ad-hoc collaboration | Shared | Single level | Temporary groups |
-| **PARTNERSHIP** | External partner | Shared | Single level | External collaborations |
+| Type             | Purpose               | Sharing | Hierarchy    | Use Case                          |
+| ---------------- | --------------------- | ------- | ------------ | --------------------------------- |
+| **COMPANY**      | Main business entity  | Private | Single level | Primary company structure         |
+| **DIVISION**     | Business unit         | Private | Multi-level  | Large organizations, subsidiaries |
+| **PROJECT_TEAM** | Project collaboration | Shared  | Single level | Cross-functional teams            |
+| **DEPARTMENT**   | Functional unit       | Private | Single level | Traditional departments           |
+| **COMMITTEE**    | Governance body       | Shared  | Single level | Board, committees                 |
+| **WORKGROUP**    | Ad-hoc collaboration  | Shared  | Single level | Temporary groups                  |
+| **PARTNERSHIP**  | External partner      | Shared  | Single level | External collaborations           |
 
 ---
 

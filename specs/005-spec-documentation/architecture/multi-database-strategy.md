@@ -104,14 +104,10 @@ CREATE TABLE tenant_def456.organizations (
 ```typescript
 // Switch tenant context before queries
 export class TenantDatabaseAdapter {
-  async queryWithTenant(
-    tenantId: TenantId,
-    query: string,
-    params: any[]
-  ) {
+  async queryWithTenant(tenantId: TenantId, query: string, params: any[]) {
     // Switch to tenant schema
     await this.db.query(`SET search_path TO tenant_${tenantId.value}, public`);
-    
+
     try {
       return await this.db.query(query, params);
     } finally {
@@ -150,7 +146,7 @@ CREATE TABLE tenant_abc123.organizations (
 
 -- Step 3: Migrate data
 INSERT INTO tenant_abc123.organizations
-SELECT * FROM public.organizations 
+SELECT * FROM public.organizations
 WHERE tenant_id = 'abc123';
 
 -- Step 4: Update application to use schema
@@ -198,7 +194,7 @@ CREATE TABLE organizations (
 // Connection pool per tenant database
 export class TenantConnectionManager {
   private connections: Map<TenantId, Database> = new Map();
-  
+
   async getTenantDb(tenantId: TenantId): Promise<Database> {
     if (!this.connections.has(tenantId)) {
       // Connect to tenant-specific database
@@ -207,12 +203,8 @@ export class TenantConnectionManager {
     }
     return this.connections.get(tenantId)!;
   }
-  
-  async query<T>(
-    tenantId: TenantId,
-    query: string,
-    params: any[]
-  ): Promise<T> {
+
+  async query<T>(tenantId: TenantId, query: string, params: any[]): Promise<T> {
     const db = await this.getTenantDb(tenantId);
     return db.query(query, params);
   }
@@ -255,7 +247,7 @@ pg_dump -a source_db -n tenant_abc123 > tenant_abc123.data.sql
 psql tenant_abc123 < tenant_abc123.data.sql
 
 # Step 6: Update tenant registry
-UPDATE tenants 
+UPDATE tenants
 SET database_name = 'tenant_abc123'
 WHERE id = 'abc123';
 ```
@@ -267,6 +259,7 @@ WHERE id = 'abc123';
 ### RLS Strategy (Default)
 
 **Use when:**
+
 - Small-to-medium tenants (< 10,000 users)
 - Low-to-medium data volume
 - Standard configuration acceptable
@@ -276,6 +269,7 @@ WHERE id = 'abc123';
 ### Schema per Tenant
 
 **Use when:**
+
 - Medium-to-large tenants (10,000 - 100,000 users)
 - Moderate data volume
 - Need per-tenant customization
@@ -285,6 +279,7 @@ WHERE id = 'abc123';
 ### Database per Tenant
 
 **Use when:**
+
 - Large enterprise tenants (> 100,000 users)
 - High data volume
 - Strict security/compliance requirements
@@ -301,7 +296,7 @@ WHERE id = 'abc123';
 // Tenant registry tracks database strategy
 interface TenantDatabaseConfig {
   tenantId: TenantId;
-  strategy: 'RLS' | 'SCHEMA' | 'DATABASE';
+  strategy: "RLS" | "SCHEMA" | "DATABASE";
   databaseName?: string;
   schemaName?: string;
   connectionString?: string;
@@ -315,28 +310,19 @@ interface TenantDatabaseConfig {
 export class TenantRouter {
   async route<T>(
     tenantId: TenantId,
-    operation: (db: Database) => Promise<T>
+    operation: (db: Database) => Promise<T>,
   ): Promise<T> {
     const config = await this.getTenantConfig(tenantId);
-    
+
     switch (config.strategy) {
-      case 'RLS':
-        return this.rlsDatabase.withContext(
-          tenantId,
-          operation
-        );
-        
-      case 'SCHEMA':
-        return this.schemaDatabase.withSchema(
-          config.schemaName!,
-          operation
-        );
-        
-      case 'DATABASE':
-        return this.tenantDatabase.withDb(
-          config.databaseName!,
-          operation
-        );
+      case "RLS":
+        return this.rlsDatabase.withContext(tenantId, operation);
+
+      case "SCHEMA":
+        return this.schemaDatabase.withSchema(config.schemaName!, operation);
+
+      case "DATABASE":
+        return this.tenantDatabase.withDb(config.databaseName!, operation);
     }
   }
 }

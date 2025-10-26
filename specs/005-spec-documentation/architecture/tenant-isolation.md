@@ -57,8 +57,8 @@ export class TenantRepository {
     // Always filter by tenant_id
     return this.db
       .select()
-      .from('organizations')
-      .where('tenant_id', '=', tenantId.value);
+      .from("organizations")
+      .where("tenant_id", "=", tenantId.value);
   }
 }
 ```
@@ -101,17 +101,17 @@ CREATE TABLE tenant_123.organizations (
 ### Domain Entity Pattern
 
 ```typescript
-import { BaseEntity, TenantId } from '@hl8/domain-kernel';
+import { BaseEntity, TenantId } from "@hl8/domain-kernel";
 
 // Every entity includes tenant_id
 export class Organization extends BaseEntity<OrganizationId> {
   constructor(
     id: OrganizationId,
-    tenantId: TenantId,  // Required for all tenant entities
+    tenantId: TenantId, // Required for all tenant entities
     name: string,
     // ...
   ) {
-    super(id, tenantId);  // Pass to BaseEntity
+    super(id, tenantId); // Pass to BaseEntity
   }
 }
 ```
@@ -124,9 +124,9 @@ export class OrganizationRepository {
   async save(org: Organization, context: IsolationContext): Promise<void> {
     // Ensure tenant_id matches context
     if (!org.tenantId.equals(context.tenantId)) {
-      throw new Error('Tenant ID mismatch');
+      throw new Error("Tenant ID mismatch");
     }
-    
+
     // Save with tenant_id
     await this.db.organizations.insert({
       id: org.id,
@@ -145,10 +145,7 @@ export class OrganizationRepository {
 
 ```typescript
 // IsolationContext carries tenant information
-const context = IsolationContext.createTenantLevel(
-  platformId,
-  tenantId
-);
+const context = IsolationContext.createTenantLevel(platformId, tenantId);
 
 // All operations use context
 await organizationService.create(data, context);
@@ -160,13 +157,13 @@ await organizationService.create(data, context);
 // Automatic tenant filtering
 export class OrganizationRepository {
   private applyTenantFilter(query: QueryBuilder, tenantId: TenantId) {
-    return query.where('tenant_id', '=', tenantId.value);
+    return query.where("tenant_id", "=", tenantId.value);
   }
-  
+
   async findByName(name: string, tenantId: TenantId) {
-    let query = this.db.select().from('organizations');
+    let query = this.db.select().from("organizations");
     query = this.applyTenantFilter(query, tenantId);
-    query = query.where('name', '=', name);
+    query = query.where("name", "=", name);
     return query.execute();
   }
 }
@@ -198,7 +195,7 @@ export class OrganizationRepository {
 
 ```sql
 -- Composite index for tenant-specific queries
-CREATE INDEX idx_organizations_tenant_name 
+CREATE INDEX idx_organizations_tenant_name
   ON organizations(tenant_id, name);
 
 -- Partition by tenant_id for large datasets
@@ -212,7 +209,7 @@ CREATE TABLE organizations (
 ```typescript
 // Efficient tenant-specific queries
 // Good: Tenant filter first
-SELECT * FROM organizations 
+SELECT * FROM organizations
 WHERE tenant_id = '123' AND name = 'Acme';
 
 // Bad: No tenant filter
@@ -230,12 +227,12 @@ SELECT * FROM organizations WHERE name = 'Acme';
 async function migrateTenant(
   tenantId: TenantId,
   sourceDb: Database,
-  targetDb: Database
+  targetDb: Database,
 ) {
   const orgs = await sourceDb.organizations
-    .where('tenant_id', '=', tenantId.value)
+    .where("tenant_id", "=", tenantId.value)
     .find();
-  
+
   await targetDb.organizations.insert(orgs);
 }
 ```

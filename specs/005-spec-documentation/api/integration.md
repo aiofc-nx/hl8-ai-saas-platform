@@ -16,6 +16,7 @@ The platform supports various integration patterns for third-party systems.
 ### 1. OAuth 2.0
 
 **Grant Types**:
+
 - Authorization Code
 - Client Credentials
 

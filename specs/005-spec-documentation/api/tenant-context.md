@@ -49,7 +49,7 @@ X-Tenant-ID must match token tenantId
 
 ```typescript
 if (headerTenantId !== tokenTenantId) {
-  throw new ForbiddenException('Tenant mismatch');
+  throw new ForbiddenException("Tenant mismatch");
 }
 ```
 
@@ -58,7 +58,7 @@ if (headerTenantId !== tokenTenantId) {
 All queries automatically filtered by tenantId:
 
 ```sql
-SELECT * FROM organizations 
+SELECT * FROM organizations
 WHERE tenant_id = $1
 ```
 
@@ -97,13 +97,13 @@ Context flows through:
 if (requestedTenantId !== contextTenantId) {
   // Log security event
   await auditLog.log({
-    event: 'cross_tenant_access_attempt',
+    event: "cross_tenant_access_attempt",
     userId,
     requestedTenantId,
-    contextTenantId
+    contextTenantId,
   });
-  
-  throw new SecurityException('Cross-tenant access prevented');
+
+  throw new SecurityException("Cross-tenant access prevented");
 }
 ```
 

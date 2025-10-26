@@ -47,14 +47,14 @@ import { BaseEntity, AggregateRoot, BaseValueObject } from "@hl8/domain-kernel";
  *
  * @description 提供实体的基础功能，包括ID、审计信息、生命周期管理等
  * 所有领域实体都应该继承此类，确保统一的实体行为
- * 
+ *
  * ⚠️ 注意：此处的 BaseEntity 是从 @hl8/domain-kernel 导入的，
  * 业务模块中不应该重新定义，而应该直接使用。
  *
  * @example
  * ```typescript
  * import { BaseEntity, UserId } from "@hl8/domain-kernel";
- * 
+ *
  * export class User extends BaseEntity {
  *   constructor(
  *     id: UserId,
@@ -115,14 +115,14 @@ import { AggregateRoot } from "@hl8/domain-kernel";
  *
  * @description 聚合根是聚合的入口点，负责管理聚合边界和一致性规则
  * 支持事件溯源和指令模式，确保业务规则的正确执行
- * 
+ *
  * ⚠️ 注意：此处的 AggregateRoot 是从 @hl8/domain-kernel 导入的，
  * 业务模块中不应该重新定义，而应该直接使用。
  *
  * @example
  * ```typescript
  * import { AggregateRoot, OrderId, CustomerId } from "@hl8/domain-kernel";
- * 
+ *
  * export class Order extends AggregateRoot {
  *   constructor(
  *     id: OrderId,

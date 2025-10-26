@@ -21,6 +21,7 @@ Authorization: Bearer <access_token>
 ```
 
 Additional required headers:
+
 ```http
 X-Tenant-ID: <tenant_id>
 Content-Type: application/json
@@ -39,6 +40,7 @@ POST /api/v1/tenants
 ```
 
 **Request Body**:
+
 ```json
 {
   "code": "acme-corp",
@@ -49,6 +51,7 @@ POST /api/v1/tenants
 ```
 
 **Response** (201 Created):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -65,12 +68,14 @@ POST /api/v1/tenants
 ```
 
 **Validation Rules**:
+
 - `code`: Required, 3-20 characters, alphanumeric with dashes/underscores
 - `name`: Required, 2-100 characters
 - `type`: Required, enum (FREE|BASIC|PROFESSIONAL|ENTERPRISE|CUSTOM)
 - `description`: Optional, max 1000 characters
 
 **Error Responses**:
+
 - `400 Bad Request`: Validation failed
 - `409 Conflict`: Tenant code already exists
 - `422 Unprocessable Entity`: Business rule violation
@@ -86,6 +91,7 @@ GET /api/v1/tenants?page=1&limit=10&sortBy=createdAt&sortOrder=desc
 ```
 
 **Query Parameters**:
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 10, max: 100)
 - `sortBy` (optional): Sort field (default: createdAt)
@@ -95,6 +101,7 @@ GET /api/v1/tenants?page=1&limit=10&sortBy=createdAt&sortOrder=desc
 - `search` (optional): Search by name or code
 
 **Response** (200 OK):
+
 ```json
 {
   "tenants": [
@@ -127,9 +134,11 @@ GET /api/v1/tenants/:id
 ```
 
 **Path Parameters**:
+
 - `id`: Tenant UUID
 
 **Response** (200 OK):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -146,6 +155,7 @@ GET /api/v1/tenants/:id
 ```
 
 **Error Responses**:
+
 - `404 Not Found`: Tenant not found
 
 ---
@@ -159,9 +169,11 @@ PUT /api/v1/tenants/:id
 ```
 
 **Path Parameters**:
+
 - `id`: Tenant UUID
 
 **Request Body**:
+
 ```json
 {
   "name": "Acme Corp Updated",
@@ -171,6 +183,7 @@ PUT /api/v1/tenants/:id
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -187,11 +200,13 @@ PUT /api/v1/tenants/:id
 ```
 
 **Validation Rules**:
+
 - Cannot update `code` or `type` (immutable fields)
 - Can update `name`, `description`, `status`
 - Status transitions must be valid
 
 **Error Responses**:
+
 - `404 Not Found`: Tenant not found
 - `400 Bad Request`: Validation failed
 - `409 Conflict`: Status transition invalid
@@ -207,16 +222,19 @@ DELETE /api/v1/tenants/:id
 ```
 
 **Path Parameters**:
+
 - `id`: Tenant UUID
 
 **Response** (204 No Content)
 
 **Business Rules**:
+
 - Only ACTIVE, SUSPENDED, or EXPIRED tenants can be deleted
 - Soft delete with 30-day retention period
 - Automatic backup before deletion
 
 **Error Responses**:
+
 - `404 Not Found`: Tenant not found
 - `409 Conflict`: Cannot delete tenant (has dependencies)
 
@@ -231,9 +249,11 @@ POST /api/v1/tenants/:id/suspend
 ```
 
 **Path Parameters**:
+
 - `id`: Tenant UUID
 
 **Request Body**:
+
 ```json
 {
   "reason": "Payment overdue"
@@ -241,6 +261,7 @@ POST /api/v1/tenants/:id/suspend
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -262,9 +283,11 @@ POST /api/v1/tenants/:id/activate
 ```
 
 **Path Parameters**:
+
 - `id`: Tenant UUID
 
 **Response** (200 OK):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -285,9 +308,11 @@ POST /api/v1/tenants/:id/upgrade
 ```
 
 **Path Parameters**:
+
 - `id`: Tenant UUID
 
 **Request Body**:
+
 ```json
 {
   "newType": "PROFESSIONAL",
@@ -296,6 +321,7 @@ POST /api/v1/tenants/:id/upgrade
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -307,6 +333,7 @@ POST /api/v1/tenants/:id/upgrade
 ```
 
 **Business Rules**:
+
 - Check resource usage against new limits
 - May require data cleanup before downgrade
 - Effective date allows delayed activation

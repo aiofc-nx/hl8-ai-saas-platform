@@ -23,7 +23,7 @@ export abstract class EntityId<TType extends string = string> {
    * @param typeName - 类型名称（用于错误消息）
    */
   protected constructor(
-    private readonly value: string,
+    public readonly value: string,
     private readonly typeName: string,
   ) {
     this.validate();

@@ -23,12 +23,12 @@ Multi-tenant tests verify that tenant data is properly isolated.
 ## Data Isolation Verification
 
 ```typescript
-it('should isolate tenant data', async () => {
-  const tenant1 = await createTenant({ code: 'tenant1' });
-  const tenant2 = await createTenant({ code: 'tenant2' });
-  
-  await createOrganization(tenant1.id, { code: 'ORG1' });
-  
+it("should isolate tenant data", async () => {
+  const tenant1 = await createTenant({ code: "tenant1" });
+  const tenant2 = await createTenant({ code: "tenant2" });
+
+  await createOrganization(tenant1.id, { code: "ORG1" });
+
   const orgs = await getOrganizations(tenant2.id);
   expect(orgs).toHaveLength(0);
 });

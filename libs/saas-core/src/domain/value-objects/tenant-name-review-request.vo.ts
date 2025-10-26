@@ -7,7 +7,7 @@
 
 import { BaseValueObject } from "./base-value-object.js";
 import { TenantId } from "@hl8/domain-kernel";
-import { UserId } from "./user-id.vo.js";
+import { UserId } from "@hl8/domain-kernel";
 
 /**
  * 租户名称审核请求优先级枚举
