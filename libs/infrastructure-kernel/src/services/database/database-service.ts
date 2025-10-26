@@ -6,6 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { InfrastructureExceptionConverter } from "../../exceptions/infrastructure-exception.mapping.js";
 import type {
   IDatabaseConnectionManager,
@@ -22,6 +23,7 @@ import type { IsolationContext } from "../../types/isolation.types.js";
 export class DatabaseService {
   constructor(
     private readonly connectionManager: IDatabaseConnectionManager,
+    private readonly logger: FastifyLoggerService,
     private readonly isolationContext?: IsolationContext,
   ) {}
 
@@ -166,7 +168,7 @@ export class DatabaseService {
     try {
       // 暂时注释掉，因为接口中没有这个方法
       // await this.connectionManager.reconnect(name);
-      console.warn("reconnect 方法暂时不可用");
+      this.logger.log("reconnect 方法暂时不可用");
     } catch (_error) {
       throw new Error(
         `重新连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
@@ -181,7 +183,7 @@ export class DatabaseService {
     try {
       // 暂时注释掉，因为接口中没有这个方法
       // await this.connectionManager.reconnectAll();
-      console.warn("reconnectAll 方法暂时不可用");
+      this.logger.log("reconnectAll 方法暂时不可用");
     } catch (_error) {
       throw new Error(
         `重新连接所有连接失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
@@ -305,7 +307,7 @@ export class DatabaseService {
     try {
       // 暂时注释掉，因为接口中没有这个方法
       // return this.connectionManager.getManagerStats();
-      console.warn("getManagerStats 方法暂时不可用");
+      this.logger.log("getManagerStats 方法暂时不可用");
       return {};
     } catch (_error) {
       throw new Error(
@@ -321,7 +323,7 @@ export class DatabaseService {
     try {
       // 暂时注释掉，因为接口中没有这个方法
       // return this.connectionManager.hasConnection(name);
-      console.warn("hasConnection 方法暂时不可用");
+      this.logger.log("hasConnection 方法暂时不可用");
       return false;
     } catch (_error) {
       return false;
@@ -335,7 +337,7 @@ export class DatabaseService {
     try {
       // 暂时注释掉，因为接口中没有这个方法
       // return this.connectionManager.getConnectionCount();
-      console.warn("getConnectionCount 方法暂时不可用");
+      this.logger.log("getConnectionCount 方法暂时不可用");
       return 0;
     } catch (_error) {
       return 0;

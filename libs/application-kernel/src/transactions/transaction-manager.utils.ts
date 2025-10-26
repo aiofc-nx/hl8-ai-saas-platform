@@ -7,6 +7,7 @@
  * @since 1.0.0
  */
 import { ITransactionManager } from "./transaction-manager.interface.js";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 
 /**
  * 事务选项
@@ -83,6 +84,14 @@ export interface TransactionResult<T> {
  * 提供事务管理的实用工具函数
  */
 export class TransactionManagerUtils {
+  private static logger?: FastifyLoggerService;
+
+  /**
+   * 设置日志服务
+   */
+  static setLogger(logger: FastifyLoggerService): void {
+    this.logger = logger;
+  }
   /**
    * 在事务中执行操作
    *
@@ -139,7 +148,14 @@ export class TransactionManagerUtils {
           // 回滚事务
           await transactionManager.rollback();
         } catch (rollbackError) {
-          console.error("事务回滚失败:", rollbackError);
+          if (this.logger) {
+            this.logger.log("事务回滚失败", {
+              error:
+                rollbackError instanceof Error
+                  ? rollbackError.message
+                  : String(rollbackError),
+            });
+          }
         }
 
         // 如果不是最后一次尝试，等待后重试
@@ -234,7 +250,14 @@ export class TransactionManagerUtils {
             await transactionManager.rollback();
           }
         } catch (rollbackError) {
-          console.error("嵌套事务回滚失败:", rollbackError);
+          if (this.logger) {
+            this.logger.log("嵌套事务回滚失败", {
+              error:
+                rollbackError instanceof Error
+                  ? rollbackError.message
+                  : String(rollbackError),
+            });
+          }
         }
 
         // 如果不是最后一次尝试，等待后重试
@@ -306,7 +329,14 @@ export class TransactionManagerUtils {
           // 回滚事务
           await transactionManager.rollback();
         } catch (rollbackError) {
-          console.error("批量事务回滚失败:", rollbackError);
+          if (this.logger) {
+            this.logger.log("批量事务回滚失败", {
+              error:
+                rollbackError instanceof Error
+                  ? rollbackError.message
+                  : String(rollbackError),
+            });
+          }
         }
 
         // 如果不是最后一次尝试，等待后重试

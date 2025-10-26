@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "@hl8/domain-kernel": "workspace:*",
-    "@hl8/exceptions": "workspace:*"
+    "@hl8/exceptions": "workspace:*",
+    "@hl8/nestjs-fastify": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

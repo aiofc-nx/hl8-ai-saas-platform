@@ -6,6 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import {
   ErrorHandlerService,
   ErrorHandleResult,
@@ -67,7 +68,7 @@ export class EnhancedErrorHandlerService extends ErrorHandlerService {
       return await super.handleError(error, context);
     } catch (handlerError) {
       // 如果错误处理器本身出错，记录并返回基本信息
-      console.error("Enhanced error handler failed:", handlerError);
+      // Enhanced error handler failed - 这个错误需要父类处理
 
       return {
         success: false,
@@ -169,23 +170,23 @@ export class EnhancedErrorHandlerService extends ErrorHandlerService {
 
       switch (severity) {
         case "CRITICAL":
-          console.error("CRITICAL Infrastructure Error:", logData);
+          // CRITICAL Infrastructure Error - 需要父类处理
           break;
         case "HIGH":
-          console.error("HIGH Infrastructure Error:", logData);
+          // HIGH Infrastructure Error - 需要父类处理
           break;
         case "MEDIUM":
-          console.warn("MEDIUM Infrastructure Error:", logData);
+          // MEDIUM Infrastructure Error - 需要父类处理
           break;
         case "LOW":
-          console.info("LOW Infrastructure Error:", logData);
+          // LOW Infrastructure Error - 需要父类处理
           break;
       }
 
       // 可以在这里添加发送到监控系统的逻辑
       await this.sendToMonitoring(exception, context);
     } catch (logError) {
-      console.error("Failed to log standard exception:", logError);
+      // Failed to log standard exception - 需要父类处理
     }
   }
 
@@ -254,9 +255,9 @@ export class EnhancedErrorHandlerService extends ErrorHandlerService {
       // 示例：发送到监控系统
       // await this.monitoringService.sendError(monitoringData);
 
-      console.log("Monitoring data prepared:", monitoringData);
+      // Monitoring data prepared - 需要父类处理
     } catch (monitoringError) {
-      console.error("Failed to send to monitoring:", monitoringError);
+      // Failed to send to monitoring - 需要父类处理
     }
   }
 

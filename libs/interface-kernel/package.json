@@ -54,6 +54,7 @@
     "@hl8/domain-kernel": "workspace:*",
     "@hl8/exceptions": "workspace:*",
     "@hl8/infrastructure-kernel": "workspace:*",
+    "@hl8/nestjs-fastify": "workspace:*",
     "@nestjs/apollo": "^12.0.0",
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",

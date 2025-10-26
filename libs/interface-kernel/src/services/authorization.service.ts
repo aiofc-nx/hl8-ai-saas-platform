@@ -3,7 +3,8 @@
  * @description 提供用户授权功能，包括权限检查、角色验证、资源访问控制等
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import {
   GeneralBadRequestException,
   GeneralInternalServerException,
@@ -21,11 +22,10 @@ import type {
  */
 @Injectable()
 export class AuthorizationService {
-  private readonly logger = new Logger(AuthorizationService.name);
   private readonly authorizationRules: Map<string, AuthorizationRule[]> =
     new Map();
 
-  constructor() {
+  constructor(private readonly logger: FastifyLoggerService) {
     this.logger.log("Authorization Service initialized");
     this.initializeDefaultRules();
   }

@@ -15,8 +15,8 @@ import {
   Param,
   Body,
   HttpStatus,
-  Logger,
 } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import type { FastifyReply } from "fastify";
 import { ApiGatewayService } from "../services/api-gateway.service.js";
 import { AuthenticationService } from "../services/authentication.service.js";
@@ -56,12 +56,11 @@ interface RestValidationRule {
  */
 @Controller("api/v1/rest")
 export class RestController {
-  private readonly logger = new Logger(RestController.name);
-
   constructor(
     private readonly apiGatewayService: ApiGatewayService,
     private readonly authenticationService: AuthenticationService,
     private readonly authorizationService: AuthorizationService,
+    private readonly logger: FastifyLoggerService,
     private readonly validationService: ValidationService,
     private readonly rateLimitService: RateLimitService,
     private readonly monitoringService: MonitoringService,

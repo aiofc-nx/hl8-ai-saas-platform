@@ -3,7 +3,8 @@
  * @description 提供用户认证功能，包括JWT令牌验证、用户身份验证等
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { JwtService } from "@nestjs/jwt";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
@@ -17,9 +18,10 @@ import { IsolationLevel } from "../types/index.js";
  */
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
-  private readonly logger = new Logger(JwtAuthStrategy.name);
-
-  constructor(private readonly jwtService: JwtService) {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly logger: FastifyLoggerService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -36,7 +38,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
    * @returns 用户上下文
    */
   async validate(payload: Record<string, unknown>): Promise<UserContext> {
-    this.logger.debug(`Validating JWT token for user: ${payload.sub}`);
+    this.logger.log("Validating JWT token", { userId: payload.sub });
 
     try {
       // 验证令牌基本结构
@@ -138,9 +140,10 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
  */
 @Injectable()
 export class AuthenticationService {
-  private readonly logger = new Logger(AuthenticationService.name);
-
-  constructor(private readonly jwtService: JwtService) {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly logger: FastifyLoggerService,
+  ) {
     this.logger.log("Authentication Service initialized");
   }
 

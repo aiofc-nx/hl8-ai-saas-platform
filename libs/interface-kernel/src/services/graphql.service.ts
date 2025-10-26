@@ -3,7 +3,8 @@
  * @description 提供 GraphQL 查询和变更处理功能
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { ApolloServer } from "apollo-server-fastify";
 import { buildSchema } from "graphql";
 import { GeneralBadRequestException } from "@hl8/exceptions";
@@ -50,10 +51,10 @@ interface GraphQLResolverParent {
  */
 @Injectable()
 export class GraphQLService {
-  private readonly logger = new Logger(GraphQLService.name);
   private apolloServer: ApolloServer;
 
   constructor(
+    private readonly logger: FastifyLoggerService,
     private readonly authenticationService: AuthenticationService,
     private readonly authorizationService: AuthorizationService,
     private readonly validationService: ValidationService,

@@ -1,0 +1,1641 @@
+openapi: 3.0.3
+info:
+  title: SAAS Core Module API
+  description: |
+    SAAS Core模块API - 多租户SAAS平台核心业务模块
+
+    本API提供多租户SAAS平台的核心业务功能，包括：
+    - 租户管理（创建、更新、删除、状态管理）
+    - 组织管理（创建、更新、删除、层级管理）
+    - 部门管理（创建、更新、删除、层级管理）
+    - 用户管理（创建、更新、删除、权限管理）
+    - 数据隔离（多层级数据隔离和访问控制）
+
+    支持5层数据隔离架构：平台 → 租户 → 组织 → 部门 → 用户
+  version: 1.0.0
+  contact:
+    name: HL8 Team
+    email: support@hl8.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.hl8.com/v1
+    description: 生产环境
+  - url: https://staging-api.hl8.com/v1
+    description: 测试环境
+  - url: http://localhost:3000/v1
+    description: 开发环境
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  # 租户管理API
+  /tenants:
+    get:
+      summary: 获取租户列表
+      description: 获取当前用户有权限访问的租户列表
+      tags:
+        - 租户管理
+      parameters:
+        - name: page
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: 每页数量
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: type
+          in: query
+          description: 租户类型过滤
+          required: false
+          schema:
+            $ref: "#/components/schemas/TenantType"
+        - name: status
+          in: query
+          description: 租户状态过滤
+          required: false
+          schema:
+            $ref: "#/components/schemas/TenantStatus"
+      responses:
+        "200":
+          description: 成功获取租户列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: 创建租户
+      description: 创建新的租户
+      tags:
+        - 租户管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTenantRequest"
+      responses:
+        "201":
+          description: 成功创建租户
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: 租户名称已存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /tenants/{tenantId}:
+    get:
+      summary: 获取租户详情
+      description: 根据租户ID获取租户详细信息
+      tags:
+        - 租户管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功获取租户详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: 更新租户
+      description: 更新租户信息
+      tags:
+        - 租户管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTenantRequest"
+      responses:
+        "200":
+          description: 成功更新租户
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: 删除租户
+      description: 删除租户（软删除）
+      tags:
+        - 租户管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: 成功删除租户
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # 组织管理API
+  /tenants/{tenantId}/organizations:
+    get:
+      summary: 获取组织列表
+      description: 获取指定租户下的组织列表
+      tags:
+        - 组织管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: 每页数量
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: type
+          in: query
+          description: 组织类型过滤
+          required: false
+          schema:
+            $ref: "#/components/schemas/OrganizationType"
+      responses:
+        "200":
+          description: 成功获取组织列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: 创建组织
+      description: 在指定租户下创建新组织
+      tags:
+        - 组织管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationRequest"
+      responses:
+        "201":
+          description: 成功创建组织
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: 组织名称已存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /tenants/{tenantId}/organizations/{organizationId}:
+    get:
+      summary: 获取组织详情
+      description: 根据组织ID获取组织详细信息
+      tags:
+        - 组织管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功获取组织详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: 更新组织
+      description: 更新组织信息
+      tags:
+        - 组织管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrganizationRequest"
+      responses:
+        "200":
+          description: 成功更新组织
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: 删除组织
+      description: 删除组织（软删除）
+      tags:
+        - 组织管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: 成功删除组织
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # 部门管理API
+  /tenants/{tenantId}/organizations/{organizationId}/departments:
+    get:
+      summary: 获取部门列表
+      description: 获取指定组织下的部门列表
+      tags:
+        - 部门管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: 每页数量
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: parentId
+          in: query
+          description: 父部门ID过滤
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功获取部门列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: 创建部门
+      description: 在指定组织下创建新部门
+      tags:
+        - 部门管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDepartmentRequest"
+      responses:
+        "201":
+          description: 成功创建部门
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: 部门名称已存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /tenants/{tenantId}/organizations/{organizationId}/departments/{departmentId}:
+    get:
+      summary: 获取部门详情
+      description: 根据部门ID获取部门详细信息
+      tags:
+        - 部门管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+        - name: departmentId
+          in: path
+          required: true
+          description: 部门ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功获取部门详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: 更新部门
+      description: 更新部门信息
+      tags:
+        - 部门管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+        - name: departmentId
+          in: path
+          required: true
+          description: 部门ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDepartmentRequest"
+      responses:
+        "200":
+          description: 成功更新部门
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: 删除部门
+      description: 删除部门（软删除）
+      tags:
+        - 部门管理
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: 租户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: path
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+        - name: departmentId
+          in: path
+          required: true
+          description: 部门ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: 成功删除部门
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # 用户管理API
+  /users:
+    get:
+      summary: 获取用户列表
+      description: 获取当前用户有权限访问的用户列表
+      tags:
+        - 用户管理
+      parameters:
+        - name: page
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: 每页数量
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: organizationId
+          in: query
+          description: 组织ID过滤
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: departmentId
+          in: query
+          description: 部门ID过滤
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: role
+          in: query
+          description: 用户角色过滤
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserRole"
+        - name: status
+          in: query
+          description: 用户状态过滤
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserStatus"
+      responses:
+        "200":
+          description: 成功获取用户列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: 创建用户
+      description: 创建新用户
+      tags:
+        - 用户管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: 成功创建用户
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: 用户邮箱或用户名已存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/{userId}:
+    get:
+      summary: 获取用户详情
+      description: 根据用户ID获取用户详细信息
+      tags:
+        - 用户管理
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: 用户ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功获取用户详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: 更新用户
+      description: 更新用户信息
+      tags:
+        - 用户管理
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: 用户ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: 成功更新用户
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: 删除用户
+      description: 删除用户（软删除）
+      tags:
+        - 用户管理
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: 用户ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: 成功删除用户
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # 用户组织关联API
+  /users/{userId}/organizations:
+    post:
+      summary: 用户加入组织
+      description: 将用户添加到指定组织
+      tags:
+        - 用户管理
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: 用户ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinOrganizationRequest"
+      responses:
+        "201":
+          description: 成功加入组织
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: 用户已在组织中
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: 用户离开组织
+      description: 将用户从指定组织中移除
+      tags:
+        - 用户管理
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: 用户ID
+          schema:
+            type: string
+            format: uuid
+        - name: organizationId
+          in: query
+          required: true
+          description: 组织ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: 成功离开组织
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT令牌认证
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API密钥认证
+
+  schemas:
+    # 基础类型
+    TenantType:
+      type: string
+      enum: [ENTERPRISE, COMMUNITY, TEAM, PERSONAL]
+      description: 租户类型
+      example: ENTERPRISE
+
+    TenantStatus:
+      type: string
+      enum: [TRIAL, ACTIVE, SUSPENDED, EXPIRED, DELETED]
+      description: 租户状态
+      example: ACTIVE
+
+    OrganizationType:
+      type: string
+      enum: [COMMITTEE, PROJECT_TEAM, QUALITY_GROUP, PERFORMANCE_GROUP]
+      description: 组织类型
+      example: COMMITTEE
+
+    OrganizationStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE, SUSPENDED]
+      description: 组织状态
+      example: ACTIVE
+
+    DepartmentStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE, SUSPENDED]
+      description: 部门状态
+      example: ACTIVE
+
+    UserSource:
+      type: string
+      enum: [PLATFORM, TENANT, SYSTEM]
+      description: 用户来源
+      example: TENANT
+
+    UserType:
+      type: string
+      enum: [PERSONAL, ENTERPRISE, COMMUNITY, TEAM]
+      description: 用户类型
+      example: ENTERPRISE
+
+    UserRole:
+      type: string
+      enum: [PLATFORM_ADMIN, TENANT_ADMIN, ORG_ADMIN, DEPT_ADMIN, USER]
+      description: 用户角色
+      example: ORG_ADMIN
+
+    UserStatus:
+      type: string
+      enum: [ACTIVE, PENDING, DISABLED, LOCKED, EXPIRED]
+      description: 用户状态
+      example: ACTIVE
+
+    SharingLevel:
+      type: string
+      enum: [PLATFORM, TENANT, ORGANIZATION, DEPARTMENT, USER]
+      description: 共享级别
+      example: TENANT
+
+    # 请求模型
+    CreateTenantRequest:
+      type: object
+      required:
+        - name
+        - type
+        - description
+      properties:
+        name:
+          type: string
+          description: 租户名称
+          example: "示例企业"
+        type:
+          $ref: "#/components/schemas/TenantType"
+        description:
+          type: string
+          description: 租户描述
+          example: "示例企业的租户描述"
+        configuration:
+          type: object
+          description: 租户配置
+          properties:
+            isolationStrategy:
+              type: string
+              enum: [ROW_LEVEL_SECURITY, SCHEMA_PER_TENANT, DATABASE_PER_TENANT]
+              description: 隔离策略
+              example: ROW_LEVEL_SECURITY
+            resourceLimits:
+              $ref: "#/components/schemas/ResourceLimits"
+
+    UpdateTenantRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 租户名称
+          example: "更新后的租户名称"
+        description:
+          type: string
+          description: 租户描述
+          example: "更新后的租户描述"
+        status:
+          $ref: "#/components/schemas/TenantStatus"
+        configuration:
+          type: object
+          description: 租户配置
+          properties:
+            isolationStrategy:
+              type: string
+              enum: [ROW_LEVEL_SECURITY, SCHEMA_PER_TENANT, DATABASE_PER_TENANT]
+              description: 隔离策略
+            resourceLimits:
+              $ref: "#/components/schemas/ResourceLimits"
+
+    CreateOrganizationRequest:
+      type: object
+      required:
+        - name
+        - type
+        - description
+      properties:
+        name:
+          type: string
+          description: 组织名称
+          example: "技术委员会"
+        type:
+          $ref: "#/components/schemas/OrganizationType"
+        description:
+          type: string
+          description: 组织描述
+          example: "负责技术决策的委员会"
+        sharingLevel:
+          $ref: "#/components/schemas/SharingLevel"
+          description: 共享级别
+          example: TENANT
+
+    UpdateOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 组织名称
+          example: "更新后的组织名称"
+        description:
+          type: string
+          description: 组织描述
+          example: "更新后的组织描述"
+        status:
+          $ref: "#/components/schemas/OrganizationStatus"
+        sharingLevel:
+          $ref: "#/components/schemas/SharingLevel"
+
+    CreateDepartmentRequest:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: 部门名称
+          example: "开发部"
+        description:
+          type: string
+          description: 部门描述
+          example: "负责产品开发的部门"
+        parentId:
+          type: string
+          format: uuid
+          description: 父部门ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        sharingLevel:
+          $ref: "#/components/schemas/SharingLevel"
+          description: 共享级别
+          example: DEPARTMENT
+
+    UpdateDepartmentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 部门名称
+          example: "更新后的部门名称"
+        description:
+          type: string
+          description: 部门描述
+          example: "更新后的部门描述"
+        parentId:
+          type: string
+          format: uuid
+          description: 父部门ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        status:
+          $ref: "#/components/schemas/DepartmentStatus"
+        sharingLevel:
+          $ref: "#/components/schemas/SharingLevel"
+
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - username
+        - source
+        - type
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: 邮箱地址
+          example: "user@example.com"
+        username:
+          type: string
+          description: 用户名
+          example: "john_doe"
+        source:
+          $ref: "#/components/schemas/UserSource"
+        type:
+          $ref: "#/components/schemas/UserType"
+        role:
+          $ref: "#/components/schemas/UserRole"
+        profile:
+          type: object
+          description: 用户档案
+          properties:
+            firstName:
+              type: string
+              description: 名字
+              example: "John"
+            lastName:
+              type: string
+              description: 姓氏
+              example: "Doe"
+            phone:
+              type: string
+              description: 电话号码
+              example: "+86-138-0000-0000"
+            avatar:
+              type: string
+              format: uri
+              description: 头像URL
+              example: "https://example.com/avatar.jpg"
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: 邮箱地址
+          example: "new_email@example.com"
+        username:
+          type: string
+          description: 用户名
+          example: "new_username"
+        role:
+          $ref: "#/components/schemas/UserRole"
+        status:
+          $ref: "#/components/schemas/UserStatus"
+        profile:
+          type: object
+          description: 用户档案
+          properties:
+            firstName:
+              type: string
+              description: 名字
+            lastName:
+              type: string
+              description: 姓氏
+            phone:
+              type: string
+              description: 电话号码
+            avatar:
+              type: string
+              format: uri
+              description: 头像URL
+
+    JoinOrganizationRequest:
+      type: object
+      required:
+        - organizationId
+        - departmentId
+      properties:
+        organizationId:
+          type: string
+          format: uuid
+          description: 组织ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        departmentId:
+          type: string
+          format: uuid
+          description: 部门ID
+          example: "123e4567-e89b-12d3-a456-426614174001"
+
+    # 响应模型
+    TenantResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 租户ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: 租户名称
+          example: "示例企业"
+        type:
+          $ref: "#/components/schemas/TenantType"
+        status:
+          $ref: "#/components/schemas/TenantStatus"
+        description:
+          type: string
+          description: 租户描述
+          example: "示例企业的租户描述"
+        configuration:
+          type: object
+          description: 租户配置
+          properties:
+            isolationStrategy:
+              type: string
+              enum: [ROW_LEVEL_SECURITY, SCHEMA_PER_TENANT, DATABASE_PER_TENANT]
+              description: 隔离策略
+            resourceLimits:
+              $ref: "#/components/schemas/ResourceLimits"
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-12-19T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2024-12-19T10:00:00Z"
+
+    OrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 组织ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenantId:
+          type: string
+          format: uuid
+          description: 租户ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: 组织名称
+          example: "技术委员会"
+        type:
+          $ref: "#/components/schemas/OrganizationType"
+        status:
+          $ref: "#/components/schemas/OrganizationStatus"
+        description:
+          type: string
+          description: 组织描述
+          example: "负责技术决策的委员会"
+        sharingLevel:
+          $ref: "#/components/schemas/SharingLevel"
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-12-19T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2024-12-19T10:00:00Z"
+
+    DepartmentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 部门ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        organizationId:
+          type: string
+          format: uuid
+          description: 组织ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: 部门名称
+          example: "开发部"
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+          description: 父部门ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        path:
+          type: string
+          description: 部门路径
+          example: "/root/development"
+        level:
+          type: integer
+          description: 部门层级
+          example: 2
+        status:
+          $ref: "#/components/schemas/DepartmentStatus"
+        description:
+          type: string
+          description: 部门描述
+          example: "负责产品开发的部门"
+        sharingLevel:
+          $ref: "#/components/schemas/SharingLevel"
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-12-19T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2024-12-19T10:00:00Z"
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 用户ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          description: 邮箱地址
+          example: "user@example.com"
+        username:
+          type: string
+          description: 用户名
+          example: "john_doe"
+        source:
+          $ref: "#/components/schemas/UserSource"
+        type:
+          $ref: "#/components/schemas/UserType"
+        role:
+          $ref: "#/components/schemas/UserRole"
+        status:
+          $ref: "#/components/schemas/UserStatus"
+        profile:
+          type: object
+          description: 用户档案
+          properties:
+            firstName:
+              type: string
+              description: 名字
+              example: "John"
+            lastName:
+              type: string
+              description: 姓氏
+              example: "Doe"
+            phone:
+              type: string
+              description: 电话号码
+              example: "+86-138-0000-0000"
+            avatar:
+              type: string
+              format: uri
+              description: 头像URL
+              example: "https://example.com/avatar.jpg"
+        organizations:
+          type: array
+          description: 所属组织
+          items:
+            type: string
+            format: uuid
+          example: ["123e4567-e89b-12d3-a456-426614174000"]
+        departments:
+          type: object
+          description: 所属部门（每个组织一个）
+          additionalProperties:
+            type: string
+            format: uuid
+          example:
+            "123e4567-e89b-12d3-a456-426614174000": "123e4567-e89b-12d3-a456-426614174001"
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-12-19T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2024-12-19T10:00:00Z"
+
+    # 列表响应模型
+    TenantListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TenantResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationInfo"
+
+    OrganizationListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrganizationResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationInfo"
+
+    DepartmentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepartmentResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationInfo"
+
+    UserListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationInfo"
+
+    # 通用模型
+    ResourceLimits:
+      type: object
+      properties:
+        maxUsers:
+          type: integer
+          description: 最大用户数
+          example: 100
+        maxStorage:
+          type: integer
+          description: 最大存储空间（MB）
+          example: 1024
+        maxOrganizations:
+          type: integer
+          description: 最大组织数
+          example: 10
+        maxApiCalls:
+          type: integer
+          description: 最大API调用数
+          example: 10000
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: 当前页码
+          example: 1
+        limit:
+          type: integer
+          description: 每页数量
+          example: 20
+        total:
+          type: integer
+          description: 总数量
+          example: 100
+        totalPages:
+          type: integer
+          description: 总页数
+          example: 5
+
+    # 错误响应模型
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: 错误代码
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: 错误消息
+          example: "请求参数验证失败"
+        details:
+          type: array
+          description: 错误详情
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: 字段名
+                example: "name"
+              message:
+                type: string
+                description: 错误消息
+                example: "名称不能为空"
+
+    ConflictError:
+      type: object
+      properties:
+        error:
+          type: string
+          description: 错误代码
+          example: "CONFLICT"
+        message:
+          type: string
+          description: 错误消息
+          example: "资源已存在"
+        conflictField:
+          type: string
+          description: 冲突字段
+          example: "name"
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Unauthorized:
+      description: 未授权访问
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Forbidden:
+      description: 禁止访问
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    InternalServerError:
+      description: 服务器内部错误
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+tags:
+  - name: 租户管理
+    description: 租户管理相关API，包括创建、查询、更新、删除租户
+  - name: 组织管理
+    description: 组织管理相关API，包括创建、查询、更新、删除组织
+  - name: 部门管理
+    description: 部门管理相关API，包括创建、查询、更新、删除部门
+  - name: 用户管理
+    description: 用户管理相关API，包括创建、查询、更新、删除用户

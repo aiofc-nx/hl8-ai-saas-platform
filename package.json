@@ -14,7 +14,7 @@
     "dev": "turbo dev",
     "dev:fastify": "pnpm --filter fastify-api dev",
     "dev:libs": "turbo dev --filter='@hl8/*'",
-    "format": "prettier . --write",
+    "format": "prettier libs/saas-core/src/**/*.ts --write",
     "format:check": "prettier . --check",
     "libs:fix": "pnpm dlx sherif@latest --fix",
     "lint": "turbo lint",

@@ -8,6 +8,7 @@
  */
 import { DomainEvent } from "./domain-event.interface.js";
 import { IEventBus, EventHandler } from "./event-bus.interface.js";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 
 /**
  * 事件过滤器
@@ -80,6 +81,14 @@ export interface EventSubscription {
  * 提供事件订阅的实用工具函数
  */
 export class EventSubscriptionManager {
+  private logger?: FastifyLoggerService;
+
+  /**
+   * 设置日志服务
+   */
+  setLogger(logger: FastifyLoggerService): void {
+    this.logger = logger;
+  }
   private subscriptions: Map<string, EventSubscription> = new Map();
   private eventBus: IEventBus;
 
@@ -251,7 +260,11 @@ export class EventSubscriptionManager {
           }
         }
       } catch (error) {
-        console.error("事件处理器执行失败:", error);
+        if (this.logger) {
+          this.logger.log("事件处理器执行失败", {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
         throw error;
       }
     };

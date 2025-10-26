@@ -3,7 +3,8 @@
  * @description 提供系统监控指标接口
  */
 
-import { Controller, Get, Query, Logger } from "@nestjs/common";
+import { Controller, Get, Query } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { MonitoringService } from "../services/monitoring.service.js";
 import { RateLimitService } from "../services/rate-limit.service.js";
 
@@ -77,9 +78,8 @@ interface BusinessMetrics {
  */
 @Controller("metrics")
 export class MetricsController {
-  private readonly logger = new Logger(MetricsController.name);
-
   constructor(
+    private readonly logger: FastifyLoggerService,
     private readonly monitoringService: MonitoringService,
     private readonly rateLimitService: RateLimitService,
   ) {

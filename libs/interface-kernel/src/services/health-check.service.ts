@@ -3,7 +3,8 @@
  * @description 提供系统健康检查功能，包括服务状态检查、依赖检查、性能检查等
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import type { HealthCheckResult, ServiceHealth } from "../types/index.js";
 
 /**
@@ -12,12 +13,11 @@ import type { HealthCheckResult, ServiceHealth } from "../types/index.js";
  */
 @Injectable()
 export class HealthCheckService {
-  private readonly logger = new Logger(HealthCheckService.name);
   private readonly serviceChecks: Map<string, () => Promise<ServiceHealth>> =
     new Map();
   private readonly startTime: number = Date.now();
 
-  constructor() {
+  constructor(private readonly logger: FastifyLoggerService) {
     this.logger.log("Health Check Service initialized");
     this.initializeDefaultChecks();
   }

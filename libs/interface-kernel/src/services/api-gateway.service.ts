@@ -3,7 +3,8 @@
  * @description 提供统一的API网关功能，包括请求路由、负载均衡、协议转换等
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { FastifyReply } from "fastify";
 import {
   GeneralBadRequestException,
@@ -68,9 +69,7 @@ interface WebSocketConnection {
  */
 @Injectable()
 export class ApiGatewayService {
-  private readonly logger = new Logger(ApiGatewayService.name);
-
-  constructor() {
+  constructor(private readonly logger: FastifyLoggerService) {
     this.logger.log("API Gateway Service initialized");
   }
 

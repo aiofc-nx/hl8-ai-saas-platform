@@ -10,6 +10,7 @@ import {
   PatternComplianceValidator,
   PatternComplianceResult,
 } from "./pattern-compliance.validator.js";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 
 /**
  * 检查配置
@@ -90,6 +91,14 @@ export interface CheckResult {
  * 提供自动化的模式合规性检查功能
  */
 export class PatternComplianceChecker {
+  private static logger: FastifyLoggerService;
+
+  /**
+   * 设置日志服务
+   */
+  static setLogger(logger: FastifyLoggerService): void {
+    this.logger = logger;
+  }
   /**
    * 检查模块合规性
    *
@@ -135,7 +144,12 @@ export class PatternComplianceChecker {
           }
         }
       } catch (error) {
-        console.error(`检查模块 ${modulePath} 时出错:`, error);
+        if (this.logger) {
+          this.logger.log("检查模块时出错", {
+            modulePath,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
         results.push({
           modulePath,
           result: {
@@ -209,8 +223,9 @@ export class PatternComplianceChecker {
     const report = this.formatReport(result);
 
     // 这里简化实现，实际应该写入文件
-    console.log("检查报告:");
-    console.log(report);
+    if (this.logger) {
+      this.logger.log("检查报告", { report });
+    }
   }
 
   /**

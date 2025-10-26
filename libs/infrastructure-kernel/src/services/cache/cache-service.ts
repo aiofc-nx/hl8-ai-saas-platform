@@ -6,6 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import type {
   ICacheService,
   CacheConfig,
@@ -39,7 +40,10 @@ export class CacheService implements ICacheService {
     enableSerialization: true,
   };
 
-  constructor(private readonly isolationContext?: IsolationContext) {}
+  constructor(
+    private readonly logger: FastifyLoggerService,
+    private readonly isolationContext?: IsolationContext,
+  ) {}
 
   /**
    * 设置缓存
@@ -371,7 +375,7 @@ export class CacheService implements ICacheService {
     try {
       // 这里可以实现缓存预热逻辑
       // 例如：预加载常用数据
-      console.log("缓存预热:", keys);
+      this.logger.log("缓存预热", { keys });
     } catch (_error) {
       throw new Error(
         `缓存预热失败: ${_error instanceof Error ? _error.message : "未知错误"}`,

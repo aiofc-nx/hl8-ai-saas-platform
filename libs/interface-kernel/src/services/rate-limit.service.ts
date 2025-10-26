@@ -3,7 +3,8 @@
  * @description 提供请求速率限制功能，防止API滥用和DDoS攻击
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import type {
   RateLimitConfig,
   InterfaceFastifyRequest,
@@ -24,13 +25,12 @@ interface RateLimitRecord {
  */
 @Injectable()
 export class RateLimitService {
-  private readonly logger = new Logger(RateLimitService.name);
   private readonly rateLimitStore: Map<string, RateLimitRecord> = new Map();
   private readonly globalConfig: RateLimitConfig;
   private readonly endpointConfigs: Map<string, RateLimitConfig> = new Map();
   private cleanupInterval: NodeJS.Timeout | null = null;
 
-  constructor() {
+  constructor(private readonly logger: FastifyLoggerService) {
     this.logger.log("Rate Limit Service initialized");
 
     // 默认全局配置

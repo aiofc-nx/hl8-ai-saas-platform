@@ -7,6 +7,7 @@
  * @since 1.0.0
  */
 import { IUseCaseContext } from "./use-case-context.interface.js";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 // import type { IsolationContext } from "@hl8/domain-kernel";
 
 /**
@@ -45,6 +46,14 @@ export interface ContextPropagationOptions {
  * 提供上下文传播的实用工具函数
  */
 export class ContextPropagationUtils {
+  private static logger?: FastifyLoggerService;
+
+  /**
+   * 设置日志服务
+   */
+  static setLogger(logger: FastifyLoggerService): void {
+    this.logger = logger;
+  }
   /**
    * 传播上下文到子操作
    *
@@ -249,8 +258,13 @@ export class ContextPropagationUtils {
     const propagatedContext = this.propagateContext(parentContext, options);
 
     // 这里应该集成实际的事件系统
-    console.log(`处理事件 ${eventType}:`, eventData);
-    console.log("上下文:", propagatedContext);
+    if (this.logger) {
+      this.logger.log("处理事件", {
+        eventType,
+        eventData,
+        context: propagatedContext,
+      });
+    }
 
     return {} as T;
   }

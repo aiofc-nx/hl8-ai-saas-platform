@@ -155,13 +155,13 @@ As a performance engineer, I need to implement performance optimizations and sca
 - **FR-001**: System MUST implement Clean Architecture with clear separation between domain, application, infrastructure, and interface layers following the hybrid architecture pattern
 - **FR-002**: System MUST implement proper domain entities (Platform, Tenant, Organization, Department, User) with complete attributes and business rules using @hl8/domain-kernel base classes
 - **FR-003**: System MUST implement value objects with proper validation rules and immutability using @hl8/domain-kernel BaseValueObject and predefined ID value objects (TenantId, OrganizationId, DepartmentId, UserId, GenericEntityId)
-- **FR-004**: System MUST implement aggregates with proper consistency boundaries and business logic using @hl8/domain-kernel AggregateRoot (TenantAggregate, OrganizationAggregate, DepartmentAggregate)
+- **FR-004**: System MUST implement aggregates with proper consistency boundaries and business logic using @hl8/domain-kernel AggregateRoot (TenantAggregate, OrganizationAggregate, DepartmentAggregate), following the entity-aggregate separation principle where aggregate roots coordinate internal entities and publish domain events. **⚠️ MANDATORY**: All aggregates (simple or complex) MUST separate aggregate roots from internal entities
 - **FR-005**: System MUST implement multi-tenant data isolation using ROW_LEVEL_SECURITY as default strategy with IsolationContext and tenant_id filtering from @hl8/domain-kernel
 - **FR-006**: System MUST implement event sourcing for all core business subdomains (tenant, organization, department, user, role management) using @hl8/domain-kernel event infrastructure
 - **FR-007**: System MUST implement domain events for all business state changes with proper event publishing and handling using @hl8/domain-kernel DomainEvent base class
 - **FR-008**: System MUST implement CQRS with separate command and query handlers using @hl8/application-kernel BaseCommand, BaseQuery, CommandHandler, and QueryHandler
 - **FR-009**: System MUST implement proper tenant lifecycle management including creation, status transitions, and deletion processes with business rule validation
-- **FR-010**: System MUST implement organization and department hierarchy with proper parent-child relationships and 7-level department nesting using domain entities
+- **FR-010**: System MUST implement organization and department hierarchy with proper parent-child relationships and 8-level department nesting using domain entities
 - **FR-011**: System MUST implement user management with multi-organization membership and single-department-per-organization constraints using proper domain relationships
 - **FR-012**: System MUST implement role-based access control with proper permission hierarchy and inheritance using domain services
 - **FR-013**: System MUST implement API endpoints with authentication, authorization, and tenant context using @hl8/interface-kernel RestController, AuthenticationGuard, and AuthorizationGuard
@@ -176,18 +176,18 @@ As a performance engineer, I need to implement performance optimizations and sca
 - **FR-022**: System MUST implement caching using @hl8/caching ICacheService for performance optimization and data caching
 - **FR-023**: System MUST implement messaging using @hl8/messaging for event-driven architecture and asynchronous processing
 - **FR-024**: System MUST implement proper Chinese documentation and comments following TSDoc standards for all public APIs, classes, methods, interfaces, and enumerations
-- **FR-025**: System MUST implement rich domain model (充血模型) where domain objects contain business logic and behavior, not just data containers
+- **FR-025**: System MUST implement rich domain model (充血模型) where domain objects contain business logic and behavior, not just data containers, and MUST separate aggregate roots from internal entities according to the entity-aggregate separation principle (aggregate roots manage boundaries, coordinate internal entities, and publish events; internal entities execute business operations and maintain state). **⚠️ MANDATORY**: This separation applies to ALL aggregates regardless of complexity (business changes, architectural consistency, maintainability, team standards)
 - **FR-026**: System MUST implement 5-layer multi-tenant isolation architecture (Platform → Tenant → Organization → Department → User) with proper access control and data isolation at each level
 - **FR-027**: System MUST implement progressive database strategy selection supporting ROW_LEVEL_SECURITY (default), SCHEMA_PER_TENANT (medium tenants), and DATABASE_PER_TENANT (large tenants) based on tenant size and requirements
 - **FR-028**: System MUST implement strict permission hierarchy (Platform Admin > Tenant Admin > Organization Admin > Department Admin > User) ensuring proper permission inheritance and access control
-- **FR-029**: System MUST implement up to 7 levels of department hierarchy with path tracking, parent-child relationships, department movement, and hierarchical queries
+- **FR-029**: System MUST implement up to 8 levels of department hierarchy with path tracking, parent-child relationships, department movement, and hierarchical queries
 - **FR-030**: System MUST implement organization sharing mechanisms supporting private and shared organizations with cross-organization resource sharing
 - **FR-031**: System MUST implement user assignment rules ensuring users can only belong to one department per organization while supporting multi-organization membership
 - **FR-032**: System MUST implement platform-level data isolation ensuring complete separation between platform administrator data and tenant data using independent schemas or databases
 - **FR-033**: System MUST implement tenant type management supporting FREE (5 users, 100MB, 1 org), BASIC (50 users, 1GB, 2 orgs), PROFESSIONAL (500 users, 10GB, 10 orgs), ENTERPRISE (10,000 users, 100GB, 100 orgs), and CUSTOM (unlimited) with proper resource limits
 - **FR-034**: System MUST implement tenant lifecycle management supporting TRIAL → ACTIVE → SUSPENDED → EXPIRED → DELETED state transitions with proper business rules
 - **FR-035**: System MUST implement organization types supporting Committee (专业委员会), ProjectTeam (项目管理团队), QualityGroup (质量控制小组), and PerformanceGroup (绩效管理小组) with horizontal management structure
-- **FR-036**: System MUST implement department hierarchy supporting up to 7 levels with vertical management structure and proper parent-child relationships
+- **FR-036**: System MUST implement department hierarchy supporting up to 8 levels with vertical management structure and proper parent-child relationships
 - **FR-037**: System MUST implement user classification system supporting platform users, tenant users, system users with proper role hierarchy (Platform Admin > Tenant Admin > Organization Admin > Department Admin > Regular User)
 - **FR-038**: System MUST implement tenant creation workflow where platform users can apply to create tenants with proper validation, uniqueness constraints, and automatic admin assignment
 - **FR-039**: System MUST implement resource monitoring and alerting system for user limits, storage usage, and API call limits with proper escalation and upgrade recommendations
@@ -201,6 +201,7 @@ As a performance engineer, I need to implement performance optimizations and sca
 - **FR-047**: System MUST preserve existing infrastructure subdomain organization (casl, cache, database, entities, mappers, repositories, services) for proper separation of concerns
 - **FR-048**: System MUST prioritize using @hl8 kernel components as the foundation for saas-core business module development, leveraging generic base components from each layer
 - **FR-049**: System MUST utilize @hl8/domain-kernel base classes (BaseEntity, AggregateRoot, BaseValueObject, EntityId) for all domain objects instead of creating custom implementations
+- **FR-049A**: System MUST PRIORITIZE using existing value objects from @hl8/domain-kernel (TenantId, OrganizationId, DepartmentId, UserId, RoleId, GenericEntityId) instead of creating duplicate implementations
 - **FR-050**: System MUST utilize @hl8/application-kernel components (BaseUseCase, BaseCommand, BaseQuery, CommandHandler, QueryHandler) for all application layer operations
 - **FR-051**: System MUST utilize @hl8/infrastructure-kernel components for all infrastructure layer implementations instead of creating custom infrastructure code
 - **FR-052**: System MUST utilize @hl8/interface-kernel components (RestController, AuthenticationGuard, AuthorizationGuard) for all interface layer implementations
@@ -215,7 +216,7 @@ As a performance engineer, I need to implement performance optimizations and sca
 - **Platform**: SAAS service provider responsible for system development, technical support, and commercial services, managing all tenants and users with global configuration and management capabilities
 - **Tenant**: Independent customer units with isolated data space and configuration environment, supporting Enterprise (企业租户), Community (社群租户), Team (团队租户), and Personal (个人租户) types with resource limits (FREE: 5 users/100MB/1 org, BASIC: 50 users/1GB/2 orgs, PROFESSIONAL: 500 users/10GB/10 orgs, ENTERPRISE: 10,000 users/100GB/100 orgs, CUSTOM: unlimited)
 - **Organization**: Horizontal management units within tenants for specific functions, supporting Committee (专业委员会), ProjectTeam (项目管理团队), QualityGroup (质量控制小组), and PerformanceGroup (绩效管理小组) with horizontal management structure
-- **Department**: Vertical management units within organizations with hierarchical structure supporting up to 7 levels with parent-child relationships and path tracking
+- **Department**: Vertical management units within organizations with hierarchical structure supporting up to 8 levels with parent-child relationships and path tracking
 - **User**: System users classified by source (Platform, Tenant, System), type (Personal, Enterprise, Community, Team), role (Platform Admin > Tenant Admin > Organization Admin > Department Admin > Regular User), status (Active, Pending, Disabled, Locked, Expired), and affiliation (Platform-level, Tenant-level, Organization-level, Department-level)
 - **Role**: User roles defining permissions and access levels within the strict hierarchy (Platform Admin > Tenant Admin > Organization Admin > Department Admin > Regular User)
 - **Permission**: Access control entities defining what actions users can perform at different organizational levels with proper inheritance and access control
@@ -242,7 +243,7 @@ SAAS Core module consists of 8 distinct subdomains that need to be redeveloped:
 ### Measurable Outcomes
 
 - **SC-001**: Clean Architecture implementation is completed with proper separation of concerns and dependency injection using @hl8 kernel components within 4 weeks
-- **SC-002**: All domain entities, value objects, and aggregates are implemented using @hl8/domain-kernel base classes with 100% business rule coverage and proper validation
+- **SC-002**: All domain entities, value objects, and aggregates are implemented using @hl8/domain-kernel base classes with 100% business rule coverage, proper validation, and entity-aggregate separation principle (aggregate roots coordinate internal entities and publish events; internal entities execute business operations and maintain state). **⚠️ MANDATORY**: All aggregates (simple or complex) MUST implement entity-aggregate separation for future-proofing and architectural consistency
 - **SC-003**: Multi-tenant data isolation is implemented with ROW_LEVEL_SECURITY using @hl8/domain-kernel IsolationContext and achieves 100% tenant data separation
 - **SC-004**: Event sourcing is implemented for all core business subdomains using @hl8/domain-kernel event infrastructure with complete event capture and state reconstruction capabilities
 - **SC-005**: CQRS implementation achieves proper separation of read and write operations using @hl8/application-kernel components with eventual consistency
@@ -257,21 +258,21 @@ SAAS Core module consists of 8 distinct subdomains that need to be redeveloped:
 - **SC-014**: All business requirements from the original specification are fully implemented and validated using kernel components
 - **SC-015**: Database implementation supports both PostgreSQL (default) and MongoDB (optional) with proper repository implementations for each database type
 - **SC-016**: All code follows Chinese documentation standards with TSDoc comments for all public APIs, classes, methods, interfaces, and enumerations
-- **SC-017**: Rich domain model (充血模型) is implemented where domain objects contain business logic and behavior, not just data containers
+- **SC-017**: Rich domain model (充血模型) is implemented where domain objects contain business logic and behavior, not just data containers, and entity-aggregate separation is properly implemented (aggregate roots manage boundaries and coordinate internal entities; internal entities execute business operations and maintain state). **⚠️ MANDATORY**: Entity-aggregate separation is required for ALL aggregates, regardless of current complexity, to ensure future scalability and maintainability
 - **SC-018**: All error handling and logging uses @hl8/exceptions and @hl8/nestjs-fastify components for consistent error management
 - **SC-019**: Configuration management uses @hl8/config ConfigService for all environment and tenant-specific settings
 - **SC-020**: Messaging implementation uses @hl8/messaging for event-driven architecture and asynchronous processing
 - **SC-021**: 5-layer multi-tenant isolation architecture is implemented with proper RLS policies and access control at each level (Platform, Tenant, Organization, Department, User)
 - **SC-022**: Progressive database strategy selection is implemented supporting RLS, SCHEMA_PER_TENANT, and DATABASE_PER_TENANT based on tenant requirements
 - **SC-023**: Strict permission hierarchy is implemented with proper inheritance and access control (Platform Admin > Tenant Admin > Organization Admin > Department Admin > User)
-- **SC-024**: Department hierarchy supports up to 7 levels with path tracking, parent-child relationships, and efficient hierarchical queries
+- **SC-024**: Department hierarchy supports up to 8 levels with path tracking, parent-child relationships, and efficient hierarchical queries
 - **SC-025**: Organization sharing mechanisms support both private and shared organizations with proper cross-organization resource access
 - **SC-026**: User assignment rules ensure single department per organization while supporting multi-organization membership
 - **SC-027**: Platform-level data isolation is implemented with complete separation between platform and tenant data using independent schemas or databases
 - **SC-028**: Tenant type management supports all 5 tenant types (FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM) with proper resource limits and validation
 - **SC-029**: Tenant lifecycle management supports all state transitions (TRIAL → ACTIVE → SUSPENDED → EXPIRED → DELETED) with proper business rules and validation
 - **SC-030**: Organization types support all 4 organization types (Committee, ProjectTeam, QualityGroup, PerformanceGroup) with horizontal management structure
-- **SC-031**: Department hierarchy supports up to 7 levels with vertical management structure, proper parent-child relationships, and efficient hierarchical queries
+- **SC-031**: Department hierarchy supports up to 8 levels with vertical management structure, proper parent-child relationships, and efficient hierarchical queries
 - **SC-032**: User classification system supports platform users, tenant users, system users with proper role hierarchy and permission inheritance
 - **SC-033**: Tenant creation workflow allows platform users to apply for tenant creation with proper validation, uniqueness constraints, and automatic admin assignment
 - **SC-034**: Resource monitoring and alerting system provides real-time monitoring of user limits, storage usage, and API call limits with proper escalation and upgrade recommendations
@@ -285,6 +286,7 @@ SAAS Core module consists of 8 distinct subdomains that need to be redeveloped:
 - **SC-042**: Infrastructure subdomain organization is preserved (casl, cache, database, entities, mappers, repositories, services) for proper separation of concerns
 - **SC-043**: @hl8 kernel components are prioritized as the foundation for saas-core business module development with proper utilization of generic base components from each layer
 - **SC-044**: All domain objects utilize @hl8/domain-kernel base classes (BaseEntity, AggregateRoot, BaseValueObject, EntityId) instead of custom implementations
+- **SC-044A**: All value objects MUST utilize existing @hl8/domain-kernel value objects (TenantId, OrganizationId, DepartmentId, UserId, RoleId, GenericEntityId) instead of creating duplicate implementations
 - **SC-045**: All application layer operations utilize @hl8/application-kernel components (BaseUseCase, BaseCommand, BaseQuery, CommandHandler, QueryHandler) instead of custom implementations
 - **SC-046**: All infrastructure layer implementations utilize @hl8/infrastructure-kernel components instead of custom infrastructure code
 - **SC-047**: All interface layer implementations utilize @hl8/interface-kernel components (RestController, AuthenticationGuard, AuthorizationGuard) instead of custom implementations
@@ -322,7 +324,7 @@ SAAS Core module consists of 8 distinct subdomains that need to be redeveloped:
 - **Multi-tenant isolation strategy**: The implementation must support 5-layer isolation architecture (Platform → Tenant → Organization → Department → User) with proper RLS policies
 - **Database strategy selection**: The system must support progressive database strategies (RLS → SCHEMA_PER_TENANT → DATABASE_PER_TENANT) based on tenant size and requirements
 - **Permission hierarchy**: The system must implement strict permission hierarchy (Platform Admin > Tenant Admin > Organization Admin > Department Admin > User)
-- **Department hierarchy**: The system must support up to 7 levels of department hierarchy with proper path tracking and parent-child relationships
+- **Department hierarchy**: The system must support up to 8 levels of department hierarchy with proper path tracking and parent-child relationships
 - **Kernel component prioritization**: saas-core business module development must be based on @hl8 kernel components, prioritizing the use of generic base components and existing infrastructure from each architectural layer
 
 ## Dependencies
@@ -347,7 +349,7 @@ SAAS Core module consists of 8 distinct subdomains that need to be redeveloped:
 - The new implementation must support all existing tenant types and organizational structures
 - All security and compliance requirements must be maintained or improved in the new implementation
 - The redevelopment must not break existing integrations or require changes to other platform modules
-- All domain objects must implement rich domain model (充血模型) with business logic and behavior
+- All domain objects must implement rich domain model (充血模型) with business logic and behavior, and must follow the entity-aggregate separation principle (aggregate roots manage boundaries, coordinate internal entities, and publish events; internal entities execute business operations and maintain state). **⚠️ MANDATORY**: Entity-aggregate separation is required for ALL aggregates, regardless of complexity, because: (1) business requirements change over time, (2) architectural consistency reduces cognitive load, (3) separation improves maintainability and extensibility, (4) unified patterns eliminate decision overhead
 - Database implementation must support both PostgreSQL (default) and MongoDB (optional) with proper repository implementations
 - All error handling and logging must use @hl8/exceptions and @hl8/nestjs-fastify components
 - Configuration management must use @hl8/config ConfigService for all settings
@@ -356,14 +358,14 @@ SAAS Core module consists of 8 distinct subdomains that need to be redeveloped:
 - Multi-tenant isolation must implement 5-layer architecture (Platform → Tenant → Organization → Department → User) with proper RLS policies
 - Database strategy must support progressive migration from RLS to SCHEMA_PER_TENANT to DATABASE_PER_TENANT based on tenant requirements
 - Permission hierarchy must be strictly enforced (Platform Admin > Tenant Admin > Organization Admin > Department Admin > User)
-- Department hierarchy must support up to 7 levels with proper path tracking and parent-child relationships
+- Department hierarchy must support up to 8 levels with proper path tracking and parent-child relationships
 - Organization sharing must support both private and shared organizations with proper access control
 - User assignment must ensure single department per organization while supporting multi-organization membership
 - Platform-level data must be completely isolated from tenant data using independent schemas or databases
 - Tenant type management must support all 5 tenant types (FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM) with proper resource limits and validation
 - Tenant lifecycle management must support all state transitions (TRIAL → ACTIVE → SUSPENDED → EXPIRED → DELETED) with proper business rules
 - Organization types must support all 4 organization types (Committee, ProjectTeam, QualityGroup, PerformanceGroup) with horizontal management structure
-- Department hierarchy must support up to 7 levels with vertical management structure and proper parent-child relationships
+- Department hierarchy must support up to 8 levels with vertical management structure and proper parent-child relationships
 - User classification system must support platform users, tenant users, system users with proper role hierarchy
 - Tenant creation workflow must allow platform users to apply for tenant creation with proper validation and uniqueness constraints
 - Resource monitoring and alerting system must provide real-time monitoring with proper escalation and upgrade recommendations

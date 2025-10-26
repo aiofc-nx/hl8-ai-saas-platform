@@ -6,6 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import type { IDatabaseConnectionManager } from "../../interfaces/database-adapter.interface.js";
 import type { IsolationContext } from "../../types/isolation.types.js";
 
@@ -58,6 +59,7 @@ export class ConnectionPoolService {
 
   constructor(
     private readonly connectionManager: IDatabaseConnectionManager,
+    private readonly logger: FastifyLoggerService,
     private readonly isolationContext?: IsolationContext,
   ) {}
 
@@ -174,7 +176,10 @@ export class ConnectionPoolService {
       // 检查连接池使用率
       const utilizationRate = stats.utilizationRate;
       if (utilizationRate > 0.9) {
-        console.warn(`连接池 ${connectionName} 使用率过高: ${utilizationRate}`);
+        this.logger.log("连接池使用率过高", {
+          connectionName,
+          utilizationRate,
+        });
         return false;
       }
 
@@ -356,7 +361,9 @@ export class ConnectionPoolService {
         await this.validatePoolHealth(connectionName);
         await this.cleanupIdleConnections(connectionName);
       } catch (_error) {
-        console.error(`连接池验证失败: ${_error}`);
+        this.logger.log("连接池验证失败", {
+          error: _error instanceof Error ? _error.message : String(_error),
+        });
       }
     }, config.validationInterval);
 
@@ -406,7 +413,10 @@ export class ConnectionPoolService {
           try {
             await this.closePool(connectionName);
           } catch (_error) {
-            console.error(`关闭连接池 ${connectionName} 失败:`, _error);
+            this.logger.log("关闭连接池失败", {
+              connectionName,
+              error: _error instanceof Error ? _error.message : String(_error),
+            });
           }
         },
       );

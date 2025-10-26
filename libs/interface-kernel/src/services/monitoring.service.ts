@@ -3,7 +3,8 @@
  * @description 提供系统监控功能，包括指标收集、性能监控、日志记录等
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import type { MetricData, InterfaceFastifyRequest } from "../types/index.js";
 
 /**
@@ -25,7 +26,6 @@ interface PerformanceMetrics {
  */
 @Injectable()
 export class MonitoringService {
-  private readonly logger = new Logger(MonitoringService.name);
   private readonly metrics: Map<string, MetricData[]> = new Map();
   private readonly performanceMetrics: PerformanceMetrics = {
     requestCount: 0,
@@ -39,7 +39,7 @@ export class MonitoringService {
   private readonly startTime: number = Date.now();
   private metricsCollectionInterval: NodeJS.Timeout | null = null;
 
-  constructor() {
+  constructor(private readonly logger: FastifyLoggerService) {
     this.logger.log("Monitoring Service initialized");
     this.startMetricsCollection();
   }

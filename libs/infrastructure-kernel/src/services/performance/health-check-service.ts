@@ -6,12 +6,17 @@
  */
 
 import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import * as os from "os";
 import type {
   IHealthCheckService,
   HealthCheckResult,
 } from "../../interfaces/health-service.interface.js";
-import type { HealthStatus, HealthChecker } from "../../types/health.types.js";
+import type {
+  HealthStatus,
+  HealthChecker,
+  HealthReport,
+} from "../../types/health.types.js";
 import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
 import type { ICacheService } from "../../interfaces/cache-service.interface.js";
 import type { ILoggingService } from "../../interfaces/logging-service.interface.js";
@@ -21,9 +26,25 @@ import type { ILoggingService } from "../../interfaces/logging-service.interface
  */
 @Injectable()
 export class HealthCheckService implements IHealthCheckService {
+  private indicators = new Map<string, () => Promise<HealthCheckResult>>();
+  private config = {
+    timeout: 5000,
+    retryAttempts: 3,
+    retryDelay: 1000,
+  };
+
+  constructor(
+    private readonly logger: FastifyLoggerService,
+    private readonly databaseAdapter: IDatabaseAdapter,
+    private readonly cacheService?: ICacheService,
+    private readonly loggingService?: ILoggingService,
+  ) {
+    this.registerDefaultIndicators();
+  }
+
   // 添加缺失的接口方法
-  getHealthReport(): Promise<any> {
-    return this.check();
+  getHealthReport(): Promise<HealthReport> {
+    return this.check() as unknown as Promise<HealthReport>;
   }
 
   getComponents(): string[] {
@@ -38,7 +59,10 @@ export class HealthCheckService implements IHealthCheckService {
     return this.config.timeout;
   }
 
-  addHealthIndicator(name: string, indicator: () => Promise<any>): void {
+  addHealthIndicator(
+    name: string,
+    indicator: () => Promise<HealthCheckResult>,
+  ): void {
     this.registerIndicator(name, indicator);
   }
 
@@ -46,7 +70,9 @@ export class HealthCheckService implements IHealthCheckService {
     this.deregisterIndicator(name);
   }
 
-  getHealthIndicator(name: string): (() => Promise<any>) | undefined {
+  getHealthIndicator(
+    name: string,
+  ): (() => Promise<HealthCheckResult>) | undefined {
     return this.indicators.get(name);
   }
 
@@ -66,12 +92,12 @@ export class HealthCheckService implements IHealthCheckService {
   // 添加其他缺失的接口方法
   enableComponent(name: string): void {
     // 启用组件
-    console.log(`启用组件: ${name}`);
+    this.logger.log("启用组件", { name });
   }
 
   disableComponent(name: string): void {
     // 禁用组件
-    console.log(`禁用组件: ${name}`);
+    this.logger.log("禁用组件", { name });
   }
 
   getComponentStatus(_name: string): Promise<HealthStatus> {
@@ -89,7 +115,7 @@ export class HealthCheckService implements IHealthCheckService {
 
   setHealthThreshold(name: string, threshold: number): void {
     // 设置健康阈值
-    console.log(`设置健康阈值: ${name} = ${threshold}`);
+    this.logger.log("设置健康阈值", { name, threshold });
   }
 
   getHealthThreshold(_name: string): number {
@@ -127,25 +153,14 @@ export class HealthCheckService implements IHealthCheckService {
     // 注销健康检查器
     this.deregisterIndicator(name);
   }
-  private indicators = new Map<string, () => Promise<HealthCheckResult>>();
-  private config = {
-    timeout: 5000,
-    retryAttempts: 3,
-    retryDelay: 1000,
-  };
-
-  constructor(
-    private readonly databaseAdapter: IDatabaseAdapter,
-    private readonly cacheService?: ICacheService,
-    private readonly loggingService?: ILoggingService,
-  ) {
-    this.registerDefaultIndicators();
-  }
 
   /**
    * 注册健康指示器
    */
-  registerIndicator(name: string, indicator: () => Promise<any>): void {
+  registerIndicator(
+    name: string,
+    indicator: () => Promise<HealthCheckResult>,
+  ): void {
     this.indicators.set(name, indicator);
   }
 
@@ -162,15 +177,15 @@ export class HealthCheckService implements IHealthCheckService {
   async check(): Promise<HealthCheckResult> {
     try {
       const startTime = Date.now();
-      const results: Record<string, any> = {};
-      const errors: Record<string, any> = {};
+      const results: Record<string, HealthCheckResult> = {};
+      const errors: Record<string, HealthCheckResult> = {};
 
       // 并行执行所有健康指示器
       const indicatorPromises = Array.from(this.indicators.entries()).map(
         async ([name, indicator]) => {
           try {
             const result = await this.executeIndicator(name, indicator);
-            if (result.status === "up") {
+            if (result.status === "HEALTHY") {
               results[name] = result;
             } else {
               errors[name] = result;
@@ -199,15 +214,25 @@ export class HealthCheckService implements IHealthCheckService {
       const executionTime = Date.now() - startTime;
 
       const healthCheckResult: HealthCheckResult = {
-        status: overallStatus as any,
-        _error: Object.keys(errors).length > 0 ? errors : undefined,
+        component: "system",
+        status:
+          overallStatus === "up"
+            ? "HEALTHY"
+            : overallStatus === "degraded"
+              ? "DEGRADED"
+              : "UNHEALTHY",
+        lastCheck: new Date(),
+        responseTime: executionTime,
+        errorRate: Object.keys(errors).length / this.indicators.size,
         details: {
           executionTime,
           totalIndicators: this.indicators.size,
           healthyIndicators: Object.keys(results).length,
           unhealthyIndicators: Object.keys(errors).length,
+          errors: Object.keys(errors).length > 0 ? errors : undefined,
         },
-      } as any;
+        dependencies: [],
+      };
 
       // 记录健康检查日志
       await this.logHealthCheck(healthCheckResult);
@@ -225,11 +250,11 @@ export class HealthCheckService implements IHealthCheckService {
    */
   private async executeIndicator(
     name: string,
-    indicator: () => Promise<any>,
-  ): Promise<any> {
+    indicator: () => Promise<HealthCheckResult>,
+  ): Promise<HealthCheckResult> {
     try {
       // 设置超时
-      const timeoutPromise = new Promise<any>((_, reject) => {
+      const timeoutPromise = new Promise<HealthCheckResult>((_, reject) => {
         setTimeout(() => {
           reject(new Error(`健康指示器 ${name} 执行超时`));
         }, this.config.timeout);
@@ -240,12 +265,15 @@ export class HealthCheckService implements IHealthCheckService {
       return result;
     } catch (_error) {
       return {
-        status: "down",
-        message:
-          _error instanceof Error ? _error.message : "健康指示器执行失败",
+        component: "unknown",
+        status: "UNHEALTHY",
+        lastCheck: new Date(),
+        responseTime: 0,
+        errorRate: 1,
         details: {
           _error: _error instanceof Error ? _error.message : "未知错误",
         },
+        dependencies: [],
       };
     }
   }
@@ -254,8 +282,8 @@ export class HealthCheckService implements IHealthCheckService {
    * 确定整体健康状态
    */
   private determineOverallStatus(
-    results: Record<string, any>,
-    errors: Record<string, any>,
+    results: Record<string, HealthCheckResult>,
+    errors: Record<string, HealthCheckResult>,
   ): "up" | "down" | "degraded" {
     const totalIndicators =
       Object.keys(results).length + Object.keys(errors).length;
@@ -280,20 +308,28 @@ export class HealthCheckService implements IHealthCheckService {
       try {
         const isHealthy = await this.databaseAdapter.healthCheck();
         return {
-          status: isHealthy ? "up" : "down",
-          message: isHealthy ? "数据库连接正常" : "数据库连接异常",
+          component: "database",
+          status: isHealthy ? "HEALTHY" : "UNHEALTHY",
+          lastCheck: new Date(),
+          responseTime: 0,
+          errorRate: isHealthy ? 0 : 1,
           details: {
             type: "database",
             healthy: isHealthy,
           },
+          dependencies: [],
         };
       } catch (_error) {
         return {
-          status: "down",
-          message: "数据库健康检查失败",
+          component: "database",
+          status: "UNHEALTHY",
+          lastCheck: new Date(),
+          responseTime: 0,
+          errorRate: 1,
           details: {
             _error: _error instanceof Error ? _error.message : "未知错误",
           },
+          dependencies: [],
         };
       }
     });
@@ -304,20 +340,28 @@ export class HealthCheckService implements IHealthCheckService {
         try {
           const isHealthy = await this.cacheService.healthCheck();
           return {
-            status: isHealthy ? "up" : "down",
-            message: isHealthy ? "缓存服务正常" : "缓存服务异常",
+            component: "cache",
+            status: isHealthy ? "HEALTHY" : "UNHEALTHY",
+            lastCheck: new Date(),
+            responseTime: 0,
+            errorRate: isHealthy ? 0 : 1,
             details: {
               type: "cache",
               healthy: isHealthy,
             },
+            dependencies: [],
           };
         } catch (_error) {
           return {
-            status: "down",
-            message: "缓存健康检查失败",
+            component: "cache",
+            status: "UNHEALTHY",
+            lastCheck: new Date(),
+            responseTime: 0,
+            errorRate: 1,
             details: {
               _error: _error instanceof Error ? _error.message : "未知错误",
             },
+            dependencies: [],
           };
         }
       });
@@ -341,20 +385,28 @@ export class HealthCheckService implements IHealthCheckService {
             "健康检查测试",
           );
           return {
-            status: "up",
-            message: "日志服务正常",
+            component: "logging",
+            status: "HEALTHY",
+            lastCheck: new Date(),
+            responseTime: 0,
+            errorRate: 0,
             details: {
               type: "logging",
               healthy: true,
             },
+            dependencies: [],
           };
         } catch (_error) {
           return {
-            status: "down",
-            message: "日志服务健康检查失败",
+            component: "logging",
+            status: "UNHEALTHY",
+            lastCheck: new Date(),
+            responseTime: 0,
+            errorRate: 1,
             details: {
               _error: _error instanceof Error ? _error.message : "未知错误",
             },
+            dependencies: [],
           };
         }
       });
@@ -369,8 +421,11 @@ export class HealthCheckService implements IHealthCheckService {
         const isHealthy = memoryUsage < 0.8; // 80%阈值
 
         return {
-          status: isHealthy ? "up" : "down",
-          message: isHealthy ? "内存使用正常" : "内存使用过高",
+          component: "memory",
+          status: isHealthy ? "HEALTHY" : "UNHEALTHY",
+          lastCheck: new Date(),
+          responseTime: 0,
+          errorRate: isHealthy ? 0 : 1,
           details: {
             type: "memory",
             usage: memoryUsage,
@@ -379,14 +434,19 @@ export class HealthCheckService implements IHealthCheckService {
             heapTotal: memUsage.heapTotal,
             external: memUsage.external,
           },
+          dependencies: [],
         };
       } catch (_error) {
         return {
-          status: "down",
-          message: "内存健康检查失败",
+          component: "memory",
+          status: "UNHEALTHY",
+          lastCheck: new Date(),
+          responseTime: 0,
+          errorRate: 1,
           details: {
             _error: _error instanceof Error ? _error.message : "未知错误",
           },
+          dependencies: [],
         };
       }
     });
@@ -406,21 +466,29 @@ export class HealthCheckService implements IHealthCheckService {
         fs.unlinkSync(testFile);
 
         return {
-          status: "up",
-          message: "磁盘访问正常",
+          component: "disk",
+          status: "HEALTHY",
+          lastCheck: new Date(),
+          responseTime: 0,
+          errorRate: 0,
           details: {
             type: "disk",
             healthy: true,
             tempDir,
           },
+          dependencies: [],
         };
       } catch (_error) {
         return {
-          status: "down",
-          message: "磁盘健康检查失败",
+          component: "disk",
+          status: "UNHEALTHY",
+          lastCheck: new Date(),
+          responseTime: 0,
+          errorRate: 1,
           details: {
             _error: _error instanceof Error ? _error.message : "未知错误",
           },
+          dependencies: [],
         };
       }
     });
@@ -438,7 +506,8 @@ export class HealthCheckService implements IHealthCheckService {
           operation: "health-check",
           resource: "health-check",
           timestamp: new Date(),
-          level: (result.status as any) === "up" ? "info" : ("warn" as any),
+          level:
+            result.status === "HEALTHY" ? ("info" as const) : ("warn" as const),
           message: `健康检查: ${result.status}`,
         };
 
@@ -449,14 +518,16 @@ export class HealthCheckService implements IHealthCheckService {
         );
       }
     } catch (_error) {
-      console.error("记录健康检查日志失败:", _error);
+      this.logger.log("记录健康检查日志失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
     }
   }
 
   /**
    * 获取健康检查配置
    */
-  getConfig(): Record<string, any> {
+  getConfig(): Record<string, unknown> {
     return { ...this.config };
   }
 
@@ -480,7 +551,7 @@ export class HealthCheckService implements IHealthCheckService {
   async healthCheck(): Promise<boolean> {
     try {
       const result = await this.check();
-      return (result.status as any) === "up";
+      return result.status === "HEALTHY";
     } catch (_error) {
       return false;
     }

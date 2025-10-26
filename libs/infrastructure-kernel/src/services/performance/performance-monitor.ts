@@ -6,6 +6,7 @@
  */
 
 import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import * as os from "os";
 import type { IHealthCheckService } from "../../interfaces/health-service.interface.js";
 import type { IDatabaseAdapter } from "../../interfaces/database-adapter.interface.js";
@@ -95,6 +96,7 @@ export class PerformanceMonitorService {
 
   constructor(
     private readonly databaseAdapter: IDatabaseAdapter,
+    private readonly logger: FastifyLoggerService,
     private readonly cacheService?: ICacheService,
     private readonly loggingService?: ILoggingService,
     private readonly healthCheckService?: IHealthCheckService,
@@ -113,7 +115,9 @@ export class PerformanceMonitorService {
       try {
         await this.collectMetrics();
       } catch (_error) {
-        console.error("收集性能指标失败:", _error);
+        this.logger.log("收集性能指标失败", {
+          error: _error instanceof Error ? _error.message : String(_error),
+        });
       }
     }, interval);
   }
@@ -436,7 +440,9 @@ export class PerformanceMonitorService {
         );
       }
     } catch (_error) {
-      console.error("检查阈值失败:", _error);
+      this.logger.log("检查阈值失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
     }
   }
 
@@ -470,7 +476,9 @@ export class PerformanceMonitorService {
       // 记录告警日志
       await this.logPerformanceAlert(alert);
     } catch (_error) {
-      console.error("创建告警失败:", _error);
+      this.logger.log("创建告警失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
     }
   }
 
@@ -499,7 +507,9 @@ export class PerformanceMonitorService {
         );
       }
     } catch (_error) {
-      console.error("记录性能指标日志失败:", _error);
+      this.logger.log("记录性能指标日志失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
     }
   }
 
@@ -526,7 +536,9 @@ export class PerformanceMonitorService {
         );
       }
     } catch (_error) {
-      console.error("记录性能告警日志失败:", _error);
+      this.logger.log("记录性能告警日志失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
     }
   }
 

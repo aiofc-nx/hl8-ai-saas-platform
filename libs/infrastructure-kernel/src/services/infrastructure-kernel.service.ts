@@ -6,6 +6,7 @@
  */
 
 import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { DatabaseService } from "./database/database-service.js";
 import { ConnectionPoolService } from "./database/connection-pool-service.js";
 import { TransactionService } from "./database/transaction-service.js";
@@ -46,6 +47,7 @@ export class InfrastructureKernelService
     private readonly errorHandler: ErrorHandlerService,
     private readonly circuitBreaker: CircuitBreakerService,
     private readonly retryManager: RetryManagerService,
+    private readonly logger: FastifyLoggerService,
     private readonly applicationKernelIntegration: ApplicationKernelIntegrationService,
     private readonly domainKernelIntegration: DomainKernelIntegrationService,
   ) {
@@ -60,7 +62,9 @@ export class InfrastructureKernelService
       await this.initialize();
       this._isInitialized = true;
     } catch (_error) {
-      console.error("基础设施层kernel初始化失败:", _error);
+      this.logger.log("基础设施层kernel初始化失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
       throw _error;
     }
   }
@@ -72,7 +76,9 @@ export class InfrastructureKernelService
     try {
       await this.shutdown();
     } catch (_error) {
-      console.error("基础设施层kernel关闭失败:", _error);
+      this.logger.log("基础设施层kernel关闭失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
     }
   }
 
@@ -123,7 +129,7 @@ export class InfrastructureKernelService
       // 初始化领域层集成
       await this.domainKernelIntegration.initialize();
 
-      console.log("基础设施层kernel初始化完成");
+      this.logger.log("基础设施层kernel初始化完成");
     } catch (_error) {
       throw new Error(
         `基础设施层kernel初始化失败: ${_error instanceof Error ? _error.message : "未知错误"}`,
@@ -157,9 +163,11 @@ export class InfrastructureKernelService
       // 关闭隔离管理器
       // await this.isolationManager.shutdown();
 
-      console.log("基础设施层kernel关闭完成");
+      this.logger.log("基础设施层kernel关闭完成");
     } catch (_error) {
-      console.error("基础设施层kernel关闭失败:", _error);
+      this.logger.log("基础设施层kernel关闭失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
     }
   }
 
@@ -248,7 +256,9 @@ export class InfrastructureKernelService
       healthChecks["domainKernelIntegration"] =
         await this.domainKernelIntegration.healthCheck();
     } catch (_error) {
-      console.error("健康检查失败:", _error);
+      this.logger.log("健康检查失败", {
+        error: _error instanceof Error ? _error.message : String(_error),
+      });
       // 设置所有服务为不健康
       for (const key of Object.keys(healthChecks)) {
         healthChecks[key] = false;

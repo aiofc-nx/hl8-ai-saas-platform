@@ -7,19 +7,45 @@
 
 ## Summary
 
-重新开发SAAS Core模块，采用Clean Architecture + DDD + CQRS + ES + EDA混合架构模式，基于@hl8内核组件进行开发，实现多租户数据隔离、完整的领域模型、事件驱动架构和CQRS模式。保留现有目录结构和子领域划分，遵循全局配置标准化要求。
+SAAS Core模块重新开发，采用Clean Architecture + DDD + CQRS + ES + EDA混合架构模式。核心要求：实现实体与聚合根分离（无论简单或复杂都必须分离）、充血模型设计、多租户数据隔离、事件驱动架构、优先使用@hl8/domain-kernel核心组件。
+
+**技术路径**：
+
+1. 领域层：使用@hl8/domain-kernel实现实体、值对象、聚合根，严格分离聚合根与内部实体
+2. 应用层：使用@hl8/application-kernel实现CQRS命令查询分离
+3. 基础设施层：实现PostgreSQL/MongoDB双重数据库支持，ROW_LEVEL_SECURITY隔离策略
+4. 接口层：使用@hl8/interface-kernel实现RESTful API和认证授权
+
+**核心约束**：
+
+- 必须实现实体与聚合根分离（MANDATORY）
+- 优先使用@hl8内核组件的现有值对象
+- 保持libs/saas-core现有目录结构
+- 支持8层部门架构
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.9.2, Node.js >= 20  
-**Primary Dependencies**: @hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel, @hl8/exceptions, @hl8/caching, @hl8/config, @hl8/nestjs-fastify, NestJS, PostgreSQL, MongoDB  
-**Storage**: PostgreSQL (default), MongoDB (optional), Redis (caching)  
-**Testing**: Jest, 90% code coverage for unit tests, 100% coverage for critical business logic  
-**Target Platform**: Linux server, Node.js runtime  
-**Project Type**: libs/saas-core (business library module)  
-**Performance Goals**: 1000 concurrent users without degradation, <200ms p95 response time  
-**Constraints**: 8 weeks development timeline, preserve existing directory structure, follow global configuration standardization  
-**Scale/Scope**: Multi-tenant SAAS platform supporting 5 tenant types (FREE/BASIC/PROFESSIONAL/ENTERPRISE/CUSTOM), 5-layer isolation architecture
+**Language/Version**: TypeScript 5.x with NodeNext module system  
+**Primary Dependencies**: NestJS, @hl8/domain-kernel, @hl8/application-kernel, @hl8/infrastructure-kernel, @hl8/interface-kernel  
+**Storage**: PostgreSQL (default), MongoDB (optional)  
+**Testing**: Jest with 90% coverage requirement  
+**Target Platform**: Node.js server-side application  
+**Project Type**: Monorepo using Turborepo, libs/saas-core subproject  
+**Performance Goals**: Support 1000 concurrent users without degradation  
+**Constraints**:
+
+- Entity-aggregate separation is MANDATORY for all aggregates (regardless of complexity)
+- Priority: use existing @hl8/domain-kernel value objects (TenantId, OrganizationId, DepartmentId, UserId, RoleId, GenericEntityId)
+- Support 8-layer department hierarchy
+- Maintain existing libs/saas-core directory structure
+- ROW_LEVEL_SECURITY for multi-tenant data isolation (default)
+- Rich domain model (充血模型) with business logic in domain objects
+- No anemic domain models allowed
+  **Scale/Scope**:
+- 8 distinct subdomains (Tenant, Organization, Department, User, Role, Auth, Authorization, Multi-Tenant Architecture)
+- 5 isolation levels (Platform → Tenant → Organization → Department → User)
+- 4 tenant types (FREE, BASIC, PROFESSIONAL, ENTERPRISE, CUSTOM)
+- 8-layer department nesting support
 
 ## Constitution Check
 
@@ -29,13 +55,14 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 - [x] **Clean Architecture**: Feature design follows four-layer architecture (Domain, Application, Infrastructure, Interface)
 - [x] **DDD Compliance**: Rich domain models with business logic, no anemic domain models
+- [x] **Entity-Aggregate Separation**: Aggregate roots are separated from internal entities (aggregate roots coordinate and publish events; internal entities execute operations and maintain state). **⚠️ MANDATORY**: ALL aggregates (simple or complex) MUST implement this separation
 - [x] **CQRS Pattern**: Commands and queries are properly separated
 - [x] **Event Sourcing**: State changes are recorded as events where applicable
 - [x] **Event-Driven Architecture**: Components communicate through events for loose coupling
 
 ### Monorepo Organization
 
-- [x] **Project Structure**: Feature follows apps/libs/packages/examples structure
+- [x] **Project Structure**: Feature follows apps/libs/packages/examples structure (libs/saas-core)
 - [x] **Domain Module Independence**: Domain modules are developed as independent projects
 - [x] **Service Naming**: Service modules in services directory drop "-service" suffix
 - [x] **Package Management**: Uses pnpm as package manager
@@ -80,7 +107,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### Documentation (this feature)
 
-```text
+```
 specs/[###-feature]/
 ├── plan.md              # This file (/speckit.plan command output)
 ├── research.md          # Phase 0 output (/speckit.plan command)
@@ -92,96 +119,79 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 
-```text
+```
 libs/saas-core/
 ├── src/
 │   ├── domain/
-│   │   ├── aggregates/
-│   │   │   ├── department.aggregate.ts
+│   │   ├── aggregates/          # 聚合根（协调内部实体并发布事件）
+│   │   │   ├── tenant.aggregate.ts
 │   │   │   ├── organization.aggregate.ts
-│   │   │   └── tenant.aggregate.ts
-│   │   ├── entities/
-│   │   │   ├── casl-ability.entity.ts
-│   │   │   ├── department.entity.ts
-│   │   │   ├── organization.entity.ts
-│   │   │   ├── platform.entity.ts
-│   │   │   ├── role.entity.ts
-│   │   │   ├── tenant.entity.ts
-│   │   │   └── user.entity.ts
-│   │   └── value-objects/
-│   │       ├── base-value-object.ts
-│   │       ├── casl-ability-id.vo.ts
-│   │       ├── casl-condition.vo.ts
-│   │       ├── casl-rule.vo.ts
-│   │       ├── department-level-config.vo.ts
-│   │       ├── permission-template.vo.ts
-│   │       ├── platform-id.vo.ts
-│   │       ├── platform-user.vo.ts
-│   │       ├── resource-limits.vo.ts
-│   │       ├── resource-usage.vo.ts
-│   │       ├── role-level.vo.ts
-│   │       ├── tenant-code.vo.ts
-│   │       ├── tenant-name-review-request.vo.ts
-│   │       ├── tenant-name-review-status.vo.ts
-│   │       ├── tenant-name.vo.ts
-│   │       ├── tenant-status.vo.ts
-│   │       ├── tenant-type.vo.ts
-│   │       ├── tenant-user.vo.ts
-│   │       ├── trial-period-config.vo.ts
-│   │       ├── user-department-assignment.vo.ts
-│   │       └── user-organization-assignment.vo.ts
+│   │   │   └── department.aggregate.ts
+│   │   ├── entities/            # 内部实体（执行业务操作和维护状态）
+│   │   │   ├── tenant-entity.ts
+│   │   │   ├── organization-entity.ts
+│   │   │   └── department-entity.ts
+│   │   ├── value-objects/       # 值对象（使用@hl8/domain-kernel优先）
+│   │   ├── domain-services/     # 领域服务
+│   │   └── events/              # 领域事件
 │   ├── application/
-│   │   ├── commands/
-│   │   │   ├── assign-permission.command.ts
-│   │   │   ├── create-tenant.command.ts
-│   │   │   ├── create-tenant.command.spec.ts
-│   │   │   ├── delete-tenant.command.ts
-│   │   │   └── update-tenant.command.ts
-│   │   ├── queries/
-│   │   │   ├── check-permission.query.ts
-│   │   │   ├── get-tenant.query.ts
-│   │   │   └── list-tenants.query.ts
-│   │   └── use-cases/
-│   │       ├── permission-management.use-case.ts
-│   │       └── tenant-creation.use-case.ts
+│   │   ├── commands/            # 命令
+│   │   ├── queries/             # 查询
+│   │   └── use-cases/           # 用例
 │   ├── infrastructure/
 │   │   ├── repositories/
-│   │   │   ├── mongodb/
 │   │   │   ├── postgresql/
-│   │   │   │   ├── department.repository.ts
-│   │   │   │   ├── organization.repository.ts
-│   │   │   │   ├── role.repository.ts
-│   │   │   │   ├── tenant.repository.ts
-│   │   │   │   └── user.repository.ts
-│   │   │   ├── tenant.repository.adapter.ts
-│   │   │   └── tenant.repository.impl.ts
-│   │   ├── casl/
-│   │   │   └── casl.config.ts
-│   │   └── cache/
-│   │       ├── cache.module.ts
-│   │       ├── cache.service.adapter.ts
-│   │       └── redis.config.ts
+│   │   │   └── mongodb/
+│   │   ├── casl/                # 权限规则
+│   │   ├── entities/            # 基础设施层实体
+│   │   ├── mappers/             # 映射器
+│   │   │   ├── postgresql/      # PostgreSQL 映射器
+│   │   │   └── mongodb/         # MongoDB 映射器
+│   │   ├── services/            # 基础设施服务
+│   │   │   ├── cqrs/            # CQRS 服务
+│   │   │   ├── isolation/       # 隔离服务
+│   │   │   ├── performance/     # 性能服务
+│   │   │   ├── database/        # 数据库服务
+│   │   │   ├── cache/           # 缓存服务
+│   │   │   └── error-handling/  # 错误处理服务
+│   │   ├── adapters/            # 适配器
+│   │   ├── kernel/              # 内核适配
+│   │   ├── event-sourcing/      # 事件溯源
+│   │   ├── interfaces/          # 基础设施接口
+│   │   ├── types/               # 类型定义
+│   │   └── utils/               # 工具类
 │   └── interface/
-│       └── controllers/
-│           └── tenant.controller.ts
-├── package.json
-├── tsconfig.json
-└── eslint.config.mjs
+│       ├── controllers/         # RESTful控制器
+│       ├── dto/                 # 数据传输对象
+│       └── guards/              # 认证授权守卫
+├── tests/
+│   ├── integration/             # 集成测试
+│   └── e2e/                     # 端到端测试
+└── *.spec.ts                    # 单元测试（与源文件同目录）
 
-tests/
-├── integration/
-└── e2e/
+libs/domain-kernel/              # @hl8/domain-kernel（内核组件）
+libs/application-kernel/         # @hl8/application-kernel
+libs/infrastructure-kernel/      # @hl8/infrastructure-kernel
+libs/interface-kernel/           # @hl8/interface-kernel
 ```
 
-## Structure Decision
+**Structure Decision**:
 
-保留现有的libs/saas-core目录结构，遵循Clean Architecture四层架构（Domain, Application, Infrastructure, Interface），维持现有的子领域划分和文件组织方式。所有配置遵循全局配置标准化要求。
+- 采用monorepo结构，libs/saas-core为核心业务模块
+- Clean Architecture四层架构：domain → application → infrastructure → interface
+- 实体与聚合根分离：aggregates/包含聚合根，entities/包含内部实体
+- 优先使用@hl8内核组件提供的基类和值对象
+- 保持现有libs/saas-core目录结构不变
+- 支持PostgreSQL和MongoDB双重数据库
 
 ## Complexity Tracking
 
-_Fill ONLY if Constitution Check has violations that must be justified_
+_No violations: All Constitution Check items passed with proper architectural decisions._
 
-| Violation                  | Why Needed         | Simpler Alternative Rejected Because |
-| -------------------------- | ------------------ | ------------------------------------ |
-| [e.g., 4th project]        | [current need]     | [why 3 projects insufficient]        |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient]  |
+**Key Architectural Decisions**:
+
+1. **Entity-Aggregate Separation (MANDATORY)**: All aggregates (simple or complex) must separate aggregate roots from internal entities for future-proofing and consistency
+2. **Priority on @hl8 Kernel Components**: Reuse existing value objects and base classes from @hl8/domain-kernel instead of creating duplicates
+3. **Dual Database Support**: PostgreSQL as default, MongoDB as optional to support flexible data storage strategies
+4. **8-Layer Department Hierarchy**: Support deep organizational structures with path tracking and hierarchical queries
+5. **ROW_LEVEL_SECURITY**: Default multi-tenant isolation strategy with progressive scaling options (SCHEMA_PER_TENANT, DATABASE_PER_TENANT)

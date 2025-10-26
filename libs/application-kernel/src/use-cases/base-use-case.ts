@@ -8,6 +8,7 @@
  */
 import { IUseCaseContext } from "../context/use-case-context.interface.js";
 import { GeneralBadRequestException } from "@hl8/exceptions";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 
 /**
  * 基础用例抽象类
@@ -38,6 +39,11 @@ export abstract class BaseUseCase<TRequest, TResponse> {
    * 所需权限
    */
   protected readonly requiredPermissions: string[];
+
+  /**
+   * 日志服务
+   */
+  protected logger?: FastifyLoggerService;
 
   /**
    * 构造函数
@@ -126,7 +132,9 @@ export abstract class BaseUseCase<TRequest, TResponse> {
     // 这里应该实现权限验证逻辑
     // 在实际实现中，应该检查用户是否具有所需权限
     // 为了简化，这里只是示例
-    console.log(`验证权限: ${this.requiredPermissions.join(", ")}`);
+    if (this.logger) {
+      this.logger.log("验证权限", { permissions: this.requiredPermissions });
+    }
 
     // 如果权限验证失败，应该抛出异常
     // 这里提供一个示例，实际实现需要根据具体的权限验证逻辑

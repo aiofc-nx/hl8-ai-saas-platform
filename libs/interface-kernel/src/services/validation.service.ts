@@ -3,7 +3,8 @@
  * @description 提供数据验证功能，包括请求数据验证、类型检查、业务规则验证等
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { z } from "zod";
 import { GeneralBadRequestException } from "@hl8/exceptions";
 import type {
@@ -27,10 +28,9 @@ interface ValidationResult {
  */
 @Injectable()
 export class ValidationService {
-  private readonly logger = new Logger(ValidationService.name);
   private readonly validationSchemas: Map<string, z.ZodSchema> = new Map();
 
-  constructor() {
+  constructor(private readonly logger: FastifyLoggerService) {
     this.logger.log("Validation Service initialized");
     this.initializeDefaultSchemas();
   }

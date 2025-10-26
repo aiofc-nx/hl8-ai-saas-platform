@@ -3,7 +3,8 @@
  * @description 提供系统健康检查接口
  */
 
-import { Controller, Get, Logger } from "@nestjs/common";
+import { Controller, Get } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { HealthCheckService } from "../services/health-check.service.js";
 import { MonitoringService } from "../services/monitoring.service.js";
 import type { HealthCheckResult } from "../types/index.js";
@@ -49,9 +50,8 @@ interface SystemInfo {
  */
 @Controller("health")
 export class HealthController {
-  private readonly logger = new Logger(HealthController.name);
-
   constructor(
+    private readonly logger: FastifyLoggerService,
     private readonly healthCheckService: HealthCheckService,
     private readonly monitoringService: MonitoringService,
   ) {

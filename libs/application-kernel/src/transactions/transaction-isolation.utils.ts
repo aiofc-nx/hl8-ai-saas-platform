@@ -7,6 +7,7 @@
  * @since 1.0.0
  */
 import { ITransactionManager } from "./transaction-manager.interface.js";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 
 /**
  * 事务隔离级别
@@ -83,6 +84,14 @@ export interface TransactionIsolationResult {
  * 提供事务隔离的实用工具函数
  */
 export class TransactionIsolationUtils {
+  private static logger?: FastifyLoggerService;
+
+  /**
+   * 设置日志服务
+   */
+  static setLogger(logger: FastifyLoggerService): void {
+    this.logger = logger;
+  }
   /**
    * 设置事务隔离级别
    *
@@ -161,7 +170,9 @@ export class TransactionIsolationUtils {
     // 这里需要根据实际的事务管理器实现
     // 例如：await transactionManager.setIsolationLevel(level);
     // 例如：await transactionManager.setReadOnly(readOnly);
-    console.log(`设置隔离级别: ${level}, 只读: ${readOnly}`);
+    if (this.logger) {
+      this.logger.log("设置隔离级别", { level, readOnly });
+    }
   }
 
   /**
@@ -176,7 +187,9 @@ export class TransactionIsolationUtils {
   ): Promise<void> {
     // 这里需要根据实际的事务管理器实现
     // 例如：await transactionManager.setTimeout(timeout);
-    console.log(`设置事务超时: ${timeout}ms`);
+    if (this.logger) {
+      this.logger.log("设置事务超时", { timeout });
+    }
   }
 
   /**
@@ -189,7 +202,9 @@ export class TransactionIsolationUtils {
   ): Promise<void> {
     // 这里需要根据实际的事务管理器实现
     // 例如：await transactionManager.enableDeadlockDetection();
-    console.log("启用死锁检测");
+    if (this.logger) {
+      this.logger.log("启用死锁检测");
+    }
   }
 
   /**
@@ -204,7 +219,9 @@ export class TransactionIsolationUtils {
   ): Promise<void> {
     // 这里需要根据实际的事务管理器实现
     // 例如：await transactionManager.setLockWaitTimeout(timeout);
-    console.log(`设置锁等待超时: ${timeout}ms`);
+    if (this.logger) {
+      this.logger.log("设置锁等待超时", { timeout });
+    }
   }
 
   /**
@@ -221,7 +238,11 @@ export class TransactionIsolationUtils {
       // 例如：return await transactionManager.detectDeadlock();
       return false;
     } catch (error) {
-      console.error("死锁检测失败:", error);
+      if (this.logger) {
+        this.logger.log("死锁检测失败", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
       return false;
     }
   }
@@ -240,7 +261,11 @@ export class TransactionIsolationUtils {
       // 例如：return await transactionManager.resolveDeadlock();
       return true;
     } catch (error) {
-      console.error("死锁解决失败:", error);
+      if (this.logger) {
+        this.logger.log("死锁解决失败", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
       return false;
     }
   }

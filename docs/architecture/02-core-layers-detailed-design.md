@@ -32,6 +32,73 @@ Domain Layer (领域层)
 └── Interfaces (接口定义)
 ```
 
+#### 1.1.1 实体与聚合根分离原则 ⚠️
+
+**重要原则**：实体与聚合根必须分离，这是项目架构的核心原则。
+
+**⚠️ 强制性要求**：**无论聚合简单或复杂，都必须实现实体与聚合根分离**。原因：
+
+- **业务会变化**：现在简单的聚合未来可能变复杂
+- **架构一致性**：所有聚合都遵循相同模式，降低理解成本
+- **可维护性**：分离模式使代码更易维护和扩展
+- **团队规范**：统一的实现模式避免决策成本
+
+**分离模式**：
+
+- **聚合根**：管理聚合边界，协调内部实体，发布领域事件，验证业务规则
+- **内部实体**：执行具体业务操作，维护自身状态，遵循聚合根指令
+
+**实现方式**：
+
+```typescript
+// 聚合根 - 管理者
+export class Tenant extends AggregateRoot<TenantId> {
+  private _tenant: TenantEntity; // 内部实体（必须存在，即使是简单聚合）
+
+  public changeStatus(newStatus: TenantStatus): void {
+    // 1. 协调：委托给内部实体执行
+    this._tenant.updateStatus(newStatus);
+
+    // 2. 事件：发布领域事件
+    this.raiseEvent("TenantStatusChanged", {...});
+  }
+}
+
+// 内部实体 - 被管理者（即使是简单聚合也必须存在）
+export class TenantEntity {
+  updateStatus(newStatus: TenantStatus): void {
+    // 执行业务逻辑
+    this._status = newStatus;
+  }
+}
+```
+
+**❌ 错误做法**：
+
+```typescript
+// ❌ 错误：即使是简单聚合也不能直接继承AggregateRoot
+export class Tenant extends AggregateRoot<TenantId> {
+  private _code: string;
+  // ... 其他属性直接放在聚合根中
+}
+```
+
+**✅ 正确做法**：
+
+```typescript
+// ✅ 正确：即使是简单聚合也要分离
+export class Tenant extends AggregateRoot<TenantId> {
+  private _tenant: TenantEntity; // 即使是简单聚合也要有内部实体
+}
+
+export class TenantEntity {
+  private _code: string;
+  // ... 业务逻辑
+}
+```
+
+**详细说明**：详见 `libs/domain-kernel/docs/06-DOMAIN_LAYER_DEVELOPMENT_GUIDE.md` 第3节
+
 ### 1.2 核心组件
 
 #### 1.2.1 实体 (Entities)

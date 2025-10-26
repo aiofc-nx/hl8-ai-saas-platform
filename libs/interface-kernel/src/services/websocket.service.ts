@@ -3,7 +3,8 @@
  * @description 提供 WebSocket 连接和消息处理功能
  */
 
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import { Server, Socket } from "socket.io";
 import { AuthenticationService } from "./authentication.service.js";
 import { AuthorizationService } from "./authorization.service.js";
@@ -35,12 +36,12 @@ interface WebSocketEventData {
  */
 @Injectable()
 export class WebSocketService {
-  private readonly logger = new Logger(WebSocketService.name);
   private io: Server;
   private connections: Map<string, WebSocketConnection> = new Map();
   private rooms: Map<string, Set<string>> = new Map();
 
   constructor(
+    private readonly logger: FastifyLoggerService,
     private readonly authenticationService: AuthenticationService,
     private readonly authorizationService: AuthorizationService,
     private readonly rateLimitService: RateLimitService,

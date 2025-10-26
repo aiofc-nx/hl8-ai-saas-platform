@@ -7,6 +7,7 @@
  * @since 1.0.0
  */
 import { ITransactionManager } from "./transaction-manager.interface.js";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 
 /**
  * 回滚策略
@@ -88,6 +89,14 @@ export interface RollbackResult {
  * 提供事务回滚的实用工具函数
  */
 export class TransactionRollbackUtils {
+  private static logger?: FastifyLoggerService;
+
+  /**
+   * 设置日志服务
+   */
+  static setLogger(logger: FastifyLoggerService): void {
+    this.logger = logger;
+  }
   /**
    * 执行事务回滚
    *
@@ -154,7 +163,14 @@ export class TransactionRollbackUtils {
         try {
           await errorHandler(lastError);
         } catch (handlerError) {
-          console.error("错误处理器执行失败:", handlerError);
+          if (this.logger) {
+            this.logger.log("错误处理器执行失败", {
+              error:
+                handlerError instanceof Error
+                  ? handlerError.message
+                  : String(handlerError),
+            });
+          }
         }
       }
 

@@ -3,7 +3,7 @@
  * @description 提供统一的错误处理功能
  */
 
-import { Logger } from "@nestjs/common";
+import { FastifyLoggerService } from "@hl8/nestjs-fastify";
 import type { ApiResponse } from "../types/index.js";
 
 /**
@@ -53,7 +53,7 @@ interface ErrorObject {
  * @description 提供统一的错误处理功能
  */
 export class ErrorHandler {
-  private static readonly logger = new Logger(ErrorHandler.name);
+  private static logger: FastifyLoggerService;
 
   /**
    * 处理错误
