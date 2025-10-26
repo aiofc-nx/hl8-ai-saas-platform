@@ -37,17 +37,18 @@ import { EnhancedErrorHandlerService } from "./services/error-handling/enhanced-
 
 // 转换原生错误为标准化异常
 const originalError = new Error("Database connection failed");
-const standardException = InfrastructureExceptionConverter.convertToStandardException(
-  originalError,
-  "DATABASE",
-  { operation: "getConnection", connectionName: "test-db" }
-);
+const standardException =
+  InfrastructureExceptionConverter.convertToStandardException(
+    originalError,
+    "DATABASE",
+    { operation: "getConnection", connectionName: "test-db" },
+  );
 
 // 使用增强的错误处理器
 const errorHandler = new EnhancedErrorHandlerService();
 const result = await errorHandler.handleError(originalError, {
   operation: "database_query",
-  context: "user_management"
+  context: "user_management",
 });
 ```
 
@@ -63,21 +64,22 @@ const result = await errorHandler.handleError(originalError, {
 // 错误类型映射
 const errorTypes = {
   DATABASE: "数据库操作错误",
-  CACHE: "缓存操作错误", 
+  CACHE: "缓存操作错误",
   NETWORK: "网络连接错误",
   ISOLATION: "数据隔离违规",
   SYSTEM: "系统内部错误",
   INTEGRATION: "集成服务错误",
   VALIDATION: "数据验证失败",
-  UNKNOWN: "未知基础设施错误"
+  UNKNOWN: "未知基础设施错误",
 };
 
 // 使用示例
-const standardException = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "DATABASE",
-  { operation: "createConnection" }
-);
+const standardException =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "DATABASE",
+    { operation: "createConnection" },
+  );
 ```
 
 ### 2. EnhancedErrorHandlerService
@@ -91,14 +93,14 @@ const standardException = InfrastructureExceptionConverter.convertToStandardExce
 const result = await enhancedErrorHandler.handleInfrastructureError(
   error,
   "DATABASE",
-  { connectionName: "test-db" }
+  { connectionName: "test-db" },
 );
 
 // 批量处理错误
 const results = await enhancedErrorHandler.handleBatchErrors([
   { error: dbError, type: "DATABASE" },
   { error: cacheError, type: "CACHE" },
-  { error: networkError, type: "NETWORK" }
+  { error: networkError, type: "NETWORK" },
 ]);
 ```
 
@@ -119,7 +121,7 @@ const standardError = error instanceof Error ? error : new Error(String(error));
 throw InfrastructureExceptionConverter.convertToStandardException(
   standardError,
   "DATABASE",
-  { operation: "getConnection", connectionName: name }
+  { operation: "getConnection", connectionName: name },
 );
 ```
 
@@ -138,7 +140,7 @@ const standardError = error instanceof Error ? error : new Error(String(error));
 throw InfrastructureExceptionConverter.convertToStandardException(
   standardError,
   "DATABASE",
-  { operation: "findById", entityId: id }
+  { operation: "findById", entityId: id },
 );
 ```
 
@@ -167,7 +169,7 @@ const errorHandler = new EnhancedErrorHandlerService({
   enableLogging: true,
   enableMonitoring: true,
   logLevel: "info",
-  monitoringEndpoint: "https://monitoring.example.com"
+  monitoringEndpoint: "https://monitoring.example.com",
 });
 ```
 
@@ -175,25 +177,25 @@ const errorHandler = new EnhancedErrorHandlerService({
 
 ### 1. 按错误类型分类
 
-| 错误类型 | 异常类 | HTTP状态码 | 错误代码 | 描述 |
-|---------|--------|-----------|----------|------|
-| DATABASE | SystemInternalException | 500 | INFRA_DATABASE_ERROR | 数据库操作错误 |
-| CACHE | SystemInternalException | 500 | INFRA_CACHE_ERROR | 缓存操作错误 |
-| NETWORK | ExternalServiceUnavailableException | 503 | INFRA_NETWORK_ERROR | 网络连接错误 |
-| ISOLATION | InfrastructureLayerException | 403 | INFRA_ISOLATION_ERROR | 数据隔离违规 |
-| SYSTEM | SystemInternalException | 500 | INFRA_SYSTEM_ERROR | 系统内部错误 |
-| INTEGRATION | IntegrationServiceException | 502 | INFRA_INTEGRATION_ERROR | 集成服务错误 |
-| VALIDATION | GeneralBadRequestException | 400 | INFRA_VALIDATION_ERROR | 数据验证失败 |
-| UNKNOWN | GeneralInternalServerException | 500 | INFRA_UNKNOWN_ERROR | 未知基础设施错误 |
+| 错误类型    | 异常类                              | HTTP状态码 | 错误代码                | 描述             |
+| ----------- | ----------------------------------- | ---------- | ----------------------- | ---------------- |
+| DATABASE    | SystemInternalException             | 500        | INFRA_DATABASE_ERROR    | 数据库操作错误   |
+| CACHE       | SystemInternalException             | 500        | INFRA_CACHE_ERROR       | 缓存操作错误     |
+| NETWORK     | ExternalServiceUnavailableException | 503        | INFRA_NETWORK_ERROR     | 网络连接错误     |
+| ISOLATION   | InfrastructureLayerException        | 403        | INFRA_ISOLATION_ERROR   | 数据隔离违规     |
+| SYSTEM      | SystemInternalException             | 500        | INFRA_SYSTEM_ERROR      | 系统内部错误     |
+| INTEGRATION | IntegrationServiceException         | 502        | INFRA_INTEGRATION_ERROR | 集成服务错误     |
+| VALIDATION  | GeneralBadRequestException          | 400        | INFRA_VALIDATION_ERROR  | 数据验证失败     |
+| UNKNOWN     | GeneralInternalServerException      | 500        | INFRA_UNKNOWN_ERROR     | 未知基础设施错误 |
 
 ### 2. 按严重级别分类
 
-| 严重级别 | 描述 | 处理策略 |
-|---------|------|----------|
-| CRITICAL | 严重错误，系统无法继续运行 | 立即停止服务，发送告警 |
-| HIGH | 高优先级错误，影响核心功能 | 记录错误，尝试恢复 |
-| MEDIUM | 中等优先级错误，影响部分功能 | 记录错误，继续运行 |
-| LOW | 低优先级错误，不影响核心功能 | 记录日志，正常处理 |
+| 严重级别 | 描述                         | 处理策略               |
+| -------- | ---------------------------- | ---------------------- |
+| CRITICAL | 严重错误，系统无法继续运行   | 立即停止服务，发送告警 |
+| HIGH     | 高优先级错误，影响核心功能   | 记录错误，尝试恢复     |
+| MEDIUM   | 中等优先级错误，影响部分功能 | 记录错误，继续运行     |
+| LOW      | 低优先级错误，不影响核心功能 | 记录日志，正常处理     |
 
 ## 🧪 测试
 
@@ -204,12 +206,13 @@ const errorHandler = new EnhancedErrorHandlerService({
 describe("InfrastructureExceptionConverter", () => {
   it("should convert database errors to standardized exceptions", () => {
     const originalError = new Error("Database connection failed");
-    const standardException = InfrastructureExceptionConverter.convertToStandardException(
-      originalError,
-      "DATABASE",
-      { operation: "getConnection" }
-    );
-    
+    const standardException =
+      InfrastructureExceptionConverter.convertToStandardException(
+        originalError,
+        "DATABASE",
+        { operation: "getConnection" },
+      );
+
     expect(standardException).toBeInstanceOf(SystemInternalException);
     expect(standardException.errorCode).toBe("INFRA_DATABASE_ERROR");
   });
@@ -223,9 +226,10 @@ describe("InfrastructureExceptionConverter", () => {
 describe("DatabaseService Integration", () => {
   it("should throw standardized exceptions for connection failures", async () => {
     const dbService = new DatabaseService(mockConnectionManager);
-    
-    await expect(dbService.getConnection("test-db"))
-      .rejects.toThrow(SystemInternalException);
+
+    await expect(dbService.getConnection("test-db")).rejects.toThrow(
+      SystemInternalException,
+    );
   });
 });
 ```
@@ -271,12 +275,12 @@ const monitoringData = {
   timestamp: "2025-01-27T10:30:00.000Z",
   context: {
     operation: "getConnection",
-    connectionName: "test-db"
+    connectionName: "test-db",
   },
   tags: {
     layer: "infrastructure",
-    severity: "CRITICAL"
-  }
+    severity: "CRITICAL",
+  },
 };
 ```
 
@@ -296,11 +300,12 @@ try {
 try {
   await databaseOperation();
 } catch (error) {
-  const standardError = error instanceof Error ? error : new Error(String(error));
+  const standardError =
+    error instanceof Error ? error : new Error(String(error));
   throw InfrastructureExceptionConverter.convertToStandardException(
     standardError,
     "DATABASE",
-    { operation: "databaseOperation" }
+    { operation: "databaseOperation" },
   );
 }
 ```
@@ -319,14 +324,14 @@ const errorHandler = new EnhancedErrorHandlerService();
 
 ```typescript
 // 批量转换错误处理
-const errors = await Promise.allSettled(operations.map(op => op.execute()));
+const errors = await Promise.allSettled(operations.map((op) => op.execute()));
 const failedOperations = errors
-  .filter(result => result.status === 'rejected')
-  .map(result => result.reason);
+  .filter((result) => result.status === "rejected")
+  .map((result) => result.reason);
 
 if (failedOperations.length > 0) {
   const batchResults = await enhancedErrorHandler.handleBatchErrors(
-    failedOperations.map(error => ({ error }))
+    failedOperations.map((error) => ({ error })),
   );
 }
 ```
@@ -344,15 +349,16 @@ const context = {
   operation: "user_creation",
   userId: user.id,
   tenantId: tenant.id,
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 };
 
 // 3. 记录详细的错误信息
-const standardException = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  errorType,
-  context
-);
+const standardException =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    errorType,
+    context,
+  );
 ```
 
 ### 2. 性能优化
@@ -380,7 +386,7 @@ const sanitizedContext = {
 };
 
 // 2. 生产环境限制错误详情
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 const errorDetail = isProduction ? "内部服务器错误" : error.message;
 ```
 
@@ -405,7 +411,7 @@ if (!errorType) {
 const context = {
   ...baseContext,
   operation: "specific_operation",
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 };
 ```
 
@@ -415,7 +421,7 @@ const context = {
 // 1. 启用详细日志
 const errorHandler = new EnhancedErrorHandlerService({
   enableLogging: true,
-  logLevel: "debug"
+  logLevel: "debug",
 });
 
 // 2. 检查异常堆栈

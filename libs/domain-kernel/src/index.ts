@@ -19,6 +19,7 @@ export { TenantId } from "./value-objects/ids/tenant-id.vo.js";
 export { OrganizationId } from "./value-objects/ids/organization-id.vo.js";
 export { DepartmentId } from "./value-objects/ids/department-id.vo.js";
 export { UserId } from "./value-objects/ids/user-id.vo.js";
+export { RoleId } from "./value-objects/ids/role-id.vo.js";
 export { GenericEntityId } from "./value-objects/ids/generic-entity-id.vo.js";
 
 // 数据隔离相关

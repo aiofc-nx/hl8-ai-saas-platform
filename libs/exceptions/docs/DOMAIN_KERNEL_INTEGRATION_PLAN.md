@@ -42,7 +42,7 @@ export abstract class DomainException extends Error {
   ) {
     super(message);
     this.name = this.constructor.name;
-    
+
     // 设置原型链（TypeScript 继承 Error 的必需操作）
     Object.setPrototypeOf(this, DomainException.prototype);
   }
@@ -113,13 +113,16 @@ export class ExceptionConverter {
    * @param result 验证结果
    * @returns 异常数组
    */
-  static convertValidationResult(result: BusinessRuleValidationResult): DomainException[] {
-    return result.errors.map(error => 
-      new BusinessRuleViolationException(
-        error.code,
-        error.message,
-        error.context
-      )
+  static convertValidationResult(
+    result: BusinessRuleValidationResult,
+  ): DomainException[] {
+    return result.errors.map(
+      (error) =>
+        new BusinessRuleViolationException(
+          error.code,
+          error.message,
+          error.context,
+        ),
     );
   }
 
@@ -128,16 +131,18 @@ export class ExceptionConverter {
    * @param result 验证结果
    * @returns 异常或 null
    */
-  static convertToSingleException(result: BusinessRuleValidationResult): DomainException | null {
+  static convertToSingleException(
+    result: BusinessRuleValidationResult,
+  ): DomainException | null {
     if (result.isValid) {
       return null;
     }
-    
+
     const firstError = result.errors[0];
     return new BusinessRuleViolationException(
       firstError.code,
       firstError.message,
-      firstError.context
+      firstError.context,
     );
   }
 }
@@ -170,12 +175,12 @@ export class BusinessRuleViolationException extends DomainException {
   toHttpException(): any {
     // 动态导入 libs/exceptions，避免硬依赖
     try {
-      const { BusinessRuleViolationException } = require('@hl8/exceptions/core/business');
-      return new BusinessRuleViolationException(
-        this.code,
-        this.message,
-        { ...this.context }
-      );
+      const {
+        BusinessRuleViolationException,
+      } = require("@hl8/exceptions/core/business");
+      return new BusinessRuleViolationException(this.code, this.message, {
+        ...this.context,
+      });
     } catch (error) {
       // 如果 libs/exceptions 不可用，返回基础异常
       return new Error(this.message);
@@ -208,11 +213,13 @@ export class ValidationException extends DomainException {
 
   toHttpException(): any {
     try {
-      const { ValidationFailedException } = require('@hl8/exceptions/core/validation');
+      const {
+        ValidationFailedException,
+      } = require("@hl8/exceptions/core/validation");
       return new ValidationFailedException(
-        this.context?.field as string || 'unknown',
+        (this.context?.field as string) || "unknown",
         this.message,
-        { ...this.context }
+        { ...this.context },
       );
     } catch (error) {
       return new Error(this.message);
@@ -245,11 +252,12 @@ export class TenantIsolationException extends DomainException {
 
   toHttpException(): any {
     try {
-      const { InvalidTenantContextException } = require('@hl8/exceptions/core/tenant');
-      return new InvalidTenantContextException(
-        this.message,
-        { ...this.context }
-      );
+      const {
+        InvalidTenantContextException,
+      } = require("@hl8/exceptions/core/tenant");
+      return new InvalidTenantContextException(this.message, {
+        ...this.context,
+      });
     } catch (error) {
       return new Error(this.message);
     }
@@ -281,7 +289,7 @@ export class BusinessRuleValidator<Context = unknown> {
       throw new BusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        firstError.context
+        firstError.context,
       );
     }
   }
@@ -291,14 +299,16 @@ export class BusinessRuleValidator<Context = unknown> {
    * @param context 验证上下文
    * @returns 异常或 null
    */
-  validateAndReturnException(context: Context): BusinessRuleViolationException | null {
+  validateAndReturnException(
+    context: Context,
+  ): BusinessRuleViolationException | null {
     const result = this.validate(context);
     if (!result.isValid) {
       const firstError = result.errors[0];
       return new BusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        firstError.context
+        firstError.context,
       );
     }
     return null;
@@ -326,7 +336,7 @@ export class BusinessRuleManager<Context = unknown> {
       throw new BusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        firstError.context
+        firstError.context,
       );
     }
   }
@@ -336,14 +346,17 @@ export class BusinessRuleManager<Context = unknown> {
    * @param context 验证上下文
    * @returns 异常数组
    */
-  validateAllAndReturnExceptions(context: Context): BusinessRuleViolationException[] {
+  validateAllAndReturnExceptions(
+    context: Context,
+  ): BusinessRuleViolationException[] {
     const result = this.validateAll(context);
-    return result.errors.map(error => 
-      new BusinessRuleViolationException(
-        error.code,
-        error.message,
-        error.context
-      )
+    return result.errors.map(
+      (error) =>
+        new BusinessRuleViolationException(
+          error.code,
+          error.message,
+          error.context,
+        ),
     );
   }
 }
@@ -394,11 +407,9 @@ export class BaseEntity {
   protected validateEntityData(): void {
     // 验证逻辑
     if (!this.isValid()) {
-      throw new ValidationException(
-        'entity',
-        '实体数据验证失败',
-        { entityId: this.id.toString() }
-      );
+      throw new ValidationException("entity", "实体数据验证失败", {
+        entityId: this.id.toString(),
+      });
     }
   }
 
@@ -421,27 +432,27 @@ export class BaseEntity {
 ```typescript
 import { BusinessRuleViolationException } from "./business-rule.exception.js";
 
-describe('DomainException', () => {
-  describe('BusinessRuleViolationException', () => {
-    it('应该创建异常实例', () => {
+describe("DomainException", () => {
+  describe("BusinessRuleViolationException", () => {
+    it("应该创建异常实例", () => {
       const exception = new BusinessRuleViolationException(
-        'INVALID_EMAIL',
-        '邮箱格式无效',
-        { email: 'invalid-email' }
+        "INVALID_EMAIL",
+        "邮箱格式无效",
+        { email: "invalid-email" },
       );
 
-      expect(exception.code).toBe('INVALID_EMAIL');
-      expect(exception.message).toBe('邮箱格式无效');
-      expect(exception.context).toEqual({ email: 'invalid-email' });
-      expect(exception.getCategory()).toBe('business');
-      expect(exception.getLayer()).toBe('domain');
+      expect(exception.code).toBe("INVALID_EMAIL");
+      expect(exception.message).toBe("邮箱格式无效");
+      expect(exception.context).toEqual({ email: "invalid-email" });
+      expect(exception.getCategory()).toBe("business");
+      expect(exception.getLayer()).toBe("domain");
     });
 
-    it('应该转换为 HTTP 异常', () => {
+    it("应该转换为 HTTP 异常", () => {
       const exception = new BusinessRuleViolationException(
-        'INVALID_EMAIL',
-        '邮箱格式无效',
-        { email: 'invalid-email' }
+        "INVALID_EMAIL",
+        "邮箱格式无效",
+        { email: "invalid-email" },
       );
 
       const httpException = exception.toHttpException();
@@ -459,7 +470,7 @@ describe('DomainException', () => {
 import { BusinessRuleManager, UserRegistrationBusinessRule } from "./index.js";
 import { BusinessRuleViolationException } from "../exceptions/business-rule.exception.js";
 
-describe('BusinessRuleManager Integration', () => {
+describe("BusinessRuleManager Integration", () => {
   let manager: BusinessRuleManager;
 
   beforeEach(() => {
@@ -467,14 +478,14 @@ describe('BusinessRuleManager Integration', () => {
     manager.registerValidator(new UserRegistrationBusinessRule());
   });
 
-  it('应该验证并抛出异常', () => {
+  it("应该验证并抛出异常", () => {
     const context = {
-      operation: 'user_registration',
+      operation: "user_registration",
       userData: {
-        email: 'invalid-email',
-        username: 'user',
-        password: 'weak'
-      }
+        email: "invalid-email",
+        username: "user",
+        password: "weak",
+      },
     };
 
     expect(() => {
@@ -482,14 +493,14 @@ describe('BusinessRuleManager Integration', () => {
     }).toThrow(BusinessRuleViolationException);
   });
 
-  it('应该验证并返回异常数组', () => {
+  it("应该验证并返回异常数组", () => {
     const context = {
-      operation: 'user_registration',
+      operation: "user_registration",
       userData: {
-        email: 'invalid-email',
-        username: 'user',
-        password: 'weak'
-      }
+        email: "invalid-email",
+        username: "user",
+        password: "weak",
+      },
     };
 
     const exceptions = manager.validateAllAndReturnExceptions(context);
@@ -503,7 +514,7 @@ describe('BusinessRuleManager Integration', () => {
 
 **文件**: `libs/domain-kernel/README.md`
 
-```markdown
+````markdown
 ## 异常处理
 
 Domain Kernel 现在支持与 `@hl8/exceptions` 的集成，提供统一的异常处理体验。
@@ -511,7 +522,10 @@ Domain Kernel 现在支持与 `@hl8/exceptions` 的集成，提供统一的异�
 ### 使用示例
 
 ```typescript
-import { BusinessRuleManager, UserRegistrationBusinessRule } from "@hl8/domain-kernel";
+import {
+  BusinessRuleManager,
+  UserRegistrationBusinessRule,
+} from "@hl8/domain-kernel";
 
 const manager = new BusinessRuleManager();
 manager.registerValidator(new UserRegistrationBusinessRule());
@@ -526,6 +540,7 @@ try {
   }
 }
 ```
+````
 
 ### 异常类型
 
@@ -533,7 +548,7 @@ try {
 - `ValidationException` - 数据验证异常
 - `TenantIsolationException` - 租户隔离异常
 
-```
+````
 
 ## 🔧 配置和依赖
 
@@ -555,7 +570,7 @@ try {
     }
   }
 }
-```
+````
 
 ### 类型定义
 
@@ -567,7 +582,9 @@ try {
  */
 export interface ExceptionConverter {
   convertToHttpException(domainException: DomainException): any;
-  convertValidationResult(result: BusinessRuleValidationResult): DomainException[];
+  convertValidationResult(
+    result: BusinessRuleValidationResult,
+  ): DomainException[];
 }
 
 /**
@@ -577,19 +594,19 @@ export interface ExceptionFactory {
   createBusinessRuleViolationException(
     code: string,
     message: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): BusinessRuleViolationException;
-  
+
   createValidationException(
     field: string,
     message: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): ValidationException;
-  
+
   createTenantIsolationException(
     message: string,
     code: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): TenantIsolationException;
 }
 ```
@@ -606,7 +623,7 @@ export interface ExceptionFactory {
 // 旧的方式
 const result = businessRuleManager.validateAll(context);
 if (!result.isValid) {
-  console.log('验证失败:', result.errors);
+  console.log("验证失败:", result.errors);
 }
 ```
 
@@ -630,14 +647,14 @@ try {
 
 ```typescript
 // 旧的异常类型
-throw new IsolationValidationError('租户ID无效', 'INVALID_TENANT_ID');
+throw new IsolationValidationError("租户ID无效", "INVALID_TENANT_ID");
 ```
 
 **迁移后：**
 
 ```typescript
 // 新的异常类型
-throw new TenantIsolationException('租户ID无效', 'INVALID_TENANT_ID');
+throw new TenantIsolationException("租户ID无效", "INVALID_TENANT_ID");
 ```
 
 ### 兼容性保证

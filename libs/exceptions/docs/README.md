@@ -137,7 +137,10 @@
 ### 1. 认证授权
 
 ```typescript
-import { AuthenticationFailedException, UnauthorizedException } from '@hl8/exceptions/core/auth';
+import {
+  AuthenticationFailedException,
+  UnauthorizedException,
+} from "@hl8/exceptions/core/auth";
 
 // 认证失败
 throw new AuthenticationFailedException("用户名或密码错误");
@@ -149,7 +152,10 @@ throw new UnauthorizedException("您没有权限访问此资源");
 ### 2. 用户管理
 
 ```typescript
-import { UserNotFoundException, UserAlreadyExistsException } from '@hl8/exceptions/core/user';
+import {
+  UserNotFoundException,
+  UserAlreadyExistsException,
+} from "@hl8/exceptions/core/user";
 
 // 用户不存在
 throw new UserNotFoundException(userId);
@@ -161,7 +167,10 @@ throw new UserAlreadyExistsException(email, "email");
 ### 3. 多租户
 
 ```typescript
-import { CrossTenantAccessException, DataIsolationViolationException } from '@hl8/exceptions/core/tenant';
+import {
+  CrossTenantAccessException,
+  DataIsolationViolationException,
+} from "@hl8/exceptions/core/tenant";
 
 // 跨租户访问违规
 throw new CrossTenantAccessException(currentTenantId, targetTenantId);
@@ -173,13 +182,19 @@ throw new DataIsolationViolationException("违反了数据隔离规则");
 ### 4. 数据验证
 
 ```typescript
-import { ValidationFailedException, BusinessRuleViolationException } from '@hl8/exceptions/core/validation';
+import {
+  ValidationFailedException,
+  BusinessRuleViolationException,
+} from "@hl8/exceptions/core/validation";
 
 // 数据验证失败
 throw new ValidationFailedException("email", "邮箱格式无效");
 
 // 业务规则违规
-throw new BusinessRuleViolationException("ORDER_AMOUNT_LIMIT", "订单金额超过限制");
+throw new BusinessRuleViolationException(
+  "ORDER_AMOUNT_LIMIT",
+  "订单金额超过限制",
+);
 ```
 
 ## 🔧 配置示例
@@ -187,13 +202,13 @@ throw new BusinessRuleViolationException("ORDER_AMOUNT_LIMIT", "订单金额超�
 ### 基本配置
 
 ```typescript
-import { ExceptionModule } from '@hl8/exceptions';
+import { ExceptionModule } from "@hl8/exceptions";
 
 @Module({
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === 'production',
+      isProduction: process.env.NODE_ENV === "production",
       registerGlobalFilters: true,
     }),
   ],
@@ -204,17 +219,21 @@ export class AppModule {}
 ### 自定义消息提供者
 
 ```typescript
-import { ExceptionMessageProvider } from '@hl8/exceptions';
+import { ExceptionMessageProvider } from "@hl8/exceptions";
 
 export class CustomMessageProvider implements ExceptionMessageProvider {
-  getMessage(errorCode: string, messageType: 'title' | 'detail', params?: Record<string, unknown>): string | undefined {
+  getMessage(
+    errorCode: string,
+    messageType: "title" | "detail",
+    params?: Record<string, unknown>,
+  ): string | undefined {
     // 实现自定义消息逻辑
   }
-  
-  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+
+  hasMessage(errorCode: string, messageType: "title" | "detail"): boolean {
     // 实现消息存在检查
   }
-  
+
   getAvailableErrorCodes(): string[] {
     // 返回所有可用的错误代码
   }
@@ -224,17 +243,21 @@ export class CustomMessageProvider implements ExceptionMessageProvider {
 ### 自定义日志服务
 
 ```typescript
-import { ILoggerService } from '@hl8/exceptions';
+import { ILoggerService } from "@hl8/exceptions";
 
 export class CustomLoggerService implements ILoggerService {
   log(message: string, context?: Record<string, unknown>): void {
     // 实现日志记录
   }
-  
-  error(message: string, stack?: string, context?: Record<string, unknown>): void {
+
+  error(
+    message: string,
+    stack?: string,
+    context?: Record<string, unknown>,
+  ): void {
     // 实现错误日志记录
   }
-  
+
   warn(message: string, context?: Record<string, unknown>): void {
     // 实现警告日志记录
   }
@@ -264,8 +287,8 @@ export class CustomLoggerService implements ILoggerService {
 2. **配置模块**
 
    ```typescript
-   import { ExceptionModule } from '@hl8/exceptions';
-   
+   import { ExceptionModule } from "@hl8/exceptions";
+
    @Module({
      imports: [ExceptionModule.forRoot()],
    })
@@ -275,8 +298,8 @@ export class CustomLoggerService implements ILoggerService {
 3. **使用异常**
 
    ```typescript
-   import { UserNotFoundException } from '@hl8/exceptions/core/user';
-   
+   import { UserNotFoundException } from "@hl8/exceptions/core/user";
+
    throw new UserNotFoundException(userId);
    ```
 

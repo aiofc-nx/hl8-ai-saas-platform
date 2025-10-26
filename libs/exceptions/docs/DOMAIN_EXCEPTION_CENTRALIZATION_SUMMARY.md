@@ -41,11 +41,11 @@ libs/exceptions/
 
 ### 异常类映射
 
-| 原 domain-kernel 异常类 | 新 libs/exceptions 异常类 | 状态 |
-|------------------------|-------------------------|------|
+| 原 domain-kernel 异常类                | 新 libs/exceptions 异常类              | 状态      |
+| -------------------------------------- | -------------------------------------- | --------- |
 | `DomainBusinessRuleViolationException` | `DomainBusinessRuleViolationException` | ✅ 已迁移 |
-| `DomainValidationException` | `DomainValidationException` | ✅ 已迁移 |
-| `DomainTenantIsolationException` | `DomainTenantIsolationException` | ✅ 已迁移 |
+| `DomainValidationException`            | `DomainValidationException`            | ✅ 已迁移 |
+| `DomainTenantIsolationException`       | `DomainTenantIsolationException`       | ✅ 已迁移 |
 
 ## 🎯 **实施成果**
 
@@ -67,13 +67,21 @@ export abstract class DomainException extends DomainLayerException {
 ```typescript
 // 业务规则违规异常
 export class DomainBusinessRuleViolationException extends DomainException {
-  constructor(ruleCode: string, message: string, context?: Record<string, unknown>);
+  constructor(
+    ruleCode: string,
+    message: string,
+    context?: Record<string, unknown>,
+  );
   getBusinessRuleInfo(): BusinessRuleInfo;
 }
 
 // 验证异常
 export class DomainValidationException extends DomainException {
-  constructor(field: string, message: string, context?: Record<string, unknown>);
+  constructor(
+    field: string,
+    message: string,
+    context?: Record<string, unknown>,
+  );
   getField(): string;
   getValidationInfo(): ValidationInfo;
 }
@@ -89,9 +97,21 @@ export class DomainTenantIsolationException extends DomainException {
 
 ```typescript
 export class DomainExceptionFactory {
-  static createBusinessRuleViolation(ruleCode: string, message: string, context?: Record<string, unknown>);
-  static createValidation(field: string, message: string, context?: Record<string, unknown>);
-  static createTenantIsolation(message: string, code: string, context?: Record<string, unknown>);
+  static createBusinessRuleViolation(
+    ruleCode: string,
+    message: string,
+    context?: Record<string, unknown>,
+  );
+  static createValidation(
+    field: string,
+    message: string,
+    context?: Record<string, unknown>,
+  );
+  static createTenantIsolation(
+    message: string,
+    code: string,
+    context?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -123,7 +143,7 @@ export * from "./domain/index.js";
 
 ```bash
 ✓ DomainBusinessRuleViolationException 测试
-✓ DomainValidationException 测试  
+✓ DomainValidationException 测试
 ✓ DomainTenantIsolationException 测试
 ✓ DomainExceptionFactory 测试
 ```
@@ -142,25 +162,25 @@ export * from "./domain/index.js";
 
 ```typescript
 // 导入领域层异常
-import { 
+import {
   DomainBusinessRuleViolationException,
   DomainValidationException,
   DomainTenantIsolationException,
-  DomainExceptionFactory
+  DomainExceptionFactory,
 } from "@hl8/exceptions/core/domain";
 
 // 创建异常
 const businessException = new DomainBusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效',
-  { email: 'invalid-email' }
+  "INVALID_EMAIL",
+  "邮箱格式无效",
+  { email: "invalid-email" },
 );
 
 // 使用工厂方法
 const validationException = DomainExceptionFactory.createValidation(
-  'email',
-  '邮箱格式无效',
-  { providedValue: 'invalid-email' }
+  "email",
+  "邮箱格式无效",
+  { providedValue: "invalid-email" },
 );
 ```
 
@@ -177,7 +197,7 @@ class UserRegistrationBusinessRule extends BusinessRuleValidator {
       throw new DomainBusinessRuleViolationException(
         firstError.code,
         firstError.message,
-        firstError.context
+        firstError.context,
       );
     }
   }
@@ -188,9 +208,9 @@ class UserRegistrationBusinessRule extends BusinessRuleValidator {
 
 ```typescript
 const exception = new DomainBusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效',
-  { email: 'invalid-email' }
+  "INVALID_EMAIL",
+  "邮箱格式无效",
+  { email: "invalid-email" },
 );
 
 // 获取业务规则信息

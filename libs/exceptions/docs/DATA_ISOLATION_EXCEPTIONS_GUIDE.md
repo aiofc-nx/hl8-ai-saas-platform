@@ -25,17 +25,17 @@ TenantException (基类)
 用于处理租户级别的数据隔离验证失败：
 
 ```typescript
-import { TenantDataIsolationException } from '@hl8/exceptions/core/tenant';
+import { TenantDataIsolationException } from "@hl8/exceptions/core/tenant";
 
 // 基本使用
-throw new TenantDataIsolationException('租户数据隔离验证失败');
+throw new TenantDataIsolationException("租户数据隔离验证失败");
 
 // 带上下文数据
-throw new TenantDataIsolationException('租户数据隔离验证失败', {
-  isolationLevel: 'tenant',
-  resourceType: 'user',
-  tenantId: 'tenant-123',
-  violationType: 'cross_tenant_access'
+throw new TenantDataIsolationException("租户数据隔离验证失败", {
+  isolationLevel: "tenant",
+  resourceType: "user",
+  tenantId: "tenant-123",
+  violationType: "cross_tenant_access",
 });
 
 // 获取隔离信息
@@ -49,16 +49,16 @@ console.log(info.resourceType); // 'user'
 用于处理组织级别的数据隔离违规：
 
 ```typescript
-import { OrganizationIsolationException } from '@hl8/exceptions/core/tenant';
+import { OrganizationIsolationException } from "@hl8/exceptions/core/tenant";
 
 // 基本使用
-throw new OrganizationIsolationException('组织数据隔离验证失败');
+throw new OrganizationIsolationException("组织数据隔离验证失败");
 
 // 带上下文数据
-throw new OrganizationIsolationException('组织数据隔离验证失败', {
-  organizationId: 'org-123',
-  resourceType: 'department',
-  violationType: 'cross_organization_access'
+throw new OrganizationIsolationException("组织数据隔离验证失败", {
+  organizationId: "org-123",
+  resourceType: "department",
+  violationType: "cross_organization_access",
 });
 
 // 获取组织隔离信息
@@ -72,17 +72,17 @@ console.log(info.isolationLevel); // 'organization'
 用于处理部门级别的数据隔离违规：
 
 ```typescript
-import { DepartmentIsolationException } from '@hl8/exceptions/core/tenant';
+import { DepartmentIsolationException } from "@hl8/exceptions/core/tenant";
 
 // 基本使用
-throw new DepartmentIsolationException('部门数据隔离验证失败');
+throw new DepartmentIsolationException("部门数据隔离验证失败");
 
 // 带上下文数据
-throw new DepartmentIsolationException('部门数据隔离验证失败', {
-  departmentId: 'dept-123',
-  organizationId: 'org-456',
-  resourceType: 'user',
-  violationType: 'cross_department_access'
+throw new DepartmentIsolationException("部门数据隔离验证失败", {
+  departmentId: "dept-123",
+  organizationId: "org-456",
+  resourceType: "user",
+  violationType: "cross_department_access",
 });
 
 // 获取部门隔离信息
@@ -96,17 +96,17 @@ console.log(info.organizationId); // 'org-456'
 用于处理租户上下文验证失败：
 
 ```typescript
-import { TenantContextViolationException } from '@hl8/exceptions/core/tenant';
+import { TenantContextViolationException } from "@hl8/exceptions/core/tenant";
 
 // 基本使用
-throw new TenantContextViolationException('租户上下文验证失败');
+throw new TenantContextViolationException("租户上下文验证失败");
 
 // 带上下文数据
-throw new TenantContextViolationException('租户上下文验证失败', {
-  contextType: 'tenant_id',
-  providedValue: 'invalid-tenant-id',
-  expectedFormat: 'uuid',
-  userId: 'user-123'
+throw new TenantContextViolationException("租户上下文验证失败", {
+  contextType: "tenant_id",
+  providedValue: "invalid-tenant-id",
+  expectedFormat: "uuid",
+  userId: "user-123",
 });
 
 // 获取上下文违规信息
@@ -120,17 +120,17 @@ console.log(info.providedValue); // 'invalid-tenant-id'
 用于处理租户权限验证失败：
 
 ```typescript
-import { TenantPermissionViolationException } from '@hl8/exceptions/core/tenant';
+import { TenantPermissionViolationException } from "@hl8/exceptions/core/tenant";
 
 // 基本使用
-throw new TenantPermissionViolationException('租户权限验证失败');
+throw new TenantPermissionViolationException("租户权限验证失败");
 
 // 带上下文数据
-throw new TenantPermissionViolationException('租户权限验证失败', {
-  permission: 'read',
-  resource: 'user',
-  tenantId: 'tenant-123',
-  userId: 'user-456'
+throw new TenantPermissionViolationException("租户权限验证失败", {
+  permission: "read",
+  resource: "user",
+  tenantId: "tenant-123",
+  userId: "user-456",
 });
 
 // 获取权限违规信息
@@ -144,46 +144,46 @@ console.log(info.resource); // 'user'
 ### 数据访问控制
 
 ```typescript
-import { 
+import {
   TenantDataIsolationException,
   OrganizationIsolationException,
-  DepartmentIsolationException 
-} from '@hl8/exceptions/core/tenant';
+  DepartmentIsolationException,
+} from "@hl8/exceptions/core/tenant";
 
 class DataAccessService {
   async getUser(userId: string, currentTenantId: string, userTenantId: string) {
     // 检查租户隔离
     if (currentTenantId !== userTenantId) {
-      throw new TenantDataIsolationException('跨租户访问用户数据', {
-        isolationLevel: 'tenant',
-        resourceType: 'user',
+      throw new TenantDataIsolationException("跨租户访问用户数据", {
+        isolationLevel: "tenant",
+        resourceType: "user",
         tenantId: currentTenantId,
-        violationType: 'cross_tenant_access'
+        violationType: "cross_tenant_access",
       });
     }
 
     // 检查组织隔离
     const userOrgId = await this.getUserOrganization(userId);
     const currentOrgId = await this.getCurrentUserOrganization();
-    
+
     if (userOrgId !== currentOrgId) {
-      throw new OrganizationIsolationException('跨组织访问用户数据', {
+      throw new OrganizationIsolationException("跨组织访问用户数据", {
         organizationId: currentOrgId,
-        resourceType: 'user',
-        violationType: 'cross_organization_access'
+        resourceType: "user",
+        violationType: "cross_organization_access",
       });
     }
 
     // 检查部门隔离
     const userDeptId = await this.getUserDepartment(userId);
     const currentDeptId = await this.getCurrentUserDepartment();
-    
+
     if (userDeptId !== currentDeptId) {
-      throw new DepartmentIsolationException('跨部门访问用户数据', {
+      throw new DepartmentIsolationException("跨部门访问用户数据", {
         departmentId: currentDeptId,
         organizationId: currentOrgId,
-        resourceType: 'user',
-        violationType: 'cross_department_access'
+        resourceType: "user",
+        violationType: "cross_department_access",
       });
     }
 
@@ -195,27 +195,27 @@ class DataAccessService {
 ### 租户上下文验证
 
 ```typescript
-import { TenantContextViolationException } from '@hl8/exceptions/core/tenant';
+import { TenantContextViolationException } from "@hl8/exceptions/core/tenant";
 
 class TenantContextService {
   validateTenantContext(tenantId: string, userId: string) {
     // 检查租户ID格式
     if (!this.isValidTenantId(tenantId)) {
-      throw new TenantContextViolationException('租户ID格式无效', {
-        contextType: 'tenant_id',
+      throw new TenantContextViolationException("租户ID格式无效", {
+        contextType: "tenant_id",
         providedValue: tenantId,
-        expectedFormat: 'uuid',
-        userId: userId
+        expectedFormat: "uuid",
+        userId: userId,
       });
     }
 
     // 检查用户是否属于该租户
     if (!this.isUserInTenant(userId, tenantId)) {
-      throw new TenantContextViolationException('用户不属于指定租户', {
-        contextType: 'user_tenant_association',
+      throw new TenantContextViolationException("用户不属于指定租户", {
+        contextType: "user_tenant_association",
         providedValue: userId,
-        expectedFormat: 'user_in_tenant',
-        userId: userId
+        expectedFormat: "user_in_tenant",
+        userId: userId,
       });
     }
   }
@@ -225,16 +225,21 @@ class TenantContextService {
 ### 权限验证
 
 ```typescript
-import { TenantPermissionViolationException } from '@hl8/exceptions/core/tenant';
+import { TenantPermissionViolationException } from "@hl8/exceptions/core/tenant";
 
 class PermissionService {
-  checkPermission(userId: string, resource: string, permission: string, tenantId: string) {
+  checkPermission(
+    userId: string,
+    resource: string,
+    permission: string,
+    tenantId: string,
+  ) {
     if (!this.hasPermission(userId, resource, permission, tenantId)) {
-      throw new TenantPermissionViolationException('用户没有权限执行此操作', {
+      throw new TenantPermissionViolationException("用户没有权限执行此操作", {
         permission: permission,
         resource: resource,
         tenantId: tenantId,
-        userId: userId
+        userId: userId,
       });
     }
   }
@@ -246,27 +251,27 @@ class PermissionService {
 ### 1. 分层异常处理
 
 ```typescript
-import { 
+import {
   TenantDataIsolationException,
   OrganizationIsolationException,
-  DepartmentIsolationException 
-} from '@hl8/exceptions/core/tenant';
+  DepartmentIsolationException,
+} from "@hl8/exceptions/core/tenant";
 
 try {
   await dataAccessService.getUser(userId, tenantId, userTenantId);
 } catch (error) {
   if (error instanceof TenantDataIsolationException) {
     // 处理租户隔离异常
-    console.log('租户隔离违规:', error.getIsolationInfo());
+    console.log("租户隔离违规:", error.getIsolationInfo());
   } else if (error instanceof OrganizationIsolationException) {
     // 处理组织隔离异常
-    console.log('组织隔离违规:', error.getOrganizationIsolationInfo());
+    console.log("组织隔离违规:", error.getOrganizationIsolationInfo());
   } else if (error instanceof DepartmentIsolationException) {
     // 处理部门隔离异常
-    console.log('部门隔离违规:', error.getDepartmentIsolationInfo());
+    console.log("部门隔离违规:", error.getDepartmentIsolationInfo());
   } else {
     // 处理其他异常
-    console.error('未知异常:', error);
+    console.error("未知异常:", error);
   }
 }
 ```
@@ -274,25 +279,25 @@ try {
 ### 2. 异常信息记录
 
 ```typescript
-import { TenantDataIsolationException } from '@hl8/exceptions/core/tenant';
+import { TenantDataIsolationException } from "@hl8/exceptions/core/tenant";
 
 try {
   await dataAccessService.getUser(userId, tenantId, userTenantId);
 } catch (error) {
   if (error instanceof TenantDataIsolationException) {
     const info = error.getIsolationInfo();
-    
+
     // 记录详细的隔离违规信息
-    logger.warn('数据隔离违规', {
+    logger.warn("数据隔离违规", {
       isolationLevel: info.isolationLevel,
       resourceType: info.resourceType,
       tenantId: info.tenantId,
       violationType: info.violationType,
       timestamp: info.timestamp,
-      userId: getCurrentUserId()
+      userId: getCurrentUserId(),
     });
   }
-  
+
   throw error;
 }
 ```
@@ -300,21 +305,21 @@ try {
 ### 3. 异常转换
 
 ```typescript
-import { TenantDataIsolationException } from '@hl8/exceptions/core/tenant';
+import { TenantDataIsolationException } from "@hl8/exceptions/core/tenant";
 
 class ExceptionConverter {
   convertToUserFriendlyMessage(error: TenantDataIsolationException): string {
     const info = error.getIsolationInfo();
-    
+
     switch (info.violationType) {
-      case 'cross_tenant_access':
-        return '您没有权限访问其他租户的数据';
-      case 'cross_organization_access':
-        return '您没有权限访问其他组织的数据';
-      case 'cross_department_access':
-        return '您没有权限访问其他部门的数据';
+      case "cross_tenant_access":
+        return "您没有权限访问其他租户的数据";
+      case "cross_organization_access":
+        return "您没有权限访问其他组织的数据";
+      case "cross_department_access":
+        return "您没有权限访问其他部门的数据";
       default:
-        return '数据访问权限不足';
+        return "数据访问权限不足";
     }
   }
 }

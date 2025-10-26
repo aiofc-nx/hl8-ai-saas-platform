@@ -32,14 +32,14 @@ yarn add @hl8/exceptions
 
 ```typescript
 // app.module.ts
-import { Module } from '@nestjs/common';
-import { ExceptionModule } from '@hl8/exceptions';
+import { Module } from "@nestjs/common";
+import { ExceptionModule } from "@hl8/exceptions";
 
 @Module({
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === 'production',
+      isProduction: process.env.NODE_ENV === "production",
     }),
   ],
 })
@@ -50,8 +50,8 @@ export class AppModule {}
 
 ```typescript
 // main.ts
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -71,25 +71,25 @@ import {
   AuthenticationFailedException,
   ValidationFailedException,
   RateLimitExceededException,
-} from '@hl8/exceptions';
+} from "@hl8/exceptions";
 ```
 
 ### 2. 在服务中使用
 
 ```typescript
 // user.service.ts
-import { Injectable } from '@nestjs/common';
-import { UserNotFoundException } from '@hl8/exceptions';
+import { Injectable } from "@nestjs/common";
+import { UserNotFoundException } from "@hl8/exceptions";
 
 @Injectable()
 export class UserService {
   async findUser(userId: string) {
     const user = await this.userRepository.findById(userId);
-    
+
     if (!user) {
       throw new UserNotFoundException(userId);
     }
-    
+
     return user;
   }
 }
@@ -119,17 +119,17 @@ export class UserService {
 
 ```typescript
 // custom-exceptions.ts
-import { AuthException } from '@hl8/exceptions/core/auth';
+import { AuthException } from "@hl8/exceptions/core/auth";
 
 export class CustomAuthException extends AuthException {
   constructor(reason: string, data?: Record<string, unknown>) {
     super(
-      'CUSTOM_AUTH_ERROR',
-      '自定义认证错误',
+      "CUSTOM_AUTH_ERROR",
+      "自定义认证错误",
       reason,
       401,
       data,
-      'https://docs.hl8.com/errors#CUSTOM_AUTH_ERROR'
+      "https://docs.hl8.com/errors#CUSTOM_AUTH_ERROR",
     );
   }
 }
@@ -139,16 +139,16 @@ export class CustomAuthException extends AuthException {
 
 ```typescript
 // auth.service.ts
-import { Injectable } from '@nestjs/common';
-import { CustomAuthException } from './custom-exceptions';
+import { Injectable } from "@nestjs/common";
+import { CustomAuthException } from "./custom-exceptions";
 
 @Injectable()
 export class AuthService {
   async validateCustomAuth(token: string) {
     if (!this.isValidCustomToken(token)) {
-      throw new CustomAuthException('自定义令牌无效', {
-        tokenType: 'custom',
-        providedToken: token.substring(0, 10) + '...'
+      throw new CustomAuthException("自定义令牌无效", {
+        tokenType: "custom",
+        providedToken: token.substring(0, 10) + "...",
       });
     }
   }
@@ -161,18 +161,15 @@ export class AuthService {
 
 ```typescript
 // main.ts
-import { NestFactory } from '@nestjs/core';
-import { HttpExceptionFilter, AnyExceptionFilter } from '@hl8/exceptions';
+import { NestFactory } from "@nestjs/core";
+import { HttpExceptionFilter, AnyExceptionFilter } from "@hl8/exceptions";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // 注册全局异常过滤器
-  app.useGlobalFilters(
-    new HttpExceptionFilter(),
-    new AnyExceptionFilter()
-  );
-  
+  app.useGlobalFilters(new HttpExceptionFilter(), new AnyExceptionFilter());
+
   await app.listen(3000);
 }
 ```
@@ -181,8 +178,8 @@ async function bootstrap() {
 
 ```typescript
 // custom-logger.service.ts
-import { Injectable } from '@nestjs/common';
-import { ILoggerService } from '@hl8/exceptions';
+import { Injectable } from "@nestjs/common";
+import { ILoggerService } from "@hl8/exceptions";
 
 @Injectable()
 export class CustomLoggerService implements ILoggerService {
@@ -190,7 +187,11 @@ export class CustomLoggerService implements ILoggerService {
     console.log(`[LOG] ${message}`, context);
   }
 
-  error(message: string, stack?: string, context?: Record<string, unknown>): void {
+  error(
+    message: string,
+    stack?: string,
+    context?: Record<string, unknown>,
+  ): void {
     console.error(`[ERROR] ${message}`, { stack, context });
   }
 
@@ -204,15 +205,15 @@ export class CustomLoggerService implements ILoggerService {
 
 ```typescript
 // app.module.ts
-import { Module } from '@nestjs/common';
-import { ExceptionModule } from '@hl8/exceptions';
-import { CustomLoggerService } from './custom-logger.service';
+import { Module } from "@nestjs/common";
+import { ExceptionModule } from "@hl8/exceptions";
+import { CustomLoggerService } from "./custom-logger.service";
 
 @Module({
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === 'production',
+      isProduction: process.env.NODE_ENV === "production",
     }),
   ],
   providers: [CustomLoggerService],
@@ -226,18 +227,18 @@ export class AppModule {}
 
 ```typescript
 // user.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
   UserNotFoundException,
   UserAlreadyExistsException,
   ValidationFailedException,
-} from '@hl8/exceptions';
+} from "@hl8/exceptions";
 
 @Injectable()
 export class UserService {
   async findUser(userId: string) {
     if (!userId) {
-      throw new ValidationFailedException('userId', '用户ID不能为空');
+      throw new ValidationFailedException("userId", "用户ID不能为空");
     }
 
     const user = await this.userRepository.findById(userId);
@@ -251,7 +252,7 @@ export class UserService {
   async createUser(userData: CreateUserDto) {
     const existingUser = await this.userRepository.findByEmail(userData.email);
     if (existingUser) {
-      throw new UserAlreadyExistsException(userData.email, 'email');
+      throw new UserAlreadyExistsException(userData.email, "email");
     }
 
     return await this.userRepository.create(userData);
@@ -263,15 +264,15 @@ export class UserService {
 
 ```typescript
 // user.controller.ts
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
-import { UserService } from './user.service';
+import { Controller, Get, Post, Param, Body } from "@nestjs/common";
+import { UserService } from "./user.service";
 
-@Controller('users')
+@Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get(':id')
-  async findUser(@Param('id') id: string) {
+  @Get(":id")
+  async findUser(@Param("id") id: string) {
     return await this.userService.findUser(id);
   }
 
@@ -318,29 +319,33 @@ curl http://localhost:3000/users/non-existent-user
 
 ```typescript
 // custom-message.provider.ts
-import { ExceptionMessageProvider } from '@hl8/exceptions';
+import { ExceptionMessageProvider } from "@hl8/exceptions";
 
 export class CustomMessageProvider implements ExceptionMessageProvider {
-  getMessage(errorCode: string, messageType: 'title' | 'detail', params?: Record<string, unknown>): string | undefined {
+  getMessage(
+    errorCode: string,
+    messageType: "title" | "detail",
+    params?: Record<string, unknown>,
+  ): string | undefined {
     // 实现自定义消息逻辑
     const messages = {
-      'USER_NOT_FOUND': {
-        title: 'User Not Found',
-        detail: `User with ID "${params?.userId}" does not exist`
-      }
+      USER_NOT_FOUND: {
+        title: "User Not Found",
+        detail: `User with ID "${params?.userId}" does not exist`,
+      },
     };
-    
+
     return messages[errorCode]?.[messageType];
   }
 
-  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+  hasMessage(errorCode: string, messageType: "title" | "detail"): boolean {
     // 实现消息存在检查逻辑
     return true;
   }
 
   getAvailableErrorCodes(): string[] {
     // 返回所有可用的错误代码
-    return ['USER_NOT_FOUND', 'USER_ALREADY_EXISTS'];
+    return ["USER_NOT_FOUND", "USER_ALREADY_EXISTS"];
   }
 }
 ```
@@ -351,14 +356,14 @@ export class CustomMessageProvider implements ExceptionMessageProvider {
 
 ```typescript
 // app.module.ts
-import { Module } from '@nestjs/common';
-import { ExceptionModule } from '@hl8/exceptions';
+import { Module } from "@nestjs/common";
+import { ExceptionModule } from "@hl8/exceptions";
 
 @Module({
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === 'production',
+      isProduction: process.env.NODE_ENV === "production",
       registerGlobalFilters: true,
     }),
   ],
@@ -384,7 +389,7 @@ A: 在创建异常时，可以通过data参数传递自定义数据。
 throw new UserNotFoundException(userId, {
   requestId: request.id,
   timestamp: new Date(),
-  additionalInfo: 'custom data'
+  additionalInfo: "custom data",
 });
 ```
 

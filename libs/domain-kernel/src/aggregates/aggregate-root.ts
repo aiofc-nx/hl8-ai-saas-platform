@@ -19,6 +19,7 @@
  */
 import { EntityId } from "../value-objects/ids/entity-id.vo.js";
 import { TenantId } from "../value-objects/ids/tenant-id.vo.js";
+import { GenericEntityId } from "../value-objects/ids/generic-entity-id.vo.js";
 import { BaseEntity } from "../entities/base-entity.js";
 
 /**
@@ -110,7 +111,7 @@ export abstract class AggregateRoot<
     eventData: Record<string, unknown>,
   ): DomainEvent {
     return {
-      eventId: new (EntityId as unknown as { new (): EntityId })(),
+      eventId: GenericEntityId.generate(),
       occurredAt: new Date(),
       aggregateId: this.id,
       version: this.version + 1,

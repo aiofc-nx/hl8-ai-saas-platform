@@ -43,10 +43,10 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function functionName(param: any): any {
   // 添加运行时验证
-  if (typeof param !== 'expected_type') {
-    throw new Error('参数类型错误');
+  if (typeof param !== "expected_type") {
+    throw new Error("参数类型错误");
   }
-  
+
   // 业务逻辑
   return param;
 }
@@ -61,7 +61,7 @@ function functionName(param: any): any {
  * 改进计划：等待库提供类型定义或创建自定义类型
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const thirdPartyLib: any = require('untyped-library');
+const thirdPartyLib: any = require("untyped-library");
 
 // 包装库调用以提供类型安全
 function safeLibraryCall(param: string): string {
@@ -84,15 +84,15 @@ function safeLibraryCall(param: string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseDynamicData(data: any): Record<string, any> {
   // 基础验证
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('数据必须是对象类型');
+  if (typeof data !== "object" || data === null) {
+    throw new Error("数据必须是对象类型");
   }
-  
+
   // 业务验证
   if (!data.id || !data.name) {
-    throw new Error('数据缺少必需字段');
+    throw new Error("数据缺少必需字段");
   }
-  
+
   return data;
 }
 ```
@@ -116,7 +116,7 @@ interface ThirdPartyLibrary {
 
 // 使用类型断言
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const lib: ThirdPartyLibrary = require('untyped-library') as any;
+const lib: ThirdPartyLibrary = require("untyped-library") as any;
 
 // 包装库调用
 function safeLibraryCall(param: string): string {
@@ -147,18 +147,18 @@ interface BaseApiResponse {
 // 使用类型守卫验证数据
 function isApiResponse(data: unknown): data is BaseApiResponse {
   return (
-    typeof data === 'object' &&
+    typeof data === "object" &&
     data !== null &&
-    'success' in data &&
-    'message' in data &&
-    'data' in data
+    "success" in data &&
+    "message" in data &&
+    "data" in data
   );
 }
 
 // 安全解析数据
 function parseApiResponse(response: unknown): BaseApiResponse {
   if (!isApiResponse(response)) {
-    throw new Error('无效的 API 响应格式');
+    throw new Error("无效的 API 响应格式");
   }
   return response;
 }
@@ -183,14 +183,14 @@ function safeReflection(obj: ReflectionTarget, propertyName: string): unknown {
   if (!(propertyName in obj)) {
     throw new Error(`属性 ${propertyName} 不存在`);
   }
-  
+
   const value = obj[propertyName];
-  
+
   // 添加类型验证
-  if (typeof value === 'function') {
-    throw new Error('属性是函数，无法直接访问');
+  if (typeof value === "function") {
+    throw new Error("属性是函数，无法直接访问");
   }
-  
+
   return value;
 }
 ```
@@ -248,20 +248,20 @@ function legacyFunction(data: any): any {
 ### 1. 单元测试模板
 
 ```typescript
-describe('functionName', () => {
-  it('should handle valid data', () => {
-    const validData = { id: '1', name: 'test' };
+describe("functionName", () => {
+  it("should handle valid data", () => {
+    const validData = { id: "1", name: "test" };
     const result = functionName(validData);
     expect(result).toBeDefined();
   });
 
-  it('should throw error for invalid data', () => {
+  it("should throw error for invalid data", () => {
     expect(() => functionName(null)).toThrow();
-    expect(() => functionName('invalid')).toThrow();
+    expect(() => functionName("invalid")).toThrow();
   });
 
-  it('should handle edge cases', () => {
-    const edgeData = { id: '', name: '' };
+  it("should handle edge cases", () => {
+    const edgeData = { id: "", name: "" };
     const result = functionName(edgeData);
     expect(result).toBeDefined();
   });
@@ -301,10 +301,10 @@ function analyzeTypeUsage(sourceCode: string): TypeUsageStats {
 interface ImprovementPlan {
   id: string;
   description: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   estimatedEffort: number;
   targetDate: Date;
-  status: 'planned' | 'in-progress' | 'completed';
+  status: "planned" | "in-progress" | "completed";
 }
 ```
 
@@ -364,7 +364,7 @@ function badExample(data: any): any {
 
 // ✅ 正确：使用可选链和类型检查
 function goodExample(data: unknown): string | undefined {
-  if (typeof data === 'object' && data !== null) {
+  if (typeof data === "object" && data !== null) {
     const obj = data as Record<string, unknown>;
     return obj.property?.that?.might?.not?.exist as string;
   }

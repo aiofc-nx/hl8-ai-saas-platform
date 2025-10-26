@@ -38,8 +38,8 @@
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseDynamicConfig(config: any): Record<string, any> {
-  if (typeof config !== 'object' || config === null) {
-    throw new Error('配置必须是对象类型');
+  if (typeof config !== "object" || config === null) {
+    throw new Error("配置必须是对象类型");
   }
   return config;
 }
@@ -60,13 +60,13 @@ function processUserData(userData: UserData) {
   // 只在局部使用 any，用于处理动态属性
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dynamicProperties: any = userData.dynamicProperties;
-  
+
   // 立即进行类型验证和转换
-  if (typeof dynamicProperties === 'object' && dynamicProperties !== null) {
+  if (typeof dynamicProperties === "object" && dynamicProperties !== null) {
     const validatedProperties = dynamicProperties as Record<string, string>;
     return { ...userData, dynamicProperties: validatedProperties };
   }
-  
+
   return userData;
 }
 ```
@@ -82,22 +82,22 @@ function processUserData(userData: UserData) {
 #### 示例
 
 ```typescript
-describe('parseDynamicConfig', () => {
-  it('should parse valid config object', () => {
-    const config = { name: 'test', value: 123 };
+describe("parseDynamicConfig", () => {
+  it("should parse valid config object", () => {
+    const config = { name: "test", value: 123 };
     const result = parseDynamicConfig(config);
     expect(result).toEqual(config);
   });
 
-  it('should throw error for invalid config', () => {
-    expect(() => parseDynamicConfig(null)).toThrow('配置必须是对象类型');
-    expect(() => parseDynamicConfig('invalid')).toThrow('配置必须是对象类型');
+  it("should throw error for invalid config", () => {
+    expect(() => parseDynamicConfig(null)).toThrow("配置必须是对象类型");
+    expect(() => parseDynamicConfig("invalid")).toThrow("配置必须是对象类型");
   });
 
-  it('should handle nested objects', () => {
-    const config = { nested: { value: 'test' } };
+  it("should handle nested objects", () => {
+    const config = { nested: { value: "test" } };
     const result = parseDynamicConfig(config);
-    expect(result.nested.value).toBe('test');
+    expect(result.nested.value).toBe("test");
   });
 });
 ```
@@ -144,7 +144,7 @@ function getValue(): string {
 
 // 5. 使用类型守卫替代 any
 function isUserData(data: unknown): data is UserData {
-  return typeof data === 'object' && data !== null && 'id' in data;
+  return typeof data === "object" && data !== null && "id" in data;
 }
 ```
 
@@ -233,7 +233,7 @@ function badExample(data: any): any {
 
 // ✅ 正确：使用可选链和类型检查
 function goodExample(data: unknown): string | undefined {
-  if (typeof data === 'object' && data !== null) {
+  if (typeof data === "object" && data !== null) {
     const obj = data as Record<string, unknown>;
     return obj.property?.that?.might?.not?.exist as string;
   }
@@ -336,7 +336,7 @@ interface ThirdPartyLibrary {
 
 // 使用类型断言
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const lib: ThirdPartyLibrary = require('untyped-library') as any;
+const lib: ThirdPartyLibrary = require("untyped-library") as any;
 
 // 包装库调用
 function safeLibraryCall(param: string): string {
@@ -367,18 +367,18 @@ interface BaseApiResponse {
 // 使用类型守卫验证数据
 function isApiResponse(data: unknown): data is BaseApiResponse {
   return (
-    typeof data === 'object' &&
+    typeof data === "object" &&
     data !== null &&
-    'success' in data &&
-    'message' in data &&
-    'data' in data
+    "success" in data &&
+    "message" in data &&
+    "data" in data
   );
 }
 
 // 安全解析数据
 function parseApiResponse(response: unknown): BaseApiResponse {
   if (!isApiResponse(response)) {
-    throw new Error('无效的 API 响应格式');
+    throw new Error("无效的 API 响应格式");
   }
   return response;
 }
@@ -403,14 +403,14 @@ function safeReflection(obj: ReflectionTarget, propertyName: string): unknown {
   if (!(propertyName in obj)) {
     throw new Error(`属性 ${propertyName} 不存在`);
   }
-  
+
   const value = obj[propertyName];
-  
+
   // 添加类型验证
-  if (typeof value === 'function') {
-    throw new Error('属性是函数，无法直接访问');
+  if (typeof value === "function") {
+    throw new Error("属性是函数，无法直接访问");
   }
-  
+
   return value;
 }
 ```
@@ -429,20 +429,20 @@ function safeReflection(obj: ReflectionTarget, propertyName: string): unknown {
 #### 测试示例
 
 ```typescript
-describe('类型安全测试', () => {
-  it('should handle valid data', () => {
-    const validData = { id: '1', name: 'test' };
+describe("类型安全测试", () => {
+  it("should handle valid data", () => {
+    const validData = { id: "1", name: "test" };
     const result = processData(validData);
     expect(result).toBeDefined();
   });
 
-  it('should handle invalid data', () => {
+  it("should handle invalid data", () => {
     expect(() => processData(null)).toThrow();
-    expect(() => processData('invalid')).toThrow();
+    expect(() => processData("invalid")).toThrow();
   });
 
-  it('should handle edge cases', () => {
-    const edgeData = { id: '', name: '' };
+  it("should handle edge cases", () => {
+    const edgeData = { id: "", name: "" };
     const result = processData(edgeData);
     expect(result).toBeDefined();
   });

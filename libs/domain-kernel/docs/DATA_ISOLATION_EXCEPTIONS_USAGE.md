@@ -8,52 +8,52 @@
 
 `IsolationValidationError` 现在根据错误代码自动选择合适的异常类型：
 
-| 错误代码 | 映射到的异常类型 | 描述 |
-|---------|----------------|------|
-| `INVALID_TENANT_ID` | `TenantContextViolationException` | 租户ID无效 |
-| `TENANT_ID_TOO_LONG` | `TenantContextViolationException` | 租户ID过长 |
-| `INVALID_TENANT_ID_FORMAT` | `TenantContextViolationException` | 租户ID格式无效 |
-| `INVALID_ORGANIZATION_ID` | `OrganizationIsolationException` | 组织ID无效 |
-| `INVALID_ORGANIZATION_CONTEXT` | `OrganizationIsolationException` | 组织上下文无效 |
-| `INVALID_DEPARTMENT_ID` | `DepartmentIsolationException` | 部门ID无效 |
-| `INVALID_DEPARTMENT_CONTEXT` | `DepartmentIsolationException` | 部门上下文无效 |
-| `INVALID_USER_ID` | `TenantDataIsolationException` | 用户ID无效 |
-| `ACCESS_DENIED` | `TenantPermissionViolationException` | 访问被拒绝 |
-| 其他 | `TenantDataIsolationException` | 默认数据隔离异常 |
+| 错误代码                       | 映射到的异常类型                     | 描述             |
+| ------------------------------ | ------------------------------------ | ---------------- |
+| `INVALID_TENANT_ID`            | `TenantContextViolationException`    | 租户ID无效       |
+| `TENANT_ID_TOO_LONG`           | `TenantContextViolationException`    | 租户ID过长       |
+| `INVALID_TENANT_ID_FORMAT`     | `TenantContextViolationException`    | 租户ID格式无效   |
+| `INVALID_ORGANIZATION_ID`      | `OrganizationIsolationException`     | 组织ID无效       |
+| `INVALID_ORGANIZATION_CONTEXT` | `OrganizationIsolationException`     | 组织上下文无效   |
+| `INVALID_DEPARTMENT_ID`        | `DepartmentIsolationException`       | 部门ID无效       |
+| `INVALID_DEPARTMENT_CONTEXT`   | `DepartmentIsolationException`       | 部门上下文无效   |
+| `INVALID_USER_ID`              | `TenantDataIsolationException`       | 用户ID无效       |
+| `ACCESS_DENIED`                | `TenantPermissionViolationException` | 访问被拒绝       |
+| 其他                           | `TenantDataIsolationException`       | 默认数据隔离异常 |
 
 ## 使用示例
 
 ### 1. 基本使用
 
 ```typescript
-import { IsolationValidationError } from '../isolation/isolation-validation.error.js';
+import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
 
 // 租户ID验证失败
 throw new IsolationValidationError(
-  '租户 ID 必须是非空字符串',
-  'INVALID_TENANT_ID',
-  { value: '' }
+  "租户 ID 必须是非空字符串",
+  "INVALID_TENANT_ID",
+  { value: "" },
 );
 
 // 组织上下文验证失败
 throw new IsolationValidationError(
-  '组织上下文缺少租户信息',
-  'INVALID_ORGANIZATION_CONTEXT',
-  { organizationId: 'org-123' }
+  "组织上下文缺少租户信息",
+  "INVALID_ORGANIZATION_CONTEXT",
+  { organizationId: "org-123" },
 );
 
 // 部门上下文验证失败
 throw new IsolationValidationError(
-  '部门上下文缺少组织信息',
-  'INVALID_DEPARTMENT_CONTEXT',
-  { departmentId: 'dept-123' }
+  "部门上下文缺少组织信息",
+  "INVALID_DEPARTMENT_CONTEXT",
+  { departmentId: "dept-123" },
 );
 ```
 
 ### 2. 在值对象中使用
 
 ```typescript
-import { IsolationValidationError } from '../isolation/isolation-validation.error.js';
+import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
 
 export class TenantId extends BaseValueObject {
   private readonly value: string;
@@ -67,26 +67,27 @@ export class TenantId extends BaseValueObject {
   protected validate(): void {
     if (!this.value || this.value.trim().length === 0) {
       throw new IsolationValidationError(
-        '租户 ID 不能为空',
-        'INVALID_TENANT_ID',
-        { value: this.value }
+        "租户 ID 不能为空",
+        "INVALID_TENANT_ID",
+        { value: this.value },
       );
     }
 
     if (this.value.length > 255) {
       throw new IsolationValidationError(
-        '租户 ID 长度不能超过255个字符',
-        'TENANT_ID_TOO_LONG',
-        { value: this.value, maxLength: 255 }
+        "租户 ID 长度不能超过255个字符",
+        "TENANT_ID_TOO_LONG",
+        { value: this.value, maxLength: 255 },
       );
     }
 
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(this.value)) {
       throw new IsolationValidationError(
-        '租户 ID 格式无效，必须是UUID格式',
-        'INVALID_TENANT_ID_FORMAT',
-        { value: this.value, expectedFormat: 'uuid' }
+        "租户 ID 格式无效，必须是UUID格式",
+        "INVALID_TENANT_ID_FORMAT",
+        { value: this.value, expectedFormat: "uuid" },
       );
     }
   }
@@ -100,7 +101,7 @@ export class TenantId extends BaseValueObject {
 ### 3. 在实体中使用
 
 ```typescript
-import { IsolationValidationError } from '../isolation/isolation-validation.error.js';
+import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
 
 export class User extends BaseEntity<UserId> {
   private _email: Email;
@@ -131,13 +132,13 @@ export class User extends BaseEntity<UserId> {
   updateEmail(newEmail: Email): void {
     if (this._status === UserStatus.DELETED) {
       throw new IsolationValidationError(
-        '无法更新已删除用户的邮箱',
-        'INVALID_USER_ID',
-        { 
+        "无法更新已删除用户的邮箱",
+        "INVALID_USER_ID",
+        {
           userId: this.id.getValue(),
           status: this._status,
-          operation: 'update_email'
-        }
+          operation: "update_email",
+        },
       );
     }
 
@@ -150,7 +151,7 @@ export class User extends BaseEntity<UserId> {
 ### 4. 在业务规则验证器中使用
 
 ```typescript
-import { IsolationValidationError } from '../isolation/isolation-validation.error.js';
+import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
 
 export class UserRegistrationBusinessRule extends BusinessRuleValidator<UserRegistrationContext> {
   validateUserRegistrationAndReturnException(
@@ -159,37 +160,37 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator<UserRegi
     // 检查租户上下文
     if (!context.tenantId || !context.tenantId.getValue()) {
       throw new IsolationValidationError(
-        '用户注册需要有效的租户上下文',
-        'INVALID_TENANT_ID',
-        { 
-          operation: 'user_registration',
-          context: 'tenant_validation'
-        }
+        "用户注册需要有效的租户上下文",
+        "INVALID_TENANT_ID",
+        {
+          operation: "user_registration",
+          context: "tenant_validation",
+        },
       );
     }
 
     // 检查组织上下文
     if (context.organizationId && !context.organizationId.getValue()) {
       throw new IsolationValidationError(
-        '组织ID无效',
-        'INVALID_ORGANIZATION_ID',
-        { 
+        "组织ID无效",
+        "INVALID_ORGANIZATION_ID",
+        {
           organizationId: context.organizationId.getValue(),
-          operation: 'user_registration'
-        }
+          operation: "user_registration",
+        },
       );
     }
 
     // 检查部门上下文
     if (context.departmentId && !context.departmentId.getValue()) {
       throw new IsolationValidationError(
-        '部门ID无效',
-        'INVALID_DEPARTMENT_ID',
-        { 
+        "部门ID无效",
+        "INVALID_DEPARTMENT_ID",
+        {
           departmentId: context.departmentId.getValue(),
           organizationId: context.organizationId?.getValue(),
-          operation: 'user_registration'
-        }
+          operation: "user_registration",
+        },
       );
     }
 
@@ -202,7 +203,7 @@ export class UserRegistrationBusinessRule extends BusinessRuleValidator<UserRegi
 ### 5. 在隔离上下文中使用
 
 ```typescript
-import { IsolationValidationError } from './isolation-validation.error.js';
+import { IsolationValidationError } from "./isolation-validation.error.js";
 
 export class IsolationContext {
   private _tenantId: TenantId;
@@ -224,46 +225,46 @@ export class IsolationContext {
     // 验证租户ID
     if (!this._tenantId || !this._tenantId.getValue()) {
       throw new IsolationValidationError(
-        '隔离上下文必须包含有效的租户ID',
-        'INVALID_TENANT_ID',
-        { contextType: 'isolation_context' }
+        "隔离上下文必须包含有效的租户ID",
+        "INVALID_TENANT_ID",
+        { contextType: "isolation_context" },
       );
     }
 
     // 验证组织上下文
     if (this._organizationId && !this._organizationId.getValue()) {
       throw new IsolationValidationError(
-        '组织上下文无效',
-        'INVALID_ORGANIZATION_CONTEXT',
-        { 
+        "组织上下文无效",
+        "INVALID_ORGANIZATION_CONTEXT",
+        {
           organizationId: this._organizationId.getValue(),
-          tenantId: this._tenantId.getValue()
-        }
+          tenantId: this._tenantId.getValue(),
+        },
       );
     }
 
     // 验证部门上下文
     if (this._departmentId && !this._departmentId.getValue()) {
       throw new IsolationValidationError(
-        '部门上下文无效',
-        'INVALID_DEPARTMENT_CONTEXT',
-        { 
+        "部门上下文无效",
+        "INVALID_DEPARTMENT_CONTEXT",
+        {
           departmentId: this._departmentId.getValue(),
           organizationId: this._organizationId?.getValue(),
-          tenantId: this._tenantId.getValue()
-        }
+          tenantId: this._tenantId.getValue(),
+        },
       );
     }
 
     // 验证部门必须属于组织
     if (this._departmentId && !this._organizationId) {
       throw new IsolationValidationError(
-        '部门上下文缺少组织信息',
-        'INVALID_DEPARTMENT_CONTEXT',
-        { 
+        "部门上下文缺少组织信息",
+        "INVALID_DEPARTMENT_CONTEXT",
+        {
           departmentId: this._departmentId.getValue(),
-          tenantId: this._tenantId.getValue()
-        }
+          tenantId: this._tenantId.getValue(),
+        },
       );
     }
   }
@@ -275,27 +276,27 @@ export class IsolationContext {
 ### 1. 捕获和处理异常
 
 ```typescript
-import { IsolationValidationError } from '../isolation/isolation-validation.error.js';
+import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
 
 try {
-  const tenantId = TenantId.create('invalid-tenant-id');
+  const tenantId = TenantId.create("invalid-tenant-id");
 } catch (error) {
   if (error instanceof IsolationValidationError) {
     // 获取内部异常实例
     const internalException = error.getInternalException();
-    
+
     // 根据异常类型进行不同处理
     if (internalException instanceof TenantContextViolationException) {
-      console.log('租户上下文验证失败:', error.getIsolationInfo());
+      console.log("租户上下文验证失败:", error.getIsolationInfo());
     } else if (internalException instanceof OrganizationIsolationException) {
-      console.log('组织隔离验证失败:', error.getIsolationInfo());
+      console.log("组织隔离验证失败:", error.getIsolationInfo());
     } else if (internalException instanceof DepartmentIsolationException) {
-      console.log('部门隔离验证失败:', error.getIsolationInfo());
+      console.log("部门隔离验证失败:", error.getIsolationInfo());
     }
-    
+
     // 获取RFC7807格式的错误信息
     const rfc7807 = error.toRFC7807();
-    console.log('RFC7807格式:', rfc7807);
+    console.log("RFC7807格式:", rfc7807);
   }
 }
 ```
@@ -303,26 +304,26 @@ try {
 ### 2. 异常信息获取
 
 ```typescript
-import { IsolationValidationError } from '../isolation/isolation-validation.error.js';
+import { IsolationValidationError } from "../isolation/isolation-validation.error.js";
 
 const error = new IsolationValidationError(
-  '租户 ID 格式无效',
-  'INVALID_TENANT_ID_FORMAT',
-  { value: 'invalid-id', expectedFormat: 'uuid' }
+  "租户 ID 格式无效",
+  "INVALID_TENANT_ID_FORMAT",
+  { value: "invalid-id", expectedFormat: "uuid" },
 );
 
 // 获取隔离信息
 const isolationInfo = error.getIsolationInfo();
-console.log('隔离代码:', isolationInfo.isolationCode);
-console.log('隔离消息:', isolationInfo.isolationMessage);
-console.log('隔离上下文:', isolationInfo.isolationContext);
-console.log('时间戳:', isolationInfo.timestamp);
+console.log("隔离代码:", isolationInfo.isolationCode);
+console.log("隔离消息:", isolationInfo.isolationMessage);
+console.log("隔离上下文:", isolationInfo.isolationContext);
+console.log("时间戳:", isolationInfo.timestamp);
 
 // 获取内部异常实例
 const internalException = error.getInternalException();
-console.log('异常类型:', internalException.constructor.name);
-console.log('错误代码:', internalException.errorCode);
-console.log('HTTP状态码:', internalException.status);
+console.log("异常类型:", internalException.constructor.name);
+console.log("错误代码:", internalException.errorCode);
+console.log("HTTP状态码:", internalException.status);
 ```
 
 ## 最佳实践

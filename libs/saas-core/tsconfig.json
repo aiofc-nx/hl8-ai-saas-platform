@@ -1,0 +1,27 @@
+{
+  "extends": "@repo/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "allowJs": false,
+    "esModuleInterop": true,
+    "incremental": false,
+    "baseUrl": ".",
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "test", "dist", "**/*.js", "**/*.js.map"],
+  "references": [
+    {
+      "path": "../domain-kernel"
+    },
+    {
+      "path": "../application-kernel"
+    },
+    {
+      "path": "../infrastructure-kernel"
+    },
+    {
+      "path": "../interface-kernel"
+    }
+  ]
+}

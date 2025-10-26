@@ -32,17 +32,17 @@ pnpm install
 
 ```typescript
 // Import specific exception categories
-import { 
+import {
   AuthenticationFailedException,
   UserNotFoundException,
-  CrossTenantAccessException 
-} from '@hl8/exceptions';
+  CrossTenantAccessException,
+} from "@hl8/exceptions";
 
 // Import layer-specific base classes
-import { 
+import {
   DomainLayerException,
-  ApplicationLayerException 
-} from '@hl8/exceptions/layers';
+  ApplicationLayerException,
+} from "@hl8/exceptions/layers";
 ```
 
 ## Core Concepts
@@ -52,7 +52,7 @@ import {
 The system organizes exceptions into business domain categories:
 
 - **auth/**: Authentication and authorization exceptions
-- **user/**: User management exceptions  
+- **user/**: User management exceptions
 - **tenant/**: Multi-tenant and isolation exceptions
 - **organization/**: Organization management exceptions
 - **department/**: Department management exceptions
@@ -95,82 +95,82 @@ All exceptions follow RFC7807 standard format:
 ### 1. Authentication Exceptions
 
 ```typescript
-import { AuthenticationFailedException } from '@hl8/exceptions';
+import { AuthenticationFailedException } from "@hl8/exceptions";
 
 // Basic usage
-throw new AuthenticationFailedException('密码错误');
+throw new AuthenticationFailedException("密码错误");
 
 // With context data
-throw new AuthenticationFailedException('密码错误', {
-  username: 'john.doe',
+throw new AuthenticationFailedException("密码错误", {
+  username: "john.doe",
   attemptCount: 3,
-  lockUntil: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
+  lockUntil: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
 });
 ```
 
 ### 2. User Management Exceptions
 
 ```typescript
-import { UserNotFoundException } from '@hl8/exceptions';
+import { UserNotFoundException } from "@hl8/exceptions";
 
 // User not found
-throw new UserNotFoundException('user-123', {
-  requestId: 'req-456',
-  timestamp: new Date().toISOString()
+throw new UserNotFoundException("user-123", {
+  requestId: "req-456",
+  timestamp: new Date().toISOString(),
 });
 
 // User already exists
-throw new UserAlreadyExistsException('john@example.com', 'email', {
-  existingUserId: 'user-456'
+throw new UserAlreadyExistsException("john@example.com", "email", {
+  existingUserId: "user-456",
 });
 ```
 
 ### 3. Multi-tenant Exceptions
 
 ```typescript
-import { CrossTenantAccessException } from '@hl8/exceptions';
+import { CrossTenantAccessException } from "@hl8/exceptions";
 
 // Cross-tenant access violation
-throw new CrossTenantAccessException('tenant-123', 'tenant-456', {
-  resourceType: 'user',
-  resourceId: 'user-789',
-  operation: 'read'
+throw new CrossTenantAccessException("tenant-123", "tenant-456", {
+  resourceType: "user",
+  resourceId: "user-789",
+  operation: "read",
 });
 ```
 
 ### 4. Validation Exceptions
 
 ```typescript
-import { ValidationFailedException } from '@hl8/exceptions';
+import { ValidationFailedException } from "@hl8/exceptions";
 
 // Field validation failure
-throw new ValidationFailedException('email', '邮箱格式无效', {
-  providedValue: 'invalid-email',
-  expectedFormat: 'user@example.com'
+throw new ValidationFailedException("email", "邮箱格式无效", {
+  providedValue: "invalid-email",
+  expectedFormat: "user@example.com",
 });
 
 // Business rule violation
 throw new BusinessRuleViolationException(
-  'ORDER_AMOUNT_LIMIT',
-  '订单金额超过限制',
-  { orderAmount: 10000, limit: 5000 }
+  "ORDER_AMOUNT_LIMIT",
+  "订单金额超过限制",
+  { orderAmount: 10000, limit: 5000 },
 );
 ```
 
 ### 5. Layer-Specific Exceptions
 
 ```typescript
-import { DomainLayerException } from '@hl8/exceptions/layers';
+import { DomainLayerException } from "@hl8/exceptions/layers";
 
 // Custom domain exception
 class OrderAmountExceededException extends DomainLayerException {
   constructor(amount: number, limit: number) {
     super(
-      'ORDER_AMOUNT_EXCEEDED',
-      '订单金额超限',
+      "ORDER_AMOUNT_EXCEEDED",
+      "订单金额超限",
       `订单金额 ${amount} 超过限制 ${limit}`,
       400,
-      { amount, limit }
+      { amount, limit },
     );
   }
 }
@@ -181,13 +181,13 @@ class OrderAmountExceededException extends DomainLayerException {
 ### 1. Module Configuration
 
 ```typescript
-import { ExceptionModule } from '@hl8/exceptions';
+import { ExceptionModule } from "@hl8/exceptions";
 
 @Module({
   imports: [
     ExceptionModule.forRoot({
       enableLogging: true,
-      isProduction: process.env.NODE_ENV === 'production',
+      isProduction: process.env.NODE_ENV === "production",
       messageProvider: new CustomMessageProvider(),
     }),
   ],
@@ -198,27 +198,27 @@ export class AppModule {}
 ### 2. Custom Message Provider
 
 ```typescript
-import { ExceptionMessageProvider } from '@hl8/exceptions';
+import { ExceptionMessageProvider } from "@hl8/exceptions";
 
 @Injectable()
 export class CustomMessageProvider implements ExceptionMessageProvider {
   getMessage(
     errorCode: string,
-    messageType: 'title' | 'detail',
-    params?: Record<string, unknown>
+    messageType: "title" | "detail",
+    params?: Record<string, unknown>,
   ): string | undefined {
     // Custom message logic
     const messages = {
-      'AUTH_LOGIN_FAILED': {
-        title: '登录失败',
-        detail: '用户名或密码错误，请重试'
-      }
+      AUTH_LOGIN_FAILED: {
+        title: "登录失败",
+        detail: "用户名或密码错误，请重试",
+      },
     };
-    
+
     return messages[errorCode]?.[messageType];
   }
 
-  hasMessage(errorCode: string, messageType: 'title' | 'detail'): boolean {
+  hasMessage(errorCode: string, messageType: "title" | "detail"): boolean {
     // Check if message exists
     return true;
   }
@@ -230,22 +230,24 @@ export class CustomMessageProvider implements ExceptionMessageProvider {
 ### 1. Unit Testing
 
 ```typescript
-import { AuthenticationFailedException } from '@hl8/exceptions';
+import { AuthenticationFailedException } from "@hl8/exceptions";
 
-describe('AuthenticationFailedException', () => {
-  it('should create exception with correct properties', () => {
-    const exception = new AuthenticationFailedException('密码错误');
-    
-    expect(exception.errorCode).toBe('AUTH_LOGIN_FAILED');
+describe("AuthenticationFailedException", () => {
+  it("should create exception with correct properties", () => {
+    const exception = new AuthenticationFailedException("密码错误");
+
+    expect(exception.errorCode).toBe("AUTH_LOGIN_FAILED");
     expect(exception.httpStatus).toBe(401);
-    expect(exception.title).toBe('认证失败');
+    expect(exception.title).toBe("认证失败");
   });
 
-  it('should convert to RFC7807 format', () => {
-    const exception = new AuthenticationFailedException('密码错误');
+  it("should convert to RFC7807 format", () => {
+    const exception = new AuthenticationFailedException("密码错误");
     const problemDetails = exception.toRFC7807();
-    
-    expect(problemDetails.type).toBe('https://docs.hl8.com/errors#AUTH_LOGIN_FAILED');
+
+    expect(problemDetails.type).toBe(
+      "https://docs.hl8.com/errors#AUTH_LOGIN_FAILED",
+    );
     expect(problemDetails.status).toBe(401);
   });
 });
@@ -254,10 +256,10 @@ describe('AuthenticationFailedException', () => {
 ### 2. Integration Testing
 
 ```typescript
-import { Test } from '@nestjs/testing';
-import { ExceptionModule } from '@hl8/exceptions';
+import { Test } from "@nestjs/testing";
+import { ExceptionModule } from "@hl8/exceptions";
 
-describe('Exception System Integration', () => {
+describe("Exception System Integration", () => {
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -269,7 +271,7 @@ describe('Exception System Integration', () => {
     await app.init();
   });
 
-  it('should handle exceptions with RFC7807 format', async () => {
+  it("should handle exceptions with RFC7807 format", async () => {
     // Test exception handling in application context
   });
 });
@@ -312,11 +314,11 @@ try {
 } catch (error) {
   if (error instanceof DatabaseConnectionError) {
     throw new GeneralInternalServerException(
-      '用户创建失败',
-      '创建用户时发生内部错误',
+      "用户创建失败",
+      "创建用户时发生内部错误",
       { originalError: error.message },
       undefined,
-      error // Preserve original error chain
+      error, // Preserve original error chain
     );
   }
   throw error;
@@ -330,12 +332,12 @@ if (!user) {
   throw new UserNotFoundException(userId);
 }
 
-if (user.status === 'LOCKED') {
-  throw new UserAccountLockedException('账户被管理员锁定');
+if (user.status === "LOCKED") {
+  throw new UserAccountLockedException("账户被管理员锁定");
 }
 
-if (user.status === 'DISABLED') {
-  throw new UserAccountDisabledException('账户已被禁用');
+if (user.status === "DISABLED") {
+  throw new UserAccountDisabledException("账户已被禁用");
 }
 ```
 
@@ -344,20 +346,18 @@ if (user.status === 'DISABLED') {
 ```typescript
 const errors: ValidationError[] = [];
 
-if (!email.includes('@')) {
-  errors.push(new ValidationFailedException('email', '邮箱格式无效'));
+if (!email.includes("@")) {
+  errors.push(new ValidationFailedException("email", "邮箱格式无效"));
 }
 
 if (password.length < 8) {
-  errors.push(new ValidationFailedException('password', '密码长度至少8位'));
+  errors.push(new ValidationFailedException("password", "密码长度至少8位"));
 }
 
 if (errors.length > 0) {
-  throw new ValidationFailedException(
-    'validation',
-    '数据验证失败',
-    { validationErrors: errors }
-  );
+  throw new ValidationFailedException("validation", "数据验证失败", {
+    validationErrors: errors,
+  });
 }
 ```
 

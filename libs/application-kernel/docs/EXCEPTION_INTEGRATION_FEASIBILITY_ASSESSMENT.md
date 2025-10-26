@@ -38,14 +38,14 @@
 
 ### 2.1 架构层次匹配
 
-| 组件 | 当前层次 | libs/exceptions 支持 | 兼容性 |
-|------|----------|---------------------|--------|
-| BaseUseCase | 应用层 | ApplicationLayerException | ✅ 高度兼容 |
-| BaseCommand | 应用层 | ApplicationLayerException | ✅ 高度兼容 |
-| BaseQuery | 应用层 | ApplicationLayerException | ✅ 高度兼容 |
-| 事务管理 | 基础设施层 | InfrastructureLayerException | ✅ 高度兼容 |
-| 事件系统 | 应用层 | ApplicationLayerException | ✅ 高度兼容 |
-| 验证系统 | 应用层 | ValidationException | ✅ 高度兼容 |
+| 组件        | 当前层次   | libs/exceptions 支持         | 兼容性      |
+| ----------- | ---------- | ---------------------------- | ----------- |
+| BaseUseCase | 应用层     | ApplicationLayerException    | ✅ 高度兼容 |
+| BaseCommand | 应用层     | ApplicationLayerException    | ✅ 高度兼容 |
+| BaseQuery   | 应用层     | ApplicationLayerException    | ✅ 高度兼容 |
+| 事务管理    | 基础设施层 | InfrastructureLayerException | ✅ 高度兼容 |
+| 事件系统    | 应用层     | ApplicationLayerException    | ✅ 高度兼容 |
+| 验证系统    | 应用层     | ValidationException          | ✅ 高度兼容 |
 
 ### 2.2 设计模式兼容性
 

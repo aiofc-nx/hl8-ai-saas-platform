@@ -123,7 +123,7 @@ test/
 // jest.config.ts
 testMatch: [
   "<rootDir>/src/**/*.spec.ts",
-  "<rootDir>/src/**/*.test.ts", 
+  "<rootDir>/src/**/*.test.ts",
   "<rootDir>/test/**/*.spec.ts",
   "<rootDir>/test/**/*.test.ts",
 ],

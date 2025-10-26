@@ -52,17 +52,17 @@ libs/exceptions/src/core/
 
 #### 2.2 领域前缀映射
 
-| 领域 | 前缀 | 示例 |
-|------|------|------|
-| 认证授权 | `AUTH_` | `AUTH_LOGIN_FAILED` |
-| 用户管理 | `USER_` | `USER_NOT_FOUND` |
-| 租户管理 | `TENANT_` | `TENANT_SUSPENDED` |
-| 组织管理 | `ORG_` | `ORG_ACCESS_DENIED` |
-| 部门管理 | `DEPT_` | `DEPT_NOT_FOUND` |
-| 数据验证 | `VALIDATION_` | `VALIDATION_FAILED` |
-| 业务规则 | `BUSINESS_` | `BUSINESS_RULE_VIOLATION` |
-| 系统资源 | `SYSTEM_` | `SYSTEM_RATE_LIMIT` |
-| 集成服务 | `INTEGRATION_` | `INTEGRATION_TIMEOUT` |
+| 领域     | 前缀           | 示例                      |
+| -------- | -------------- | ------------------------- |
+| 认证授权 | `AUTH_`        | `AUTH_LOGIN_FAILED`       |
+| 用户管理 | `USER_`        | `USER_NOT_FOUND`          |
+| 租户管理 | `TENANT_`      | `TENANT_SUSPENDED`        |
+| 组织管理 | `ORG_`         | `ORG_ACCESS_DENIED`       |
+| 部门管理 | `DEPT_`        | `DEPT_NOT_FOUND`          |
+| 数据验证 | `VALIDATION_`  | `VALIDATION_FAILED`       |
+| 业务规则 | `BUSINESS_`    | `BUSINESS_RULE_VIOLATION` |
+| 系统资源 | `SYSTEM_`      | `SYSTEM_RATE_LIMIT`       |
+| 集成服务 | `INTEGRATION_` | `INTEGRATION_TIMEOUT`     |
 
 ### 3. 异常层次结构
 
@@ -97,25 +97,26 @@ AbstractHttpException (抽象基类)
 // auth/authentication-failed.exception.ts
 export class AuthenticationFailedException extends AbstractHttpException {
   constructor(reason: string, data?: Record<string, unknown>) {
-    super(
-      "AUTH_LOGIN_FAILED",
-      "认证失败",
-      `登录失败: ${reason}`,
-      401,
-      { reason, ...data }
-    );
+    super("AUTH_LOGIN_FAILED", "认证失败", `登录失败: ${reason}`, 401, {
+      reason,
+      ...data,
+    });
   }
 }
 
 // auth/unauthorized.exception.ts
 export class UnauthorizedException extends AbstractHttpException {
-  constructor(resource: string, action: string, data?: Record<string, unknown>) {
+  constructor(
+    resource: string,
+    action: string,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "AUTH_UNAUTHORIZED",
       "未授权访问",
       `您没有权限${action}资源"${resource}"`,
       401,
-      { resource, action, ...data }
+      { resource, action, ...data },
     );
   }
 }
@@ -128,7 +129,7 @@ export class TokenExpiredException extends AbstractHttpException {
       "令牌已过期",
       `${tokenType}令牌已过期，请重新登录`,
       401,
-      { tokenType, ...data }
+      { tokenType, ...data },
     );
   }
 }
@@ -141,7 +142,7 @@ export class InvalidTokenException extends AbstractHttpException {
       "无效令牌",
       `${tokenType}令牌格式无效或已损坏`,
       401,
-      { tokenType, ...data }
+      { tokenType, ...data },
     );
   }
 }
@@ -154,7 +155,7 @@ export class InsufficientPermissionsException extends AbstractHttpException {
       "权限不足",
       `执行此操作需要以下权限: ${requiredPermissions.join(", ")}`,
       403,
-      { requiredPermissions, ...data }
+      { requiredPermissions, ...data },
     );
   }
 }
@@ -184,46 +185,58 @@ export class UserNotFoundException extends AbstractHttpException {
       "用户未找到",
       `ID 为 "${userId}" 的用户不存在`,
       404,
-      { userId, ...data }
+      { userId, ...data },
     );
   }
 }
 
 // user/user-already-exists.exception.ts
 export class UserAlreadyExistsException extends AbstractHttpException {
-  constructor(identifier: string, identifierType: string = "email", data?: Record<string, unknown>) {
+  constructor(
+    identifier: string,
+    identifierType: string = "email",
+    data?: Record<string, unknown>,
+  ) {
     super(
       "USER_ALREADY_EXISTS",
       "用户已存在",
       `使用${identifierType}"${identifier}"的用户已存在`,
       409,
-      { identifier, identifierType, ...data }
+      { identifier, identifierType, ...data },
     );
   }
 }
 
 // user/invalid-user-status.exception.ts
 export class InvalidUserStatusException extends AbstractHttpException {
-  constructor(currentStatus: string, expectedStatus: string[], data?: Record<string, unknown>) {
+  constructor(
+    currentStatus: string,
+    expectedStatus: string[],
+    data?: Record<string, unknown>,
+  ) {
     super(
       "USER_INVALID_STATUS",
       "无效用户状态",
       `用户当前状态"${currentStatus}"不允许执行此操作，期望状态: ${expectedStatus.join(", ")}`,
       400,
-      { currentStatus, expectedStatus, ...data }
+      { currentStatus, expectedStatus, ...data },
     );
   }
 }
 
 // user/user-account-locked.exception.ts
 export class UserAccountLockedException extends AbstractHttpException {
-  constructor(reason: string, lockUntil?: Date, data?: Record<string, unknown>) {
+  constructor(
+    reason: string,
+    lockUntil?: Date,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "USER_ACCOUNT_LOCKED",
       "账户已锁定",
       `账户因"${reason}"被锁定${lockUntil ? `，锁定至 ${lockUntil.toISOString()}` : ""}`,
       423,
-      { reason, lockUntil, ...data }
+      { reason, lockUntil, ...data },
     );
   }
 }
@@ -236,7 +249,7 @@ export class UserAccountDisabledException extends AbstractHttpException {
       "账户已禁用",
       `账户因"${reason}"被禁用`,
       403,
-      { reason, ...data }
+      { reason, ...data },
     );
   }
 }
@@ -255,7 +268,7 @@ export class DepartmentNotFoundException extends AbstractHttpException {
       "部门未找到",
       `ID 为 "${departmentId}" 的部门不存在`,
       404,
-      { departmentId, ...data }
+      { departmentId, ...data },
     );
   }
 }
@@ -268,20 +281,24 @@ export class UnauthorizedDepartmentException extends AbstractHttpException {
       "未授权访问部门",
       `您没有权限访问部门 "${departmentId}"`,
       403,
-      { departmentId, ...data }
+      { departmentId, ...data },
     );
   }
 }
 
 // department/invalid-department-hierarchy.exception.ts
 export class InvalidDepartmentHierarchyException extends AbstractHttpException {
-  constructor(parentId: string, childId: string, data?: Record<string, unknown>) {
+  constructor(
+    parentId: string,
+    childId: string,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "DEPT_INVALID_HIERARCHY",
       "无效部门层级",
       `部门 "${childId}" 不能成为部门 "${parentId}" 的下级`,
       400,
-      { parentId, childId, ...data }
+      { parentId, childId, ...data },
     );
   }
 }
@@ -292,13 +309,17 @@ export class InvalidDepartmentHierarchyException extends AbstractHttpException {
 ```typescript
 // tenant/cross-tenant-access.exception.ts
 export class CrossTenantAccessException extends AbstractHttpException {
-  constructor(sourceTenantId: string, targetTenantId: string, data?: Record<string, unknown>) {
+  constructor(
+    sourceTenantId: string,
+    targetTenantId: string,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "TENANT_CROSS_ACCESS",
       "跨租户访问异常",
       `租户 "${sourceTenantId}" 尝试访问租户 "${targetTenantId}" 的数据`,
       403,
-      { sourceTenantId, targetTenantId, ...data }
+      { sourceTenantId, targetTenantId, ...data },
     );
   }
 }
@@ -311,7 +332,7 @@ export class DataIsolationViolationException extends AbstractHttpException {
       "数据隔离违规",
       `检测到数据隔离违规: ${violationType}`,
       403,
-      { violationType, ...data }
+      { violationType, ...data },
     );
   }
 }
@@ -324,7 +345,7 @@ export class InvalidTenantContextException extends AbstractHttpException {
       "无效租户上下文",
       `租户上下文无效: ${context}`,
       400,
-      { context, ...data }
+      { context, ...data },
     );
   }
 }
@@ -343,33 +364,41 @@ export class ValidationFailedException extends AbstractHttpException {
       "数据验证失败",
       `字段 "${field}" 验证失败: ${message}`,
       400,
-      { field, message, ...data }
+      { field, message, ...data },
     );
   }
 }
 
 // validation/business-rule-violation.exception.ts
 export class BusinessRuleViolationException extends AbstractHttpException {
-  constructor(ruleName: string, violation: string, data?: Record<string, unknown>) {
+  constructor(
+    ruleName: string,
+    violation: string,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "BUSINESS_RULE_VIOLATION",
       "业务规则违规",
       `业务规则 "${ruleName}" 被违反: ${violation}`,
       400,
-      { ruleName, violation, ...data }
+      { ruleName, violation, ...data },
     );
   }
 }
 
 // validation/constraint-violation.exception.ts
 export class ConstraintViolationException extends AbstractHttpException {
-  constructor(constraint: string, value: unknown, data?: Record<string, unknown>) {
+  constructor(
+    constraint: string,
+    value: unknown,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "VALIDATION_CONSTRAINT_VIOLATION",
       "约束违规",
       `约束 "${constraint}" 被违反，值: ${JSON.stringify(value)}`,
       400,
-      { constraint, value, ...data }
+      { constraint, value, ...data },
     );
   }
 }
@@ -388,33 +417,41 @@ export class RateLimitExceededException extends AbstractHttpException {
       "请求频率超限",
       `请求频率超过限制，限制: ${limit}/${window}`,
       429,
-      { limit, window, ...data }
+      { limit, window, ...data },
     );
   }
 }
 
 // system/service-unavailable.exception.ts
 export class ServiceUnavailableException extends AbstractHttpException {
-  constructor(serviceName: string, reason: string, data?: Record<string, unknown>) {
+  constructor(
+    serviceName: string,
+    reason: string,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "SYSTEM_SERVICE_UNAVAILABLE",
       "服务不可用",
       `服务 "${serviceName}" 暂时不可用: ${reason}`,
       503,
-      { serviceName, reason, ...data }
+      { serviceName, reason, ...data },
     );
   }
 }
 
 // system/resource-not-found.exception.ts
 export class ResourceNotFoundException extends AbstractHttpException {
-  constructor(resourceType: string, resourceId: string, data?: Record<string, unknown>) {
+  constructor(
+    resourceType: string,
+    resourceId: string,
+    data?: Record<string, unknown>,
+  ) {
     super(
       "SYSTEM_RESOURCE_NOT_FOUND",
       "资源未找到",
       `${resourceType} 资源 "${resourceId}" 不存在`,
       404,
-      { resourceType, resourceId, ...data }
+      { resourceType, resourceId, ...data },
     );
   }
 }
@@ -464,7 +501,7 @@ export abstract class InterfaceLayerException extends AbstractHttpException {
     title: string,
     detail: string,
     status: number,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ) {
     super(errorCode, title, detail, status, data);
     this.name = this.constructor.name;
@@ -482,7 +519,7 @@ export abstract class ApplicationLayerException extends AbstractHttpException {
     title: string,
     detail: string,
     status: number,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ) {
     super(errorCode, title, detail, status, data);
     this.name = this.constructor.name;
@@ -500,7 +537,7 @@ export abstract class DomainLayerException extends AbstractHttpException {
     title: string,
     detail: string,
     status: number,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ) {
     super(errorCode, title, detail, status, data);
     this.name = this.constructor.name;
@@ -518,7 +555,7 @@ export abstract class InfrastructureLayerException extends AbstractHttpException
     title: string,
     detail: string,
     status: number,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ) {
     super(errorCode, title, detail, status, data);
     this.name = this.constructor.name;
@@ -553,25 +590,25 @@ class DatabaseConnectionFailed extends InfrastructureLayerException {
 // exception-mapping.config.ts
 export const EXCEPTION_MAPPING = {
   // 领域层异常映射
-  'BUSINESS_RULE_VIOLATION': {
-    layer: 'domain',
+  BUSINESS_RULE_VIOLATION: {
+    layer: "domain",
     status: 400,
-    category: 'business'
+    category: "business",
   },
-  
+
   // 应用层异常映射
-  'USE_CASE_EXECUTION_FAILED': {
-    layer: 'application', 
+  USE_CASE_EXECUTION_FAILED: {
+    layer: "application",
     status: 422,
-    category: 'workflow'
+    category: "workflow",
   },
-  
+
   // 基础设施层异常映射
-  'DATABASE_CONNECTION_FAILED': {
-    layer: 'infrastructure',
+  DATABASE_CONNECTION_FAILED: {
+    layer: "infrastructure",
     status: 503,
-    category: 'system'
-  }
+    category: "system",
+  },
 };
 ```
 
@@ -744,50 +781,50 @@ export * from "./exception.module.js";
 ### 1. 基本使用
 
 ```typescript
-import { 
+import {
   UserNotFoundException,
   AuthenticationFailedException,
-  BusinessRuleViolationException 
-} from '@hl8/exceptions';
+  BusinessRuleViolationException,
+} from "@hl8/exceptions";
 
 // 用户未找到异常
-throw new UserNotFoundException('user-123', { 
-  requestId: 'req-456',
-  timestamp: new Date().toISOString()
+throw new UserNotFoundException("user-123", {
+  requestId: "req-456",
+  timestamp: new Date().toISOString(),
 });
 
 // 认证失败异常
-throw new AuthenticationFailedException('密码错误', {
-  username: 'john.doe',
-  attemptCount: 3
+throw new AuthenticationFailedException("密码错误", {
+  username: "john.doe",
+  attemptCount: 3,
 });
 
 // 业务规则违规异常
 throw new BusinessRuleViolationException(
-  'ORDER_AMOUNT_LIMIT',
-  '订单金额超过限制',
-  { orderAmount: 10000, limit: 5000 }
+  "ORDER_AMOUNT_LIMIT",
+  "订单金额超过限制",
+  { orderAmount: 10000, limit: 5000 },
 );
 ```
 
 ### 2. 分层异常使用
 
 ```typescript
-import { 
+import {
   DomainLayerException,
   ApplicationLayerException,
-  InterfaceLayerException 
-} from '@hl8/exceptions';
+  InterfaceLayerException,
+} from "@hl8/exceptions";
 
 // 领域层异常
 class OrderAmountExceededException extends DomainLayerException {
   constructor(amount: number, limit: number) {
     super(
-      'ORDER_AMOUNT_EXCEEDED',
-      '订单金额超限',
+      "ORDER_AMOUNT_EXCEEDED",
+      "订单金额超限",
       `订单金额 ${amount} 超过限制 ${limit}`,
       400,
-      { amount, limit }
+      { amount, limit },
     );
   }
 }
@@ -796,11 +833,11 @@ class OrderAmountExceededException extends DomainLayerException {
 class OrderProcessingFailedException extends ApplicationLayerException {
   constructor(orderId: string, reason: string) {
     super(
-      'ORDER_PROCESSING_FAILED',
-      '订单处理失败',
+      "ORDER_PROCESSING_FAILED",
+      "订单处理失败",
       `订单 ${orderId} 处理失败: ${reason}`,
       422,
-      { orderId, reason }
+      { orderId, reason },
     );
   }
 }

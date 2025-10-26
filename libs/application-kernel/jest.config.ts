@@ -41,11 +41,11 @@ const config: Config = {
       },
     ],
   },
-        moduleNameMapper: {
-          "^@hl8/application-kernel$": "<rootDir>/src/index.ts",
-          "^@hl8/domain-kernel$": "<rootDir>/../domain-kernel/src/index.ts",
-          "^@hl8/exceptions$": "<rootDir>/../exceptions/src/index.ts",
-        },
+  moduleNameMapper: {
+    "^@hl8/application-kernel$": "<rootDir>/src/index.ts",
+    "^@hl8/domain-kernel$": "<rootDir>/../domain-kernel/src/index.ts",
+    "^@hl8/exceptions$": "<rootDir>/../exceptions/src/index.ts",
+  },
   transformIgnorePatterns: ["node_modules/(?!(.*\\.mjs$))"],
 };
 

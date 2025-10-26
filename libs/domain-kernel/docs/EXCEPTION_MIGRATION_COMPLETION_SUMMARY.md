@@ -62,11 +62,11 @@ libs/exceptions/
 
 #### **异常类映射**
 
-| 原 domain-kernel 异常类 | 新 libs/exceptions 异常类 | 状态 |
-|------------------------|-------------------------|------|
+| 原 domain-kernel 异常类                | 新 libs/exceptions 异常类              | 状态      |
+| -------------------------------------- | -------------------------------------- | --------- |
 | `DomainBusinessRuleViolationException` | `DomainBusinessRuleViolationException` | ✅ 已迁移 |
-| `DomainValidationException` | `DomainValidationException` | ✅ 已迁移 |
-| `DomainTenantIsolationException` | `DomainTenantIsolationException` | ✅ 已迁移 |
+| `DomainValidationException`            | `DomainValidationException`            | ✅ 已迁移 |
+| `DomainTenantIsolationException`       | `DomainTenantIsolationException`       | ✅ 已迁移 |
 
 ### 🚀 **使用方式**
 
@@ -74,11 +74,11 @@ libs/exceptions/
 
 ```typescript
 // 从 libs/exceptions 导入领域层异常
-import { 
+import {
   DomainBusinessRuleViolationException,
   DomainValidationException,
   DomainTenantIsolationException,
-  DomainExceptionFactory
+  DomainExceptionFactory,
 } from "/home/arligle/hl8/hl8-ai-saas-platform/libs/exceptions/dist/core/domain/index.js";
 ```
 

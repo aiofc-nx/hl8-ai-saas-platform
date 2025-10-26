@@ -19,7 +19,7 @@ This data model defines the core entities for the enhanced exception handling sy
 - `name`: string - Category name (e.g., "auth", "user", "tenant")
 - `displayName`: string - Human-readable display name (e.g., "认证授权", "用户管理")
 - `description`: string - Category description and purpose
-- `prefix`: string - Error code prefix (e.g., "AUTH_", "USER_")
+- `prefix`: string - Error code prefix (e.g., "AUTH*", "USER*")
 - `layer`: string - Associated Clean Architecture layer ("interface", "application", "domain", "infrastructure")
 
 **Validation Rules**:
@@ -53,7 +53,7 @@ This data model defines the core entities for the enhanced exception handling sy
 
 **Validation Rules**:
 
-- Error code must follow naming convention: {PREFIX}_{TYPE}
+- Error code must follow naming convention: {PREFIX}\_{TYPE}
 - HTTP status code must be valid (100-599)
 - Title and detail must be provided in Chinese
 - Error code must be unique across all exceptions

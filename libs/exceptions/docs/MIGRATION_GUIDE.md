@@ -58,10 +58,10 @@ import { InvalidTenantContextException } from "@hl8/exceptions/core/tenant";
 
 ```typescript
 // 继续使用 ✅
-import { 
+import {
   GeneralBadRequestException,
   GeneralInternalServerException,
-  GeneralNotFoundException
+  GeneralNotFoundException,
 } from "@hl8/exceptions";
 ```
 
@@ -149,7 +149,7 @@ import {
   UnauthorizedException,
   TokenExpiredException,
   InvalidTokenException,
-  InsufficientPermissionsException
+  InsufficientPermissionsException,
 } from "@hl8/exceptions/core/auth";
 
 // 用户管理异常
@@ -158,21 +158,21 @@ import {
   UserAlreadyExistsException,
   InvalidUserStatusException,
   UserAccountLockedException,
-  UserAccountDisabledException
+  UserAccountDisabledException,
 } from "@hl8/exceptions/core/user";
 
 // 数据验证异常
 import {
   ValidationFailedException,
   BusinessRuleViolationException,
-  ConstraintViolationException
+  ConstraintViolationException,
 } from "@hl8/exceptions/core/validation";
 
 // 系统资源异常
 import {
   RateLimitExceededException,
   ServiceUnavailableException,
-  ResourceNotFoundException
+  ResourceNotFoundException,
 } from "@hl8/exceptions/core/system";
 ```
 

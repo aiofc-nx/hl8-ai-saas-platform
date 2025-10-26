@@ -272,7 +272,11 @@ class UserNotFoundException extends UserException {
 
 ```typescript
 class UserAlreadyExistsException extends UserException {
-  constructor(identifier: string, field: string, data?: Record<string, unknown>);
+  constructor(
+    identifier: string,
+    field: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -282,7 +286,11 @@ class UserAlreadyExistsException extends UserException {
 
 ```typescript
 class InvalidUserStatusException extends UserException {
-  constructor(currentStatus: string, expectedStatus: string, data?: Record<string, unknown>);
+  constructor(
+    currentStatus: string,
+    expectedStatus: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -327,7 +335,11 @@ abstract class TenantException extends DomainLayerException {
 
 ```typescript
 class CrossTenantAccessException extends TenantException {
-  constructor(currentTenantId: string, targetTenantId: string, data?: Record<string, unknown>);
+  constructor(
+    currentTenantId: string,
+    targetTenantId: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -382,7 +394,11 @@ class ValidationFailedException extends ValidationException {
 
 ```typescript
 class BusinessRuleViolationException extends ValidationException {
-  constructor(ruleName: string, violation: string, data?: Record<string, unknown>);
+  constructor(
+    ruleName: string,
+    violation: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -392,7 +408,11 @@ class BusinessRuleViolationException extends ValidationException {
 
 ```typescript
 class ConstraintViolationException extends ValidationException {
-  constructor(constraintType: string, violation: string, data?: Record<string, unknown>);
+  constructor(
+    constraintType: string,
+    violation: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -437,7 +457,11 @@ class ServiceUnavailableException extends SystemException {
 
 ```typescript
 class ResourceNotFoundException extends SystemException {
-  constructor(resourceType: string, resourceId: string, data?: Record<string, unknown>);
+  constructor(
+    resourceType: string,
+    resourceId: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -472,7 +496,11 @@ class OrganizationNotFoundException extends OrganizationException {
 
 ```typescript
 class UnauthorizedOrganizationException extends OrganizationException {
-  constructor(userId: string, organizationId: string, data?: Record<string, unknown>);
+  constructor(
+    userId: string,
+    organizationId: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -507,7 +535,11 @@ class DepartmentNotFoundException extends DepartmentException {
 
 ```typescript
 class UnauthorizedDepartmentException extends DepartmentException {
-  constructor(userId: string, departmentId: string, data?: Record<string, unknown>);
+  constructor(
+    userId: string,
+    departmentId: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -542,7 +574,11 @@ abstract class BusinessException extends DomainLayerException {
 
 ```typescript
 class OperationFailedException extends BusinessException {
-  constructor(operation: string, reason: string, data?: Record<string, unknown>);
+  constructor(
+    operation: string,
+    reason: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -552,7 +588,12 @@ class OperationFailedException extends BusinessException {
 
 ```typescript
 class InvalidStateTransitionException extends BusinessException {
-  constructor(entity: string, currentState: string, targetState: string, data?: Record<string, unknown>);
+  constructor(
+    entity: string,
+    currentState: string,
+    targetState: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -562,7 +603,12 @@ class InvalidStateTransitionException extends BusinessException {
 
 ```typescript
 class StepFailedException extends BusinessException {
-  constructor(workflowName: string, stepNumber: number, reason: string, data?: Record<string, unknown>);
+  constructor(
+    workflowName: string,
+    stepNumber: number,
+    reason: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -587,7 +633,11 @@ abstract class IntegrationException extends InfrastructureLayerException {
 
 ```typescript
 class ExternalServiceUnavailableException extends IntegrationException {
-  constructor(serviceName: string, reason: string, data?: Record<string, unknown>);
+  constructor(
+    serviceName: string,
+    reason: string,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -597,7 +647,12 @@ class ExternalServiceUnavailableException extends IntegrationException {
 
 ```typescript
 class ExternalServiceErrorException extends IntegrationException {
-  constructor(serviceName: string, errorMessage: string, statusCode: number, data?: Record<string, unknown>);
+  constructor(
+    serviceName: string,
+    errorMessage: string,
+    statusCode: number,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -607,7 +662,11 @@ class ExternalServiceErrorException extends IntegrationException {
 
 ```typescript
 class ExternalServiceTimeoutException extends IntegrationException {
-  constructor(serviceName: string, timeoutMs: number, data?: Record<string, unknown>);
+  constructor(
+    serviceName: string,
+    timeoutMs: number,
+    data?: Record<string, unknown>,
+  );
 }
 ```
 
@@ -655,7 +714,9 @@ HTTP异常过滤器，专门处理 `AbstractHttpException` 及其子类。
 ```typescript
 @Injectable()
 @Catch(AbstractHttpException)
-export class HttpExceptionFilter implements ExceptionFilter<AbstractHttpException> {
+export class HttpExceptionFilter
+  implements ExceptionFilter<AbstractHttpException>
+{
   constructor(
     @Optional() private readonly logger?: ILoggerService,
     @Optional() private readonly messageProvider?: IExceptionMessageProvider,
@@ -771,7 +832,11 @@ export interface ILoggerService {
   /**
    * 记录错误日志
    */
-  error(message: string, stack?: string, context?: Record<string, unknown>): void;
+  error(
+    message: string,
+    stack?: string,
+    context?: Record<string, unknown>,
+  ): void;
 
   /**
    * 记录警告日志

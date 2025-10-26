@@ -23,7 +23,12 @@ npm install @hl8/application-kernel @hl8/domain-kernel @hl8/exceptions
 ## 🚀 快速开始
 
 ```typescript
-import { BaseCommand, BaseQuery, BaseUseCase, GeneralBadRequestException } from "@hl8/application-kernel";
+import {
+  BaseCommand,
+  BaseQuery,
+  BaseUseCase,
+  GeneralBadRequestException,
+} from "@hl8/application-kernel";
 import { IsolationContext, TenantId } from "@hl8/domain-kernel";
 
 // 创建命令
@@ -59,14 +64,14 @@ export class CreateUserUseCase extends BaseUseCase {
 export class ValidateUserUseCase extends BaseUseCase {
   async execute(command: CreateUserCommand): Promise<void> {
     // 参数验证
-    if (!command.email || !command.email.includes('@')) {
+    if (!command.email || !command.email.includes("@")) {
       throw new GeneralBadRequestException(
         "邮箱格式错误",
         "邮箱地址格式不正确",
-        { email: command.email, expectedFormat: 'user@example.com' }
+        { email: command.email, expectedFormat: "user@example.com" },
       );
     }
-    
+
     // 业务逻辑...
   }
 }

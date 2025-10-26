@@ -22,11 +22,11 @@
 
 #### 重命名映射
 
-| 原名称 | 新名称 | 说明 |
-|--------|--------|------|
+| 原名称                           | 新名称                                 | 说明                   |
+| -------------------------------- | -------------------------------------- | ---------------------- |
 | `BusinessRuleViolationException` | `DomainBusinessRuleViolationException` | 领域层业务规则违规异常 |
-| `ValidationException` | `DomainValidationException` | 领域层验证异常 |
-| `TenantIsolationException` | `DomainTenantIsolationException` | 领域层租户隔离异常 |
+| `ValidationException`            | `DomainValidationException`            | 领域层验证异常         |
+| `TenantIsolationException`       | `DomainTenantIsolationException`       | 领域层租户隔离异常     |
 
 ### 实施细节
 
@@ -59,16 +59,16 @@ import { DomainBusinessRuleViolationException } from "./business-rule.exception.
 ```typescript
 // 原代码
 const exception = new BusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效',
-  { email: 'invalid-email' }
+  "INVALID_EMAIL",
+  "邮箱格式无效",
+  { email: "invalid-email" },
 );
 
 // 新代码
 const exception = new DomainBusinessRuleViolationException(
-  'INVALID_EMAIL',
-  '邮箱格式无效',
-  { email: 'invalid-email' }
+  "INVALID_EMAIL",
+  "邮箱格式无效",
+  { email: "invalid-email" },
 );
 ```
 
@@ -104,10 +104,10 @@ const exception = new DomainBusinessRuleViolationException(
 
 ```typescript
 // 领域层异常
-import { DomainBusinessRuleViolationException } from '@hl8/domain-kernel';
+import { DomainBusinessRuleViolationException } from "@hl8/domain-kernel";
 
 // HTTP异常
-import { BusinessRuleViolationException } from '@hl8/exceptions';
+import { BusinessRuleViolationException } from "@hl8/exceptions";
 ```
 
 ### 2. 避免命名冲突
@@ -134,7 +134,7 @@ import { BusinessRuleViolationException } from '@hl8/exceptions';
 
 ```bash
 ✓ 应该创建业务规则违规异常
-✓ 应该创建验证异常  
+✓ 应该创建验证异常
 ✓ 应该创建租户隔离异常
 ✓ 应该返回异常基本信息
 ✓ 应该转换为 RFC7807 格式
@@ -160,20 +160,20 @@ import { BusinessRuleViolationException } from '@hl8/exceptions';
 
 ```typescript
 // 原代码
-import { BusinessRuleViolationException } from '@hl8/domain-kernel';
+import { BusinessRuleViolationException } from "@hl8/domain-kernel";
 
 // 新代码
-import { DomainBusinessRuleViolationException } from '@hl8/domain-kernel';
+import { DomainBusinessRuleViolationException } from "@hl8/domain-kernel";
 ```
 
 #### 2. 更新使用
 
 ```typescript
 // 原代码
-throw new BusinessRuleViolationException('INVALID_EMAIL', '邮箱格式无效');
+throw new BusinessRuleViolationException("INVALID_EMAIL", "邮箱格式无效");
 
 // 新代码
-throw new DomainBusinessRuleViolationException('INVALID_EMAIL', '邮箱格式无效');
+throw new DomainBusinessRuleViolationException("INVALID_EMAIL", "邮箱格式无效");
 ```
 
 #### 3. 更新类型注解

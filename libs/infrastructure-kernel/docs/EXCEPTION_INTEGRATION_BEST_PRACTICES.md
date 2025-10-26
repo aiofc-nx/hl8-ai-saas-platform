@@ -24,18 +24,20 @@
 import { InfrastructureExceptionConverter } from "./exceptions/infrastructure-exception.mapping.js";
 
 // 自动推断错误类型并转换
-const standardException = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "DATABASE",
-  { operation: "getConnection", connectionName: "test-db" }
-);
+const standardException =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "DATABASE",
+    { operation: "getConnection", connectionName: "test-db" },
+  );
 
 // 手动指定错误类型
-const networkException = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "NETWORK",
-  { endpoint: "https://api.example.com" }
-);
+const networkException =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "NETWORK",
+    { endpoint: "https://api.example.com" },
+  );
 ```
 
 ### 2. EnhancedErrorHandlerService
@@ -50,21 +52,19 @@ const errorHandler = new EnhancedErrorHandlerService();
 // 处理单个错误
 const result = await errorHandler.handleError(error, {
   operation: "database_query",
-  context: "user_management"
+  context: "user_management",
 });
 
 // 处理基础设施层特定错误
-const result = await errorHandler.handleInfrastructureError(
-  error,
-  "DATABASE",
-  { connectionName: "test-db" }
-);
+const result = await errorHandler.handleInfrastructureError(error, "DATABASE", {
+  connectionName: "test-db",
+});
 
 // 批量处理错误
 const results = await errorHandler.handleBatchErrors([
   { error: dbError, type: "DATABASE" },
   { error: cacheError, type: "CACHE" },
-  { error: networkError, type: "NETWORK" }
+  { error: networkError, type: "NETWORK" },
 ]);
 ```
 
@@ -88,11 +88,12 @@ import { InfrastructureExceptionConverter } from "./exceptions/infrastructure-ex
 try {
   await databaseOperation();
 } catch (error) {
-  const standardError = error instanceof Error ? error : new Error(String(error));
+  const standardError =
+    error instanceof Error ? error : new Error(String(error));
   throw InfrastructureExceptionConverter.convertToStandardException(
     standardError,
     "DATABASE",
-    { operation: "databaseOperation" }
+    { operation: "databaseOperation" },
   );
 }
 ```
@@ -115,13 +116,14 @@ export class DatabaseService {
     try {
       return await this.connectionManager.getConnection(name);
     } catch (error) {
-      const standardError = error instanceof Error ? error : new Error(String(error));
-      
+      const standardError =
+        error instanceof Error ? error : new Error(String(error));
+
       // 使用增强的错误处理器
       const result = await this.errorHandler.handleInfrastructureError(
         standardError,
         "DATABASE",
-        { operation: "getConnection", connectionName: name }
+        { operation: "getConnection", connectionName: name },
       );
 
       // 如果错误处理器无法处理，抛出标准化异常
@@ -129,7 +131,7 @@ export class DatabaseService {
         throw InfrastructureExceptionConverter.convertToStandardException(
           standardError,
           "DATABASE",
-          { operation: "getConnection", connectionName: name }
+          { operation: "getConnection", connectionName: name },
         );
       }
 
@@ -160,7 +162,8 @@ export class ExceptionHandlingMiddleware {
     try {
       return await operation();
     } catch (error) {
-      const standardError = error instanceof Error ? error : new Error(String(error));
+      const standardError =
+        error instanceof Error ? error : new Error(String(error));
       throw InfrastructureExceptionConverter.convertToStandardException(
         standardError,
         errorType,
@@ -180,7 +183,8 @@ export class ExceptionHandlingMiddleware {
     try {
       return operation();
     } catch (error) {
-      const standardError = error instanceof Error ? error : new Error(String(error));
+      const standardError =
+        error instanceof Error ? error : new Error(String(error));
       throw InfrastructureExceptionConverter.convertToStandardException(
         standardError,
         errorType,
@@ -224,7 +228,10 @@ export class CacheService {
 **适用场景**: 需要为现有方法添加异常处理功能
 
 ```typescript
-import { InfrastructureExceptionConverter, InfrastructureErrorType } from "./exceptions/infrastructure-exception.mapping.js";
+import {
+  InfrastructureExceptionConverter,
+  InfrastructureErrorType,
+} from "./exceptions/infrastructure-exception.mapping.js";
 
 /**
  * 基础设施异常处理装饰器
@@ -244,9 +251,10 @@ export function HandleInfrastructureException(
       try {
         return await originalMethod.apply(this, args);
       } catch (error) {
-        const standardError = error instanceof Error ? error : new Error(String(error));
+        const standardError =
+          error instanceof Error ? error : new Error(String(error));
         const context = contextProvider ? contextProvider(args) : {};
-        
+
         throw InfrastructureExceptionConverter.convertToStandardException(
           standardError,
           errorType,
@@ -262,17 +270,17 @@ export function HandleInfrastructureException(
 // 使用示例
 @Injectable()
 export class DatabaseService {
-  @HandleInfrastructureException("DATABASE", (args) => ({ 
-    operation: "getConnection", 
-    connectionName: args[0] 
+  @HandleInfrastructureException("DATABASE", (args) => ({
+    operation: "getConnection",
+    connectionName: args[0],
   }))
   async getConnection(name: string): Promise<IDatabaseAdapter> {
     return await this.connectionManager.getConnection(name);
   }
 
-  @HandleInfrastructureException("DATABASE", (args) => ({ 
-    operation: "createConnection", 
-    connectionName: args[0] 
+  @HandleInfrastructureException("DATABASE", (args) => ({
+    operation: "createConnection",
+    connectionName: args[0],
   }))
   async createConnection(name: string, config: any): Promise<IDatabaseAdapter> {
     return await this.connectionManager.createConnection(name, config);
@@ -286,25 +294,27 @@ export class DatabaseService {
 
 ```typescript
 // 连接错误
-const connectionError = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "DATABASE",
-  { operation: "connect", connectionName: "main-db" }
-);
+const connectionError =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "DATABASE",
+    { operation: "connect", connectionName: "main-db" },
+  );
 
 // 查询错误
 const queryError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "DATABASE",
-  { operation: "query", sql: "SELECT * FROM users", table: "users" }
+  { operation: "query", sql: "SELECT * FROM users", table: "users" },
 );
 
 // 事务错误
-const transactionError = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "DATABASE",
-  { operation: "transaction", transactionId: "tx-123" }
-);
+const transactionError =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "DATABASE",
+    { operation: "transaction", transactionId: "tx-123" },
+  );
 ```
 
 ### 缓存错误
@@ -314,14 +324,14 @@ const transactionError = InfrastructureExceptionConverter.convertToStandardExcep
 const redisError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "CACHE",
-  { operation: "connect", cacheType: "redis", host: "localhost:6379" }
+  { operation: "connect", cacheType: "redis", host: "localhost:6379" },
 );
 
 // 缓存操作错误
 const cacheError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "CACHE",
-  { operation: "get", cacheKey: "user:123", cacheType: "redis" }
+  { operation: "get", cacheKey: "user:123", cacheType: "redis" },
 );
 ```
 
@@ -332,33 +342,48 @@ const cacheError = InfrastructureExceptionConverter.convertToStandardException(
 const httpError = InfrastructureExceptionConverter.convertToStandardException(
   error,
   "NETWORK",
-  { operation: "http_request", endpoint: "https://api.example.com", method: "POST" }
+  {
+    operation: "http_request",
+    endpoint: "https://api.example.com",
+    method: "POST",
+  },
 );
 
 // 超时错误
-const timeoutError = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "NETWORK",
-  { operation: "timeout", endpoint: "https://api.example.com", timeout: 5000 }
-);
+const timeoutError =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "NETWORK",
+    {
+      operation: "timeout",
+      endpoint: "https://api.example.com",
+      timeout: 5000,
+    },
+  );
 ```
 
 ### 隔离错误
 
 ```typescript
 // 租户隔离违规
-const isolationError = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "ISOLATION",
-  { operation: "tenant_access", tenantId: "tenant-123", resource: "user-data" }
-);
+const isolationError =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "ISOLATION",
+    {
+      operation: "tenant_access",
+      tenantId: "tenant-123",
+      resource: "user-data",
+    },
+  );
 
 // 数据隔离违规
-const dataIsolationError = InfrastructureExceptionConverter.convertToStandardException(
-  error,
-  "ISOLATION",
-  { operation: "data_access", tenantId: "tenant-123", table: "users" }
-);
+const dataIsolationError =
+  InfrastructureExceptionConverter.convertToStandardException(
+    error,
+    "ISOLATION",
+    { operation: "data_access", tenantId: "tenant-123", table: "users" },
+  );
 ```
 
 ## 🔍 监控和日志集成
@@ -407,18 +432,23 @@ const monitoringData = {
 describe("DatabaseService Exception Handling", () => {
   it("should throw standardized exceptions for connection failures", async () => {
     const mockConnectionManager = {
-      getConnection: jest.fn().mockRejectedValue(new Error("Connection failed")),
+      getConnection: jest
+        .fn()
+        .mockRejectedValue(new Error("Connection failed")),
     };
 
     const dbService = new DatabaseService(mockConnectionManager);
 
-    await expect(dbService.getConnection("test-db"))
-      .rejects.toThrow(GeneralInternalServerException);
+    await expect(dbService.getConnection("test-db")).rejects.toThrow(
+      GeneralInternalServerException,
+    );
   });
 
   it("should include proper context in exceptions", async () => {
     const mockConnectionManager = {
-      getConnection: jest.fn().mockRejectedValue(new Error("Connection failed")),
+      getConnection: jest
+        .fn()
+        .mockRejectedValue(new Error("Connection failed")),
     };
 
     const dbService = new DatabaseService(mockConnectionManager);
@@ -449,7 +479,9 @@ describe("Exception Integration", () => {
     expect(results).toHaveLength(3);
     expect(results[0].error).toBeInstanceOf(GeneralInternalServerException);
     expect(results[1].error).toBeInstanceOf(GeneralInternalServerException);
-    expect(results[2].error).toBeInstanceOf(ExternalServiceUnavailableException);
+    expect(results[2].error).toBeInstanceOf(
+      ExternalServiceUnavailableException,
+    );
   });
 });
 ```
@@ -460,7 +492,10 @@ describe("Exception Integration", () => {
 
 ```typescript
 class CachedExceptionConverter {
-  private static conversionCache = new Map<string, InfrastructureLayerException>();
+  private static conversionCache = new Map<
+    string,
+    InfrastructureLayerException
+  >();
 
   static convertToStandardException(
     error: Error,
@@ -468,16 +503,17 @@ class CachedExceptionConverter {
     context?: Record<string, unknown>,
   ): InfrastructureLayerException {
     const cacheKey = `${error.message}:${errorType}:${JSON.stringify(context)}`;
-    
+
     if (this.conversionCache.has(cacheKey)) {
       return this.conversionCache.get(cacheKey)!;
     }
 
-    const standardException = InfrastructureExceptionConverter.convertToStandardException(
-      error,
-      errorType,
-      context,
-    );
+    const standardException =
+      InfrastructureExceptionConverter.convertToStandardException(
+        error,
+        errorType,
+        context,
+      );
 
     this.conversionCache.set(cacheKey, standardException);
     return standardException;
@@ -505,25 +541,26 @@ const performanceMonitor = {
     errorType: InfrastructureErrorType,
   ): Promise<T> {
     const startTime = performance.now();
-    
+
     try {
       const result = await operation();
       const endTime = performance.now();
-      
+
       console.log(`操作成功，耗时: ${endTime - startTime}ms`);
       return result;
     } catch (error) {
       const endTime = performance.now();
       const handlingTime = endTime - startTime;
-      
+
       console.log(`操作失败，处理耗时: ${handlingTime}ms`);
-      
-      const standardException = InfrastructureExceptionConverter.convertToStandardException(
-        error as Error,
-        errorType,
-        { handlingTime },
-      );
-      
+
+      const standardException =
+        InfrastructureExceptionConverter.convertToStandardException(
+          error as Error,
+          errorType,
+          { handlingTime },
+        );
+
       throw standardException;
     }
   },
